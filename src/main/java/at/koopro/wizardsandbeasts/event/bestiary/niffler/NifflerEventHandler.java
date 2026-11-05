@@ -4,9 +4,11 @@ import org.jspecify.annotations.NullMarked;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.bestiary.BestiaryDataHelper;
+import at.koopro.wizardsandbeasts.entity.niffler.CarriedNifflerAttachment;
 import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -40,6 +42,8 @@ public final class NifflerEventHandler {
         // Only a niffler new to the world brings young. A saved one joins the level again on every chunk load,
         // and rolling here for it bred a fresh litter each time the area was revisited.
         if (event.loadedFromDisk()) return;
+        // Nor does a baby that has just grown up: growIntoAdult adds a fresh adult, which re-rolled a litter.
+        if (niffler.grewFromBaby()) return;
         if (niffler.getRandom().nextFloat() >= 0.30f) return;
 
         // Spawn 1–3 baby Nifflers nearby
@@ -54,6 +58,35 @@ public final class NifflerEventHandler {
             baby.setPos(niffler.getX() + ox, niffler.getY(), niffler.getZ() + oz);
             baby.setCoat(niffler.coat());
             sl.addFreshEntity(baby);
+        }
+    }
+
+    // ─── Pocket carry across logout ──────────────────────────────────────────
+
+    /** A carried niffler is set down while its owner can still be found, so the pocket is emptied with it. */
+    @SubscribeEvent
+    public static void onOwnerLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        var player = event.getEntity();
+        var pocket = player.getData(ModAttachments.CARRIED_NIFFLER.get());
+        if (pocket.nifflerUUID() == null || !(player.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return;
+        }
+        if (level.getEntity(pocket.nifflerUUID()) instanceof NifflerEntity niffler) {
+            niffler.ownerLeaving(player);
+        }
+        player.setData(ModAttachments.CARRIED_NIFFLER.get(), CarriedNifflerAttachment.EMPTY);
+    }
+
+    /** Older saves can hold a pocket naming a niffler set down long ago: empty it on the way in. */
+    @SubscribeEvent
+    public static void onOwnerLogin(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+        var player = event.getEntity();
+        var pocket = player.getData(ModAttachments.CARRIED_NIFFLER.get());
+        if (pocket.nifflerUUID() == null || !(player.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return;
+        }
+        if (!(level.getEntity(pocket.nifflerUUID()) instanceof NifflerEntity niffler) || !niffler.isCarried()) {
+            player.setData(ModAttachments.CARRIED_NIFFLER.get(), CarriedNifflerAttachment.EMPTY);
         }
     }
 }

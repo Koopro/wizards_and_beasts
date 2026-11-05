@@ -15,6 +15,6 @@
   "betrayalPenalty": 0,
   "masteryBond": 80,
   "xpSource": "niffler_bond",
-  "feedSound": "wizards_and_beasts:niffler_eat",
-  "refuseSound": "wizards_and_beasts:niffler_hiss"
+  "feedSound": "wizards_and_beasts:entity.niffler.eat",
+  "refuseSound": "wizards_and_beasts:entity.niffler.hiss"
 }

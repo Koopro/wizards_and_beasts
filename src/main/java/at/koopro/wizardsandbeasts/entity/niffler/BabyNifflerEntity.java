@@ -101,6 +101,17 @@ public class BabyNifflerEntity extends NifflerEntity {
                 spawnAtLocation(serverLevel, rest);
             }
         }
+        // The same animal, grown: its name, its keeping and how hurt it is come too, and it brings no litter of its
+        // own (it is not a niffler new to the world, which is what the litter roll is for).
+        if (hasCustomName()) {
+            adult.setCustomName(getCustomName());
+            adult.setCustomNameVisible(isCustomNameVisible());
+        }
+        if (isPersistenceRequired()) {
+            adult.setPersistenceRequired();
+        }
+        adult.setHealth(adult.getMaxHealth() * (getHealth() / getMaxHealth()));
+        adult.markGrownFromBaby();
         serverLevel.addFreshEntity(adult);
         this.discard();
     }

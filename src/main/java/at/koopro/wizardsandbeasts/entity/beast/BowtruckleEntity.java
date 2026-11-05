@@ -53,7 +53,6 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
@@ -182,7 +181,20 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
                 homeTree = findHomeTree(serverLevel, blockPosition());
             }
         }
-        if (homeTree != null && !hasHome()) {
+        if (homeTree != null && tickCount % 100 == 0 && !serverLevel.getBlockState(homeTree).is(BlockTags.LOGS)) {
+            // Its tree was felled: the trunk it was defending and hiding against is gone. Look for another rather
+            // than guard a stump forever (Beast Renaissance D11).
+            homeTree = null;
+            clearHome();
+            searchedForHome = false;
+        }
+        if (followsOwner()) {
+            // Following its person, it is not held to its tree; the restriction goal fought the follow goal whenever
+            // its person was more than the home range from the trunk.
+            if (hasHome()) {
+                clearHome();
+            }
+        } else if (homeTree != null && !hasHome()) {
             setHomeTo(homeTree, HOME_RANGE);
         }
         if (angerTicks > 0 && --angerTicks == 0) {
@@ -395,8 +407,21 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
      * stick that tempts a Bowtruckle across a clearing is still the stick that feeds it, and every
      * other item falls through to the default interaction untouched.
      */
+    /** What draws it across a clearing: anything it eats (mallowsweet best), read from its bond profile. */
+    private boolean tempts(net.minecraft.world.item.ItemStack stack) {
+        var profile = bondProfile();
+        return profile != null ? profile.feedFor(stack) != null : stack.is(Items.STICK);
+    }
+
     @Override
     protected @NonNull InteractionResult mobInteract(@NonNull Player player, @NonNull InteractionHand hand) {
+        // Its person, crouching with an empty hand: pick the lock nearby. Asked first, because the shared companion
+        // "pat" also answers an owner's sneak + empty hand and made this unreachable (Beast Renaissance D6). With no
+        // lock to pick it passes, and the pat still happens below.
+        if (player.isShiftKeyDown() && player.getItemInHand(hand).isEmpty() && player instanceof ServerPlayer asker
+                && askToPickLock(asker)) {
+            return InteractionResult.SUCCESS;
+        }
         InteractionResult fed = offerBondFood(player, hand);
         if (fed.consumesAction() && !level().isClientSide()) {
             // Canon's woodlouse: busy with its food, it lets this person at its tree for a while.
@@ -406,10 +431,6 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
         }
         if (fed != InteractionResult.PASS) {
             return fed;
-        }
-        // Its person, crouching with an empty hand: pick the lock nearby.
-        if (player.isShiftKeyDown() && player.getItemInHand(hand).isEmpty() && player instanceof ServerPlayer sp) {
-            return askToPickLock(sp) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
         return super.mobInteract(player, hand);
     }
@@ -517,8 +538,7 @@ public class BowtruckleEntity extends GeoEntityBase implements BondableBeast {
             }
         });
         goalSelector.addGoal(3, new BowtruckleLockpickGoal(this));
-        goalSelector.addGoal(3, new TemptGoal(this, 1.1,
-                Ingredient.of(Items.STICK, Items.OAK_SAPLING), false));
+        goalSelector.addGoal(3, new TemptGoal(this, 1.1, this::tempts, false));
         goalSelector.addGoal(4, new BowtruckleHideGoal(this));
         // Ecology (tree-dwelling, territorial, social). The tree is held by its restriction and defended by its own
         // melee and target goals; the ecology layer adds the warning before the attack and the alarm to its kin.

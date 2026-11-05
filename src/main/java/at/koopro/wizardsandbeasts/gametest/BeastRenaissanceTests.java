@@ -1,7 +1,15 @@
 package at.koopro.wizardsandbeasts.gametest;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.entity.beast.BowtruckleEntity;
 import at.koopro.wizardsandbeasts.entity.beast.HidebehindEntity;
+import at.koopro.wizardsandbeasts.entity.niffler.BabyNifflerEntity;
+import at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity;
+import at.koopro.wizardsandbeasts.event.bestiary.niffler.NifflerEventHandler;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
+import net.minecraft.world.InteractionHand;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import java.util.List;
 import at.koopro.wizardsandbeasts.entity.beast.RunespoorEntity;
 import at.koopro.wizardsandbeasts.entity.beast.ai.HidebehindStalkGoal;
 import at.koopro.wizardsandbeasts.entity.creature.HippogriffEntity;
@@ -47,6 +55,93 @@ public final class BeastRenaissanceTests {
         tests.add("br0_streeler_floats",
                 "D14: the streeler floats and avoids water instead of walking in and drowning",
                 BeastRenaissanceTests::streelerFloats);
+        tests.add("br0_niffler_sneak_click_carries_and_logout_sets_it_down",
+                "D6, D9: an owner's sneak + empty hand pockets a trusting niffler; leaving the server sets it down",
+                BeastRenaissanceTests::nifflerSneakClickCarriesAndLogoutSetsItDown);
+        tests.add("br0_bowtruckle_sneak_click_picks_a_lock",
+                "D6: an owner's sneak + empty hand sets a trusting bowtruckle to the nearby lock",
+                BeastRenaissanceTests::bowtruckleSneakClickPicksALock);
+        tests.add("br0_grown_niffler_keeps_its_name_and_brings_no_litter",
+                "D9: a baby niffler grows into the same animal: name, health share, and no fresh litter",
+                BeastRenaissanceTests::grownNifflerKeepsItsNameAndBringsNoLitter);
+    }
+
+    private static void nifflerSneakClickCarriesAndLogoutSetsItDown(GameTestHelper helper) {
+        NifflerEntity niffler = helper.spawn(ModEntities.NIFFLER.get(), new BlockPos(1, 2, 1));
+        niffler.setNoAi(true);
+        // A niffler new to the world brings a litter three times in ten. Those babies land outside this test's box
+        // and are prey to the next scenario's predators, so they go at once.
+        discardLitter(helper, niffler);
+        ServerPlayer owner = WizardTestSupport.placeMockPlayer(helper, "wandb-br0-niffler", GameType.SURVIVAL);
+        owner.snapTo(helper.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 2.5)));
+        niffler.bondState().setOwner(owner.getUUID());
+
+        // Not yet trusting enough to be carried: the sneak-click is the shared pat, and nothing is pocketed.
+        niffler.setSyncedBondLevel(niffler.bondState().setLevel(40, 100));
+        owner.setShiftKeyDown(true);
+        niffler.interact(owner, InteractionHand.MAIN_HAND);
+        check(helper, !niffler.isCarried(), () -> "a niffler at bond 40 was pocketed");
+
+        // Trusting: the same sneak-click pockets it. It used to be swallowed by the pat and never reached the niffler.
+        niffler.setSyncedBondLevel(niffler.bondState().setLevel(80, 100));
+        niffler.interact(owner, InteractionHand.MAIN_HAND);
+        check(helper, niffler.isCarried(), () -> "an owner's sneak + empty hand did not pocket a niffler at bond 80");
+        check(helper, owner.getData(ModAttachments.CARRIED_NIFFLER.get()).isCarrying(),
+                () -> "the owner's pocket does not name the niffler they carry");
+
+        // Leaving the server while carrying it: it is set down, and the pocket is emptied with it.
+        NifflerEventHandler.onOwnerLogout(new PlayerEvent.PlayerLoggedOutEvent(owner));
+        check(helper, !niffler.isCarried(), () -> "the owner left and the niffler stayed 'carried' by nobody");
+        check(helper, !owner.getData(ModAttachments.CARRIED_NIFFLER.get()).isCarrying(),
+                () -> "the owner left with a pocket still naming the niffler");
+
+        owner.setShiftKeyDown(false);
+        retire(helper, owner);
+        niffler.discard();
+        helper.succeed();
+    }
+
+    private static void bowtruckleSneakClickPicksALock(GameTestHelper helper) {
+        BlockPos lock = new BlockPos(3, 2, 1);
+        helper.setBlock(lock.below(), Blocks.STONE);
+        helper.setBlock(lock, Blocks.IRON_TRAPDOOR);
+        BowtruckleEntity bowtruckle = helper.spawn(ModEntities.BOWTRUCKLE.get(), new BlockPos(1, 2, 1));
+        bowtruckle.setNoAi(true);
+        ServerPlayer owner = WizardTestSupport.placeMockPlayer(helper, "wandb-br0-bowtruckle", GameType.SURVIVAL);
+        owner.snapTo(helper.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 2, 2.5)));
+        bowtruckle.bondState().setOwner(owner.getUUID());
+        bowtruckle.setSyncedBondLevel(bowtruckle.bondState().setLevel(BowtruckleEntity.LOCKPICK_BOND, 100));
+
+        owner.setShiftKeyDown(true);
+        bowtruckle.interact(owner, InteractionHand.MAIN_HAND);
+        check(helper, helper.absolutePos(lock).equals(bowtruckle.lockJob()),
+                () -> "an owner's sneak + empty hand did not set the bowtruckle to the trapdoor (job: "
+                        + bowtruckle.lockJob() + ")");
+
+        owner.setShiftKeyDown(false);
+        retire(helper, owner);
+        bowtruckle.discard();
+        helper.succeed();
+    }
+
+    private static void grownNifflerKeepsItsNameAndBringsNoLitter(GameTestHelper helper) {
+        BabyNifflerEntity baby = helper.spawn(ModEntities.BABY_NIFFLER.get(), new BlockPos(2, 2, 2));
+        baby.setNoAi(true);
+        baby.setCustomName(net.minecraft.network.chat.Component.literal("Teaspoon"));
+        baby.setHealth(baby.getMaxHealth() * 0.5f);
+        baby.growIntoAdult();
+
+        List<NifflerEntity> adults = helper.getLevel().getEntitiesOfClass(NifflerEntity.class,
+                new net.minecraft.world.phys.AABB(helper.absolutePos(new BlockPos(2, 2, 2))).inflate(4),
+                niffler -> !niffler.isBaby());
+        check(helper, adults.size() == 1, () -> adults.size() + " adults near a baby that grew once; a litter came too");
+        NifflerEntity adult = adults.get(0);
+        check(helper, adult.hasCustomName() && "Teaspoon".equals(adult.getCustomName().getString()),
+                () -> "the grown niffler lost its name");
+        float share = adult.getHealth() / adult.getMaxHealth();
+        check(helper, Math.abs(share - 0.5f) < 0.01f, () -> "a half-hurt baby grew into an adult at " + share);
+        adult.discard();
+        helper.succeed();
     }
 
     // -- scenarios ---------------------------------------------------------------------------------
@@ -139,6 +234,11 @@ public final class BeastRenaissanceTests {
     }
 
     // -- helpers -----------------------------------------------------------------------------------
+
+    private static void discardLitter(GameTestHelper helper, Entity around) {
+        helper.getLevel().getEntitiesOfClass(BabyNifflerEntity.class, around.getBoundingBox().inflate(6))
+                .forEach(Entity::discard);
+    }
 
     private static void face(ServerPlayer player, float yaw) {
         player.setYRot(yaw);

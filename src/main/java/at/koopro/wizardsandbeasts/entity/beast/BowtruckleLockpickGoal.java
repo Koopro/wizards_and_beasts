@@ -35,6 +35,10 @@ public class BowtruckleLockpickGoal extends Goal {
 
     private final BowtruckleEntity bowtruckle;
     private int ticks;
+    /** Every tick of the job, walking included. */
+    private int jobTicks;
+    /** A lock it cannot reach in this long is given up (Beast Renaissance D11: it used to re-path forever). */
+    public static final int GIVE_UP_TICKS = 400;
 
     public BowtruckleLockpickGoal(BowtruckleEntity bowtruckle) {
         this.bowtruckle = bowtruckle;
@@ -77,6 +81,7 @@ public class BowtruckleLockpickGoal extends Goal {
     @Override
     public void start() {
         ticks = 0;
+        jobTicks = 0;
     }
 
     @Override
@@ -99,6 +104,12 @@ public class BowtruckleLockpickGoal extends Goal {
         }
         Vec3 at = Vec3.atBottomCenterOf(lock);
         bowtruckle.getLookControl().setLookAt(at.x, at.y + 0.5, at.z);
+        if (++jobTicks > GIVE_UP_TICKS && ticks == 0) {
+            // Never reached it: the lock is out of reach (behind glass, up a wall it cannot climb). Give up.
+            bowtruckle.getNavigation().stop();
+            bowtruckle.clearLockJob();
+            return;
+        }
         if (bowtruckle.position().distanceToSqr(at) > REACH_SQR) {
             if (bowtruckle.getNavigation().isDone()) {
                 bowtruckle.getNavigation().moveTo(at.x, at.y, at.z, 1.0);

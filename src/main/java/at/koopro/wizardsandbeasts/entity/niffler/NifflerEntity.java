@@ -232,6 +232,10 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
         if (digCooldown > 0) digCooldown--;
         if (!hasHome() && getOwnerUUID() == null) {
             setHomeTo(blockPosition(), HOME_RADIUS);   // spawn eggs and old saves arrive without a burrow
+        } else if (hasHome() && getOwnerUUID() != null) {
+            // A niffler that has taken a person leaves its wild burrow behind; otherwise its restriction goal kept
+            // pulling it back there, away from the owner it follows (Beast Renaissance D9).
+            clearHome();
         }
 
         tickBond();
@@ -299,19 +303,23 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
     protected @NonNull InteractionResult mobInteract(@NonNull Player player, @NonNull InteractionHand hand) {
         if (!ModuleManager.isEnabled(Module.CREATURES)) return InteractionResult.PASS;
 
-        // Feeding, the feed cooldown and the bond gain are all the shared layer's now; it returns
-        // PASS for anything this species does not eat, so the two hand-empty interactions below
-        // still see every other item.
+        ItemStack held = player.getItemInHand(hand);
+
+        // Pocket carry — sneak + empty hand. Asked before the shared layer: its companion "pat" also answers an
+        // owner's sneak + empty hand, and running it first made the carry unreachable (Beast Renaissance D6). When
+        // the niffler will not be carried (bond under 80) this passes, and the pat still happens below.
+        if (held.isEmpty() && player.isShiftKeyDown()) {
+            InteractionResult carried = tryToggleCarry(player);
+            if (carried != InteractionResult.PASS) {
+                return carried;
+            }
+        }
+
+        // Feeding, the feed cooldown and the bond gain are all the shared layer's now; it returns PASS for anything
+        // this species does not eat, so the hand-empty interactions still see every other item.
         InteractionResult fed = offerBondFood(player, hand);
         if (fed != InteractionResult.PASS) {
             return fed;
-        }
-
-        ItemStack held = player.getItemInHand(hand);
-
-        // Pocket carry — sneak + empty hand
-        if (held.isEmpty() && player.isShiftKeyDown()) {
-            return tryToggleCarry(player);
         }
 
         // Pouch access
@@ -323,8 +331,8 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
     }
 
     private @NonNull InteractionResult tryToggleCarry(Player player) {
-        if (level().isClientSide()) return InteractionResult.SUCCESS;
         if (getBondLevel() < 80) return InteractionResult.PASS;
+        if (level().isClientSide()) return InteractionResult.SUCCESS;
 
         if (isBaby()) {
             level().playSound(null, blockPosition(), ModSounds.NIFFLER_SQUIRM.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
@@ -529,6 +537,10 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
     @Override
     public boolean hurtServer(@NonNull ServerLevel level, @NonNull DamageSource source, float amount) {
         boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt) {
+            // Struck by its own person: the bond pays, as for every other bondable beast (this never called it).
+            onBondedHurt(source);
+        }
         if (hurt && isAlive()) {
             triggerAnim(ACTION_CONTROLLER, "hit");
             setHoarding(false);
@@ -571,6 +583,28 @@ public class NifflerEntity extends GeoEntityBase implements BondableBeast,
                     }
                 }
             }
+        }
+    }
+
+    /** Transient: set on an adult that has just grown from a baby, so the litter roll skips it. */
+    private boolean grownFromBaby;
+
+    public void markGrownFromBaby() {
+        grownFromBaby = true;
+    }
+
+    public boolean grewFromBaby() {
+        return grownFromBaby;
+    }
+
+    /**
+     * The owner is leaving the server: set the niffler down at their feet while they can still be found. Carrying is
+     * not saved, and once the owner was gone the drop could no longer clear their pocket, so they logged back in
+     * still "carrying" a niffler that stood somewhere else (Beast Renaissance D9).
+     */
+    public void ownerLeaving(Player owner) {
+        if (!level().isClientSide() && isCarried() && owner.getUUID().equals(bond.ownerUUID())) {
+            setCarried(null);
         }
     }
 
