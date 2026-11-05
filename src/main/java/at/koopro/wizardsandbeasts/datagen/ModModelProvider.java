@@ -458,7 +458,10 @@ public class ModModelProvider extends ModelProvider {
         createFlooFireplace(blockModels, ModBlocks.FLOO_FIREPLACE.get());
         createFlooFlames(blockModels, ModBlocks.FLOO_FLAMES.get());
         propBlock(blockModels, ModBlocks.EXAMINATION_DESK.get(), deskModel(),
-                sideTop(ModBlocks.EXAMINATION_DESK.get(), ""), false);
+                sideTop(ModBlocks.EXAMINATION_DESK.get(), "")
+                        .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_paper"))
+                        .put(TextureSlot.BACK, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_ink")),
+                false);
     }
 
     // --- Location decorative block datagen ---
@@ -673,19 +676,39 @@ public class ModModelProvider extends ModelProvider {
         return builder.build();
     }
 
-    /** Table: a top slab on four corner legs. */
+    /**
+     * The O.W.L. examination desk at vanilla's level of prop detail (a lectern, a grindstone): a top with
+     * an apron under its edge, four legs tied by low stretchers, and on the top an exam paper and an
+     * inkwell with its quill. It was a slab on four posts, which read as any table.
+     *
+     * <p>Paper (FRONT) and ink (BACK) are {@code tools/prop_parts.py}'s; the wood is the desk's own.
+     */
     private static ExtendedModelTemplate deskModel() {
         ExtendedModelTemplateBuilder builder =
-                prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
-                        .element(e -> e.from(0, 12, 0).to(16, 15, 16)
+                prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.FRONT, TextureSlot.BACK)
+                        .element(e -> e.from(0, 13, 0).to(16, 15, 16)
                                 .textureAll(TextureSlot.SIDE)
-                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)));
-        float[][] legs = { { 1, 1 }, { 12, 1 }, { 1, 12 }, { 12, 12 } };
+                                .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))
+                        // Apron: a frame just under the top's edge, set in by one.
+                        .element(e -> e.from(1, 11, 1).to(15, 13, 15)
+                                .textureAll(TextureSlot.SIDE));
+        float[][] legs = { { 1, 1 }, { 13, 1 }, { 1, 13 }, { 13, 13 } };
         for (float[] leg : legs) {
-            builder.element(e -> e.from(leg[0], 0, leg[1]).to(leg[0] + 3, 12, leg[1] + 3)
+            builder.element(e -> e.from(leg[0], 0, leg[1]).to(leg[0] + 2, 11, leg[1] + 2)
                     .textureAll(TextureSlot.SIDE)
                     .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)));
         }
+        // Stretchers: low rails between the legs, front-back on both sides and one across the back.
+        builder.element(e -> e.from(1.5F, 2, 3).to(2.5F, 3, 13).textureAll(TextureSlot.SIDE));
+        builder.element(e -> e.from(13.5F, 2, 3).to(14.5F, 3, 13).textureAll(TextureSlot.SIDE));
+        builder.element(e -> e.from(3, 2, 13.5F).to(13, 3, 14.5F).textureAll(TextureSlot.SIDE));
+        // Exam paper lying on the top, a hair above it so it never z-fights.
+        builder.element(e -> e.from(3, 15, 4).to(10, 15.1F, 12)
+                .face(Direction.UP, f -> f.texture(TextureSlot.FRONT).uvs(0, 0, 16, 16)));
+        // Inkwell, and the quill standing in it.
+        builder.element(e -> e.from(11, 15, 4).to(13, 17, 6).textureAll(TextureSlot.BACK));
+        builder.element(e -> e.from(11.75F, 16, 4.75F).to(12.25F, 21, 5.25F)
+                .textureAll(TextureSlot.FRONT));
         return builder.build();
     }
 
