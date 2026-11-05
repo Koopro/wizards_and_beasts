@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:scarf",
+    "minecraft:white_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:scarf",
+    "count": 1
+  }
+}

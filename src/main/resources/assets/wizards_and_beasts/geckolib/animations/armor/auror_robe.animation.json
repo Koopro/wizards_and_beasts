@@ -1,7 +1,6 @@
 {
 	"_comment": [
-		"No clips. The wearer's pose drives every armour bone: GeoArmorRenderer snaps each bone onto the matching vanilla ModelPart every frame, so a robe already walks and swings without a keyframe.",
-		"This file exists because the model declares it. Add a clip here before naming one from a controller \u2014 GeckoLib throws on a clip it cannot find."
+		"No clips. Cloth bones are driven from the wearer's pose by the renderer."
 	],
 	"format_version": "1.8.0",
 	"animations": {}

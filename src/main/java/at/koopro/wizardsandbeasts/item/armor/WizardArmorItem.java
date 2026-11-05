@@ -1,11 +1,19 @@
 package at.koopro.wizardsandbeasts.item.armor;
 
 import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
+import at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit;
 import at.koopro.wizardsandbeasts.item.GeoItemBase;
 import at.koopro.wizardsandbeasts.util.ClientClassBridge;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.level.Level;
@@ -16,6 +24,7 @@ import software.bernie.geckolib.animation.object.PlayState;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for the mod's worn GeckoLib wardrobe: real armour <em>or</em> Curios clothing.
@@ -102,6 +111,46 @@ public abstract class WizardArmorItem extends GeoItemBase {
             return EquipmentAPI.equipFromHand(player, hand, material.equipSound());
         }
         return super.use(level, player, hand);
+    }
+
+    // -- Wardrobe ------------------------------------------------------------------------------
+
+    /**
+     * The livery a robe of this cut wears when its stack carries no {@code outfit} component — the
+     * look of every robe saved before the wardrobe existed. {@code null} for pieces that are not a
+     * wardrobe cut (hats, masks, trousers, boots), which {@code Wardrobe#stamp} then refuses.
+     */
+    public @Nullable Identifier defaultLivery() {
+        return null;
+    }
+
+    /** {@code wizards_and_beasts:<path>} for the body piece of a set, {@code null} for its trousers and boots. */
+    protected @Nullable Identifier bodyLivery(String path) {
+        return armorType == ArmorType.CHESTPLATE
+                ? Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, path)
+                : null;
+    }
+
+    /** Livery and, when issued above rank 0, the rank's name for this cut. */
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, tooltip, flag);
+        Identifier fallback = defaultLivery();
+        if (fallback == null) {
+            return;
+        }
+        Outfit outfit = Outfit.of(stack);
+        Identifier livery = outfit.livery().orElse(fallback);
+        tooltip.accept(Component.translatableWithFallback(
+                "livery." + livery.getNamespace() + "." + livery.getPath(), livery.getPath())
+                .withStyle(ChatFormatting.GRAY));
+        if (outfit.rank() > 0) {
+            Identifier item = BuiltInRegistries.ITEM.getKey(this);
+            tooltip.accept(Component.translatableWithFallback(
+                    "wardrobe." + item.getNamespace() + ".rank." + item.getPath() + "." + outfit.rank(),
+                    "Rank " + outfit.rank()).withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 
     // -- GeckoLib ------------------------------------------------------------------------------

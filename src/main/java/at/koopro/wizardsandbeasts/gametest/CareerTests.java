@@ -215,6 +215,18 @@ final class CareerTests {
 
             BestiaryDataHelper.setTier(player, creature("thestral"), DiscoveryTier.OBSERVED);
             check(helper, record(player).rank() == 1, () -> "not promoted with experience and five pages");
+            // The rank issues its uniform (WARDROBE_RENAISSANCE E4): a travelling coat already stitched in field olive.
+            net.minecraft.world.item.ItemStack coat = net.minecraft.world.item.ItemStack.EMPTY;
+            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                net.minecraft.world.item.ItemStack held = player.getInventory().getItem(slot);
+                if (held.is(at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.TRAVEL_COAT_CHEST.get())) {
+                    coat = held;
+                }
+            }
+            net.minecraft.world.item.ItemStack issued = coat;
+            check(helper, !issued.isEmpty() && at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit.of(issued).livery()
+                            .map(net.minecraft.resources.Identifier::getPath).orElse("").equals("field_olive"),
+                    () -> "the field naturalist's coat was not issued in field olive: " + issued);
             float multiplier = CareerProgression.wageMultiplier(player, Profession.MAGIZOOLOGIST);
             check(helper, Math.abs(multiplier - 1.25f) < 1e-4, () -> "rank 1 wage multiplier " + multiplier);
 

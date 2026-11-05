@@ -13,4 +13,9 @@ public class AurorRobeItem extends WizardArmorItem {
     protected String rendererClassName() {
         return "at.koopro.wizardsandbeasts.client.armor.AurorRobeRenderer";
     }
+
+    @Override
+    public net.minecraft.resources.@org.jspecify.annotations.Nullable Identifier defaultLivery() {
+        return bodyLivery("auror_office");
+    }
 }

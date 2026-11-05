@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:scarf",
+    "minecraft:yellow_dye",
+    "minecraft:black_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:scarf",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:outfit": {
+        "livery": "wizards_and_beasts:house_badger",
+        "rank": 0
+      }
+    }
+  }
+}

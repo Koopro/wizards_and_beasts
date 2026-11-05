@@ -63,6 +63,17 @@ class ArmorGeoAssetTest {
     /** Sets drawn on the body: chest, legs and boots all come out of one file. */
     private static final List<String> BODY_SETS = List.of("student_robe", "auror_robe", "death_eater_robe");
 
+    /** Wardrobe cuts that are a body piece only: torso and sleeves, no trousers or boots of their own. */
+    private static final List<String> BODY_ONLY_SETS = List.of("wizard_robe", "scholar_gown",
+            "travel_coat", "healer_coat", "ministry_robe", "master_mantle");
+
+    /** Capes and cloaks: the body bone and the cape's own two. */
+    private static final List<String> CAPE_SETS = List.of("school_cape", "travel_cloak");
+
+    /** Accessories in their own Curios slots: belts, scarf and gloves on the body and arms, hats on the head. */
+    private static final List<String> ACCESSORY_SETS =
+            List.of("leather_belt", "duty_belt", "scarf", "gloves", "professor_hat", "travel_hat");
+
     /** Sets that only ever occupy the head slot. */
     private static final List<String> HEAD_SETS = List.of("wizard_hat", "sorting_hat", "death_eater_mask");
 
@@ -124,6 +135,16 @@ class ArmorGeoAssetTest {
                 assertTrue(declared.contains(parent),
                         set + ": bone '" + bone.get("name").getAsString()
                                 + "' hangs from '" + parent + "', which is not declared");
+            }
+        }
+    }
+
+    @Test
+    void bodyOnlyCutsCarryTorsoAndSleeves() throws IOException {
+        for (String set : BODY_ONLY_SETS) {
+            Set<String> bones = bonesOf(set);
+            for (String required : List.of("armorBody", "armorLeftArm", "armorRightArm")) {
+                assertTrue(bones.contains(required), set + " is missing " + required);
             }
         }
     }
@@ -279,7 +300,8 @@ class ArmorGeoAssetTest {
     // -- helpers -------------------------------------------------------------------------------
 
     private static List<String> allSets() {
-        return java.util.stream.Stream.concat(BODY_SETS.stream(), HEAD_SETS.stream()).toList();
+        return java.util.stream.Stream.of(BODY_SETS, BODY_ONLY_SETS, CAPE_SETS, ACCESSORY_SETS, HEAD_SETS)
+                .flatMap(List::stream).toList();
     }
 
     private static JsonArray bonesArray(String set) throws IOException {

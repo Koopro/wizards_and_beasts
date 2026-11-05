@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "W W",
+    "WGW",
+    "WWW"
+  ],
+  "key": {
+    "W": "minecraft:white_wool",
+    "G": "minecraft:green_dye"
+  },
+  "result": {
+    "id": "wizards_and_beasts:healer_coat_chest",
+    "count": 1
+  }
+}

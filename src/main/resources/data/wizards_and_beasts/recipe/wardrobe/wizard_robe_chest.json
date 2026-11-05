@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "G G",
+    "GRG",
+    "GGG"
+  ],
+  "key": {
+    "G": "minecraft:gray_wool",
+    "R": "minecraft:brown_wool"
+  },
+  "result": {
+    "id": "wizards_and_beasts:wizard_robe_chest",
+    "count": 1
+  }
+}

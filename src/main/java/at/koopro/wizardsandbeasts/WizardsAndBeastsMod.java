@@ -124,6 +124,8 @@ public class WizardsAndBeastsMod {
         modEventBus.addListener(at.koopro.wizardsandbeasts.entity.beast.BeastSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(at.koopro.wizardsandbeasts.entity.goblin.GoblinTellerSpawnHandler::registerSpawnPlacements);
         modEventBus.addListener(WandDatapackRegistries::registerDatapackRegistries);
+        // Wardrobe liveries: which cuts may be stitched in which colourway (WARDROBE_RENAISSANCE §B3).
+        modEventBus.addListener(at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe::registerDatapackRegistries);
         // Worn equipment: the wearables item data map, and the Curios slot validator that reads it.
         modEventBus.addListener(at.koopro.wizardsandbeasts.equipment.WearableDefinitions::register);
         modEventBus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(

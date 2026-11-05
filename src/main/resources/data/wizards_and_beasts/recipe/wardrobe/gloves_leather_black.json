@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:gloves",
+    "minecraft:black_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:gloves",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:outfit": {
+        "livery": "wizards_and_beasts:leather_black",
+        "rank": 0
+      }
+    }
+  }
+}

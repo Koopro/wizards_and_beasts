@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:master_mantle_chest",
+    "minecraft:white_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:master_mantle_chest",
+    "count": 1
+  }
+}

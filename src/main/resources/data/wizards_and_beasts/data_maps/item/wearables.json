@@ -204,6 +204,114 @@
     },
     "wizards_and_beasts:time_turner": {
       "equipment_type": "necklace"
+    },
+    "wizards_and_beasts:wizard_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:scholar_gown_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:school_cape": {
+      "equipment_type": "cloak"
+    },
+    "wizards_and_beasts:travel_cloak": {
+      "equipment_type": "cloak"
+    },
+    "wizards_and_beasts:leather_belt": {
+      "equipment_type": "belt"
+    },
+    "wizards_and_beasts:duty_belt": {
+      "equipment_type": "belt"
+    },
+    "wizards_and_beasts:scarf": {
+      "equipment_type": "necklace"
+    },
+    "wizards_and_beasts:gloves": {
+      "equipment_type": "hands"
+    },
+    "wizards_and_beasts:professor_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ]
+    },
+    "wizards_and_beasts:travel_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ]
+    },
+    "wizards_and_beasts:travel_coat_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:healer_coat_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:ministry_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:master_mantle_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
     }
   }
 }

@@ -24,6 +24,7 @@ public final class ItemCommands {
                 .requires(WizardsAndBeastsCommandPermissions.ADMIN)
                 .then(WandCommands.register())
                 .then(BroomCommands.register())
-                .then(TrunkCommands.register());
+                .then(TrunkCommands.register())
+                .then(at.koopro.wizardsandbeasts.equipment.wardrobe.OutfitCommands.register());
     }
 }

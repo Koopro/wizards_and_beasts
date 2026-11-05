@@ -46,4 +46,9 @@ public class DeathEaterRobeItem extends WizardArmorItem implements HoodedRobe {
                         : "tooltip.wizards_and_beasts.hood_down")
                 .withStyle(ChatFormatting.GRAY));
     }
+
+    @Override
+    public net.minecraft.resources.@org.jspecify.annotations.Nullable Identifier defaultLivery() {
+        return bodyLivery("dark_order");
+    }
 }

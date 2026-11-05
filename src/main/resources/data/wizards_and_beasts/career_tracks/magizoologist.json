@@ -98,6 +98,10 @@
     },
     {
       "id": "field_naturalist",
+      "rewards": [
+        { "id": "wizards_and_beasts:travel_coat_chest", "count": 1, "components": { "wizards_and_beasts:outfit": { "livery": "wizards_and_beasts:field_olive", "rank": 0 } } },
+        { "id": "wizards_and_beasts:gloves", "count": 1 }
+      ],
       "xp": 200,
       "wage_multiplier": 1.25,
       "requires": [
@@ -208,6 +212,7 @@
         }
       ],
       "rewards": [
+        { "id": "wizards_and_beasts:master_mantle_chest", "count": 1 },
         {
           "id": "wizards_and_beasts:newts_case_item",
           "count": 1

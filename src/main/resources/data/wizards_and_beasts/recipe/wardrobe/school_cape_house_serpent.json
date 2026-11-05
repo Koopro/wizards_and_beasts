@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:school_cape",
+    "minecraft:green_dye",
+    "minecraft:light_gray_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:school_cape",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:outfit": {
+        "livery": "wizards_and_beasts:house_serpent",
+        "rank": 0
+      }
+    }
+  }
+}

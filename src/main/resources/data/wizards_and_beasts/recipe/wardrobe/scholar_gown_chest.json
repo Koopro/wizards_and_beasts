@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "P P",
+    "PKP",
+    "PPP"
+  ],
+  "key": {
+    "P": "minecraft:purple_wool",
+    "K": "minecraft:book"
+  },
+  "result": {
+    "id": "wizards_and_beasts:scholar_gown_chest",
+    "count": 1
+  }
+}

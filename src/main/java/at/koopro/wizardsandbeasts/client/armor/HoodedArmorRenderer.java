@@ -85,10 +85,13 @@ public abstract class HoodedArmorRenderer<T extends Item & GeoItem, R extends Hu
     public void adjustModelBonesForRender(RenderPassInfo<R> renderPassInfo, BoneSnapshots snapshots) {
         super.adjustModelBonesForRender(renderPassInfo, snapshots);
 
-        boolean up = Boolean.TRUE.equals(renderPassInfo.renderState().getGeckolibData(HOOD_UP));
+        // A hat over a raised hood would cut through it; the hat wins and the hood is drawn down.
+        boolean up = Boolean.TRUE.equals(renderPassInfo.renderState().getGeckolibData(HOOD_UP))
+                && !hatWorn(renderPassInfo.renderState());
 
         setVisible(snapshots, HoodedRobe.HOOD_UP_BONE, up);
-        setVisible(snapshots, HoodedRobe.HOOD_DOWN_BONE, !up);
+        // A lowered hood under a cape is hidden: the cape's collar sits where it would be.
+        setVisible(snapshots, HoodedRobe.HOOD_DOWN_BONE, !up && !capeWorn(renderPassInfo.renderState()));
     }
 
     /**

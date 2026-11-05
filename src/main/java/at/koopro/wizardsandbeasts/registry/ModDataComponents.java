@@ -545,6 +545,18 @@ public class ModDataComponents {
                             .networkSynchronized(ByteBufCodecs.BOOL)
                             .build());
 
+    /**
+     * A robe's livery and rank ({@code equipment.wardrobe.Outfit}). Absent = the cut's default
+     * livery at rank 0. Synced so every viewer draws the same robe; set only by
+     * {@code Wardrobe#stamp} on the server.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit>> OUTFIT =
+            DATA_COMPONENTS.register("outfit", () ->
+                    DataComponentType.<at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit>builder()
+                            .persistent(at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit.CODEC)
+                            .networkSynchronized(at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit.STREAM_CODEC)
+                            .build());
+
     private ModDataComponents() {
     }
 

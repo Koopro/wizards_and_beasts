@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:healer_coat_chest",
+    "minecraft:red_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:healer_coat_chest",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:outfit": {
+        "livery": "wizards_and_beasts:ward_crimson",
+        "rank": 0
+      }
+    }
+  }
+}

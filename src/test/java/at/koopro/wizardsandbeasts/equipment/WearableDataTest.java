@@ -104,6 +104,12 @@ class WearableDataTest {
         assertStats(values, "student_robe_chest", WizardArmorMaterials.STUDENT_ROBE, ArmorType.CHESTPLATE);
         assertStats(values, "auror_robe_chest", WizardArmorMaterials.AUROR_ROBE, ArmorType.CHESTPLATE);
         assertStats(values, "death_eater_robe_chest", WizardArmorMaterials.DEATH_EATER_ROBE, ArmorType.CHESTPLATE);
+        // The wardrobe's body-only cuts are made of the school robe's material and carry its stats.
+        assertStats(values, "wizard_robe_chest", WizardArmorMaterials.STUDENT_ROBE, ArmorType.CHESTPLATE);
+        assertStats(values, "scholar_gown_chest", WizardArmorMaterials.STUDENT_ROBE, ArmorType.CHESTPLATE);
+        for (String cut : new String[]{"travel_coat_chest", "healer_coat_chest", "ministry_robe_chest", "master_mantle_chest"}) {
+            assertStats(values, cut, WizardArmorMaterials.STUDENT_ROBE, ArmorType.CHESTPLATE);
+        }
         assertStats(values, "wizard_hat", WizardArmorMaterials.WIZARD_HAT, ArmorType.HELMET);
         assertStats(values, "sorting_hat", WizardArmorMaterials.SORTING_HAT, ArmorType.HELMET);
         for (String mask : new String[]{"death_eater_mask", "death_eater_mask_1", "death_eater_mask_2",

@@ -76,9 +76,13 @@ public final class EquipmentShowcaseCapture {
     private static final boolean ENABLED =
             System.getenv("WB_EQUIPMENT_SHOWCASE") != null && !FMLEnvironment.isProduction();
     private static final boolean CAST = "cast".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
+    /** Wardrobe Renaissance Phase D: the five prototype cuts standing, walking, sprinting, sneaking, seated. */
+    private static final boolean WARDROBE = "wardrobe".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     private static final int LOAD_TICKS = 80;
     private static final int STAGE_Y = 200;
     private static final double START_X = -10.5;
+    /** Centre of the stage's pool (wardrobe mode swims there), well east of where the walks end. */
+    private static final double POOL_X = 9.5;
 
     private enum Stage { IDLE, OPENING, LOADING, RUNNING, DONE }
 
@@ -142,8 +146,118 @@ public final class EquipmentShowcaseCapture {
         p.setItemSlot(EquipmentSlot.MAINHAND, wand);
     }));
 
+    /** One per prototype cut, each at the rank that shows the most of it (WARDROBE_RENAISSANCE Phase C). */
+    private static final List<Outfit> WARDROBE_OUTFITS = List.of(
+            new Outfit("school_lion_graduate", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), "house_lion", 2));
+            }),
+            new Outfit("auror_elite", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.AUROR_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.AUROR_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.AUROR_ROBE_CHEST.get(), "auror_office", 3));
+            }),
+            new Outfit("dark_officer_hood", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_BOOTS.get()));
+                ItemStack robe = stitched(p, ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "dark_order", 1);
+                RobeHood.setUp(robe, true);
+                wear(p, robe);
+            }),
+            new Outfit("everyday_moss", p ->
+                    wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0))),
+            new Outfit("scholar_potions_professor", p ->
+                    wear(p, stitched(p, ArmorItemRegistry.SCHOLAR_GOWN_CHEST.get(), "faculty_potions", 1))),
+            // Phase E1: capes over robes. The elytra steps check that a glider takes the back from the cape.
+            new Outfit("cape_lion_over_school", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), "house_lion", 0));
+                wear(p, stitched(p, ArmorItemRegistry.SCHOOL_CAPE.get(), "house_lion", 0));
+            }),
+            new Outfit("cloak_over_everyday", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "slate", 0));
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_CLOAK.get(), "umber", 0));
+            }),
+            new Outfit("cloak_over_dark_hood_down", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "dark_order", 0));
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_CLOAK.get(), "slate", 0));
+            }),
+            // Phase E2: accessories in their own Curios slots, over the robes.
+            new Outfit("acc_student_scarf_gloves", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), "house_lion", 1));
+                wear(p, stitched(p, ArmorItemRegistry.SCARF.get(), "house_lion", 0));
+                wear(p, stitched(p, ArmorItemRegistry.GLOVES.get(), "leather_black", 0));
+            }),
+            new Outfit("acc_auror_duty_belt", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.AUROR_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.AUROR_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.AUROR_ROBE_CHEST.get(), "auror_office", 2));
+                wear(p, stitched(p, ArmorItemRegistry.DUTY_BELT.get(), "auror_office", 0));
+                wear(p, stitched(p, ArmorItemRegistry.GLOVES.get(), "dragonhide", 0));
+            }),
+            new Outfit("acc_traveller", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
+                wear(p, stitched(p, ArmorItemRegistry.LEATHER_BELT.get(), "leather_brown", 0));
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_CLOAK.get(), "umber", 0));
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_HAT.get(), "umber", 0));
+            }),
+            new Outfit("acc_professor", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.SCHOLAR_GOWN_CHEST.get(), "faculty_potions", 1));
+                wear(p, stitched(p, ArmorItemRegistry.PROFESSOR_HAT.get(), "faculty_potions", 0));
+                wear(p, stitched(p, ArmorItemRegistry.SCARF.get(), "house_serpent", 0));
+            }),
+            // Phase E3: the four remaining cuts, at the ranks that show the most of them.
+            new Outfit("e3_travel_coat", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_COAT_CHEST.get(), "canvas_umber", 0));
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_HAT.get(), "umber", 0));
+            }),
+            new Outfit("e3_healer_senior", p ->
+                    wear(p, stitched(p, ArmorItemRegistry.HEALER_COAT_CHEST.get(), "ward_green", 2))),
+            new Outfit("e3_ministry_council", p ->
+                    wear(p, stitched(p, ArmorItemRegistry.MINISTRY_ROBE_CHEST.get(), "ministry_plum", 3))),
+            new Outfit("e3_master_with_cape", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.MASTER_MANTLE_CHEST.get(), "master_crimson", 0));
+                wear(p, stitched(p, ArmorItemRegistry.SCHOOL_CAPE.get(), "school_plain", 0));
+            }),
+            // The hood is up on the stack, but a hat is worn: the hood must be drawn down.
+            new Outfit("acc_dark_hood_up_under_hat", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_BOOTS.get()));
+                ItemStack robe = stitched(p, ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "dark_order", 0);
+                RobeHood.setUp(robe, true);
+                wear(p, robe);
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_HAT.get(), "slate", 0));
+            }));
+
+    /**
+     * A cut stitched through the same door the admin command uses, so a livery registry that failed
+     * to load shows up here as a warning rather than as a plain robe that looks like a pass.
+     */
+    private static ItemStack stitched(ServerPlayer p, net.minecraft.world.item.Item cut, String livery, int rank) {
+        ItemStack stack = new ItemStack(cut);
+        var result = at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.stamp(stack,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, livery),
+                rank, p.level().registryAccess());
+        LOGGER.info("Wardrobe showcase: {} in {} rank {}: {}", cut, livery, rank, result);
+        return stack;
+    }
+
+    /** {@code WB_EQUIPMENT_SHOWCASE_ONLY=<prefix>} keeps only the outfits whose name starts with it. */
+    private static final String ONLY = System.getenv().getOrDefault("WB_EQUIPMENT_SHOWCASE_ONLY", "");
+
     private static List<Outfit> outfits() {
-        return CAST ? CAST_OUTFITS : OUTFITS;
+        List<Outfit> all = CAST ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
+        if (ONLY.isEmpty()) {
+            return all;
+        }
+        return all.stream().filter(o -> java.util.Arrays.stream(ONLY.split(","))
+                .anyMatch(prefix -> o.name().startsWith(prefix))).toList();
     }
 
     private static final List<Step> SCRIPT = new ArrayList<>();
@@ -155,6 +269,8 @@ public final class EquipmentShowcaseCapture {
     private static boolean captureThisFrame;
     private static boolean forward;
     private static boolean sneak;
+    private static boolean sprint;
+    private static net.minecraft.world.entity.Entity seat;
     private static ArmorStand camera;
 
     private EquipmentShowcaseCapture() {}
@@ -195,6 +311,10 @@ public final class EquipmentShowcaseCapture {
             buildCastScript(current);
             return;
         }
+        if (WARDROBE) {
+            buildWardrobeScript(current);
+            return;
+        }
         SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
             undress(p);
             p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
@@ -213,6 +333,115 @@ public final class EquipmentShowcaseCapture {
         SCRIPT.add(new Step("character_sheet", 10, true, Cam.SCREEN,
                 p -> Minecraft.getInstance().setScreen(new CharacterSheetScreen()), NOTHING));
         SCRIPT.add(new Step("close", 2, false, Cam.QUARTER, p -> Minecraft.getInstance().setScreen(null), NOTHING));
+    }
+
+    /**
+     * Still views, then the cloth in motion: four walk frames a few ticks apart so the stride is
+     * caught at different phases, a sprint, a sneak, and seated in a boat (both legs forward, which is
+     * what lifts the hip skirt's front).
+     */
+    private static void buildWardrobeScript(Outfit current) {
+        SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
+            p.getAbilities().invulnerable = true;
+            p.onUpdateAbilities();
+            p.setHealth(p.getMaxHealth());
+            p.removeAllEffects();
+            undress(p);
+            p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+            current.dress().accept(p);
+        }));
+        SCRIPT.add(new Step("quarter", 4, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("front", 4, true, Cam.FRONT, NONE, NOTHING));
+        SCRIPT.add(new Step("side", 4, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("back", 4, true, Cam.BACK, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_side_a", 10, true, Cam.SIDE, p -> moves(true, false), NOTHING));
+        SCRIPT.add(new Step("walk_side_b", 2, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_side_c", 2, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_quarter_a", 2, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_quarter_b", 2, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_front", 2, true, Cam.FRONT, NONE, NOTHING));
+        SCRIPT.add(new Step("stop_walk", 8, false, Cam.SIDE, p -> moves(false, false), p ->
+                p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true)));
+        SCRIPT.add(new Step("sprint_side_a", 10, true, Cam.SIDE, p -> {
+            sprint = true;
+            moves(true, false);
+        }, NOTHING));
+        SCRIPT.add(new Step("sprint_side_b", 2, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("sprint_quarter", 2, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("stop_sprint", 8, false, Cam.SIDE, p -> {
+            sprint = false;
+            moves(false, false);
+        }, p -> p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true)));
+        SCRIPT.add(new Step("sneak_quarter", 10, true, Cam.QUARTER, p -> moves(false, true), NOTHING));
+        SCRIPT.add(new Step("sneak_side", 2, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("unsneak", 4, false, Cam.SIDE, p -> moves(false, false), NOTHING));
+        SCRIPT.add(new Step("seat_set", 12, false, Cam.QUARTER, NONE, p -> {
+            var boat = EntityType.OAK_BOAT.create(p.level(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            if (boat != null) {
+                boat.snapTo(p.getX(), p.getY(), p.getZ(), -90.0F, 0.0F);
+                p.level().addFreshEntity(boat);
+                p.startRiding(boat, true, true);
+                seat = boat;
+            }
+        }));
+        SCRIPT.add(new Step("seated_quarter", 4, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("seated_side", 4, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("unseat", 6, false, Cam.QUARTER, NONE, EquipmentShowcaseCapture::dismount));
+
+        // Astride a broom, in the flight pose layer's own riding pose.
+        SCRIPT.add(new Step("broom_set", 14, false, Cam.QUARTER, NONE, p -> {
+            var broom = new at.koopro.wizardsandbeasts.entity.broom.BroomEntity(
+                    at.koopro.wizardsandbeasts.registry.ModEntities.BROOM.get(), p.level());
+            broom.setPos(p.getX(), p.getY() + 1.0, p.getZ());
+            broom.setYRot(-90.0F);
+            broom.setDefinitionId(net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "broom"));
+            p.level().addFreshEntity(broom);
+            p.startRiding(broom, true, true);
+            seat = broom;
+            LOGGER.info("Wardrobe showcase: on the broom: {}", p.getVehicle() == broom);
+        }));
+        SCRIPT.add(new Step("broom_quarter", 4, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("broom_side", 4, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("unbroom", 6, false, Cam.QUARTER, NONE, EquipmentShowcaseCapture::dismount));
+
+        // Swimming: into the stage's pool, sprinting forward, which is what puts a player in the swim pose.
+        SCRIPT.add(new Step("swim_set", 16, false, Cam.SIDE, p -> {
+            sprint = true;
+            moves(true, false);
+        }, p -> p.teleportTo(p.level(), POOL_X, STAGE_Y - 2.2, 0.5, Set.of(), -90.0F, 0.0F, true)));
+        SCRIPT.add(new Step("swim_side", 2, true, Cam.SIDE, p -> LOGGER.info("Wardrobe showcase: swimming {}", p.isSwimming()), NOTHING));
+        SCRIPT.add(new Step("swim_quarter", 2, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("swim_stop", 6, false, Cam.SIDE, p -> {
+            sprint = false;
+            moves(false, false);
+        }, p -> p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true)));
+
+        // Gliding on an elytra worn under the robe: clothing never hides a glider.
+        SCRIPT.add(new Step("elytra_set", 6, false, Cam.QUARTER, NONE, p -> {
+            p.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.ELYTRA));
+            p.teleportTo(p.level(), START_X, STAGE_Y + 14, 0.5, Set.of(), -90.0F, 10.0F, true);
+        }));
+        SCRIPT.add(new Step("elytra_launch", 8, false, Cam.SIDE, NONE, p -> {
+            p.startFallFlying();
+            LOGGER.info("Wardrobe showcase: gliding {}", p.isFallFlying());
+        }));
+        SCRIPT.add(new Step("elytra_side", 2, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("elytra_quarter", 2, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("elytra_back", 2, true, Cam.BACK, NONE, NOTHING));
+        SCRIPT.add(new Step("elytra_end", 6, false, Cam.QUARTER, NONE, p -> {
+            p.stopFallFlying();
+            p.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+            p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+        }));
+    }
+
+    private static void dismount(ServerPlayer p) {
+        p.stopRiding();
+        if (seat != null) {
+            seat.discard();
+            seat = null;
+        }
+        p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
     }
 
     /** A cast parked on a phase (-1: none), sent exactly as the server sends a real one. */
@@ -331,7 +560,10 @@ public final class EquipmentShowcaseCapture {
         player.setXRot(0.0F);
         player.zza = forward ? 1.0F : 0.0F;
         player.xxa = 0.0F;
-        player.input.keyPresses = new Input(forward, false, false, false, false, sneak, false);
+        player.input.keyPresses = new Input(forward, false, false, false, false, sneak, sprint);
+        if (sprint && forward) {
+            player.setSprinting(true);
+        }
     }
 
     @SubscribeEvent
@@ -514,6 +746,15 @@ public final class EquipmentShowcaseCapture {
                 level.setBlockAndUpdate(new BlockPos(x, STAGE_Y - 1, z), Blocks.SMOOTH_STONE.defaultBlockState());
                 for (int y = 0; y < 5; y++) {
                     level.setBlockAndUpdate(new BlockPos(x, STAGE_Y + y, z), Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+        // A pool three deep in the east of the stage, for the wardrobe's swimming shots.
+        for (int x = 4; x <= 15; x++) {
+            for (int z = -3; z <= 3; z++) {
+                for (int y = STAGE_Y - 4; y <= STAGE_Y - 1; y++) {
+                    level.setBlockAndUpdate(new BlockPos(x, y, z), y == STAGE_Y - 4
+                            ? Blocks.SMOOTH_STONE.defaultBlockState() : Blocks.WATER.defaultBlockState());
                 }
             }
         }

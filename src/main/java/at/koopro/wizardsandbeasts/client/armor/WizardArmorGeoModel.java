@@ -37,6 +37,19 @@ public class WizardArmorGeoModel<T extends Item & GeoItem> extends DefaultedGeoM
         super(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, assetName));
     }
 
+    /**
+     * The stack's livery sheet when it has one ({@code WizardArmorRenderer#LIVERY_TEXTURE}), else
+     * the model's own, which still honours {@code withAltTexture} for the mask castings.
+     */
+    @Override
+    public Identifier getTextureResource(software.bernie.geckolib.renderer.base.GeoRenderState renderState) {
+        Identifier livery = renderState.getGeckolibData(WizardArmorRenderer.LIVERY_TEXTURE);
+        if (livery != null && !WizardArmorRenderer.BASE_SHEET.equals(livery)) {
+            return livery;
+        }
+        return super.getTextureResource(renderState);
+    }
+
     @Override
     protected String subtype() {
         return "armor";

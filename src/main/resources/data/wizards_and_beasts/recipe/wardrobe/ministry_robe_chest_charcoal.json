@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:ministry_robe_chest",
+    "minecraft:gray_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:ministry_robe_chest",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:outfit": {
+        "livery": "wizards_and_beasts:ministry_charcoal",
+        "rank": 0
+      }
+    }
+  }
+}

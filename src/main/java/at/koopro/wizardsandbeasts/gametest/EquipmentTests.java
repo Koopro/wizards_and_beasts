@@ -62,6 +62,9 @@ final class EquipmentTests {
                 EquipmentTests::hoodHidesHelmet);
         tests.add("equipment_slot_validation", "equipment: items only enter the slot their definition names",
                 EquipmentTests::slotValidation);
+        tests.add("equipment_wardrobe_recipes_and_accessory_slots",
+                "equipment: the wardrobe's recipes load, and each accessory enters its own slot and no other",
+                EquipmentTests::wardrobeRecipesAndSlots);
         tests.add("equipment_full_outfit", "equipment: armour + robe + cloak + hat + mask + necklace together",
                 EquipmentTests::fullOutfit);
         tests.add("equipment_cloak_effects_from_back_slot",
@@ -184,6 +187,40 @@ final class EquipmentTests {
                     () -> "hood state was not written to the worn stack");
             check(helper, !EquipmentVisibility.isArmorVisible(player, EquipmentSlot.HEAD),
                     () -> "hood up did not hide the helmet");
+            helper.succeed();
+        } finally {
+            retire(helper, player);
+        }
+    }
+
+    /**
+     * WARDROBE_RENAISSANCE E2/E4. The recipe half is the positive control for "no parse error in the log":
+     * the server must actually hold every wardrobe recipe file, not merely not complain about them.
+     */
+    private static void wardrobeRecipesAndSlots(GameTestHelper helper) {
+        ServerPlayer player = wearer(helper, "WardrobeSlots");
+        try {
+            long loaded = helper.getLevel().getServer().getRecipeManager().getRecipes().stream()
+                    .map(holder -> holder.id().identifier())
+                    .filter(id -> id.getNamespace().equals(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID)
+                            && id.getPath().startsWith("wardrobe/"))
+                    .count();
+            check(helper, loaded == 51, () -> "the server holds " + loaded + " wardrobe recipes, not 51");
+
+            check(helper, CuriosEquipment.equip(player, "necklace", new ItemStack(ArmorItemRegistry.SCARF.get())),
+                    () -> "a scarf did not enter the necklace slot");
+            check(helper, CuriosEquipment.equip(player, "belt", new ItemStack(ArmorItemRegistry.LEATHER_BELT.get())),
+                    () -> "a belt did not enter the belt slot");
+            check(helper, CuriosEquipment.equip(player, "hands", new ItemStack(ArmorItemRegistry.GLOVES.get())),
+                    () -> "gloves did not enter the hands slot");
+            check(helper, CuriosEquipment.equip(player, "head", new ItemStack(ArmorItemRegistry.TRAVEL_HAT.get())),
+                    () -> "a hat did not enter the head slot");
+            check(helper, CuriosEquipment.equip(player, "back", new ItemStack(ArmorItemRegistry.SCHOOL_CAPE.get())),
+                    () -> "a cape did not enter the back slot");
+            check(helper, !CuriosEquipment.equip(player, "belt", new ItemStack(ArmorItemRegistry.SCARF.get())),
+                    () -> "a scarf entered the belt slot");
+            check(helper, !CuriosEquipment.equip(player, "body", new ItemStack(ArmorItemRegistry.GLOVES.get())),
+                    () -> "gloves entered the body slot");
             helper.succeed();
         } finally {
             retire(helper, player);

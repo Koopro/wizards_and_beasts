@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  G",
+    "GGG",
+    "G  "
+  ],
+  "key": {
+    "G": "minecraft:gray_wool"
+  },
+  "result": {
+    "id": "wizards_and_beasts:scarf",
+    "count": 1
+  }
+}

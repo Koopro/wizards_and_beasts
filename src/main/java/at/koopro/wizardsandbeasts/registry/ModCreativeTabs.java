@@ -302,6 +302,51 @@ public class ModCreativeTabs {
                         for (var mask : ArmorItemRegistry.ALL_MASKS) {
                             output.accept(mask.get());
                         }
+
+                        // Wardrobe: the new cuts, then each shipped livery and rank as a ready stack,
+                        // so builders can pick a stitched robe without the admin command.
+                        output.accept(ArmorItemRegistry.WIZARD_ROBE_CHEST.get());
+                        output.accept(ArmorItemRegistry.SCHOLAR_GOWN_CHEST.get());
+                        for (String house : new String[]{"house_lion", "house_serpent", "house_eagle", "house_badger"}) {
+                            output.accept(outfit(ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), house, 0));
+                        }
+                        for (int rank = 1; rank <= 3; rank++) {
+                            output.accept(outfit(ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), "house_lion", rank));
+                            output.accept(outfit(ArmorItemRegistry.AUROR_ROBE_CHEST.get(), "auror_office", rank));
+                        }
+                        output.accept(outfit(ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "dark_order", 1));
+                        output.accept(outfit(ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
+                        output.accept(outfit(ArmorItemRegistry.SCHOLAR_GOWN_CHEST.get(), "faculty", 1));
+                        output.accept(outfit(ArmorItemRegistry.SCHOLAR_GOWN_CHEST.get(), "faculty_potions", 1));
+                        output.accept(ArmorItemRegistry.TRAVEL_COAT_CHEST.get());
+                        output.accept(outfit(ArmorItemRegistry.TRAVEL_COAT_CHEST.get(), "field_olive", 0));
+                        output.accept(ArmorItemRegistry.HEALER_COAT_CHEST.get());
+                        output.accept(outfit(ArmorItemRegistry.HEALER_COAT_CHEST.get(), "ward_green", 2));
+                        output.accept(outfit(ArmorItemRegistry.HEALER_COAT_CHEST.get(), "ward_crimson", 1));
+                        output.accept(ArmorItemRegistry.MINISTRY_ROBE_CHEST.get());
+                        output.accept(outfit(ArmorItemRegistry.MINISTRY_ROBE_CHEST.get(), "ministry_plum", 3));
+                        output.accept(outfit(ArmorItemRegistry.MINISTRY_ROBE_CHEST.get(), "ministry_charcoal", 1));
+                        output.accept(ArmorItemRegistry.MASTER_MANTLE_CHEST.get());
+                        output.accept(outfit(ArmorItemRegistry.MASTER_MANTLE_CHEST.get(), "master_midnight", 0));
+                        output.accept(ArmorItemRegistry.SCHOOL_CAPE.get());
+                        for (String house : new String[]{"house_lion", "house_serpent", "house_eagle", "house_badger"}) {
+                            output.accept(outfit(ArmorItemRegistry.SCHOOL_CAPE.get(), house, 0));
+                        }
+                        output.accept(ArmorItemRegistry.TRAVEL_CLOAK.get());
+                        output.accept(outfit(ArmorItemRegistry.TRAVEL_CLOAK.get(), "slate", 0));
+                        output.accept(ArmorItemRegistry.LEATHER_BELT.get());
+                        output.accept(outfit(ArmorItemRegistry.LEATHER_BELT.get(), "leather_black", 0));
+                        output.accept(ArmorItemRegistry.DUTY_BELT.get());
+                        output.accept(ArmorItemRegistry.SCARF.get());
+                        for (String house : new String[]{"house_lion", "house_serpent", "house_eagle", "house_badger"}) {
+                            output.accept(outfit(ArmorItemRegistry.SCARF.get(), house, 0));
+                        }
+                        output.accept(ArmorItemRegistry.GLOVES.get());
+                        output.accept(outfit(ArmorItemRegistry.GLOVES.get(), "leather_black", 0));
+                        output.accept(ArmorItemRegistry.PROFESSOR_HAT.get());
+                        output.accept(outfit(ArmorItemRegistry.PROFESSOR_HAT.get(), "faculty_potions", 0));
+                        output.accept(ArmorItemRegistry.TRAVEL_HAT.get());
+                        output.accept(outfit(ArmorItemRegistry.TRAVEL_HAT.get(), "slate", 0));
                     })
                     .build());
 
@@ -527,5 +572,14 @@ public class ModCreativeTabs {
     private static final String SPAWN_EGG_SUFFIX = "_spawn_egg";
 
     private ModCreativeTabs() {
+    }
+
+    /** A wardrobe cut already stitched in one of the mod's own liveries (creative tab only). */
+    private static net.minecraft.world.item.ItemStack outfit(net.minecraft.world.item.Item cut, String livery, int rank) {
+        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(cut);
+        stack.set(ModDataComponents.OUTFIT.get(), new at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit(
+                java.util.Optional.of(net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, livery)), rank));
+        return stack;
     }
 }

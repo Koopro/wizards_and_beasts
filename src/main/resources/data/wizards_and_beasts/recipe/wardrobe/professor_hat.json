@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " B ",
+    "BNB",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:black_wool",
+    "N": "minecraft:gold_nugget"
+  },
+  "result": {
+    "id": "wizards_and_beasts:professor_hat",
+    "count": 1
+  }
+}

@@ -1,9 +1,14 @@
 package at.koopro.wizardsandbeasts.registry;
 
+import at.koopro.wizardsandbeasts.item.armor.AccessoryItem;
 import at.koopro.wizardsandbeasts.item.armor.AurorRobeItem;
+import at.koopro.wizardsandbeasts.item.armor.CapeItem;
 import at.koopro.wizardsandbeasts.item.armor.DeathEaterMaskItem;
 import at.koopro.wizardsandbeasts.item.armor.DeathEaterRobeItem;
 import at.koopro.wizardsandbeasts.item.armor.StudentRobeItem;
+import at.koopro.wizardsandbeasts.item.armor.WizardRobeItem;
+import at.koopro.wizardsandbeasts.item.armor.RobeCutItem;
+import at.koopro.wizardsandbeasts.item.armor.ScholarGownItem;
 import at.koopro.wizardsandbeasts.item.armor.WizardArmorItem;
 import at.koopro.wizardsandbeasts.item.armor.WizardHatItem;
 import net.minecraft.world.item.equipment.ArmorType;
@@ -65,6 +70,49 @@ public final class ArmorItemRegistry {
     public static final DeferredItem<DeathEaterRobeItem> DEATH_EATER_ROBE_BOOTS =
             ModItems.ITEMS.registerItem("death_eater_robe_boots", props -> new DeathEaterRobeItem(props, ArmorType.BOOTS));
 
+    // --- Wardrobe cuts (body only) -----------------------------------------------------
+    // WARDROBE_RENAISSANCE Phase C: worn in the Curios body slot over whatever the wearer has on.
+
+    public static final DeferredItem<WizardRobeItem> WIZARD_ROBE_CHEST =
+            ModItems.ITEMS.registerItem("wizard_robe_chest", WizardRobeItem::new);
+    public static final DeferredItem<ScholarGownItem> SCHOLAR_GOWN_CHEST =
+            ModItems.ITEMS.registerItem("scholar_gown_chest", ScholarGownItem::new);
+
+    // --- Phase E3 body cuts ------------------------------------------------------------
+
+    public static final DeferredItem<RobeCutItem> TRAVEL_COAT_CHEST = ModItems.ITEMS.registerItem("travel_coat_chest",
+            props -> new RobeCutItem(props, "travel_coat", "canvas_umber"));
+    public static final DeferredItem<RobeCutItem> HEALER_COAT_CHEST = ModItems.ITEMS.registerItem("healer_coat_chest",
+            props -> new RobeCutItem(props, "healer_coat", "ward_green"));
+    public static final DeferredItem<RobeCutItem> MINISTRY_ROBE_CHEST = ModItems.ITEMS.registerItem("ministry_robe_chest",
+            props -> new RobeCutItem(props, "ministry_robe", "ministry_plum"));
+    public static final DeferredItem<RobeCutItem> MASTER_MANTLE_CHEST = ModItems.ITEMS.registerItem("master_mantle_chest",
+            props -> new RobeCutItem(props, "master_mantle", "master_crimson"));
+
+    // --- Capes and cloaks (back slot) ---------------------------------------------------
+    // WARDROBE_RENAISSANCE Phase E1: worn over a robe, swung by vanilla's own cape physics.
+
+    public static final DeferredItem<CapeItem> SCHOOL_CAPE =
+            ModItems.ITEMS.registerItem("school_cape", props -> new CapeItem(props, "school_cape", "school_plain"));
+    public static final DeferredItem<CapeItem> TRAVEL_CLOAK =
+            ModItems.ITEMS.registerItem("travel_cloak", props -> new CapeItem(props, "travel_cloak", "umber"));
+
+    // --- Accessories (belt, hands, necklace, head slots) ---------------------------------
+    // WARDROBE_RENAISSANCE Phase E2: cosmetic, each outside every robe cut's envelope.
+
+    public static final DeferredItem<AccessoryItem> LEATHER_BELT = ModItems.ITEMS.registerItem("leather_belt",
+            props -> new AccessoryItem(props, "leather_belt", "leather_brown", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> DUTY_BELT = ModItems.ITEMS.registerItem("duty_belt",
+            props -> new AccessoryItem(props, "duty_belt", "auror_office", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> SCARF = ModItems.ITEMS.registerItem("scarf",
+            props -> new AccessoryItem(props, "scarf", "school_plain", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> GLOVES = ModItems.ITEMS.registerItem("gloves",
+            props -> new AccessoryItem(props, "gloves", "dragonhide", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> PROFESSOR_HAT = ModItems.ITEMS.registerItem("professor_hat",
+            props -> new AccessoryItem(props, "professor_hat", "faculty", ArmorType.HELMET));
+    public static final DeferredItem<AccessoryItem> TRAVEL_HAT = ModItems.ITEMS.registerItem("travel_hat",
+            props -> new AccessoryItem(props, "travel_hat", "umber", ArmorType.HELMET));
+
     /** The plain issue mask. Statistically identical to the five castings below. */
     public static final DeferredItem<DeathEaterMaskItem> DEATH_EATER_MASK =
             ModItems.ITEMS.registerItem("death_eater_mask",
@@ -106,6 +154,9 @@ public final class ArmorItemRegistry {
             STUDENT_ROBE_CHEST, STUDENT_ROBE_LEGS, STUDENT_ROBE_BOOTS, WIZARD_HAT,
             AUROR_ROBE_CHEST, AUROR_ROBE_LEGS, AUROR_ROBE_BOOTS,
             DEATH_EATER_ROBE_CHEST, DEATH_EATER_ROBE_LEGS, DEATH_EATER_ROBE_BOOTS,
+            WIZARD_ROBE_CHEST, SCHOLAR_GOWN_CHEST, SCHOOL_CAPE, TRAVEL_CLOAK,
+            TRAVEL_COAT_CHEST, HEALER_COAT_CHEST, MINISTRY_ROBE_CHEST, MASTER_MANTLE_CHEST,
+            LEATHER_BELT, DUTY_BELT, SCARF, GLOVES, PROFESSOR_HAT, TRAVEL_HAT,
             DEATH_EATER_MASK, DEATH_EATER_MASK_1, DEATH_EATER_MASK_2,
             DEATH_EATER_MASK_3, DEATH_EATER_MASK_4, DEATH_EATER_MASK_5);
 

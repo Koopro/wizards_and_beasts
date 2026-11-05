@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:master_mantle_chest",
+    "minecraft:blue_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:master_mantle_chest",
+    "count": 1,
+    "components": {
+      "wizards_and_beasts:outfit": {
+        "livery": "wizards_and_beasts:master_midnight",
+        "rank": 0
+      }
+    }
+  }
+}

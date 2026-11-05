@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " R ",
+    "RLR",
+    "RRR"
+  ],
+  "key": {
+    "R": "minecraft:brown_wool",
+    "L": "minecraft:leather"
+  },
+  "result": {
+    "id": "wizards_and_beasts:travel_hat",
+    "count": 1
+  }
+}

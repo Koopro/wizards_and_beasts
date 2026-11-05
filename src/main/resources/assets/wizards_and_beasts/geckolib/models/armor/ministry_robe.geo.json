@@ -1,0 +1,517 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.ministry_robe",
+				"texture_width": 128,
+				"texture_height": 128,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3,
+				"visible_bounds_offset": [
+					0,
+					1.5,
+					0
+				]
+			},
+			"bones": [
+				{
+					"name": "armorBody",
+					"pivot": [
+						0,
+						24,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4,
+								12,
+								-2
+							],
+							"size": [
+								8,
+								12,
+								4
+							],
+							"uv": [
+								52,
+								0
+							],
+							"inflate": 0.5
+						},
+						{
+							"origin": [
+								-5.1,
+								21.6,
+								-3.0
+							],
+							"size": [
+								1,
+								4,
+								6
+							],
+							"uv": [
+								36,
+								17
+							]
+						},
+						{
+							"origin": [
+								4.1,
+								21.6,
+								-3.0
+							],
+							"size": [
+								1,
+								4,
+								6
+							],
+							"uv": [
+								50,
+								17
+							]
+						},
+						{
+							"origin": [
+								-4.5,
+								21.6,
+								2.9
+							],
+							"size": [
+								9,
+								4,
+								2
+							],
+							"uv": [
+								42,
+								29
+							]
+						},
+						{
+							"origin": [
+								-1.0,
+								11.8,
+								-3.15
+							],
+							"size": [
+								2,
+								13,
+								1
+							],
+							"uv": [
+								108,
+								0
+							],
+							"rotation": [
+								0,
+								0,
+								32
+							],
+							"pivot": [
+								0,
+								18.3,
+								-3.15
+							]
+						}
+					]
+				},
+				{
+					"name": "rank1",
+					"parent": "armorBody",
+					"pivot": [
+						0,
+						24,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4.0,
+								21.0,
+								-3.6
+							],
+							"size": [
+								8,
+								1,
+								1
+							],
+							"uv": [
+								70,
+								29
+							]
+						}
+					]
+				},
+				{
+					"name": "rank2",
+					"parent": "armorBody",
+					"pivot": [
+						0,
+						24,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-1.0,
+								19.0,
+								-3.7
+							],
+							"size": [
+								2,
+								2,
+								1
+							],
+							"uv": [
+								64,
+								29
+							]
+						}
+					]
+				},
+				{
+					"name": "rank3",
+					"parent": "armorBody",
+					"pivot": [
+						0,
+						24,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-3.5,
+								19.8,
+								-3.5
+							],
+							"size": [
+								7,
+								1,
+								1
+							],
+							"uv": [
+								88,
+								29
+							]
+						}
+					]
+				},
+				{
+					"name": "robeSkirt",
+					"parent": "armorBody",
+					"pivot": [
+						0,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-5.5,
+								7.0,
+								1.6
+							],
+							"size": [
+								11,
+								5,
+								2
+							],
+							"uv": [
+								16,
+								29
+							],
+							"rotation": [
+								-4,
+								0,
+								0
+							],
+							"pivot": [
+								0,
+								12.0,
+								3.6
+							]
+						},
+						{
+							"origin": [
+								-5.4,
+								7.0,
+								-3.2
+							],
+							"size": [
+								2,
+								5,
+								7
+							],
+							"uv": [
+								0,
+								17
+							],
+							"rotation": [
+								0,
+								0,
+								-4
+							],
+							"pivot": [
+								-4.4,
+								12.0,
+								0
+							]
+						},
+						{
+							"origin": [
+								3.4,
+								7.0,
+								-3.2
+							],
+							"size": [
+								2,
+								5,
+								7
+							],
+							"uv": [
+								18,
+								17
+							],
+							"rotation": [
+								0,
+								0,
+								4
+							],
+							"pivot": [
+								4.4,
+								12.0,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "clothHipFront",
+					"parent": "robeSkirt",
+					"pivot": [
+						0,
+						12,
+						-2.6
+					],
+					"cubes": [
+						{
+							"origin": [
+								-5.4,
+								7.0,
+								-3.6
+							],
+							"size": [
+								6,
+								5,
+								2
+							],
+							"uv": [
+								104,
+								17
+							],
+							"rotation": [
+								4,
+								0,
+								0
+							],
+							"pivot": [
+								0,
+								12.0,
+								-3.6
+							]
+						},
+						{
+							"origin": [
+								-0.6,
+								7.0,
+								-3.7
+							],
+							"size": [
+								6,
+								5,
+								2
+							],
+							"uv": [
+								0,
+								29
+							],
+							"rotation": [
+								4,
+								0,
+								0
+							],
+							"pivot": [
+								0,
+								12.0,
+								-3.7
+							]
+						}
+					]
+				},
+				{
+					"name": "clothLegR",
+					"parent": "robeSkirt",
+					"pivot": [
+						-1.9,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-5.3,
+								0.0,
+								-3.3
+							],
+							"size": [
+								6,
+								10,
+								7
+							],
+							"uv": [
+								0,
+								0
+							],
+							"rotation": [
+								0,
+								0,
+								-3
+							],
+							"pivot": [
+								-5.3,
+								10.0,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "clothLegL",
+					"parent": "robeSkirt",
+					"pivot": [
+						1.9,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-0.7,
+								0.0,
+								-3.4
+							],
+							"size": [
+								6,
+								10,
+								7
+							],
+							"uv": [
+								26,
+								0
+							],
+							"rotation": [
+								0,
+								0,
+								3
+							],
+							"pivot": [
+								5.3,
+								10.0,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "armorRightArm",
+					"pivot": [
+						-5,
+						22,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-8,
+								12,
+								-2
+							],
+							"size": [
+								4,
+								12,
+								4
+							],
+							"uv": [
+								76,
+								0
+							],
+							"inflate": 0.45
+						},
+						{
+							"origin": [
+								-8.5,
+								12.2,
+								-2.5
+							],
+							"size": [
+								5,
+								2,
+								5
+							],
+							"uv": [
+								64,
+								17
+							],
+							"inflate": 0.2
+						}
+					]
+				},
+				{
+					"name": "armorLeftArm",
+					"pivot": [
+						5,
+						22,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								4,
+								12,
+								-2
+							],
+							"size": [
+								4,
+								12,
+								4
+							],
+							"uv": [
+								92,
+								0
+							],
+							"inflate": 0.45
+						},
+						{
+							"origin": [
+								3.5,
+								12.2,
+								-2.5
+							],
+							"size": [
+								5,
+								2,
+								5
+							],
+							"uv": [
+								84,
+								17
+							],
+							"inflate": 0.2
+						}
+					]
+				}
+			]
+		}
+	]
+}

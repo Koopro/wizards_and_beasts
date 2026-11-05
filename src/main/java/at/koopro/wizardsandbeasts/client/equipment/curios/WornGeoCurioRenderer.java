@@ -2,6 +2,10 @@ package at.koopro.wizardsandbeasts.client.equipment.curios;
 
 import at.koopro.wizardsandbeasts.client.equipment.CapturedBodyPose;
 import at.koopro.wizardsandbeasts.client.equipment.EquipmentRenderStateModifier;
+import at.koopro.wizardsandbeasts.client.armor.CapeRenderer;
+import at.koopro.wizardsandbeasts.client.armor.WizardArmorRenderer;
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
+import at.koopro.wizardsandbeasts.item.armor.CapeItem;
 import at.koopro.wizardsandbeasts.item.armor.WizardArmorItem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -11,7 +15,9 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NullMarked;
@@ -59,6 +65,10 @@ public final class WornGeoCurioRenderer implements ICurioRenderer {
                 || EquipmentRenderStateModifier.isConcealed(renderState)) {
             return;
         }
+        if (item instanceof CapeItem && wearsGlider(renderState)) {
+            // Vanilla draws no cape over an elytra either; the wings take the back.
+            return;
+        }
         EquipmentSlot slot = item.armorType().getSlot();
         GeoArmorRenderer renderer = GeoRenderProvider.of(stack).getGeoArmorRenderer(stack, slot);
         if (renderer == null) {
@@ -81,8 +91,39 @@ public final class WornGeoCurioRenderer implements ICurioRenderer {
                 new GeoArmorRenderer.RenderData(stack, slot, slotContext.entity(), parentModel),
                 geoState, renderState.partialTick);
         geoState.addGeckolibData(CapturedBodyPose.TICKET, CapturedBodyPose.capture(parentModel));
+        if (item instanceof CapeItem) {
+            geoState.addGeckolibData(CapeRenderer.MOTION, capeMotion(renderState));
+        } else {
+            // A robe under a drawn cape drops its lowered hood: the cape's collar takes that place.
+            boolean capeDrawn = EquipmentAPI.getEquippedCloak(slotContext.entity()).getItem() instanceof CapeItem
+                    && !wearsGlider(renderState);
+            geoState.addGeckolibData(WizardArmorRenderer.CAPE_WORN, capeDrawn);
+            geoState.addGeckolibData(WizardArmorRenderer.HAT_WORN,
+                    !EquipmentAPI.getEquippedHat(slotContext.entity()).isEmpty());
+        }
 
         renderer.performRenderPass(geoState, poseStack, collector,
                 Minecraft.getInstance().levelRenderer.levelRenderState.cameraRenderState);
+    }
+
+    private static boolean wearsGlider(LivingEntityRenderState renderState) {
+        return renderState instanceof HumanoidRenderState humanoid
+                && humanoid.chestEquipment.has(DataComponents.GLIDER);
+    }
+
+    /**
+     * {@code {capeLean, capeFlap, strideAmplitude}}: vanilla's own cape physics for a player, and the
+     * leg swing amplitude {@code HumanoidModel#setupAnim} uses ({@code 1.4 * walkAnimationSpeed / speedValue}).
+     */
+    private static float[] capeMotion(LivingEntityRenderState renderState) {
+        float lean = 0f;
+        float flap = 0f;
+        if (renderState instanceof AvatarRenderState avatar) {
+            lean = avatar.capeLean;
+            flap = avatar.capeFlap;
+        }
+        float speedValue = renderState instanceof HumanoidRenderState humanoid && humanoid.speedValue > 0f
+                ? humanoid.speedValue : 1f;
+        return new float[]{lean, flap, 1.4f * renderState.walkAnimationSpeed / speedValue};
     }
 }

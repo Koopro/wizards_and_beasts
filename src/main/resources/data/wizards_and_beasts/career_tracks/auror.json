@@ -13,6 +13,10 @@
     { "id": "trainee", "xp": 0 },
     {
       "id": "auror",
+      "rewards": [
+        { "id": "wizards_and_beasts:auror_robe_chest", "count": 1, "components": { "wizards_and_beasts:outfit": { "livery": "wizards_and_beasts:auror_office", "rank": 1 } } },
+        { "id": "wizards_and_beasts:duty_belt", "count": 1 }
+      ],
       "xp": 300,
       "wage_multiplier": 1.4,
       "ministry_rank": "auror",
@@ -24,6 +28,9 @@
     },
     {
       "id": "senior_auror",
+      "rewards": [
+        { "id": "wizards_and_beasts:auror_robe_chest", "count": 1, "components": { "wizards_and_beasts:outfit": { "livery": "wizards_and_beasts:auror_office", "rank": 2 } } }
+      ],
       "xp": 900,
       "wage_multiplier": 1.8,
       "requires": [
@@ -36,6 +43,9 @@
     },
     {
       "id": "head_auror",
+      "rewards": [
+        { "id": "wizards_and_beasts:auror_robe_chest", "count": 1, "components": { "wizards_and_beasts:outfit": { "livery": "wizards_and_beasts:auror_office", "rank": 3 } } }
+      ],
       "xp": 2000,
       "wage_multiplier": 2.3,
       "requires": [

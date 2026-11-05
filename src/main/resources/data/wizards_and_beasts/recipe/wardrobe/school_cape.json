@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "S S",
+    "BBB",
+    "BBB"
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "B": "minecraft:black_wool"
+  },
+  "result": {
+    "id": "wizards_and_beasts:school_cape",
+    "count": 1
+  }
+}

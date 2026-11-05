@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "B B",
+    "BKB",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:black_wool",
+    "K": "minecraft:bone"
+  },
+  "result": {
+    "id": "wizards_and_beasts:death_eater_robe_chest",
+    "count": 1
+  }
+}

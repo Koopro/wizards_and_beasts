@@ -20,4 +20,9 @@ public class StudentRobeItem extends WizardArmorItem {
     protected String rendererClassName() {
         return "at.koopro.wizardsandbeasts.client.armor.StudentRobeRenderer";
     }
+
+    @Override
+    public net.minecraft.resources.@org.jspecify.annotations.Nullable Identifier defaultLivery() {
+        return bodyLivery("school_plain");
+    }
 }

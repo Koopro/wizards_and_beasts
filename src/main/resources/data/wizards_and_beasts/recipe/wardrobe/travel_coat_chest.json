@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "L L",
+    "RRR",
+    "RRR"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "R": "minecraft:brown_wool"
+  },
+  "result": {
+    "id": "wizards_and_beasts:travel_coat_chest",
+    "count": 1
+  }
+}

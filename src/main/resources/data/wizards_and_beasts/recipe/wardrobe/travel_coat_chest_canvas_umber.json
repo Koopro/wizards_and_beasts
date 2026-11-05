@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:travel_coat_chest",
+    "minecraft:white_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:travel_coat_chest",
+    "count": 1
+  }
+}

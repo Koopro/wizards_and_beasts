@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "B B",
+    "BSB",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:black_wool",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "id": "wizards_and_beasts:student_robe_chest",
+    "count": 1
+  }
+}
