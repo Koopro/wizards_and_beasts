@@ -352,7 +352,8 @@ public class ModModelProvider extends ModelProvider {
         eggshellBlock(blockModels);
         blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
-                sideTop(ModBlocks.SPELL_TEACHER.get(), ""), true);
+                sideTop(ModBlocks.SPELL_TEACHER.get(), "")
+                        .put(TextureSlot.FRONT, modLoc("block/examination_desk_paper")), true);
         // Walnut frame, an ash handle (the wand woods' own planks and stripped log), birch-twig bristles.
         propBlock(blockModels, ModBlocks.BROOM_RACK.get(), broomRackModel(), new TextureMapping()
                 .put(TextureSlot.PARTICLE, modLoc("block/walnut_planks"))
@@ -713,44 +714,68 @@ public class ModModelProvider extends ModelProvider {
     }
 
     /**
-     * Broom rack, authored facing north: two posts and two rails along the south edge, and a broom stood in front
-     * of them — a birch handle up to the top rail and a bundle of twigs at the foot. Vanilla wood, birch and hay
-     * textures, so the rack needs no art of its own.
+     * Broom rack, authored facing north: two posts on foot blocks with caps, two rails along the south
+     * edge with a pair of pegs on the top one, and a broom held on the pegs (an ash handle and a bundle
+     * of twigs bound with a band). Walnut frame, ash handle, its own bristles texture.
      */
     private static ExtendedModelTemplate broomRackModel() {
         ExtendedModelTemplateBuilder builder = prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.END,
                 TextureSlot.TEXTURE);
         for (float x : new float[] { 1, 13 }) {
-            builder.element(e -> e.from(x, 0, 13).to(x + 2, 16, 15)
+            builder.element(e -> e.from(x - 0.5F, 0, 12).to(x + 2.5F, 1, 16)
                     .textureAll(TextureSlot.SIDE)
                     .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)));
+            builder.element(e -> e.from(x, 1, 13).to(x + 2, 15, 15).textureAll(TextureSlot.SIDE));
+            builder.element(e -> e.from(x - 0.5F, 15, 12.5F).to(x + 2.5F, 16, 15.5F).textureAll(TextureSlot.SIDE));
         }
         for (float y : new float[] { 3, 12 }) {
             builder.element(e -> e.from(3, y, 13.5F).to(13, y + 2, 14.5F).textureAll(TextureSlot.SIDE));
+        }
+        // Pegs out of the top rail, either side of the handle.
+        for (float x : new float[] { 5.5F, 9.5F }) {
+            builder.element(e -> e.from(x, 12.5F, 11.5F).to(x + 1, 13.5F, 13.5F).textureAll(TextureSlot.SIDE));
         }
         return builder
                 .element(e -> e.from(7, 4, 11).to(9, 16, 13).textureAll(TextureSlot.END))
                 .element(e -> e.from(5.5F, 0, 9.5F).to(10.5F, 5, 14.5F)
                         .textureAll(TextureSlot.TEXTURE)
                         .face(Direction.DOWN, f -> f.texture(TextureSlot.TEXTURE).cullface(Direction.DOWN)))
+                // The binding round the top of the bristles.
+                .element(e -> e.from(6.5F, 4, 10.5F).to(9.5F, 5.5F, 13.5F).textureAll(TextureSlot.SIDE))
                 .build();
     }
 
-    /** Lectern: footed column under a reading surface tilted toward the reader. */
+    /**
+     * Spell teacher, a lectern at vanilla's prop detail: a stepped foot, a column with a collar at
+     * each end, the reading desk tilted toward the reader, and an open book lying on it (two pages
+     * either side of a spine, tilted with the desk). Pages are the exam paper texture.
+     *
+     * <p>-22.5 is the sign vanilla's own lectern desk uses. A positive X rotation raises the
+     * north edge, which tilts the reading surface away from the reader.
+     */
     private static ExtendedModelTemplate lecternModel() {
-        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP)
-                .element(e -> e.from(3, 0, 3).to(13, 2, 13)
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.FRONT)
+                .element(e -> e.from(3, 0, 3).to(13, 1, 13)
                         .textureAll(TextureSlot.SIDE)
                         .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
-                .element(e -> e.from(5, 2, 5).to(11, 10, 11)
-                        .textureAll(TextureSlot.SIDE))
-                // -22.5, the sign vanilla's own lectern desk uses. A positive X rotation raises the
-                // *north* edge, which tilts the reading surface away from the reader — invisible
-                // while the block had no facing and every one of them pointed north.
-                .element(e -> e.from(2, 10, 2).to(14, 13, 14)
+                .element(e -> e.from(4, 1, 4).to(12, 2, 12).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(6, 2, 6).to(10, 10, 10).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(5, 3, 5).to(11, 4, 11).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(5, 9, 5).to(11, 10, 11).textureAll(TextureSlot.SIDE))
+                .element(e -> e.from(2, 10, 2).to(14, 12, 14)
                         .rotation(r -> r.singleAxis(Direction.Axis.X, -22.5F).origin(8, 11, 8))
                         .textureAll(TextureSlot.SIDE)
                         .face(Direction.UP, f -> f.texture(TextureSlot.TOP)))
+                // The open book: two pages and the spine between them.
+                .element(e -> e.from(3, 12, 3.5F).to(7.75F, 12.75F, 12.5F)
+                        .rotation(r -> r.singleAxis(Direction.Axis.X, -22.5F).origin(8, 11, 8))
+                        .textureAll(TextureSlot.FRONT))
+                .element(e -> e.from(8.25F, 12, 3.5F).to(13, 12.75F, 12.5F)
+                        .rotation(r -> r.singleAxis(Direction.Axis.X, -22.5F).origin(8, 11, 8))
+                        .textureAll(TextureSlot.FRONT))
+                .element(e -> e.from(7.75F, 12, 3.5F).to(8.25F, 12.5F, 12.5F)
+                        .rotation(r -> r.singleAxis(Direction.Axis.X, -22.5F).origin(8, 11, 8))
+                        .textureAll(TextureSlot.SIDE))
                 .build();
     }
 
@@ -760,7 +785,7 @@ public class ModModelProvider extends ModelProvider {
      * {@link BlockModelGenerators#ROTATION_HORIZONTAL_FACING} treats as unrotated.
      */
     private static ExtendedModelTemplate fireplaceModel() {
-        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP)
+        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP, TextureSlot.BACK)
                 .element(e -> e.from(0, 0, 13).to(16, 16, 16)
                         .textureAll(TextureSlot.SIDE)
                         // The inner face of the back wall is the fire you look at.
@@ -781,6 +806,12 @@ public class ModModelProvider extends ModelProvider {
                 // A mantel shelf proud of the breast, so the block reads as a fireplace and not a dark box.
                 .element(e -> e.from(-1, 13, -2).to(17, 14, 2)
                         .textureAll(TextureSlot.TOP))
+                // Corbels under the shelf's ends, and the pot of Floo powder on it: the one object that
+                // says which fireplace this is before the green fire does.
+                .element(e -> e.from(0, 11, -1).to(2, 13, 0).textureAll(TextureSlot.TOP))
+                .element(e -> e.from(14, 11, -1).to(16, 13, 0).textureAll(TextureSlot.TOP))
+                .element(e -> e.from(11, 14, -1.5F).to(13.5F, 16.5F, 1).textureAll(TextureSlot.BACK))
+                .element(e -> e.from(11.5F, 16.5F, -1).to(13, 17, 0.5F).textureAll(TextureSlot.TOP))
                 // The hearthstone, run out under the flames that burn in the block in front: they stand on the
                 // hearth instead of on bare floor.
                 .element(e -> e.from(-1, 0, -5).to(17, 1, 0)
@@ -1103,7 +1134,8 @@ public class ModModelProvider extends ModelProvider {
                 .put(TextureSlot.PARTICLE, surround)
                 .put(TextureSlot.SIDE, surround)
                 .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block))
-                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"));
+                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"))
+                .put(TextureSlot.BACK, Identifier.withDefaultNamespace("block/flower_pot"));
 
         Identifier off = template.create(block, unlit, blockModels.modelOutput);
         Identifier on = template.createWithSuffix(block, "_lit",

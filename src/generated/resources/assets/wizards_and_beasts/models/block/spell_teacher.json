@@ -30,7 +30,7 @@
       ],
       "to": [
         13,
-        2,
+        1,
         13
       ]
     },
@@ -56,8 +56,104 @@
         }
       },
       "from": [
-        5,
+        4,
+        1,
+        4
+      ],
+      "to": [
+        12,
         2,
+        12
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        6,
+        2,
+        6
+      ],
+      "to": [
+        10,
+        10,
+        10
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        5,
+        3,
+        5
+      ],
+      "to": [
+        11,
+        4,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        5,
+        9,
         5
       ],
       "to": [
@@ -103,12 +199,136 @@
       },
       "to": [
         14,
-        13,
+        12,
         14
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#front"
+        },
+        "east": {
+          "texture": "#front"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#front"
+        },
+        "up": {
+          "texture": "#front"
+        },
+        "west": {
+          "texture": "#front"
+        }
+      },
+      "from": [
+        3,
+        12,
+        3.5
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          8,
+          11,
+          8
+        ]
+      },
+      "to": [
+        7.75,
+        12.75,
+        12.5
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#front"
+        },
+        "east": {
+          "texture": "#front"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#front"
+        },
+        "up": {
+          "texture": "#front"
+        },
+        "west": {
+          "texture": "#front"
+        }
+      },
+      "from": [
+        8.25,
+        12,
+        3.5
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          8,
+          11,
+          8
+        ]
+      },
+      "to": [
+        13,
+        12.75,
+        12.5
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        7.75,
+        12,
+        3.5
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          8,
+          11,
+          8
+        ]
+      },
+      "to": [
+        8.25,
+        12.5,
+        12.5
       ]
     }
   ],
   "textures": {
+    "front": "wizards_and_beasts:block/examination_desk_paper",
     "particle": "wizards_and_beasts:block/spell_teacher",
     "side": "wizards_and_beasts:block/spell_teacher",
     "top": "wizards_and_beasts:block/spell_teacher_top"

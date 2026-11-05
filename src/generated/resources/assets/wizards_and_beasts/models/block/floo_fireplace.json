@@ -201,6 +201,134 @@
     {
       "faces": {
         "down": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        }
+      },
+      "from": [
+        0,
+        11,
+        -1
+      ],
+      "to": [
+        2,
+        13,
+        0
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        }
+      },
+      "from": [
+        14,
+        11,
+        -1
+      ],
+      "to": [
+        16,
+        13,
+        0
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#back"
+        },
+        "east": {
+          "texture": "#back"
+        },
+        "north": {
+          "texture": "#back"
+        },
+        "south": {
+          "texture": "#back"
+        },
+        "up": {
+          "texture": "#back"
+        },
+        "west": {
+          "texture": "#back"
+        }
+      },
+      "from": [
+        11,
+        14,
+        -1.5
+      ],
+      "to": [
+        13.5,
+        16.5,
+        1
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        }
+      },
+      "from": [
+        11.5,
+        16.5,
+        -1
+      ],
+      "to": [
+        13,
+        17,
+        0.5
+      ]
+    },
+    {
+      "faces": {
+        "down": {
           "cullface": "down",
           "texture": "#top"
         },
@@ -233,6 +361,7 @@
     }
   ],
   "textures": {
+    "back": "minecraft:block/flower_pot",
     "front": "wizards_and_beasts:block/floo_fireplace",
     "particle": "wizards_and_beasts:block/floo_fireplace_side",
     "side": "wizards_and_beasts:block/floo_fireplace_side",
