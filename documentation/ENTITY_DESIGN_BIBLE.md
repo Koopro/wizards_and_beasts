@@ -195,6 +195,26 @@ Clips are marked **essential / recommended / optional**:
 **Current state: 84 of 110 rigs have exactly four clips** (idle + locomotion + attack + voice). The
 production plan below treats that four-clip set as the floor, not the target.
 
+**Activity loops (2026-11-06).** The movement controller (`AnimHelper.activityController`) plays a
+rig's own loop for the synced `CreatureActivity` when the animation file has it, and a stand-in when
+it does not, so a new loop needs no Java. Names, from `CreatureActivity`: `run`/`gallop` (RUN, FLEE),
+`sneak`/`stalk`, `rest`, `sleep`, `eat`/`graze`/`sniff`, `drink`, `groom`/`preen`/`lick`/`shake`,
+`alert`, `threaten`/`hiss`/`rear`, `glide`, `hover`, `takeoff`, `land`, `perch`, `burrowed`, `climb`.
+`rigkit.ACTIVITY_LOOPS` accepts them and keeps them out of the definition's one-shot list.
+
+**Living-detail bones (2026-11-06).** `CreatureLifePass` (client only, after the clips) adds to any
+rig that has these bones; a rig without one simply goes without that detail:
+
+| Bone | What the pass does |
+|---|---|
+| `head` | turns toward where the creature looks (the AI's synced head rotation), ±70° yaw, ±40° pitch |
+| `neck`, `neck_1..3`, `neck_01..02`, `neck_lower`, `neck_upper` | share half of that turn |
+| `eyelid_left`, `eyelid_right` | blink every 3–7.5 s, closed in SLEEP and when dying. Model them **shut**, a pair, children of `head`, pivot on the eye's upper edge; the pass scales them open. **No clip may key them.** |
+| `ear_left`/`ear_right` (or `_l`/`_r`) | an occasional outward flick |
+| `chest` | breathes (scale), slower for big and sleeping animals |
+
+The head turn fades out while a one-shot plays, so a clip that poses the head keeps its pose.
+
 ---
 
 # Sound Language
