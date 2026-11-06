@@ -48,7 +48,7 @@
   "clips": [
     "flinch",
     "call",
-    "death",
-    "peek"
+    "peek",
+    "death"
   ]
 }
