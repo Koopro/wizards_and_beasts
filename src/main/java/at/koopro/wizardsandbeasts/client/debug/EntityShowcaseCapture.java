@@ -1,5 +1,11 @@
 package at.koopro.wizardsandbeasts.client.debug;
 
+import at.koopro.wizardsandbeasts.creature.profile.CreatureActivity;
+import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.registry.ModEntities;
@@ -75,6 +81,15 @@ import java.util.Set;
  * {@code WB_ENTITY_SHOWCASE_FLAGS} ({@code +flag,-flag}) sets or clears the viewer's ability flags before the first
  * shot, e.g. {@code -witnessed_death} to photograph what someone who cannot see thestrals sees.
  * The client quits when the last shot is written.
+ *
+ * <p><b>Actions (Creature Visual Renaissance).</b> {@code WB_ENTITY_SHOWCASE_ACTIONS} adds, after the views, a frame strip
+ * per action from the front three-quarter camera: an activity name ({@code run}, {@code sleep}, {@code eat} ... from
+ * {@code CreatureActivity}) sets the synced activity byte on the server copy, exactly what the ecology brain does,
+ * so the shot shows the clip the game really plays; {@code walk} drives the client copy's walk cycle (an AI-off mob
+ * never moves); {@code vanish}/{@code appear} add and remove invisibility (the fade); {@code look} turns the creature's synced head away from its body (the life pass's head turn);
+ * {@code @clip} fires a declared one-shot through {@code GenericBeastEntity.triggerDeclared}.
+ * {@code WB_ENTITY_SHOWCASE_STRIP} is {@code frames:interval} (default {@code 4:5}): how many shots per action and
+ * how many ticks apart; {@code name*frames:interval} overrides it for one action. Files are {@code <stem>__<action>_f<n>.png}.
  */
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID, value = Dist.CLIENT)
 public final class EntityShowcaseCapture {
@@ -92,7 +107,14 @@ public final class EntityShowcaseCapture {
      * and {@code reborn} shoot 40 and 130 ticks after a preceding {@code death} — what a creature that does not
      * stay dead (the phoenix) is doing by then. They damage nothing themselves.
      */
-    private enum View { FRONT, SIDE, BACK, FAR, NIGHT, HURT, DEATH, AIR, ASHES, REBORN }
+    private enum View {
+        FRONT, SIDE, BACK, FAR, NIGHT, HURT, DEATH, AIR, ASHES, REBORN;
+
+        /** Hurts or kills the subject, so it is shot after everything that needs it alive and calm. */
+        boolean destructive() {
+            return this == HURT || this == DEATH || this == ASHES || this == REBORN;
+        }
+    }
 
     private enum Stage { IDLE, OPENING, LOADING, RUNNING, DONE }
 
@@ -104,6 +126,9 @@ public final class EntityShowcaseCapture {
     private static boolean opened;
     /** The creature on the stage, by network id, set on the server thread when it is spawned. */
     private static volatile int subjectId = -1;
+    /** Where the current view puts the camera player's feet; set on the server thread. */
+    private static volatile double[] cameraTarget;
+    private static int cameraWaits;
 
     private EntityShowcaseCapture() {}
 
@@ -141,7 +166,16 @@ public final class EntityShowcaseCapture {
         }
     }
 
-    private record Request(List<Entry> entities, List<View> views, String world, Path out) {
+    /** One photograph: a fixed view, or frame {@code frame} of an action strip. */
+    private record Shot(int entry, View view, String action, int frame, int interval) {
+        String suffix() {
+            return action == null ? view.name().toLowerCase(Locale.ROOT)
+                    : action.replace("@", "clip_") + "_f" + frame;
+        }
+    }
+
+    private record Request(List<Entry> entities, List<View> views, List<String> actions, int frames, int interval,
+                           String world, Path out) {
         static Request fromEnvironment() {
             String list = System.getenv("WB_ENTITY_SHOWCASE");
             if (list == null || FMLEnvironment.isProduction()) {
@@ -164,15 +198,49 @@ public final class EntityShowcaseCapture {
             for (String name : spec.split(",")) {
                 views.add(View.valueOf(name.strip().toUpperCase(Locale.ROOT)));
             }
+            List<String> actions = new ArrayList<>();
+            for (String name : System.getenv().getOrDefault("WB_ENTITY_SHOWCASE_ACTIONS", "").split(",")) {
+                if (!name.isBlank()) {
+                    actions.add(name.strip().toLowerCase(Locale.ROOT));
+                }
+            }
+            String[] strip = System.getenv().getOrDefault("WB_ENTITY_SHOWCASE_STRIP", "4:5").split(":");
             String world = System.getenv().getOrDefault("WB_ENTITY_SHOWCASE_WORLD", "wb_entity_showcase");
             String out = System.getenv().getOrDefault("WB_ENTITY_SHOWCASE_OUT", "entity_showcase");
-            return new Request(entities, views, world, Path.of(Screenshot.SCREENSHOT_DIR, out));
+            return new Request(entities, views, actions, Integer.parseInt(strip[0]), Integer.parseInt(strip[1]),
+                    world, Path.of(Screenshot.SCREENSHOT_DIR, out));
         }
 
-        int shots() {
-            return entities.size() * views.size();
+        List<Shot> shots() {
+            List<Shot> shots = new ArrayList<>();
+            for (int e = 0; e < entities.size(); e++) {
+                // Views that hurt or kill the subject go last, after the strips: a `death` before them
+                // left every strip photographing an empty stage (2026-11-06).
+                for (View view : views) {
+                    if (!view.destructive()) {
+                        shots.add(new Shot(e, view, null, 0, 0));
+                    }
+                }
+                for (String spec : actions) {
+                    // `name*frames:interval` overrides the strip for one action (a blink needs fine sampling).
+                    String action = spec.contains("*") ? spec.substring(0, spec.indexOf('*')) : spec;
+                    int count = spec.contains("*") ? Integer.parseInt(spec.substring(spec.indexOf('*') + 1).split(":")[0]) : frames;
+                    int every = spec.contains("*") ? Integer.parseInt(spec.split(":")[1]) : interval;
+                    for (int f = 0; f < count; f++) {
+                        shots.add(new Shot(e, View.FRONT, action, f, every));
+                    }
+                }
+                for (View view : views) {
+                    if (view.destructive()) {
+                        shots.add(new Shot(e, view, null, 0, 0));
+                    }
+                }
+            }
+            return shots;
         }
     }
+
+    private static final List<Shot> SHOTS = REQUEST == null ? List.of() : REQUEST.shots();
 
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
@@ -186,8 +254,8 @@ public final class EntityShowcaseCapture {
         mc.options.hideGui = true;
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1600, 900);
         stage = Stage.OPENING;
-        LOGGER.info("Entity showcase: {} entities x {} views into {}",
-                REQUEST.entities().size(), REQUEST.views().size(), REQUEST.out());
+        LOGGER.info("Entity showcase: {} entities, {} shots into {}",
+                REQUEST.entities().size(), SHOTS.size(), REQUEST.out());
         mc.createWorldOpenFlows().openWorld(REQUEST.world(), () -> stage = Stage.DONE);
     }
 
@@ -213,6 +281,15 @@ public final class EntityShowcaseCapture {
         if (captureThisFrame || --wait > 0) {
             return;
         }
+        // The camera is moved on the server thread. On a loaded machine the move can land after the fixed wait,
+        // and the shot is the previous view again (seen 2026-11-06: side, back and far all came out as the front).
+        // Hold the shot until the client player is where this view put it, for up to five seconds.
+        double[] target = cameraTarget;
+        if (stage == Stage.RUNNING && (target == null || mc.player.distanceToSqr(target[0], target[1], target[2]) > 0.25)
+                && cameraWaits++ < 100) {
+            return;
+        }
+        cameraWaits = 0;
         if (stage == Stage.LOADING) {
             stage = Stage.RUNNING;
             shot = 0;
@@ -231,6 +308,19 @@ public final class EntityShowcaseCapture {
         captureThisFrame = true;
     }
 
+    /** Keeps an AI-off subject's walk cycle running on the client for a {@code walk} strip. */
+    @SubscribeEvent
+    public static void onWalkTick(ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (REQUEST == null || stage != Stage.RUNNING || mc.level == null || shot >= SHOTS.size()
+                || !"walk".equals(SHOTS.get(shot).action())) {
+            return;
+        }
+        if (subjectId >= 0 && mc.level.getEntity(subjectId) instanceof LivingEntity living) {
+            living.walkAnimation.setSpeed(0.9F);
+        }
+    }
+
     @SubscribeEvent
     public static void onRenderFrame(RenderFrameEvent.Post event) {
         if (!captureThisFrame) {
@@ -239,7 +329,7 @@ public final class EntityShowcaseCapture {
         captureThisFrame = false;
         Minecraft mc = Minecraft.getInstance();
         Entry entry = entry();
-        String name = entry.stem() + "__" + view().name().toLowerCase(Locale.ROOT) + ".png";
+        String name = entry.stem() + "__" + SHOTS.get(shot).suffix() + ".png";
         Path file = mc.gameDirectory.toPath().resolve(REQUEST.out()).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -251,7 +341,7 @@ public final class EntityShowcaseCapture {
         }));
         shot++;
         MinecraftServer server = mc.getSingleplayerServer();
-        if (shot >= REQUEST.shots() || server == null) {
+        if (shot >= SHOTS.size() || server == null) {
             stage = Stage.DONE;
             LOGGER.info("Entity showcase: done, {} shots", shot);
             mc.stop();
@@ -261,18 +351,21 @@ public final class EntityShowcaseCapture {
     }
 
     private static Entry entry() {
-        return REQUEST.entities().get(shot / REQUEST.views().size());
+        return REQUEST.entities().get(SHOTS.get(shot).entry());
     }
 
     private static View view() {
-        return REQUEST.views().get(shot % REQUEST.views().size());
+        return SHOTS.get(shot).view();
     }
 
     /** Spawns the creature on the first view of each entry, then places the camera for this view. */
     private static void present(Minecraft mc, MinecraftServer server) {
+        cameraTarget = null;
         Entry entry = entry();
         View view = view();
-        boolean first = shot % REQUEST.views().size() == 0;
+        Shot current = SHOTS.get(shot);
+        boolean first = shot == 0 || SHOTS.get(shot - 1).entry() != current.entry();
+        String action = current.action();
         mc.options.setCameraType(CameraType.FIRST_PERSON);
         mc.options.hideGui = true;
         var uuid = mc.player.getUUID();
@@ -297,6 +390,9 @@ public final class EntityShowcaseCapture {
             if (villager != null) {
                 boolean shown = view == View.FRONT || view == View.FAR;
                 villager.snapTo(-(size * 0.5 + 1.0), shown ? STAGE_Y : STAGE_Y - 40, 0.5, 0.0F, 0.0F);
+            }
+            if (action != null && current.frame() == 0 && subject instanceof GenericBeastEntity beast) {
+                act(beast, action);
             }
             if (subject instanceof Mob mob && view == View.HURT) {
                 mob.hurtServer(level, level.damageSources().generic(), 0.5F);
@@ -328,9 +424,16 @@ public final class EntityShowcaseCapture {
             double dz = 0.5 - camZ;
             float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
             float pitch = (float) -Math.toDegrees(Math.atan2(lookY - camY, Math.sqrt(dx * dx + dz * dz)));
+            cameraTarget = new double[] {camX, camY - player.getEyeHeight(), camZ};
             player.teleportTo(level, camX, camY - player.getEyeHeight(), camZ, Set.of(), yaw,
                     Mth.clamp(pitch, -89.0F, 89.0F), true);
         });
+        if (action != null) {
+            // The first frame waits for the controller to blend in (and lids or a sit to settle).
+            boolean quick = action.startsWith("@") || action.equals("vanish") || action.equals("appear");
+            wait = current.frame() == 0 ? (quick ? 2 : 30) : current.interval();
+            return;
+        }
         wait = switch (view) {
             case HURT -> 4;
             case DEATH -> 11;
@@ -339,6 +442,29 @@ public final class EntityShowcaseCapture {
             case REBORN -> 130;
             default -> first ? SPAWN_TICKS : SETTLE_TICKS;
         };
+    }
+
+    /** Puts the subject into one action: an activity, a one-shot, the walk cycle or a turned head. */
+    private static void act(GenericBeastEntity beast, String action) {
+        beast.setActivity(CreatureActivity.IDLE);
+        beast.setYHeadRot(beast.getYRot());
+        beast.setXRot(0.0F);
+        if (action.startsWith("@")) {
+            beast.triggerDeclared(action.substring(1));
+        } else if (action.equals("vanish")) {
+            beast.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 400, 0, false, false, false));
+        } else if (action.equals("appear")) {
+            beast.removeEffect(MobEffects.INVISIBILITY);
+        } else if (action.equals("look")) {
+            beast.setYHeadRot(beast.getYRot() + 50.0F);
+            beast.setXRot(-15.0F);
+        } else if (!action.equals("walk") && !action.equals("idle")) {
+            try {
+                beast.setActivity(CreatureActivity.valueOf(action.toUpperCase(Locale.ROOT)));
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("Entity showcase: no activity {}", action);
+            }
+        }
     }
 
     private static void spawn(ServerLevel level, Entry entry) {
@@ -392,6 +518,8 @@ public final class EntityShowcaseCapture {
         entity.setNoGravity(false);
         entity.setSilent(true);
         entity.addTag(TAG);
+        // A Demiguise vanishes when looked at straight on, which is all a camera does; `vanish`/`appear` stage it.
+        entity.addTag(at.koopro.wizardsandbeasts.creature.ability.WatchedInvisibility.HOLD_VISIBLE_TAG);
         entity.snapTo(0.5, STAGE_Y, 0.5, 0.0F, 0.0F);
         entity.setYHeadRot(0.0F);
         entity.setYBodyRot(0.0F);
