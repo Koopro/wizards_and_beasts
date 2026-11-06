@@ -3,11 +3,15 @@ package at.koopro.wizardsandbeasts.client.entity;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.Entity;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
@@ -47,7 +51,26 @@ public class TintedBeastRenderer<R extends EntityRenderState & GeoRenderState>
         int base = super.getRenderColor(beast, unused, partialTick);
         int tint = beast.getTint();
         // 0xFFFFFFFF (opaque white) = no tint; otherwise multiply it into the base/invisibility colour.
-        return tint == 0xFFFFFFFF ? base : ARGB.multiply(base, tint);
+        int color = tint == 0xFFFFFFFF ? base : ARGB.multiply(base, tint);
+        float fade = VanishFade.visibility(beast, partialTick);
+        return fade >= 1f ? color : ARGB.color(Math.round(ARGB.alpha(color) * fade), color);
+    }
+
+    /**
+     * A creature that turns invisible (the Demiguise when watched) fades out over {@link VanishFade#TICKS} instead
+     * of vanishing between two frames, and fades back in. GeckoLib returns no render type for an invisible entity,
+     * so while the fade is under way this keeps drawing it, translucent; once it has faded out, GeckoLib's own
+     * rule applies again (nothing for players, the faint spectator ghost for spectators).
+     */
+    @Override
+    public @Nullable RenderType getRenderType(R renderState, Identifier texture) {
+        Integer color = renderState.getGeckolibData(DataTickets.RENDER_COLOR);
+        int alpha = color == null ? 255 : ARGB.alpha(color);
+        boolean hiddenFromViewer = renderState.isInvisible
+                && renderState.getOrDefaultGeckolibData(DataTickets.INVISIBLE_TO_PLAYER, false);
+        if (hiddenFromViewer && alpha > VanishFade.MIN_ALPHA) return RenderTypes.itemEntityTranslucentCull(texture);
+        if (!renderState.isInvisible && alpha < 255) return RenderTypes.itemEntityTranslucentCull(texture);
+        return super.getRenderType(renderState, texture);
     }
 
     /** Provider mirroring {@code GeoRendererHelper.simple}/{@code DragonRenderer.provider} for the manifest loop. */

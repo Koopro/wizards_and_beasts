@@ -21,6 +21,12 @@ public record WatchedInvisibility(double range) implements CreatureAbility {
 
     private static final int CHECK_TICKS = 4;
 
+    /**
+     * A creature carrying this tag stays as it is: a staged scene (the showcase capture, a map maker's display) needs
+     * to look at it straight on, and invisibility is then set or cleared by whoever staged it.
+     */
+    public static final String HOLD_VISIBLE_TAG = "wizards_and_beasts.hold_visible";
+
     public static final MapCodec<WatchedInvisibility> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.DOUBLE.optionalFieldOf("range", 24.0).forGetter(WatchedInvisibility::range)
     ).apply(instance, WatchedInvisibility::new));
@@ -32,7 +38,8 @@ public record WatchedInvisibility(double range) implements CreatureAbility {
 
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
-        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, CHECK_TICKS)) {
+        if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, CHECK_TICKS)
+                || entity.getTags().contains(HOLD_VISIBLE_TAG)) {
             return;
         }
         if (watched(entity, level)) {
