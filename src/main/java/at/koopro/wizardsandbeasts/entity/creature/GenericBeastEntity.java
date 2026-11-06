@@ -927,6 +927,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
      */
     @Override
     public void playAmbientSound() {
+        // Asleep, it neither calls nor plays its call clip: the ambient beat used to lift a sleeping
+        // Demiguise's head out of its curl to look over its shoulder (seen in the 2026-11-06 capture).
+        if (activity() == at.koopro.wizardsandbeasts.creature.profile.CreatureActivity.SLEEP) {
+            return;
+        }
         super.playAmbientSound();
         if (level() instanceof ServerLevel) {
             triggerFirstDeclared(CLIPS_AMBIENT);
