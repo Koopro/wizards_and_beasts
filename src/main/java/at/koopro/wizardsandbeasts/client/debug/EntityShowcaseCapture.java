@@ -87,7 +87,9 @@ import java.util.Set;
  * {@code CreatureActivity}) sets the synced activity byte on the server copy, exactly what the ecology brain does,
  * so the shot shows the clip the game really plays; {@code walk} drives the client copy's walk cycle (an AI-off mob
  * never moves); {@code vanish}/{@code appear} add and remove invisibility (the fade); {@code look} turns the creature's synced head away from its body (the life pass's head turn);
- * {@code @clip} fires a declared one-shot through {@code GenericBeastEntity.triggerDeclared}.
+ * {@code @clip} fires a declared one-shot through {@code GenericBeastEntity.triggerDeclared}, {@code @controller/clip}
+ * any triggerable clip of any GeckoLib creature; {@code pace}, {@code fly} and {@code glide} move the client copy so
+ * a creature that reads its own movement (the Phoenix) plays those loops.
  * {@code WB_ENTITY_SHOWCASE_STRIP} is {@code frames:interval} (default {@code 4:5}): how many shots per action and
  * how many ticks apart; {@code name*frames:interval} overrides it for one action. Files are {@code <stem>__<action>_f<n>.png}.
  */
@@ -170,7 +172,7 @@ public final class EntityShowcaseCapture {
     private record Shot(int entry, View view, String action, int frame, int interval) {
         String suffix() {
             return action == null ? view.name().toLowerCase(Locale.ROOT)
-                    : action.replace("@", "clip_") + "_f" + frame;
+                    : action.replace("@", "clip_").replace('/', '_') + "_f" + frame;
         }
     }
 
@@ -308,16 +310,40 @@ public final class EntityShowcaseCapture {
         captureThisFrame = true;
     }
 
-    /** Keeps an AI-off subject's walk cycle running on the client for a {@code walk} strip. */
+    /**
+     * Every tick, not only at the shot: keeps an AI-off subject on the ground (so its controller has blended out
+     * of any flight clip by the time it is photographed; the first Phoenix view caught it mid-flight) and keeps its
+     * walk cycle running for a {@code walk} strip.
+     */
     @SubscribeEvent
-    public static void onWalkTick(ClientTickEvent.Post event) {
+    public static void onSubjectTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (REQUEST == null || stage != Stage.RUNNING || mc.level == null || shot >= SHOTS.size()
-                || !"walk".equals(SHOTS.get(shot).action())) {
+        if (REQUEST == null || stage != Stage.RUNNING || mc.level == null || shot >= SHOTS.size() || subjectId < 0) {
             return;
         }
-        if (subjectId >= 0 && mc.level.getEntity(subjectId) instanceof LivingEntity living) {
+        Entity shown = mc.level.getEntity(subjectId);
+        String action = SHOTS.get(shot).action();
+        boolean airborne = SHOTS.get(shot).view() == View.AIR || "fly".equals(action) || "glide".equals(action);
+        if (shown == null) {
+            return;
+        }
+        shown.setOnGround(!airborne);
+        if ("walk".equals(action) && shown instanceof LivingEntity living) {
             living.walkAnimation.setSpeed(0.9F);
+        }
+        // A creature whose controller reads its own movement (the Phoenix) only walks, flies or glides when the
+        // client copy moves. Move the copy, never the server one: a few hundredths a tick, back and forth, so it
+        // stays in frame. `glide` also sinks, and goes back up every second.
+        if (action != null && (action.equals("pace") || airborne)) {
+            double baseY = STAGE_Y + (airborne ? 0.8 : 0.0);
+            double wiggle = (shown.tickCount % 2 == 0 ? 0.04 : -0.04);
+            double y = action.equals("glide") ? baseY + 0.6 - (shown.tickCount % 20) * 0.05 : baseY;
+            shown.setOldPosAndRot();
+            shown.setPos(0.5 + wiggle, y, 0.5 + (action.equals("glide") ? wiggle : 0.0));
+        } else if (action != null) {
+            // Any other action stands where the server put it: undo what a moving strip did to the client copy.
+            shown.setOldPosAndRot();
+            shown.setPos(0.5, STAGE_Y, 0.5);
         }
     }
 
@@ -393,6 +419,11 @@ public final class EntityShowcaseCapture {
             }
             if (action != null && current.frame() == 0 && subject instanceof GenericBeastEntity beast) {
                 act(beast, action);
+            } else if (action != null && current.frame() == 0 && action.startsWith("@") && action.contains("/")
+                    && subject instanceof software.bernie.geckolib.animatable.GeoEntity geo) {
+                // `@controller/clip`: any triggerable clip, for creatures with their own controllers (the Phoenix).
+                String[] parts = action.substring(1).split("/", 2);
+                geo.triggerAnim(parts[0], parts[1]);
             }
             if (subject instanceof Mob mob && view == View.HURT) {
                 mob.hurtServer(level, level.damageSources().generic(), 0.5F);
