@@ -14,7 +14,8 @@
   "animation": "wizards_and_beasts:geckolib/animations/entity/griffin.animation.json",
   "attackDamage": 7.0,
   "traits": [
-    "KNOCKBACK"
+    "KNOCKBACK",
+    "PERCHER"
   ],
   "abilities": [
     {
@@ -43,6 +44,8 @@
     "death",
     "stretch",
     "shake",
-    "graze"
+    "graze",
+    "takeoff",
+    "land"
   ]
 }

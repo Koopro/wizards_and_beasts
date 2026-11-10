@@ -14,7 +14,9 @@
   "texture": "wizards_and_beasts:textures/entity/thunderbird.png",
   "animation": "wizards_and_beasts:geckolib/animations/entity/thunderbird.animation.json",
   "attackDamage": 9.0,
-  "traits": [],
+  "traits": [
+    "PERCHER"
+  ],
   "abilities": [
     {
       "type": "thunderbird_storm",
@@ -47,6 +49,8 @@
     "death",
     "preen",
     "ruffle",
-    "stretch"
+    "stretch",
+    "takeoff",
+    "land"
   ]
 }

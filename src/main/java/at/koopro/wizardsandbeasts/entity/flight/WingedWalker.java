@@ -24,6 +24,31 @@ public interface WingedWalker {
         return true;
     }
 
+    /** Lowest cruising height over the terrain, in blocks. */
+    default int cruiseAltitude() {
+        return 6;
+    }
+
+    /** How far above {@link #cruiseAltitude()} a waypoint may sit. */
+    default int cruiseAltitudeSpan() {
+        return 7;
+    }
+
+    /** How far a single leg of a flight reaches, in blocks. */
+    default double flightReach() {
+        return 18.0;
+    }
+
+    /** Whether it meets every fight in the air, however near the target stands (the thunderbird and its storm). */
+    default boolean fightsFromTheAir() {
+        return false;
+    }
+
+    /** Whether it lands by choice on the highest ground it can find (griffin, thunderbird) rather than anywhere. */
+    default boolean perches() {
+        return false;
+    }
+
     /** Vanilla's {@code travelFlying} for a ridden flight; it is protected, so the creature calls it. */
     void flyRidden(Vec3 input, float speed);
 }

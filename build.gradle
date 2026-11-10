@@ -111,6 +111,10 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // -Pwb.gametest.only=flight_,creature_ai_ runs only the scenarios whose names contain one of these.
+            if (project.hasProperty('wb.gametest.only')) {
+                systemProperty 'wb.gametest.only', project.property('wb.gametest.only')
+            }
         }
 
         data {

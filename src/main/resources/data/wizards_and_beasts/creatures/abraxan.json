@@ -32,6 +32,8 @@
     "death",
     "stretch",
     "shake",
-    "graze"
+    "graze",
+    "takeoff",
+    "land"
   ]
 }

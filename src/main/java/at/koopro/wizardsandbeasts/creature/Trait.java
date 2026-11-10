@@ -37,5 +37,7 @@ public enum Trait {
     /** Slowly regenerates health over time. */
     REGEN,
     /** Detonates on death. */
-    EXPLODE_ON_DEATH
+    EXPLODE_ON_DEATH,
+    /** A large flier that lands by choice on the highest ground in reach (griffin, thunderbird). */
+    PERCHER
 }

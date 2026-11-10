@@ -61,6 +61,8 @@
     "hit",
     "death",
     "stretch",
-    "shake"
+    "shake",
+    "takeoff",
+    "land"
   ]
 }

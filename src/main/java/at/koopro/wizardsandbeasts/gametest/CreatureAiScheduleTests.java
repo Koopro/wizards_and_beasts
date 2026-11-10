@@ -33,11 +33,11 @@ final class CreatureAiScheduleTests {
                 "creature AI: a hunting hippogriff asks for a path at most every few ticks while chasing",
                 CreatureAiScheduleTests::pursuitPaced);
         tests.addAlone("creature_ai_flying_predator_chases_by_sight",
-                "creature AI: a dragon that can see a sheep flies straight at it and eats, with almost no path searches",
+                "creature AI: a dragon that can see a sheep goes straight for it and eats, with paced path checks",
                 CreatureAiScheduleTests::flyingChase);
         tests.addAlone("creature_ai_large_flier_still_wanders",
-                "creature AI: a dragon left alone takes off and flies somewhere, by straight collision-checked flight",
-                CreatureAiScheduleTests::largeFlierWanders);
+                "creature AI: a dragon left alone walks or flies somewhere, with no 3D flying path search",
+                CreatureAiScheduleTests::largeFlierWanders, 1300);
         tests.addAlone("creature_ai_camouflage_stays_continuous",
                 "creature AI: a moke is invisible on every tick, though its effect is refreshed only twice a second",
                 CreatureAiScheduleTests::camouflageContinuous);
@@ -133,6 +133,8 @@ final class CreatureAiScheduleTests {
 
     private static void flyingChase(GameTestHelper helper) {
         CreatureArena arena = CreatureArena.at(helper, Y + 6);
+        // A dragon walks the ground now (BR-1 §4.6): it needs some under it to chase across.
+        FlightFrameworkTests.Scene ground = new FlightFrameworkTests.Scene(helper).floor(-3, -4, 19, 6, Y + 5);
         PathfinderMob dragon = arena.creature("common_welsh_green", 1, 1);
         dragon.setNoAi(false);
         var sheep = arena.spawn(EntityType.SHEEP, 14, 1);
@@ -147,11 +149,13 @@ final class CreatureAiScheduleTests {
                 long paths = AiMetrics.get(AiMetrics.Metric.PATH_REQUEST) - before[0];
                 int took = tick[0];
                 arena.clear();
+                ground.clear();
                 // Path *requests* still count the pursuit's paced checks; what a direct chase saves is the search.
                 check(helper, paths <= took / 4 + 2, () -> paths + " path checks in " + took + " ticks");
                 helper.succeed();
             } else if (tick[0] > 400) {
                 arena.clear();
+                ground.clear();
                 helper.fail("the dragon did not catch a sheep it could see in 400 ticks (intent "
                         + EcologySensing.state(dragon).intent() + ")");
             }
@@ -160,21 +164,30 @@ final class CreatureAiScheduleTests {
 
     private static void largeFlierWanders(GameTestHelper helper) {
         CreatureArena arena = CreatureArena.at(helper, Y + 12);
+        // Room to stroll: on a strip barely wider than itself a dragon finds nowhere to walk to.
+        WizardTestSupport.forceChunks(helper, new net.minecraft.core.BlockPos(-14, Y + 11, -18),
+                new net.minecraft.core.BlockPos(30, Y + 11, 20));
+        FlightFrameworkTests.Scene ground = new FlightFrameworkTests.Scene(helper).floor(-12, -16, 28, 18, Y + 11);
         PathfinderMob dragon = arena.creature("hungarian_horntail", 4, 1);
         dragon.setNoAi(false);
         dragon.setNoGravity(false);
+        // Large fliers walk and take bounded flights now (BR-1 §4.6); neither wander plans a 3D flying path.
         check(helper, dragon.goalSelector.getAvailableGoals().stream()
-                        .anyMatch(g -> g.getGoal() instanceof at.koopro.wizardsandbeasts.entity.creature.ai.DirectFlightWanderGoal),
-                () -> "a dragon is not on the direct-flight wander");
+                        .anyMatch(g -> g.getGoal() instanceof at.koopro.wizardsandbeasts.entity.flight.WingedWalkerFlightGoal),
+                () -> "a dragon has no bounded-flight goal");
+        check(helper, !(dragon.getNavigation() instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation),
+                () -> "a dragon still plans its movement with the 3D flying path finder");
         net.minecraft.world.phys.Vec3 start = dragon.position();
         int[] tick = {0};
         helper.onEachTick(() -> {
             tick[0]++;
-            if (dragon.position().distanceTo(start) > 4.0) {
+            if (dragon.position().subtract(start).horizontalDistance() > 4.0) {
                 arena.clear();
+                ground.clear();
                 helper.succeed();
             } else if (tick[0] > 1200) {
                 arena.clear();
+                ground.clear();
                 helper.fail("a dragon left alone for a minute never wandered");
             }
         });

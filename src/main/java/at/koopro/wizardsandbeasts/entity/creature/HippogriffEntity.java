@@ -1,9 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
 import at.koopro.wizardsandbeasts.creature.wildlife.WildlifeRules;
-import at.koopro.wizardsandbeasts.entity.flight.FlightBeats;
 import at.koopro.wizardsandbeasts.entity.flight.RiddenFlight;
-import at.koopro.wizardsandbeasts.entity.flight.WingedWalker;
 import at.koopro.wizardsandbeasts.entity.flight.WingedWalkerFlightGoal;
 import at.koopro.wizardsandbeasts.entity.flight.WingedWalkerMoveControl;
 import at.koopro.wizardsandbeasts.event.bestiary.BestiaryDiscoveryHandler;
@@ -33,9 +31,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -81,7 +77,7 @@ import java.util.UUID;
  *       and saved variant, rolled when it first spawns.</li>
  * </ul>
  */
-public class HippogriffEntity extends GenericFlyingBeastEntity implements WingedWalker,
+public class HippogriffEntity extends GenericFlyingBeastEntity implements
         at.koopro.wizardsandbeasts.creature.variant.VariantHolder {
 
     public static final String ACTION_CONTROLLER = "hippogriff_action";
@@ -120,20 +116,10 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
     private final Map<UUID, Integer> warned = new HashMap<>();
     /** When each person last struck it. Server only. */
     private final Map<UUID, Integer> grudges = new HashMap<>();
-    private boolean flying;
     private int bowTicks;
-    private final FlightBeats beats = new FlightBeats();
 
     public HippogriffEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
-        this.moveControl = new WingedWalkerMoveControl<>(this);
-    }
-
-    @Override
-    protected PathNavigation createNavigation(Level level) {
-        GroundPathNavigation navigation = new GroundPathNavigation(this, level);
-        navigation.setCanFloat(true);
-        return navigation;
     }
 
     @Override
@@ -142,35 +128,23 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
         builder.define(DATA_COAT, (byte) 0);
     }
 
+    /** Walking, bounded flights and the aerial hunt come from the large-flier base; it only flies less often. */
     @Override
-    protected void addMovementGoals() {
-        goalSelector.addGoal(5, new WingedWalkerFlightGoal<>(this, 900));
-        goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.8));
+    protected int takeoffChance() {
+        return 900;
+    }
+
+    /** Its takeoff, landing and flap are its own clips on its own controller. */
+    @Override
+    protected void flightBeat(String clip) {
+        triggerAnim(ACTION_CONTROLLER, clip);
     }
 
     // ── state ─────────────────────────────────────────────────────────────────
 
     @Override
-    public boolean isFlying() {
-        return flying;
-    }
-
-    @Override
     public boolean canTakeFlight() {
         return !isBowing();
-    }
-
-    @Override
-    public void flyRidden(Vec3 input, float speed) {
-        travelFlying(input, speed);
-    }
-
-    @Override
-    public void setFlying(boolean flying) {
-        this.flying = flying;
-        if (!flying) {
-            setNoGravity(false);
-        }
     }
 
     public boolean isBowing() {
@@ -227,10 +201,6 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements Winged
         if (bowTicks > 0) {
             bowTicks--;
         }
-        if (isVehicle()) {
-            flying = false;
-        }
-        beats.update(this, clip -> triggerAnim(ACTION_CONTROLLER, clip));
         if (tickCount % 4 == 0 && !isVehicle()) {
             watchForRespect(level);
         }

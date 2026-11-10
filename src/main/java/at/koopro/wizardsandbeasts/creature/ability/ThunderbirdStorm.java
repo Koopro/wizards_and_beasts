@@ -16,7 +16,9 @@ import org.jspecify.annotations.NonNull;
 /**
  * Signature ability (Thunderbird): senses danger and answers with a storm. When the Thunderbird has a
  * hostile target, on a cooldown it whips up thunder/rain and calls a lightning bolt down on the target.
- * Canon: a Thunderbird can sense danger and create storms as it flies.
+ * Canon: a Thunderbird can sense danger and create storms <em>as it flies</em>. So a large flier makes its storm
+ * only on the wing; {@code GenericFlyingBeastEntity.fightsFromTheAir} sees to it that it takes off for the fight.
+ * (A creature that never stands on the ground, should one be given this ability, storms as before.)
  */
 public record ThunderbirdStorm(double range, int cooldownTicks, int stormDurationTicks) implements CreatureAbility {
 
@@ -36,6 +38,10 @@ public record ThunderbirdStorm(double range, int cooldownTicks, int stormDuratio
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
         if (!(entity.level() instanceof ServerLevel level) || entity.getCooldown(COOLDOWN_KEY) > 0) {
+            return;
+        }
+        if (entity instanceof at.koopro.wizardsandbeasts.entity.creature.GenericFlyingBeastEntity flier
+                && flier.walksTheGround() && entity.onGround()) {
             return;
         }
         LivingEntity target = entity.getTarget();

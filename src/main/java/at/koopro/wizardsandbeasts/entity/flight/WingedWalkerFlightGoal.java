@@ -20,15 +20,23 @@ import java.util.EnumSet;
  * and descends until it touches down. A flight never outlasts {@link #MAX_TICKS}, and a waypoint it makes no progress
  * toward for {@link #STUCK_TICKS} is abandoned for the landing — so it cannot hang in the air or wedge in a canopy.
  * Loaded chunks only; the heightmap decides every height, so it never aims inside terrain.
+ *
+ * <p>Two more rules since the generic fliers joined (BEAST_RENAISSANCE §4.6). A second instance ({@link #startled})
+ * takes off when something has just hurt it and it has nobody to fight: a winged horse leaves by air. And it chooses where to come down
+ * ({@link #landingScore}): never water, never a treetop, and a creature that {@link WingedWalker#perches() perches}
+ * takes the highest of the spots it looked at.
  */
 public final class WingedWalkerFlightGoal<T extends PathfinderMob & WingedWalker> extends Goal {
 
     private static final int MAX_TICKS = 700;
     private static final int STUCK_TICKS = 80;
     private static final double REACHED = 2.5;
+    /** Hurt this recently, with no one to fight back at, it leaves by air instead of waiting for the idle roll. */
+    static final int STARTLED_TICKS = 160;
+    private static final int LANDING_TRIES = 10;
 
     private final T creature;
-    /** One in this many ticks, on average, an idle creature takes off. */
+    /** One in this many ticks, on average, an idle creature takes off; zero for the startled-only goal. */
     private final int chance;
     private int waypointsLeft;
     private Vec3 target;
@@ -43,13 +51,26 @@ public final class WingedWalkerFlightGoal<T extends PathfinderMob & WingedWalker
         setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP));
     }
 
+    /**
+     * The same flight, started only by a blow it has nobody to answer: register it above whatever would have the
+     * creature run away on foot. The idle goal keeps its random roll and its low priority.
+     */
+    public static <T extends PathfinderMob & WingedWalker> WingedWalkerFlightGoal<T> startled(T creature) {
+        return new WingedWalkerFlightGoal<>(creature, 0);
+    }
+
     @Override
     public boolean canUse() {
         if (!ModuleManager.isEnabled(Module.CREATURES) || creature.isVehicle() || creature.getTarget() != null
                 || !creature.onGround() || creature.isInWater() || !creature.canTakeFlight()) {
             return false;
         }
-        if (creature.getRandom().nextInt(reducedTickDelay(chance)) != 0) {
+        if (chance == 0) {
+            if (!startled(creature.getLastHurtByMob() != null,
+                    creature.tickCount - creature.getLastHurtByMobTimestamp())) {
+                return false;
+            }
+        } else if (creature.getRandom().nextInt(reducedTickDelay(chance)) != 0) {
             return false;
         }
         BlockPos pos = creature.blockPosition();
@@ -121,14 +142,36 @@ public final class WingedWalkerFlightGoal<T extends PathfinderMob & WingedWalker
         creature.getLookControl().setLookAt(target.x, target.y, target.z);
     }
 
+    /** Whether a creature hurt {@code ticksSince} ticks ago by something is still startled enough to take off. */
+    static boolean startled(boolean hurtBySomeone, int ticksSince) {
+        return hurtBySomeone && ticksSince >= 0 && ticksSince < STARTLED_TICKS;
+    }
+
+    /**
+     * How good a column is to land on; below zero means not at all.
+     *
+     * @param surface         first free block over everything that blocks motion
+     * @param solidSurface    the same, ignoring leaves
+     * @param wet             the block it would stand on is a fluid
+     * @param perches         the creature prefers height
+     */
+    static int landingScore(int surface, int solidSurface, boolean wet, boolean perches) {
+        if (wet || surface != solidSurface) {
+            return -1;   // a lake, or a canopy
+        }
+        return perches ? surface + 64 : 0;
+    }
+
     /** The next waypoint, or the landing spot once the waypoints are spent. */
     private void next() {
         if (!(creature.level() instanceof ServerLevel level)) {
             return;
         }
         boolean land = waypointsLeft <= 0;
-        double reach = land ? 10.0 : 18.0;
-        for (int attempt = 0; attempt < 10; attempt++) {
+        double reach = land ? Math.max(10.0, creature.flightReach() * 0.55) : creature.flightReach();
+        Vec3 best = null;
+        int bestScore = -1;
+        for (int attempt = 0; attempt < LANDING_TRIES; attempt++) {
             double angle = creature.getRandom().nextDouble() * Math.PI * 2.0;
             double r = reach * (0.4 + 0.6 * creature.getRandom().nextDouble());
             int x = (int) Math.floor(creature.getX() + Math.cos(angle) * r);
@@ -138,24 +181,37 @@ public final class WingedWalkerFlightGoal<T extends PathfinderMob & WingedWalker
                 continue;
             }
             int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-            BlockPos ground = new BlockPos(x, surface - 1, z);
-            if (land && !level.getFluidState(ground).isEmpty()) {
-                continue;   // not into a lake
+            if (!land) {
+                double y = surface + creature.cruiseAltitude()
+                        + creature.getRandom().nextInt(Math.max(1, creature.cruiseAltitudeSpan()));
+                aim(new Vec3(x + 0.5, Math.min(y, level.getMaxY() - 4), z + 0.5), false);
+                return;
             }
-            double y = land ? surface : surface + 6 + creature.getRandom().nextInt(7);
-            y = Math.min(y, level.getMaxY() - 4);
-            target = new Vec3(x + 0.5, y, z + 0.5);
-            landing = land;
-            waypointsLeft--;
-            bestDistance = creature.position().distanceTo(target);
-            sinceProgress = 0;
+            int solid = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            boolean wet = !level.getFluidState(new BlockPos(x, surface - 1, z)).isEmpty();
+            int score = landingScore(surface, solid, wet, creature.perches());
+            if (score > bestScore) {
+                bestScore = score;
+                best = new Vec3(x + 0.5, Math.min(surface, level.getMaxY() - 4), z + 0.5);
+                if (!creature.perches()) {
+                    break;   // any dry, open ground will do
+                }
+            }
+        }
+        if (best != null) {
+            aim(best, true);
             return;
         }
         // Nothing sensible nearby: come straight down where it is.
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING, creature.getBlockX(), creature.getBlockZ());
-        target = new Vec3(creature.getX(), surface, creature.getZ());
-        landing = true;
-        bestDistance = creature.position().distanceTo(target);
+        aim(new Vec3(creature.getX(), surface, creature.getZ()), true);
+    }
+
+    private void aim(Vec3 at, boolean land) {
+        target = at;
+        landing = land;
+        waypointsLeft--;
+        bestDistance = creature.position().distanceTo(at);
         sinceProgress = 0;
     }
 }

@@ -87,6 +87,17 @@ public final class WizardTestSupport {
                             Holder<TestEnvironmentDefinition> environment,
                             int maxTicks) {
 
+        /**
+         * Run only the scenarios whose name contains this ({@code -Pwb.gametest.only=flight_} on the Gradle command
+         * line, passed through as a system property). The whole suite takes minutes; a scenario being written
+         * should not. Unset, everything runs.
+         */
+        private static final String ONLY = System.getProperty("wb.gametest.only", "");
+
+        private static boolean skipped(String name) {
+            return !ONLY.isEmpty() && java.util.Arrays.stream(ONLY.split(",")).noneMatch(name::contains);
+        }
+
         /** Registers one scenario against {@link #EMPTY_STRUCTURE}. */
         public void add(String name, String description, Consumer<GameTestHelper> scenario) {
             add(name, description, EMPTY_STRUCTURE, scenario);
@@ -103,6 +114,9 @@ public final class WizardTestSupport {
 
         /** {@link #addAlone(String, String, Consumer)} with its own timeout, for a scenario that measures over time. */
         public void addAlone(String name, String description, Consumer<GameTestHelper> scenario, int ticks) {
+            if (skipped(name)) {
+                return;
+            }
             Holder<TestEnvironmentDefinition> own = event.registerEnvironment(
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "alone_" + name),
                     new TestEnvironmentDefinition.AllOf());
@@ -114,6 +128,9 @@ public final class WizardTestSupport {
         /** Registers one scenario against a named structure. */
         public void add(String name, String description, Identifier structure,
                         Consumer<GameTestHelper> scenario) {
+            if (skipped(name)) {
+                return;
+            }
             event.registerTest(
                     Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, name),
                     new ScenarioTest(description, scenario,

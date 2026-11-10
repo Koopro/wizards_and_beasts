@@ -639,7 +639,7 @@ carried item, alpha-tint render type). Not verified in a client: D1 (needs a ded
 | D10 | S2 | Burrowed mooncalf is an invisible collidable that never flees | `MooncalfEntity.java:205,306` | fixed 71116ca5 |
 | D11 | S2 | Bowtruckle lock job never times out; dead home tree never re-checked; home restriction fights follow | `BowtruckleLockpickGoal:103`, `BowtruckleEntity:179-187` | fixed 3a9e62b5 |
 | D12 | S2 | Pixie: carried item not rendered; wand can be lost in lava or to despawn; creative players shield others | `CornishPixieEntity:237` | fixed 71116ca5; carried-item render deferred to BR-5 (look) |
-| D13 | S2 | Hippogriff `dive_bomb` dead; takeoff plays on step-up | `WingedWalkerFlightGoal:48`, `FlightBeats:27` | takeoff + pruning fixed 71116ca5; dive bomb → BR-1 flight framework |
+| D13 | S2 | Hippogriff `dive_bomb` dead; takeoff plays on step-up | `WingedWalkerFlightGoal:48`, `FlightBeats:27` | takeoff + pruning fixed 71116ca5; dive bomb reachable since the flight framework (2026-11-10): the aerial pursuit puts the flier above its target |
 | D14 | S2 | Streeler can drown (no float) | `StreelerEntity` goals | fixed 3224a3b6 |
 | D15 | S2 | Acromantula nest silk crumbles (keeper 12 < territory 20); webs ignore mobGriefing | `AcromantulaWebBlock`, `AcromantulaWebs.canSpin` | fixed 71116ca5 |
 | D16 | S2 | Augurey flies in dry weather | `AugureyEntity:80,124` | fixed 71116ca5 |
@@ -650,7 +650,7 @@ carried item, alpha-tint render type). Not verified in a client: D1 (needs a ded
 | D21 | S2 | Saved attribute bases block datapack retuning of existing creatures; `/reload` never rewires goals | `GenericBeastEntity` constructor | fixed ffa2d138 (reload re-applies definition stats; `/reload` still does not rewire goals → BR-1) |
 | D22 | S2 | Ecology home and fed state not saved | `ModAttachments.java:350` | not a defect then (transient by design); saved since BR-2 (home, needs, fed-until), `ecology_life_state_survives_a_save` |
 | D23 | S3 | Dragon breath ~1,300 particle sends per breath per viewer | `DragonBreathGoal.java:212-227` | fixed 71116ca5 |
-| D24 | S3 | Flying melee uses a full 3D path search for 3–4-wide boxes | `GenericBeastEntity.java:595` | open → BR-1 flight framework |
+| D24 | S3 | Flying melee uses a full 3D path search for 3–4-wide boxes | `GenericBeastEntity.java:595` | fixed 2026-11-10: large fliers use ground navigation and `WingedPursuitGoal` (steering, no 3D search) |
 | D25 | S3 | Dementor spawner per entity (200-block box query) and aura re-query per victim | `DementorEntity.java:349,432` | fixed ffa2d138 |
 | D26 | S3 | Mooncalf `herdCentre` query on every goal check | `MooncalfEntity.java:233,322` | fixed 71116ca5 |
 | D27 | S3 | Goals re-path every tick (phoenix defend, niffler flee, pixie pester, mooncalf burrow) | as listed in §2.2 | fixed 71116ca5, ffa2d138 |
@@ -1023,6 +1023,19 @@ creatures, NOISE and PLAYER stimuli from vanilla game events, persistence (D22).
 hysteresis (`EcologyCommitment`), navigation timeouts and failure backoff, individual personality, carrion for
 scavengers. Not done from §4.4: `RETURN_TO_HABITAT`, `PERCH` (flight framework), a LIGHT/BLOOD stimulus.
 Reference: `CREATURE_ECOLOGY.md` §2–§12.
+
+**Status 2026-11-10 — BR-1 §4.6 delivered** (uncommitted on `feat/creature-visuals`; plan and review in
+`tasks/todo_flight_framework_2026_11_10.md`, decisions in `docs/development/DESIGN_DECISIONS.md`). Every generic flier
+at least 1.5 blocks wide is a `WingedWalker` through `GenericFlyingBeastEntity.walksTheGround()`: the ten dragons,
+abraxan, aethonan, granian, griffin, thunderbird, snallygaster, and the Hippogriff, which now inherits instead of
+duplicating. What landed: ground navigation and gravity when not flying; bounded flights; a startled takeoff;
+`WingedPursuitGoal` (aerial passes, D24, D13); landing never on water or leaves; `Trait.PERCHER` (griffin,
+thunderbird); `FlightLoop` (walk on the ground, glide while sinking); `walk`, `glide`, `takeoff` and `land` clips on
+all 16 rigs (`tools/flight_clips.py`); the thunderbird's storm tied to flight. Deviations from §4.6: `flying` is
+not saved (a flier loaded mid-air comes down unhurt), and `DirectFlightWanderGoal` was deleted rather than
+generalised, because nothing wanders by hover any more. Still open from BR-1: §4.3 aquatic depth bands and
+`AmphibiousMoveControl`, a `PERCH` activity with its clip, `RETURN_TO_HABITAT`, the Thestral on the shared base.
+**Not yet seen in a client.**
 
 BR-0 and BR-1 need no owner decision. BR-3, BR-5, BR-6 and BR-7 each start with the questions in §8.
 

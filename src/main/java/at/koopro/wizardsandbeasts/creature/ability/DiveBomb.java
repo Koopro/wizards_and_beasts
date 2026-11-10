@@ -29,6 +29,7 @@ public record DiveBomb(double range, float diveDamage, int cooldownTicks) implem
 
     @Override
     public void registerGoals(@NonNull GenericBeastEntity entity, @NonNull GoalSelector goalSelector) {
-        goalSelector.addGoal(3, new DiveBombGoal(entity, this));
+        // Above the aerial pursuit (3), which brings a large flier over its target: the stoop takes over from it.
+        goalSelector.addGoal(2, new DiveBombGoal(entity, this));
     }
 }
