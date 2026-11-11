@@ -42,5 +42,14 @@
     "death",
     "stretch",
     "grunt"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.0,
+      "windupTicks": 16,
+      "recoveryTicks": 24
+    }
+  },
+  "_combat_note": "[canon PS ch.10] slow, stupid, a club swung wide: the raise is shown, the blow can be stepped out of."
 }

@@ -35,7 +35,7 @@ public sealed interface CreatureAbility permits
         Tint, Evasion, PackTactics, DamageReduction, SporeCloud, Frenzy, DiveBomb,
         JarveyJinx, SphinxRiddle, LureDisguise, Duplication, BlockDecay,
         Shed, Wary, WatchedInvisibility, Foresight, Groomable, MoonBound, LycanthropicBite, SlayerCurse,
-        BlastPropulsion, Infighting, HoardGuard, StarReading, ForestKeeper, MerfolkSong {
+        BlastPropulsion, Infighting, HoardGuard, StarReading, ForestKeeper, MerfolkSong, RangedShot {
 
     /** Dispatch codec keyed by the variant's {@link Type}, mirroring {@code SkillNodeEffect.CODEC}. */
     Codec<CreatureAbility> CODEC = Type.CODEC.dispatch(CreatureAbility::type, Type::codec);
@@ -132,7 +132,9 @@ public sealed interface CreatureAbility permits
         HOARD_GUARD("hoard_guard", HoardGuard.CODEC),
         STAR_READING("star_reading", StarReading.CODEC),
         FOREST_KEEPER("forest_keeper", ForestKeeper.CODEC),
-        MERFOLK_SONG("merfolk_song", MerfolkSong.CODEC);
+        MERFOLK_SONG("merfolk_song", MerfolkSong.CODEC),
+        // Combat identity (BR-4): physical missiles for creatures that do not cast.
+        RANGED_SHOT("ranged_shot", RangedShot.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 

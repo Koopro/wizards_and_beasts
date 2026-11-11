@@ -39,5 +39,14 @@
     "hit",
     "death",
     "peek"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "pack_hunter",
+      "approachSpeed": 1.35,
+      "windupTicks": 5,
+      "preferredRange": 5.0
+    }
+  },
+  "_combat_note": "[design] dog-headed pack hunter; canon gives only its hair as a wand core."
 }

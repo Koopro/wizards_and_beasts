@@ -42,5 +42,21 @@
     "death",
     "stretch",
     "grunt"
-  ]
+  ],
+  "behaviour": {
+    "reactions": [
+      {
+        "stimulus": "fire",
+        "response": "flee",
+        "radius": 12.0
+      }
+    ],
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.15,
+      "windupTicks": 12,
+      "recoveryTicks": 20
+    }
+  },
+  "_combat_note": "[canon FB] devours anything in its path, and fears fire: a flame lit or a torch set down within twelve blocks, or being burned, sends it running."
 }

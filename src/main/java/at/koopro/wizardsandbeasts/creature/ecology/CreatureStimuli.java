@@ -9,12 +9,18 @@ import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -139,6 +145,13 @@ public final class CreatureStimuli {
         if (own != Response.IGNORE) {
             hold(hurt, own, from, level.getGameTime(), Stimulus.DAMAGE);
         }
+        // Burned: to a creature that declares a reaction to fire, that outranks whatever it made of the blow.
+        if (event.getSource().is(DamageTypeTags.IS_FIRE)) {
+            Response burned = responseOf(hurt, profile, Stimulus.FIRE);
+            if (burned != Response.IGNORE) {
+                hold(hurt, burned, from, level.getGameTime(), Stimulus.FIRE);
+            }
+        }
         if (profile.has(SOCIAL)) {
             AiMetrics.inc(AiMetrics.Metric.STIMULUS_QUERY);
             for (PathfinderMob kin : level.getEntitiesOfClass(PathfinderMob.class,
@@ -183,8 +196,39 @@ public final class CreatureStimuli {
     /** Last tick a noise of each loudness was let through, per chunk, per level. */
     private static final Map<ServerLevel, Long2LongOpenHashMap> HEARD = new WeakHashMap<>();
 
+    /** A flame is noticed this far. */
+    public static final double FIRE_RADIUS = 16.0;
+
+    /**
+     * Fire appeared at {@code at}: lit with flint and steel, a torch or campfire set down, lava poured. Only a
+     * creature whose definition declares a reaction to fire answers (the Yeti, which canon says fears it); nothing
+     * is implied for the rest. Public for the test harness and for spells that make fire without a block event.
+     */
+    public static void fire(ServerLevel level, Vec3 at) {
+        raise(level, at, Stimulus.FIRE, FIRE_RADIUS, null);
+    }
+
+    /** A block a creature would call fire: open flame, a lit campfire, a torch, lava. */
+    static boolean isFlame(BlockState state) {
+        if (state.is(BlockTags.FIRE) || state.is(Blocks.LAVA)) {
+            return true;
+        }
+        if (state.is(BlockTags.CAMPFIRES)) {
+            return state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT);
+        }
+        return state.is(Blocks.TORCH) || state.is(Blocks.WALL_TORCH) || state.is(Blocks.SOUL_TORCH)
+                || state.is(Blocks.SOUL_WALL_TORCH);
+    }
+
     @SubscribeEvent
     public static void onGameEvent(VanillaGameEvent event) {
+        // Fire first: it is not a noise and is not rate-limited away. Flint and steel and block items both announce
+        // a placed block; one block-state read per placement is the whole cost.
+        if (event.getVanillaEvent().is(GameEvent.BLOCK_PLACE) && event.getLevel() instanceof ServerLevel placedIn
+                && ModuleManager.isEnabled(Module.CREATURES)
+                && isFlame(placedIn.getBlockState(BlockPos.containing(event.getEventPosition())))) {
+            fire(placedIn, event.getEventPosition());
+        }
         Loudness loudness = loudness(event.getVanillaEvent(), event.getCause());
         if (loudness == null || !(event.getLevel() instanceof ServerLevel level)) {
             return;
@@ -339,6 +383,11 @@ public final class CreatureStimuli {
         state.react(new Perception.Stimulus(response, source, kind), now, now + EcologySensing.STIMULUS_TICKS);
         if (response == Response.FLEE) {
             state.needs.alarm(EcologyProfileRegistry.of(mob.getType()));
+            // What runs is no longer fighting. Without this a creature driven off kept its target and came
+            // straight back the moment the fright ended.
+            if (mob.getTarget() != null) {
+                mob.setTarget(null);
+            }
         }
         state.wake();
     }

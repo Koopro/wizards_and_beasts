@@ -23,6 +23,19 @@
         "amplifier": 0,
         "duration_ticks": 80
       }
+    },
+    {
+      "type": "ranged_shot",
+      "kind": "spit",
+      "range": 7.0,
+      "damage": 2.0,
+      "effect": {
+        "effect": "minecraft:poison",
+        "amplifier": 0,
+        "duration_ticks": 100
+      },
+      "cooldown_ticks": 40,
+      "defensive": true
     }
   ],
   "clips": [
@@ -30,5 +43,6 @@
     "death",
     "squirm",
     "settle"
-  ]
+  ],
+  "_combat_note": "[canon FB] squirts venom from its sac when threatened, and never starts a fight: the spit only answers a blow."
 }

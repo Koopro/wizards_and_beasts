@@ -66,5 +66,13 @@
     {
       "type": "lycanthropic_bite"
     }
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.4,
+      "windupTicks": 5
+    }
+  },
+  "_combat_note": "[canon] relentless at the full moon: short windup, no pause, never retreats."
 }

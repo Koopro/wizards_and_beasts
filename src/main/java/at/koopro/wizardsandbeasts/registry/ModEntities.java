@@ -47,6 +47,15 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<BeastHexProjectile>> BEAST_HEX_PROJECTILE =
             EntityHelper.register(ENTITY_TYPES, "beast_hex_projectile", BeastHexProjectile::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
 
+    /** A giant's rock. One class with {@link #CREATURE_SPIT}; the type decides weight and look. */
+    public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.entity.creature.CreatureMissile>> THROWN_BOULDER =
+            EntityHelper.register(ENTITY_TYPES, "thrown_boulder",
+                    at.koopro.wizardsandbeasts.entity.creature.CreatureMissile::new, MobCategory.MISC, 0.7f, 0.7f, 8, 2);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.entity.creature.CreatureMissile>> CREATURE_SPIT =
+            EntityHelper.register(ENTITY_TYPES, "creature_spit",
+                    at.koopro.wizardsandbeasts.entity.creature.CreatureMissile::new, MobCategory.MISC, 0.25f, 0.25f, 8, 2);
+
     /**
      * Two spells locked together where their bolts met. Short-lived and purely visual, but spawned
      * by the server so every duellist sees the same lock — see {@link SpellClashEntity}.

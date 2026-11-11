@@ -36,6 +36,13 @@
       "ambient": "minecraft:entity.wolf.ambient",
       "hurt": "minecraft:entity.wolf.hurt",
       "death": "minecraft:entity.wolf.death"
+    },
+    "combat": {
+      "style": "harrier",
+      "approachSpeed": 1.3,
+      "preferredRange": 4.0,
+      "retreatAtHealth": 0.4
     }
-  }
+  },
+  "_combat_note": "[canon FB] ferocious to Muggles, yet a terrier: nips and backs off [design]."
 }

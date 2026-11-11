@@ -79,7 +79,7 @@ Nine bespoke creatures (Niffler, Bowtruckle, Phoenix, Dementor, Acromantula, Bas
    - 90 creatures have no voice at all, including every dragon, the unicorn, the thestral, the mooncalf, the occamy and the centaur.
 7. **Combat is one vanilla `MeleeAttackGoal`.**
    - HOSTILE targets only players.
-   - `CombatProfile` style, windup, recovery, range and retreat are parsed but unused.
+   - `CombatProfile` style, windup, recovery, range and retreat are parsed but unused. **Fixed 2026-11-11 (BR-4):** a declared profile is fought by `CreatureCombatGoal`; 20 species declare one. Creatures without one keep vanilla melee.
    - The most common "identity" ability is a Speed+Strength potion (`enrage`, 33 species).
 8. **Lore errors in data:** 33 species carry abilities or looks that contradict canon (§3), for example:
    - Centaur hexes instead of arrows.

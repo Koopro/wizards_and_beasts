@@ -31,6 +31,9 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), SpellProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.BEAM.get(), BeamEntityRenderer::new);
         event.registerEntityRenderer(ModEntities.BEAST_HEX_PROJECTILE.get(), ThrownItemRenderer::new);
+        // A rock the size of a giant's fist, and a gob small enough to miss.
+        event.registerEntityRenderer(ModEntities.THROWN_BOULDER.get(), context -> new ThrownItemRenderer<>(context, 2.6f, false));
+        event.registerEntityRenderer(ModEntities.CREATURE_SPIT.get(), context -> new ThrownItemRenderer<>(context, 0.6f, false));
         event.registerEntityRenderer(ModEntities.PATRONUS.get(), PatronusRenderer::new);
         event.registerEntityRenderer(ModEntities.PROTEGO_SHIELD.get(), ProtegoShieldRenderer::new);
         // Movie-style spell clash: jagged bolts drawn with the beam system's Lightning shape.

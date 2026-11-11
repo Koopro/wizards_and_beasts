@@ -19,11 +19,13 @@
   ],
   "abilities": [
     {
-      "type": "ranged_hex",
-      "range": 14.0,
-      "damage": 4.0,
+      "type": "ranged_shot",
+      "kind": "arrow",
+      "range": 16.0,
+      "min_range": 3.0,
+      "damage": 5.0,
       "cooldown_ticks": 50,
-      "particle": "crit"
+      "windup_ticks": 10
     },
     {
       "type": "star_reading",
@@ -44,5 +46,13 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "skirmisher",
+      "approachSpeed": 1.25,
+      "preferredRange": 10.0
+    }
+  },
+  "_combat_note": "[canon OotP ch.33] bows and arrows; keeps its distance and kicks only when closed with [design]."
 }

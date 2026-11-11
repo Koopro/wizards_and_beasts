@@ -29,8 +29,10 @@
       "cleanse_self": false
     },
     {
-      "type": "ranged_hex",
-      "range": 10.0,
+      "type": "ranged_shot",
+      "kind": "arrow",
+      "range": 12.0,
+      "min_range": 2.0,
       "damage": 3.0,
       "effect": {
         "effect": "minecraft:poison",
@@ -38,7 +40,7 @@
         "duration_ticks": 100
       },
       "cooldown_ticks": 70,
-      "particle": "dread"
+      "windup_ticks": 8
     }
   ],
   "clips": [
@@ -47,5 +49,14 @@
     "hit",
     "death",
     "peek"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "skirmisher",
+      "approachSpeed": 1.2,
+      "preferredRange": 8.0,
+      "retreatAtHealth": 0.4
+    }
+  },
+  "_combat_note": "[official extended: Ilvermorny] hunts with poisoned arrows; weak hand to hand, so it keeps away."
 }

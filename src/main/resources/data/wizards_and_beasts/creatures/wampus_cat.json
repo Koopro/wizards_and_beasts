@@ -54,5 +54,15 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "harrier",
+      "approachSpeed": 1.5,
+      "windupTicks": 6,
+      "recoveryTicks": 10,
+      "preferredRange": 6.0
+    }
+  },
+  "_combat_note": "[canon FB 2017] fast enough to outrun arrows: bites and is gone [design reading]."
 }

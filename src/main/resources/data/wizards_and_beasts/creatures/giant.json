@@ -27,11 +27,13 @@
       "duration_ticks": 300
     },
     {
-      "type": "ranged_hex",
-      "range": 12.0,
-      "damage": 5.0,
-      "cooldown_ticks": 80,
-      "particle": "crit"
+      "type": "ranged_shot",
+      "kind": "boulder",
+      "range": 18.0,
+      "min_range": 5.0,
+      "damage": 8.0,
+      "cooldown_ticks": 110,
+      "windup_ticks": 14
     },
     {
       "type": "damage_reduction",
@@ -49,5 +51,14 @@
     "death",
     "stretch",
     "grunt"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.0,
+      "windupTicks": 18,
+      "recoveryTicks": 20
+    }
+  },
+  "_combat_note": "[canon DH] fists and stamping. The thrown boulder is [design]: no book has a giant throw anything; it replaces a hex bolt, which a giant cannot cast."
 }

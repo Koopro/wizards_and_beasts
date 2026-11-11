@@ -47,5 +47,14 @@
     "death",
     "groom",
     "skitter"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "pack_hunter",
+      "approachSpeed": 1.4,
+      "windupTicks": 4,
+      "preferredRange": 5.0
+    }
+  },
+  "_combat_note": "[canon FB] hunts humans; the clan as a pack is [design from the MacBoon story]."
 }

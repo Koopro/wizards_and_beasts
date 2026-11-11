@@ -44,5 +44,22 @@
     "hit",
     "death",
     "peek"
-  ]
+  ],
+  "behaviour": {
+    "reactions": [
+      {
+        "stimulus": "spell",
+        "response": "flee",
+        "radius": 10.0
+      }
+    ],
+    "combat": {
+      "style": "ambusher",
+      "approachSpeed": 1.3,
+      "windupTicks": 8,
+      "recoveryTicks": 16,
+      "retreatAtHealth": 0.5
+    }
+  },
+  "_combat_note": "[canon FB, PoA ch.8] bludgeons the lone; easily driven off, so it runs when it is losing, and any spell cast within ten blocks sends it running (canon: repelled by charms and hexes)."
 }

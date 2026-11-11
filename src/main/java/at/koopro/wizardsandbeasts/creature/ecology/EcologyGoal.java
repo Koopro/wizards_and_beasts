@@ -1,5 +1,8 @@
 package at.koopro.wizardsandbeasts.creature.ecology;
 
+import at.koopro.wizardsandbeasts.creature.profile.CombatProfile;
+import at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity;
+import at.koopro.wizardsandbeasts.entity.creature.ai.CombatRhythm;
 import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.creature.profile.CreatureActivity;
 import at.koopro.wizardsandbeasts.creature.profile.HasActivity;
@@ -125,7 +128,7 @@ public final class EcologyGoal extends Goal {
         }
         maybeThink();
         EcologyIntent intent = state().intent();
-        return intent != EcologyIntent.NONE && !skipped.contains(intent);
+        return intent != EcologyIntent.NONE && !skipped.contains(intent) && !yieldsToItsFight(intent);
     }
 
     @Override
@@ -135,7 +138,27 @@ public final class EcologyGoal extends Goal {
         }
         maybeThink();
         EcologyIntent intent = state().intent();
-        return intent != EcologyIntent.NONE && !skipped.contains(intent);
+        return intent != EcologyIntent.NONE && !skipped.contains(intent) && !yieldsToItsFight(intent);
+    }
+
+    /**
+     * A creature that has a living target and can bite fights it through its melee goal, which sits below this
+     * goal. Anything this goal did meanwhile would hold the body and the fight would never start (seen in a
+     * client 2026-11-11: a troll stood warning the camera beside its target, and a centaur stayed to rejoin its
+     * herd instead of taking its distance). So while it has a target this goal stands aside for everything short
+     * of an emergency: the creature still runs from fire, from a predator and from a wound, and it goes back to
+     * its daily life when the fight is over. A hunt is not affected: prey is not a target, the ecology bites it.
+     */
+    private boolean yieldsToItsFight(EcologyIntent intent) {
+        if (intent.band() == EcologyIntent.Band.EMERGENCY || !(mob instanceof GenericBeastEntity) || !canBite()) {
+            return false;
+        }
+        LivingEntity target = mob.getTarget();
+        return target != null && target.isAlive();
+    }
+
+    private boolean fightsByProfile() {
+        return mob instanceof GenericBeastEntity beast && !beast.combatProfile().isDefault();
     }
 
     private EcologyState state() {
@@ -176,6 +199,7 @@ public final class EcologyGoal extends Goal {
     public void stop() {
         show(CreatureActivity.IDLE);
         mob.getNavigation().stop();
+        blowLandsAt = 0;
         pursuit.reset();
         directChase = false;
         lastChaseDistance = Double.MAX_VALUE;
@@ -300,7 +324,15 @@ public final class EcologyGoal extends Goal {
             AiMetrics.inc(AiMetrics.Metric.BACKOFF_SKIP);
             return;
         }
-        Vec3 away = DefaultRandomPos.getPosAway(mob, 16, 7, source);
+        // The farthest of three tries. One try is any spot further off than it stands now, which may be a single
+        // step: a frightened creature zigzagged and was six blocks away after five seconds (traced 2026-11-11).
+        Vec3 away = null;
+        for (int attempt = 0; attempt < 3; attempt++) {
+            Vec3 spot = DefaultRandomPos.getPosAway(mob, 16, 7, source);
+            if (spot != null && (away == null || spot.distanceToSqr(source) > away.distanceToSqr(source))) {
+                away = spot;
+            }
+        }
         if (away != null) {
             fleeSearch.succeed();
             mob.getNavigation().moveTo(away.x, away.y, away.z, speed);
@@ -640,6 +672,11 @@ public final class EcologyGoal extends Goal {
             warn(level, now, state, p);
             return;
         }
+        if (fightsByProfile() && canBite()) {
+            // Its own way of fighting takes it from here: see yieldsToItsFight.
+            mob.setTarget(target);
+            return;
+        }
         mob.getLookControl().setLookAt(target, 30.0f, 30.0f);
         double reach = mob.getBbWidth() * 2.0 + target.getBbWidth();
         if (mob.distanceTo(target) > reach) {
@@ -647,14 +684,11 @@ public final class EcologyGoal extends Goal {
             return;
         }
         mob.getNavigation().stop();
-        if (now >= state.nextActionTick) {
+        if (canBite()) {
+            bite(level, now, state, target);
+        } else if (now >= state.nextActionTick) {
             state.nextActionTick = now + ATTACK_INTERVAL;
-            if (canBite()) {
-                mob.swing(InteractionHand.MAIN_HAND);
-                mob.doHurtTarget(level, target);
-            } else {
-                warn(level, now, state, p);
-            }
+            warn(level, now, state, p);
         }
     }
 
@@ -721,10 +755,8 @@ public final class EcologyGoal extends Goal {
             return;
         }
         navTarget = null;
-        if (now >= state.nextActionTick && canBite()) {
-            state.nextActionTick = now + ATTACK_INTERVAL;
-            mob.swing(InteractionHand.MAIN_HAND);
-            mob.doHurtTarget(level, prey); // a kill feeds it: CreatureStimuli.onDeath
+        if (canBite()) {
+            bite(level, now, state, prey); // a kill feeds it: CreatureStimuli.onDeath
         }
     }
 
@@ -779,6 +811,40 @@ public final class EcologyGoal extends Goal {
         state.decision = EcologyBrain.Decision.NONE;
         state.heldSince = now;
         state.preyId = null;
+    }
+
+    /** Game time at which a blow that has been shown lands; 0 while none is in the air. */
+    private long blowLandsAt;
+
+    /**
+     * One blow at an intruder or at prey, in the creature's own rhythm. A creature with a combat profile shows the
+     * blow first and strikes when its windup ends, missing a target that has got clear by then, exactly as it does
+     * in an ordinary fight ({@code CreatureCombatGoal}); its recovery is added to the pause that follows. One with
+     * no profile, or no windup, bites at once as before.
+     */
+    private void bite(ServerLevel level, long now, EcologyState state, LivingEntity target) {
+        CombatProfile combat = mob instanceof GenericBeastEntity beast ? beast.combatProfile() : CombatProfile.DEFAULT;
+        if (blowLandsAt == 0) {
+            if (now < state.nextActionTick) {
+                return;
+            }
+            if (combat.windupTicks() > 0 && mob instanceof GenericBeastEntity beast) {
+                blowLandsAt = now + combat.windupTicks();
+                beast.telegraphBlow();
+                return;
+            }
+        } else if (now < blowLandsAt) {
+            return;
+        }
+        blowLandsAt = 0;
+        state.nextActionTick = now + ATTACK_INTERVAL + combat.recoveryTicks();
+        mob.swing(InteractionHand.MAIN_HAND);
+        double reach = mob.getBbWidth() * 2.0 + target.getBbWidth() + CombatRhythm.lunge(combat.style());
+        if (mob.distanceTo(target) <= reach) {
+            mob.doHurtTarget(level, target);
+        } else if (mob instanceof GenericBeastEntity beast) {
+            beast.swingAtNothing();
+        }
     }
 
     private boolean canBite() {

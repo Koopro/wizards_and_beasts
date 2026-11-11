@@ -42,5 +42,14 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "harrier",
+      "approachSpeed": 1.4,
+      "preferredRange": 4.0,
+      "retreatAtHealth": 0.4
+    }
+  },
+  "_combat_note": "[canon FB] aggressive to the untrustworthy, but a cat: scratches and springs away [design]."
 }

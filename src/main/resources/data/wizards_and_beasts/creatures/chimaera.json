@@ -44,5 +44,14 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.2,
+      "windupTicks": 10,
+      "recoveryTicks": 16
+    }
+  },
+  "_combat_note": "[canon FB] vicious and bloodthirsty; a heavy shown blow [design timing]."
 }

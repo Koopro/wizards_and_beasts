@@ -610,8 +610,20 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             // Approach speed comes from the combat profile, whose default is exactly the old figure,
             // so a creature that declares no profile closes at precisely the speed it always did.
             // CHARGE still wins, because it is a trait thirteen creatures already rely on.
-            double approach = charge ? 1.45 : combatProfile().approachSpeed();
-            goalSelector.addGoal(4, new MeleeAttackGoal(this, approach, true));
+            CombatProfile combat = combatProfile();
+            if (combat.isDefault()) {
+                double approach = charge ? 1.45 : combat.approachSpeed();
+                MeleeAttackGoal melee = new MeleeAttackGoal(this, approach, true);
+                // The body only, like CreatureCombatGoal. Vanilla's melee also claims the gaze, and the ranged and
+                // breath goals above it hold the gaze whenever their target is in range, which locked melee out
+                // for as long as the creature could shoot: a merperson or snallygaster never closed.
+                melee.setFlags(java.util.EnumSet.of(net.minecraft.world.entity.ai.goal.Goal.Flag.MOVE));
+                goalSelector.addGoal(4, melee);
+            } else {
+                // A declared profile is fought as declared: windup, recovery, range and retreat (BR-4).
+                goalSelector.addGoal(4, new at.koopro.wizardsandbeasts.entity.creature.ai.CreatureCombatGoal(
+                        this, combat, charge ? 1.45 : 0.0));
+            }
             HurtByTargetGoal retaliate = new HurtByTargetGoal(this);
             if (has(Trait.PACK)) {
                 retaliate.setAlertOthers();
@@ -653,8 +665,11 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     @Override
     public boolean doHurtTarget(ServerLevel level, Entity target) {
         boolean hit = super.doHurtTarget(level, target);
+        boolean shown = blowAlreadyShown();
         if (hit && target instanceof LivingEntity victim) {
-            triggerFirstDeclared(CLIPS_ATTACK);
+            if (!shown) {
+                triggerFirstDeclared(CLIPS_ATTACK);
+            }
             applyHitTraits(victim);
             if (ModuleManager.isEnabled(Module.CREATURES)) {
                 for (CreatureAbility ability : abilities()) {
@@ -899,6 +914,37 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             triggerAnim(BEAST_ACTION_CONTROLLER, clip);
         }
     }
+
+    /**
+     * The start of a windup: the creature shows the blow that is coming. Its attack clip starts now, not when the
+     * blow lands: every rig's attack is a raise followed by a swing, and each profile's windup is about as long as
+     * its raise, so the swing comes down as the damage is dealt. (Seen in a client 2026-11-11: started on the hit,
+     * a troll's club went up after its target had already flashed red.) It also gives voice, lower than its call.
+     */
+    public void telegraphBlow() {
+        triggerFirstDeclared(CLIPS_ATTACK);
+        blowShownAt = tickCount;
+        net.minecraft.sounds.SoundEvent voice = getAmbientSound();
+        if (voice != null && !isSilent()) {
+            playSound(voice, getSoundVolume(), getVoicePitch() * 0.75f);
+        }
+    }
+
+    /** A blow that met nothing. The clip plays unless a windup already started it, so a dodge is seen as a dodge. */
+    public void swingAtNothing() {
+        if (!blowAlreadyShown()) {
+            triggerFirstDeclared(CLIPS_ATTACK);
+        }
+    }
+
+    /** True once for a blow whose clip {@link #telegraphBlow} started within the longest windup a profile allows. */
+    private boolean blowAlreadyShown() {
+        boolean shown = blowShownAt >= 0 && tickCount - blowShownAt <= 105;
+        blowShownAt = -1;
+        return shown;
+    }
+
+    private int blowShownAt = -1;
 
     /**
      * Fire the first clip in {@code preference} that this creature declares, or nothing.

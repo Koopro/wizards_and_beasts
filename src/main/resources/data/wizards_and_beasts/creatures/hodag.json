@@ -39,5 +39,15 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "ambusher",
+      "approachSpeed": 1.4,
+      "windupTicks": 5,
+      "recoveryTicks": 20,
+      "retreatAtHealth": 0.3
+    }
+  },
+  "_combat_note": "[canon FB 2017] a night raider of Mooncalf herds; hostility to people and the ambush are [design]."
 }

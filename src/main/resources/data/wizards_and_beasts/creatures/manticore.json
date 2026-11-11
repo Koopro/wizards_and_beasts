@@ -57,5 +57,15 @@
     "stretch",
     "shake",
     "graze"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "harrier",
+      "approachSpeed": 1.35,
+      "windupTicks": 8,
+      "recoveryTicks": 12,
+      "preferredRange": 5.0
+    }
+  },
+  "_combat_note": "[canon FB] the sting kills; strikes and withdraws out of reach [design]."
 }

@@ -4792,6 +4792,8 @@
   "block.wizards_and_beasts.tent_grand": "Grand Tent",
   "entity.wizards_and_beasts.beam": "Spell Beam",
   "entity.wizards_and_beasts.beast_hex_projectile": "Beast Hex",
+  "entity.wizards_and_beasts.thrown_boulder": "Thrown Boulder",
+  "entity.wizards_and_beasts.creature_spit": "Venom Spit",
   "entity.wizards_and_beasts.broom": "Broom",
   "entity.wizards_and_beasts.patronus": "Patronus",
   "entity.wizards_and_beasts.protego_shield": "Shield Charm",

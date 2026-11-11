@@ -47,5 +47,14 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.3,
+      "windupTicks": 12,
+      "recoveryTicks": 30
+    }
+  },
+  "_combat_note": "[canon FB] aggressive, two long horns: a charge with a shown lowering of the head [design timing]."
 }

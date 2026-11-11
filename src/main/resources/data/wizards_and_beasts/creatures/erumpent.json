@@ -43,5 +43,14 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "brute",
+      "approachSpeed": 1.2,
+      "windupTicks": 14,
+      "recoveryTicks": 34
+    }
+  },
+  "_combat_note": "[canon FB] charges only when sorely provoked; the horn's fluid is the explosive_horn ability."
 }

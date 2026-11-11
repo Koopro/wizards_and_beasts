@@ -56,5 +56,15 @@
     "graze",
     "sniff",
     "shake"
-  ]
+  ],
+  "behaviour": {
+    "combat": {
+      "style": "ambusher",
+      "approachSpeed": 1.5,
+      "windupTicks": 8,
+      "recoveryTicks": 14,
+      "preferredRange": 6.0
+    }
+  },
+  "_combat_note": "[canon FB] moves silently despite its size: it waits, then commits."
 }
