@@ -160,7 +160,7 @@ public final class EntityShowcaseCapture {
 
         /** The file name's stem: the id, and who the person is when the line says. */
         String stem() {
-            String stem = id.getPath().replace('/', '_');
+            String stem = id.getPath().replace('/', '_') + (props.containsKey("age") ? "_age" + props.get("age") : "");
             if (props.containsKey("role")) {
                 stem += "_" + props.get("role") + "_" + props.getOrDefault("person", "0");
             }
@@ -324,8 +324,8 @@ public final class EntityShowcaseCapture {
         Entity shown = mc.level.getEntity(subjectId);
         String action = SHOTS.get(shot).action();
         boolean airborne = SHOTS.get(shot).view() == View.AIR || "fly".equals(action) || "glide".equals(action);
-        if (shown == null) {
-            return;
+        if (shown == null || "fight".equals(action) || "struck".equals(action)) {
+            return;   // nothing, or a creature moving by its own goals: leave the client copy alone
         }
         shown.setOnGround(!airborne);
         if ("walk".equals(action) && shown instanceof LivingEntity living) {
@@ -445,7 +445,7 @@ public final class EntityShowcaseCapture {
                 default -> 35.0;
             };
             double distance = view == View.FAR ? 20.0 : size * 0.95 + 1.2;
-            double baseY = subject != null ? subject.getY() : STAGE_Y;
+            double baseY = subject != null && !entry.props().containsKey("fight") ? subject.getY() : STAGE_Y;
             double lookY = baseY + height * 0.5;
             double camY = lookY + (view == View.FAR ? 2.0 : height * 0.25 + 0.2);
             double rad = Math.toRadians(angle);
@@ -461,7 +461,8 @@ public final class EntityShowcaseCapture {
         });
         if (action != null) {
             // The first frame waits for the controller to blend in (and lids or a sit to settle).
-            boolean quick = action.startsWith("@") || action.equals("vanish") || action.equals("appear");
+            boolean quick = action.startsWith("@") || action.equals("vanish") || action.equals("appear")
+                    || action.equals("fight") || action.equals("struck");
             wait = current.frame() == 0 ? (quick ? 2 : 30) : current.interval();
             return;
         }
@@ -486,6 +487,18 @@ public final class EntityShowcaseCapture {
             beast.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 400, 0, false, false, false));
         } else if (action.equals("appear")) {
             beast.removeEffect(MobEffects.INVISIBILITY);
+        } else if (action.equals("fight") || action.equals("struck")) {
+            // AI on, against the foe the entry line staged (`fight=<entity> gap=<blocks>`): the strip that
+            // follows is the creature fighting by its own goals, not a posed clip.
+            if (beast.level() instanceof ServerLevel level && foe(level) instanceof net.minecraft.world.entity.LivingEntity foe) {
+                beast.setNoAi(false);
+                if (action.equals("fight")) {
+                    beast.setTarget(foe);
+                } else {
+                    beast.invulnerableTime = 0;
+                    beast.hurtServer(level, level.damageSources().mobAttack(foe), 1.0F);
+                }
+            }
         } else if (action.equals("look")) {
             beast.setYHeadRot(beast.getYRot() + 50.0F);
             beast.setXRot(-15.0F);
@@ -508,6 +521,14 @@ public final class EntityShowcaseCapture {
         // Anything the last creature left behind: offspring, a summoned double, a mob that
         // shrugged off its death shot. Only the yardstick villager stays.
         level.getEntitiesOfClass(Mob.class, area, e -> !e.getTags().contains(TAG + "_ref")).forEach(Entity::discard);
+        // A subject that fought with its AI on may have walked anywhere; find it by tag, not by where it stood.
+        List<Entity> strays = new ArrayList<>();
+        level.getAllEntities().forEach(e -> {
+            if (e.getTags().contains(TAG) && !e.getTags().contains(TAG + "_ref")) {
+                strays.add(e);
+            }
+        });
+        strays.forEach(Entity::discard);
         // Explosive deaths (Erumpent, Blast-Ended Skrewt) crater the stage; lay it again.
         layFloor(level);
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(entry.id());
@@ -554,6 +575,26 @@ public final class EntityShowcaseCapture {
         entity.snapTo(0.5, STAGE_Y, 0.5, 0.0F, 0.0F);
         entity.setYHeadRot(0.0F);
         entity.setYBodyRot(0.0F);
+        String fight = entry.props().get("fight");
+        if (fight != null) {
+            // The foe stands at the centre, where the camera looks; the subject starts `gap` blocks west of it
+            // and faces it. The foe never moves or fights back, so what is seen is the subject's own doing.
+            float gap = Float.parseFloat(entry.props().getOrDefault("gap", "5"));
+            entity.snapTo(0.5 - gap, STAGE_Y, 0.5, -90.0F, 0.0F);
+            entity.setYHeadRot(-90.0F);
+            entity.setYBodyRot(-90.0F);
+            Entity foe = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(fight)).create(level, EntitySpawnReason.COMMAND);
+            if (foe instanceof Mob mob) {
+                mob.setNoAi(true);
+                mob.setSilent(true);
+                mob.setPersistenceRequired();
+                mob.addTag(TAG);
+                mob.addTag(TAG + "_crowd");
+                mob.addTag(TAG + "_foe");
+                mob.snapTo(0.5, STAGE_Y, 0.5, 90.0F, 0.0F);
+                level.addFreshEntity(mob);
+            }
+        }
         level.addFreshEntity(entity);
         subjectId = entity.getId();
     }
@@ -562,6 +603,12 @@ public final class EntityShowcaseCapture {
         AABB area = new AABB(-12, STAGE_Y - 4, -12, 12, STAGE_Y + 20, 12);
         return level.getEntitiesOfClass(Entity.class, area, e -> e.getTags().contains(TAG)
                 && !e.getTags().contains(TAG + "_ref") && !e.getTags().contains(TAG + "_crowd")).stream().findFirst().orElse(null);
+    }
+
+    private static Entity foe(ServerLevel level) {
+        AABB area = new AABB(-12, STAGE_Y - 4, -12, 12, STAGE_Y + 20, 12);
+        return level.getEntitiesOfClass(Entity.class, area, e -> e.getTags().contains(TAG + "_foe"))
+                .stream().findFirst().orElse(null);
     }
 
     /** Who a staged settlement person is: the role, and the name a post would give them, which picks their skin. */
