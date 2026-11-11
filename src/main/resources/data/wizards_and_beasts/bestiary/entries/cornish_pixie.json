@@ -21,8 +21,8 @@
   ],
   "encounterTrigger": "PROXIMITY",
   "entityType": "wizards_and_beasts:cornish_pixie",
-  "iconTexture": "wizards_and_beasts:textures/gui/bestiary/entry_placeholder.png",
-  "silhouetteTexture": "wizards_and_beasts:textures/gui/bestiary/entry_placeholder.png",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/cornish_pixie.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/cornish_pixie.png",
   "sortOrder": 33,
   "profile": {
     "classification": "beast",
