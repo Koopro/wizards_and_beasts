@@ -41,13 +41,18 @@
   "clips": [
     "attack",
     "call",
+    "stretch",
     "hit",
     "death",
-    "graze",
-    "sniff",
     "shake"
   ],
   "behaviour": {
+    "idle": {
+      "actions": [
+        "stretch",
+        "shake"
+      ]
+    },
     "combat": {
       "style": "skirmisher",
       "approachSpeed": 1.25,
