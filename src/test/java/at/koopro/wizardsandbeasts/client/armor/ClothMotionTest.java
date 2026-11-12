@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.armor;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +22,28 @@ class ClothMotionTest {
         assertTrue(forward > 0, "a leg swung forward must carry its half forward");
         assertEquals(SWING * ClothMotion.LEG_FOLLOW, forward, EPS);
         assertEquals(-SWING * ClothMotion.LEG_FOLLOW, ClothMotion.lowerHalf(SWING, 0f), EPS);
+    }
+
+    @Test
+    void standingLeavesTheHalvesWhereTheyAreDrawn() {
+        for (int side : new int[] {-1, 1}) {
+            Vector3f offset = ClothMotion.lowerHalfOffset(side, 0f, 0f, 0f, 0f, 0f, 0f, side * 1.9f, 12f, 0f);
+            assertEquals(0f, offset.length(), EPS);
+        }
+    }
+
+    @Test
+    void inACrouchTheHalvesStayOnTheLegs() {
+        // Vanilla's crouch: body leaned 0.5 rad and dropped 3.2, legs moved back 4.
+        float lean = 0.5f;
+        Vector3f offset = ClothMotion.lowerHalfOffset(-1, 0f, 3.2f, 0f, lean, 0f, 0f, -1.9f, 12.2f, 4f);
+        // Carry the hip the way the body bone does, add the offset (back in model space), and land on the leg.
+        Quaternionf body = new Quaternionf().rotationZYX(0f, 0f, lean);
+        Vector3f hip = body.transform(new Vector3f(-1.9f, 12f, 0f).add(offset.x, -offset.y, offset.z))
+                .add(0f, 3.2f, 0f);
+        assertEquals(-1.9f, hip.x, 1e-4f);
+        assertEquals(12.2f, hip.y, 1e-4f);
+        assertEquals(4f, hip.z, 1e-4f);
     }
 
     @Test

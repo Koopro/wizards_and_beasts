@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoItem;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.model.GeoModel;
@@ -148,17 +149,35 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
     }
 
     /**
-     * The robe skirt (option B, see {@link ClothMotion}): each lower half turns with its own leg, the
+     * The robe skirt (option B, see {@link ClothMotion}): each lower half is posed as its own leg, the
      * hip skirt's front lifts when both legs come forward. Only on the Curios path, the only one that
      * draws a robe body; a model without these bones is untouched.
+     *
+     * <p>Since 2026-11-12 a half takes its leg's whole pose, not only the swing: the splay (z), the turn (y) and
+     * the hip joint's place, so in a crouch or on a broom, where the body leans and the legs go back, the
+     * halves stay on the legs instead of hanging off the body's hip line.
      */
     private static void moveCloth(CapturedBodyPose pose, BoneSnapshots snapshots) {
         float body = pose.xRot(ArmorSegment.CHEST);
         float right = pose.xRot(ArmorSegment.RIGHT_LEG);
         float left = pose.xRot(ArmorSegment.LEFT_LEG);
-        snapshots.ifPresent(ClothMotion.LEG_R, s -> s.setRotX(ClothMotion.lowerHalf(right, body)));
-        snapshots.ifPresent(ClothMotion.LEG_L, s -> s.setRotX(ClothMotion.lowerHalf(left, body)));
+        snapshots.ifPresent(ClothMotion.LEG_R, s -> poseHalf(s, pose, ArmorSegment.RIGHT_LEG, -1));
+        snapshots.ifPresent(ClothMotion.LEG_L, s -> poseHalf(s, pose, ArmorSegment.LEFT_LEG, 1));
         snapshots.ifPresent(ClothMotion.HIP_FRONT, s -> s.setRotX(ClothMotion.hipFront(right, left)));
+    }
+
+    private static void poseHalf(BoneSnapshot s, CapturedBodyPose pose,
+                                 ArmorSegment leg, int side) {
+        ArmorSegment body = ArmorSegment.CHEST;
+        Vector3f offset = ClothMotion.lowerHalfOffset(side,
+                pose.x(body), pose.y(body), pose.z(body), pose.xRot(body), pose.yRot(body), pose.zRot(body),
+                pose.x(leg), pose.y(leg), pose.z(leg));
+        s.setRotX(ClothMotion.lowerHalf(pose.xRot(leg), pose.xRot(body)))
+                .setRotY(-(pose.yRot(leg) - pose.yRot(body)))
+                .setRotZ(pose.zRot(leg) - pose.zRot(body))
+                .setTranslateX(offset.x)
+                .setTranslateY(offset.y)
+                .setTranslateZ(offset.z);
     }
 
     /**

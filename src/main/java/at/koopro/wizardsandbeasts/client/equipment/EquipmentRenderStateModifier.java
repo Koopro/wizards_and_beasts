@@ -1,5 +1,8 @@
 package at.koopro.wizardsandbeasts.client.equipment;
 
+import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
+import at.koopro.wizardsandbeasts.item.armor.CapeItem;
+import at.koopro.wizardsandbeasts.item.armor.WizardArmorItem;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.equipment.EquipmentVisibility;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
@@ -57,6 +60,7 @@ public final class EquipmentRenderStateModifier {
     private static void apply(LivingEntity wearer, AvatarRenderState state) {
         EquipmentVisibility.Result visibility = EquipmentVisibility.resolve(wearer);
         if (visibility == EquipmentVisibility.NONE) {
+            wearClothAsSkin(wearer, state);
             return;
         }
         state.setRenderData(VISIBILITY, visibility);
@@ -79,6 +83,28 @@ public final class EquipmentRenderStateModifier {
         }
         if (!visibility.isArmorVisible(EquipmentSlot.FEET)) {
             state.feetEquipment = ItemStack.EMPTY;
+        }
+        if (!visibility.concealed()) {
+            wearClothAsSkin(wearer, state);
+        }
+    }
+
+    /**
+     * A robe is worn as the skin's second layer (2026-11-12, owner: "the second layer should actually act like a
+     * second skin layer, for all robes"): the cut is drawn just over the body, where the skin's own jacket, sleeves
+     * and trouser legs are, so those overlay layers are switched off under it. Otherwise the two shells sit a
+     * fraction apart and the skin's layer shows through the cloth (seen in game at 0.25 and 0.3).
+     */
+    private static void wearClothAsSkin(LivingEntity wearer, AvatarRenderState state) {
+        if (EquipmentAPI.getEquippedBodyClothing(wearer).getItem() instanceof WizardArmorItem robe
+                && !(robe instanceof CapeItem)) {
+            state.showJacket = false;
+            state.showLeftSleeve = false;
+            state.showRightSleeve = false;
+        }
+        if (state.legsEquipment.getItem() instanceof WizardArmorItem) {
+            state.showLeftPants = false;
+            state.showRightPants = false;
         }
     }
 

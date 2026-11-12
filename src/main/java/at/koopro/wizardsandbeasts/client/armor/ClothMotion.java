@@ -1,5 +1,8 @@
 package at.koopro.wizardsandbeasts.client.armor;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 /**
  * The robe skirt's motion rule, as pure arithmetic (WARDROBE_RENAISSANCE §B5 and §C-look, option B).
  *
@@ -19,8 +22,17 @@ package at.koopro.wizardsandbeasts.client.armor;
  */
 public final class ClothMotion {
 
-    /** How closely a lower half follows its leg. Just under 1 so the cloth trails the limb a hair. */
-    public static final float LEG_FOLLOW = 0.95f;
+    /**
+     * How closely a lower half follows its leg. 1 since 2026-11-12 (owner: "the bottom part should move with the
+     * legs, left half with the left leg, right half with the right"): each half is drawn as part of its leg, like
+     * the skin's own trouser layer, so it can never part from it.
+     */
+    public static final float LEG_FOLLOW = 1.0f;
+
+    /** Where a lower half's bone pivots, x by side: the hip joint, as {@code tools/wardrobe_model.py} places it. */
+    public static final float HIP_X = 1.9f;
+    /** The hip joint's depth below the body's pivot (the neck), in model units. */
+    public static final float HIP_DROP = 12f;
 
     /** How far the hip skirt's front lifts with the forward pitch both legs share (seated). */
     public static final float SEAT_LIFT = 0.8f;
@@ -76,6 +88,28 @@ public final class ClothMotion {
 
     private static float vanillaCapeDegrees(float capeLean, float capeFlap) {
         return 6f + capeLean / 2f + capeFlap;
+    }
+
+    /**
+     * Bone translation that puts a lower half's hip pivot on its leg's pivot, in GeckoLib bone units.
+     *
+     * <p>The half is a child of {@code armorBody}, so it rides the body's pivot and rotation. Crouching, riding a
+     * broom or any pose that leans the body moves the body (down, forward) while the legs stay or move back; without
+     * this the halves stay hung on the body's hip line and come away from the legs. The miss between where the body
+     * carries the hip ({@code bodyPos + R_body * hip}) and where the leg's pivot is, taken into the body's own frame,
+     * is the bone's offset. Model space is y-down; GeckoLib's bones are y-up, so y changes sign (its
+     * {@code ArmorSegment} matchers do the same).
+     *
+     * @param side -1 for the right half, +1 for the left
+     */
+    public static Vector3f lowerHalfOffset(int side, float bodyX, float bodyY, float bodyZ,
+                                           float bodyXRot, float bodyYRot, float bodyZRot,
+                                           float legX, float legY, float legZ) {
+        Quaternionf bodyRot = new Quaternionf().rotationZYX(bodyZRot, bodyYRot, bodyXRot);
+        Vector3f carried = bodyRot.transform(new Vector3f(side * HIP_X, HIP_DROP, 0f)).add(bodyX, bodyY, bodyZ);
+        Vector3f miss = new Vector3f(legX, legY, legZ).sub(carried);
+        bodyRot.conjugate().transform(miss);
+        return miss.set(miss.x, -miss.y, miss.z);
     }
 
     /** Bone x-rotation of a lower half, from its leg's and the body's {@code ModelPart} x-rotations. */
