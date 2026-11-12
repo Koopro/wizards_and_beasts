@@ -92,9 +92,39 @@ class BrewTintTest {
         JsonObject model = read(DEFINITION).getAsJsonObject("model");
         assertEquals("minecraft:select", model.get("type").getAsString());
         assertEquals("minecraft:display_context", model.get("property").getAsString());
-        return inSlot
-                ? model.getAsJsonArray("cases").get(0).getAsJsonObject().getAsJsonObject("model")
-                : model.getAsJsonObject("fallback");
+        if (!inSlot) {
+            return model.getAsJsonObject("fallback");
+        }
+        // The slot branch switches on the brew id first (the signature brews have their own bottles); every other
+        // brew falls through to the tinted icon.
+        JsonObject slot = model.getAsJsonArray("cases").get(0).getAsJsonObject().getAsJsonObject("model");
+        if ("minecraft:select".equals(slot.get("type").getAsString())) {
+            assertEquals("minecraft:component", slot.get("property").getAsString());
+            assertEquals("wizards_and_beasts:brew_id", slot.get("component").getAsString());
+            return slot.getAsJsonObject("fallback");
+        }
+        return slot;
+    }
+
+    @Test
+    void signatureBrewsShowTheirOwnBottleInTheSlot() throws IOException {
+        JsonObject slot = read(DEFINITION).getAsJsonObject("model").getAsJsonArray("cases").get(0).getAsJsonObject()
+                .getAsJsonObject("model");
+        JsonArray cases = slot.getAsJsonArray("cases");
+        assertEquals(8, cases.size(), "the eight signature brews with their own sprite");
+        for (var element : cases) {
+            JsonObject c = element.getAsJsonObject();
+            String brew = c.get("when").getAsString();
+            String modelId = c.getAsJsonObject("model").get("model").getAsString();
+            String name = brew.substring(brew.indexOf(':') + 1);
+            assertEquals("wizards_and_beasts:item/" + name, modelId, "a brew's bottle is named after the brew");
+            Path modelFile = Path.of("src/main/resources/assets/wizards_and_beasts/models/item/" + name + ".json");
+            assertTrue(Files.exists(modelFile), "model for " + brew);
+            assertTrue(Files.exists(Path.of("src/main/resources/assets/wizards_and_beasts/textures/item/" + name + ".png")),
+                    "sprite for " + brew);
+            assertTrue(Files.exists(Path.of("src/main/resources/data/wizards_and_beasts/brews/" + name + ".json")),
+                    "the brew exists: " + brew);
+        }
     }
 
     private static void assertBrewTint(JsonObject tint) {
