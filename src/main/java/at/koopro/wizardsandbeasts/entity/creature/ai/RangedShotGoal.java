@@ -31,11 +31,25 @@ public final class RangedShotGoal extends Goal {
         setFlags(EnumSet.of(Flag.LOOK));
     }
 
+    /**
+     * An archer holds a real bow, as a skeleton does, and the client draws that item in its hand
+     * ({@code BeastHeldItemLayer}). Checked here and not only at spawn, so a creature saved before it carried
+     * one picks one up the first time it has someone to shoot at. It never drops.
+     */
+    private void armed() {
+        if (shot.kind() == RangedShot.Kind.ARROW && mob.getMainHandItem().isEmpty()) {
+            mob.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BOW));
+            mob.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0.0f);
+        }
+    }
+
     @Override
     public boolean canUse() {
         if (!ModuleManager.isEnabled(Module.CREATURES)) {
             return false;
         }
+        armed();
         LivingEntity target = mob.getTarget();
         return target != null && target.isAlive() && shot.inBand(mob.distanceTo(target))
                 && mob.getSensing().hasLineOfSight(target);

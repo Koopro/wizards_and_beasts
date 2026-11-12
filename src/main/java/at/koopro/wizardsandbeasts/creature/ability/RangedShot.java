@@ -80,6 +80,11 @@ public record RangedShot(
     @Override
     public void registerGoals(@NonNull GenericBeastEntity entity, @NonNull GoalSelector goalSelector) {
         goalSelector.addGoal(2, new RangedShotGoal(entity, this));
+        // An archer is seen with its bow from the moment it exists, not from its first shot.
+        if (kind == Kind.ARROW && !entity.level().isClientSide() && entity.getMainHandItem().isEmpty()) {
+            entity.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+            entity.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0.0f);
+        }
     }
 
     @Override

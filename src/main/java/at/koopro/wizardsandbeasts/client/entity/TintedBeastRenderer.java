@@ -39,11 +39,13 @@ public class TintedBeastRenderer<R extends EntityRenderState & GeoRenderState>
     public TintedBeastRenderer(EntityRendererProvider.Context context, String modelName) {
         super(context, new DefaultedEntityGeoModel<>(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
+        withRenderLayer(new BeastHeldItemLayer<>(this));
     }
 
     /** For subclasses (e.g. {@link DisguisableBeastRenderer}) that need a custom model, not the default one built from a name. */
     protected TintedBeastRenderer(EntityRendererProvider.Context context, DefaultedEntityGeoModel<GenericBeastEntity> model) {
         super(context, model);
+        withRenderLayer(new BeastHeldItemLayer<>(this));
     }
 
     @Override
