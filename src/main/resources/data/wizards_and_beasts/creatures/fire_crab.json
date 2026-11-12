@@ -33,6 +33,7 @@
   "clips": [
     "attack",
     "hiss",
+    "groom",
     "hit",
     "death",
     "skitter"
