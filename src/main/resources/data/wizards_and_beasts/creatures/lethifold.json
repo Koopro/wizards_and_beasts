@@ -27,8 +27,8 @@
   "clips": [
     "attack",
     "flinch",
-    "death",
     "squirm",
-    "settle"
+    "settle",
+    "death"
   ]
 }
