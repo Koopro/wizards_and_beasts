@@ -42,9 +42,9 @@ public final class ApparitionSelectorScreen extends Screen {
     private static final String KEY = "gui." + WizardsAndBeastsMod.MODID + ".apparition_selector.";
 
     private static final int ROW_HEIGHT = 22;
-    private static final int LIST_W = 220;
+    /** The list's narrowest width; it widens to fit the key hint, which was cut at 220 ("Esc to s..."). */
+    private static final int MIN_LIST_W = 220;
     private static final int PAD = WizardsMetrics.SPACE_M;
-    private static final int PANEL_W = LIST_W + 2 * PAD;
     /** Clearance between the panel and the screen edge when the list is cut to fit. */
     private static final int SCREEN_MARGIN = WizardsMetrics.SPACE_L;
     private static final int TEXT_INSET = 5;
@@ -57,6 +57,7 @@ public final class ApparitionSelectorScreen extends Screen {
     /** Where the mouse was last frame: hover only takes the selection when the mouse actually moves. */
     private int lastMouseX = Integer.MIN_VALUE;
     private int lastMouseY = Integer.MIN_VALUE;
+    private int listW = MIN_LIST_W;
     private int panelX;
     private int panelY;
     private int panelH;
@@ -80,6 +81,10 @@ public final class ApparitionSelectorScreen extends Screen {
                 && this.minecraft.level.dimension().equals(point.dimension());
     }
 
+    private int panelW() {
+        return listW + 2 * PAD;
+    }
+
     /** Title, its rule and the gap under it: what {@link Ui#title} takes before the list starts. */
     private int titleBlockH() {
         return font.lineHeight + 1 + WizardsMetrics.DIVIDER_H + WizardsMetrics.SPACE_XS;
@@ -95,10 +100,12 @@ public final class ApparitionSelectorScreen extends Screen {
         int fitRows = Math.max(1, (this.height - 2 * SCREEN_MARGIN - chrome) / ROW_HEIGHT);
         // An empty list keeps two rows: room for the two-line "how to memorise a place" message.
         int rows = Mth.clamp(count == 0 ? 2 : count, 1, fitRows);
+        int hintW = font.width(Component.translatable(KEY + "hint"));
+        listW = Mth.clamp(hintW, MIN_LIST_W, Math.max(MIN_LIST_W, this.width - 2 * SCREEN_MARGIN - 2 * PAD));
         panelH = chrome + rows * ROW_HEIGHT;
-        panelX = (this.width - PANEL_W) / 2;
+        panelX = (this.width - panelW()) / 2;
         panelY = (this.height - panelH) / 2;
-        list.setBounds(panelX + PAD, panelY + PAD + titleBlockH(), LIST_W, rows * ROW_HEIGHT);
+        list.setBounds(panelX + PAD, panelY + PAD + titleBlockH(), listW, rows * ROW_HEIGHT);
         list.setItemCount(count);
         selected = count == 0 ? 0 : Mth.clamp(selected, 0, count - 1);
     }
@@ -114,11 +121,11 @@ public final class ApparitionSelectorScreen extends Screen {
         List<ApparitionPoint> points = points();
         layout(points.size());
 
-        Ui.panel(g, S, panelX, panelY, PANEL_W, panelH);
-        Ui.title(g, font, S, this.title, panelX + PAD, panelY + PAD, LIST_W, null);
+        Ui.panel(g, S, panelX, panelY, panelW(), panelH);
+        Ui.title(g, font, S, this.title, panelX + PAD, panelY + PAD, listW, null);
 
         if (points.isEmpty()) {
-            Ui.emptyState(g, font, S, new Ui.Rect(list.rowLeft(), list.rowTop(0), LIST_W, 2 * ROW_HEIGHT),
+            Ui.emptyState(g, font, S, new Ui.Rect(list.rowLeft(), list.rowTop(0), listW, 2 * ROW_HEIGHT),
                     Component.translatable(KEY + "empty"), null);
             return;
         }
@@ -176,7 +183,7 @@ public final class ApparitionSelectorScreen extends Screen {
         list.renderScrollbar(g, S);
 
         UiText.drawFit(g, font, S, Component.translatable(KEY + "hint"), panelX + PAD,
-                panelY + panelH - PAD - font.lineHeight, LIST_W, S.ink3());
+                panelY + panelH - PAD - font.lineHeight, listW, S.ink3());
 
         if (truncatedName != null) {
             UiTooltips.ifTruncated(g, font, true, truncatedName, truncatedOver, mouseX, mouseY);
