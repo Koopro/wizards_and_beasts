@@ -51,10 +51,10 @@
   ],
   "clips": [
     "strike",
+    "stretch",
     "hiss",
     "hit",
     "death",
-    "stretch",
     "shake",
     "graze"
   ],
