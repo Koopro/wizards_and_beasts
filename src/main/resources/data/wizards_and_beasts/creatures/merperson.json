@@ -39,6 +39,10 @@
       "type": "merfolk_song",
       "interval_ticks": 600,
       "verses": 4
+    },
+    {
+      "type": "held_item",
+      "item": "minecraft:trident"
     }
   ],
   "clips": [

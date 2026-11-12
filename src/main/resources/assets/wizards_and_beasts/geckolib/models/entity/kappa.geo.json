@@ -6,7 +6,7 @@
         "identifier": "geometry.kappa",
         "texture_width": 64,
         "texture_height": 48,
-        "visible_bounds_width": 1.76,
+        "visible_bounds_width": 1.79,
         "visible_bounds_height": 2.46,
         "visible_bounds_offset": [
           0,
@@ -94,6 +94,86 @@
               "uv": [
                 0,
                 13
+              ]
+            },
+            {
+              "origin": [
+                -4.0,
+                10.333,
+                4.3
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                44,
+                37
+              ]
+            },
+            {
+              "origin": [
+                0.5,
+                10.333,
+                4.3
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                52,
+                37
+              ]
+            },
+            {
+              "origin": [
+                -4.0,
+                14.333,
+                4.3
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                0,
+                42
+              ]
+            },
+            {
+              "origin": [
+                0.5,
+                14.333,
+                4.3
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                8,
+                42
+              ]
+            },
+            {
+              "origin": [
+                -1.75,
+                12.333,
+                4.3
+              ],
+              "size": [
+                3,
+                3,
+                1
+              ],
+              "uv": [
+                16,
+                42
               ]
             }
           ]
