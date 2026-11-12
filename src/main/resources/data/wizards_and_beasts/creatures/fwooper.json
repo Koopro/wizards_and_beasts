@@ -28,10 +28,10 @@
     }
   ],
   "clips": [
-    "flinch",
     "song",
-    "death",
+    "flinch",
     "attack",
+    "death",
     "preen",
     "ruffle",
     "stretch"
