@@ -51,6 +51,8 @@ public class PatronusEntity extends Mob {
     private float patronusPower;
     private float proficiencyScalar;
     private float orbitAngle;
+    /** Development showcase only: a corporeal form held still with no caster (EntityShowcaseCapture). */
+    private boolean showcase;
 
     public PatronusEntity(EntityType<? extends PatronusEntity> type, Level level) {
         super(type, level);
@@ -83,6 +85,16 @@ public class PatronusEntity extends Mob {
     /** The strength it was cast with. Server-side only: never synced, so a client copy reads 0. */
     public float getPower() {
         return patronusPower;
+    }
+
+    /**
+     * Holds this Patronus as a still, corporeal {@code formId} with no caster, for the entity showcase to
+     * photograph. Server side only; never called in play.
+     */
+    public void holdForShowcase(String formId) {
+        showcase = true;
+        entityData.set(DATA_CORPOREAL, true);
+        entityData.set(DATA_FORM_ID, formId);
     }
 
     public static void trySpawn(ServerLevel level, ServerPlayer caster, float patronusPower,
@@ -121,6 +133,9 @@ public class PatronusEntity extends Mob {
         }
         if (!(level() instanceof ServerLevel)) {
             discard();
+            return;
+        }
+        if (showcase) {
             return;
         }
         ServerLevel sl = (ServerLevel) level();

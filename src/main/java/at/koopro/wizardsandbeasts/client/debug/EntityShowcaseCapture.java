@@ -161,6 +161,9 @@ public final class EntityShowcaseCapture {
         /** The file name's stem: the id, and who the person is when the line says. */
         String stem() {
             String stem = id.getPath().replace('/', '_') + (props.containsKey("age") ? "_age" + props.get("age") : "");
+            if (props.containsKey("form")) {
+                stem += "_" + Identifier.parse(props.get("form")).getPath();
+            }
             if (props.containsKey("role")) {
                 stem += "_" + props.get("role") + "_" + props.getOrDefault("person", "0");
             }
@@ -542,6 +545,10 @@ public final class EntityShowcaseCapture {
                     EntitySpawnReason.COMMAND, null);
             mob.setNoAi(true);
             mob.setPersistenceRequired();
+        }
+        if (entity instanceof at.koopro.wizardsandbeasts.entity.spell.PatronusEntity patronus
+                && entry.props().containsKey("form")) {
+            patronus.holdForShowcase(entry.props().get("form"));   // e.g. form=minecraft:horse
         }
         if (entity instanceof SettlementNpcEntity npc && entry.props().containsKey("role")) {
             dress(npc, entry.props().get("role"), entry.props().getOrDefault("person", "0"));
