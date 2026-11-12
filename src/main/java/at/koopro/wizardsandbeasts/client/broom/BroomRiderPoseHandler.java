@@ -47,9 +47,20 @@ public final class BroomRiderPoseHandler {
     private static final float LEG_X_ROT = 0.95F;
     /** Splay, so the legs read as either side of the broom rather than fused together. */
     private static final float LEG_Z_ROT = 0.12F;
-    /** Arms reach forward and down onto the handle in front of the leaned torso. */
-    private static final float ARM_X_ROT = -0.85F;
-    private static final float ARM_Z_ROT = 0.10F;
+    /*
+     * The grip (2026-11-12, owner: "arms should grab the broom"). The first crouch reached the arms straight forward at
+     * shoulder width, so the hands hung beside and above the handle. The handle runs down the middle (x 0) at the seat:
+     * a player's vehicle attachment is 0.6 blocks, so the shaft's top is about y 14.4 in model space, and the crouch has
+     * already lowered the shoulders to about y 6. An arm reaches about 10 to the hand, so it swings down-forward
+     * (cos = 8.5 / 10) and turns inward until the two hands close on the shaft, the wand hand a little ahead of the
+     * other, as a broom is held.
+     */
+    /** Arms swing down and forward from the shoulder onto the handle; the right (wand) hand reaches further. */
+    private static final float RIGHT_ARM_X_ROT = -0.62F;
+    private static final float LEFT_ARM_X_ROT = -0.52F;
+    /** Arms turn inward so both hands close on the shaft at the midline instead of hanging at shoulder width. */
+    private static final float RIGHT_ARM_Y_ROT = -0.70F;
+    private static final float LEFT_ARM_Y_ROT = 0.62F;
     /** How much of the broom's forward lean the torso takes on, on top of the crouch. */
     private static final float TORSO_LEAN_SHARE = 0.45F;
     /** Cap on the broom's contribution, in degrees, so a steep dive never folds the rider double. */
@@ -88,11 +99,11 @@ public final class BroomRiderPoseHandler {
         humanoid.rightLeg.zRot = LEG_Z_ROT;
         humanoid.leftLeg.zRot = -LEG_Z_ROT;
 
-        humanoid.rightArm.xRot = ARM_X_ROT;
-        humanoid.leftArm.xRot = ARM_X_ROT;
-        humanoid.rightArm.yRot = 0.0F;
-        humanoid.leftArm.yRot = 0.0F;
-        humanoid.rightArm.zRot = ARM_Z_ROT;
-        humanoid.leftArm.zRot = -ARM_Z_ROT;
+        humanoid.rightArm.xRot = RIGHT_ARM_X_ROT;
+        humanoid.leftArm.xRot = LEFT_ARM_X_ROT;
+        humanoid.rightArm.yRot = RIGHT_ARM_Y_ROT;
+        humanoid.leftArm.yRot = LEFT_ARM_Y_ROT;
+        humanoid.rightArm.zRot = 0.0F;
+        humanoid.leftArm.zRot = 0.0F;
     }
 }
