@@ -8,7 +8,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.ambient.BatModel;
+import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.model.animal.feline.CatModel;
+import net.minecraft.client.model.animal.fox.FoxModel;
+import net.minecraft.client.model.animal.goat.GoatModel;
 import net.minecraft.client.model.animal.parrot.ParrotModel;
 import net.minecraft.client.model.animal.rabbit.RabbitModel;
 import net.minecraft.client.model.animal.wolf.WolfModel;
@@ -16,7 +20,11 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.BatRenderState;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
+import net.minecraft.client.renderer.entity.state.FoxRenderState;
+import net.minecraft.client.renderer.entity.state.GoatRenderState;
+import net.minecraft.client.renderer.entity.state.HorseRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.ParrotRenderState;
 import net.minecraft.client.renderer.entity.state.RabbitRenderState;
@@ -26,6 +34,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 
@@ -34,8 +43,10 @@ import org.jspecify.annotations.Nullable;
  * spell's <em>form</em> in ethereal silver-blue:
  * <ul>
  *   <li><b>Corporeal</b> (power ≥ 40): the resolved animal. Forms with a vanilla model
- *       ({@code cat}/{@code wolf}/{@code rabbit}/{@code parrot}) borrow it, tinted translucent
- *       silver; everything else falls back to the iconic {@link PatronusStagModel}.</li>
+ *       (all eight {@code PatronusFormDeterminer} forms: horse, wolf, fox, rabbit, cat, goat, parrot, bat)
+ *       borrow it, tinted translucent silver; anything else falls back to the iconic
+ *       {@link PatronusStagModel}. Until 2026-11-12 only cat, wolf, rabbit and parrot had one, and the
+ *       horse, fox, goat and bat Patronus drew as a stag (VR-0 D4).</li>
  *   <li><b>Non-corporeal</b> (power &lt; 40): a formless silver mist — no animal.</li>
  * </ul>
  */
@@ -55,6 +66,10 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
     private @Nullable WolfModel wolfModel;
     private @Nullable RabbitModel rabbitModel;
     private @Nullable ParrotModel parrotModel;
+    private @Nullable HorseModel horseModel;
+    private @Nullable FoxModel foxModel;
+    private @Nullable GoatModel goatModel;
+    private @Nullable BatModel batModel;
 
     public PatronusRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -194,10 +209,62 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
                 model.setupAnim(idleParrot());
                 return model;
             }
+            case "horse" -> {
+                HorseModel model = horseModel();
+                model.resetPose();
+                model.setupAnim(idleHorse());
+                return model;
+            }
+            case "fox" -> {
+                FoxModel model = foxModel();
+                model.resetPose();
+                model.setupAnim(idleFox());
+                return model;
+            }
+            case "goat" -> {
+                GoatModel model = goatModel();
+                model.resetPose();
+                model.setupAnim(idleGoat());
+                return model;
+            }
+            case "bat" -> {
+                BatModel model = batModel();
+                model.resetPose();
+                model.setupAnim(idleBat());
+                return model;
+            }
             default -> {
                 return null;
             }
         }
+    }
+
+    private static HorseRenderState idleHorse() {
+        HorseRenderState s = new HorseRenderState();
+        s.ageScale = 1.0f;
+        s.saddle = ItemStack.EMPTY;
+        s.bodyArmorItem = ItemStack.EMPTY;
+        return s;
+    }
+
+    private static FoxRenderState idleFox() {
+        FoxRenderState s = new FoxRenderState();
+        s.ageScale = 1.0f;
+        return s;
+    }
+
+    private static GoatRenderState idleGoat() {
+        GoatRenderState s = new GoatRenderState();
+        s.ageScale = 1.0f;
+        s.hasLeftHorn = true;
+        s.hasRightHorn = true;
+        return s;
+    }
+
+    private static BatRenderState idleBat() {
+        BatRenderState s = new BatRenderState();
+        s.ageScale = 1.0f;
+        return s;
     }
 
     private static CatRenderState idleCat() {
@@ -251,6 +318,34 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
             rabbitModel = new RabbitModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.RABBIT));
         }
         return rabbitModel;
+    }
+
+    private HorseModel horseModel() {
+        if (horseModel == null) {
+            horseModel = new HorseModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.HORSE));
+        }
+        return horseModel;
+    }
+
+    private FoxModel foxModel() {
+        if (foxModel == null) {
+            foxModel = new FoxModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.FOX));
+        }
+        return foxModel;
+    }
+
+    private GoatModel goatModel() {
+        if (goatModel == null) {
+            goatModel = new GoatModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.GOAT));
+        }
+        return goatModel;
+    }
+
+    private BatModel batModel() {
+        if (batModel == null) {
+            batModel = new BatModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.BAT));
+        }
+        return batModel;
     }
 
     private ParrotModel parrotModel() {
