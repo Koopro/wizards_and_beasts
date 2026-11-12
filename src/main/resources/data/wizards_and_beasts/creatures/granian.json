@@ -18,12 +18,12 @@
   "clips": [
     "strike",
     "call",
-    "hit",
+    "flinch",
+    "takeoff",
+    "land",
     "death",
     "stretch",
     "shake",
-    "graze",
-    "takeoff",
-    "land"
+    "graze"
   ]
 }
