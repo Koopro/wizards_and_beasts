@@ -4,14 +4,88 @@
     "property": "minecraft:display_context",
     "cases": [
       {
-        "when": ["gui", "ground", "fixed", "on_shelf"],
+        "when": [
+          "gui",
+          "ground",
+          "fixed",
+          "on_shelf"
+        ],
         "model": {
-          "type": "minecraft:model",
-          "model": "wizards_and_beasts:item/brew_inventory",
-          "tints": [
-            { "type": "minecraft:constant", "value": -1 },
-            { "type": "wizards_and_beasts:brew", "default": 9398742 }
-          ]
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "wizards_and_beasts:brew_id",
+          "cases": [
+            {
+              "when": "wizards_and_beasts:amortentia",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/amortentia"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:draught_of_living_death",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/draught_of_living_death"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:felix_felicis",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/felix_felicis"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:pepperup_potion",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/pepperup_potion"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:polyjuice_potion",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/polyjuice_potion"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:skele_gro",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/skele_gro"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:veritaserum",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/veritaserum"
+              }
+            },
+            {
+              "when": "wizards_and_beasts:wolfsbane_potion",
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/wolfsbane_potion"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "wizards_and_beasts:item/brew_inventory",
+            "tints": [
+              {
+                "type": "minecraft:constant",
+                "value": -1
+              },
+              {
+                "type": "wizards_and_beasts:brew",
+                "default": 9398742
+              }
+            ]
+          }
         }
       }
     ],
@@ -19,7 +93,10 @@
       "type": "minecraft:model",
       "model": "wizards_and_beasts:item/brew",
       "tints": [
-        { "type": "wizards_and_beasts:brew", "default": 9398742 }
+        {
+          "type": "wizards_and_beasts:brew",
+          "default": 9398742
+        }
       ]
     }
   }
