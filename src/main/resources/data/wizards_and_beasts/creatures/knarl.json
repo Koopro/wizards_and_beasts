@@ -23,8 +23,8 @@
     }
   ],
   "clips": [
-    "flinch",
     "call",
+    "flinch",
     "death",
     "graze",
     "sniff",
