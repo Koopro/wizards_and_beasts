@@ -59,11 +59,11 @@
     }
   },
   "clips": [
+    "takeoff",
+    "land",
     "hit",
     "death",
     "stretch",
-    "shake",
-    "takeoff",
-    "land"
+    "shake"
   ]
 }
