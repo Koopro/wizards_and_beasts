@@ -126,18 +126,18 @@ public final class AbilitySupport {
         SMOKE(() -> ParticleTypes.SMOKE),
         SOUL(() -> ParticleTypes.SOUL),
         GLOW(() -> ParticleTypes.GLOW),
-        HAPPY(() -> ParticleTypes.HAPPY_VILLAGER),
-        WITCH(() -> ParticleTypes.WITCH),
-        ENCHANT(() -> ParticleTypes.ENCHANT),
+        HAPPY(() -> new SpellTintParticleOptions(ModParticles.LIGHT_GLOW.get(), MagicColours.HEALING)),
+        WITCH(() -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.MAGIC)),
+        ENCHANT(() -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.MAGIC)),
         CRIT(() -> ParticleTypes.CRIT),
         ELECTRIC(() -> ParticleTypes.ELECTRIC_SPARK),
         BUBBLE(() -> ParticleTypes.BUBBLE),
-        PORTAL(() -> ParticleTypes.PORTAL),
+        PORTAL(() -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.MAGIC)),
         SPORE(() -> ParticleTypes.SPORE_BLOSSOM_AIR),
         DAMAGE(() -> ParticleTypes.DAMAGE_INDICATOR),
-        // The mod's own pixel sprites, tinted by meaning (MagicColours). Prefer these over the
-        // vanilla entries above: HAPPY is vanilla's "trade accepted" sparkle and PORTAL/WITCH
-        // are the Enderman's and the witch's, so a creature wearing them reads as a vanilla mob.
+        // The mod's own pixel sprites, tinted by meaning (MagicColours). HAPPY, WITCH, ENCHANT and PORTAL
+        // above keep their names for the data that names them but draw these sprites since 2026-11-13:
+        // vanilla's own are "trade accepted", the witch, the enchanting table and the Enderman.
         ARCANE(() -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MagicColours.MAGIC)),
         LIGHT(() -> new SpellTintParticleOptions(ModParticles.LIGHT_GLOW.get(), MagicColours.LIGHT)),
         HEALING(() -> new SpellTintParticleOptions(ModParticles.LIGHT_GLOW.get(), MagicColours.HEALING)),

@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -66,7 +65,7 @@ public final class HealersHands {
             }
         }
         if (lifted > 0 && target.level() instanceof net.minecraft.server.level.ServerLevel level) {
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.6,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.healing(), target.getX(), target.getY() + target.getBbHeight() * 0.6,
                     target.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
         }
         return lifted;

@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.effect;
 
 import at.koopro.wizardsandbeasts.toad.PeppermintToad;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,7 +37,7 @@ public final class PeppermintHopEffect extends MobEffect {
     public boolean applyEffectTick(@NonNull ServerLevel level, @NonNull LivingEntity entity, int amplifier) {
         level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
                 SoundEvents.FROG_LONG_JUMP, SoundSource.PLAYERS, 0.25f, 1.5f);
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.healing(),
                 entity.getX(), entity.getY() + entity.getBbHeight() * 0.45, entity.getZ(),
                 3, 0.2, 0.15, 0.2, 0.0);
         return true;

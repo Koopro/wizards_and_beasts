@@ -144,7 +144,7 @@ public enum BeanFlavour implements StringRepresentable {
             ChocolateFrog.clearDespair(eater);
             eater.addEffect(new MobEffectInstance(
                     ModEffects.CHOCOLATE_WARD, ChocolateFrog.WARD_TICKS, 0, false, false, true));
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                     eater.getX(), eater.getEyeY(), eater.getZ(), 8, 0.3, 0.3, 0.3, 0.0);
         }
     },

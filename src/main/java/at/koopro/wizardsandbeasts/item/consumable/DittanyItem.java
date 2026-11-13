@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.item.consumable;
 
 import at.koopro.wizardsandbeasts.dittany.Dittany;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -93,7 +92,7 @@ public class DittanyItem extends ConsumedItem {
         patient.level().playSound(null, patient.getX(), patient.getY(), patient.getZ(),
                 SoundEvents.BOTTLE_EMPTY, SoundSource.PLAYERS, 0.7f, 1.4f);
         if (patient.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.healing(),
                     patient.getX(), patient.getY() + patient.getBbHeight() * 0.6, patient.getZ(),
                     8, 0.3, 0.3, 0.3, 0.0);
         }

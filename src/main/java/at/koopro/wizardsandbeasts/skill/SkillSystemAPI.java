@@ -19,7 +19,6 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.core.particles.ParticleTypes;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 
 /**
@@ -305,7 +304,7 @@ public final class SkillSystemAPI {
         // The same chime the mod uses for a lesson landing, at a volume that does not carry across a room.
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.35f, 1.35f);
-        player.level().sendParticles(ParticleTypes.ENCHANT,
+        player.level().sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                 player.getX(), player.getY() + 1.2, player.getZ(),
                 UNLOCK_PARTICLES, 0.35, 0.5, 0.35, 0.02);
     }

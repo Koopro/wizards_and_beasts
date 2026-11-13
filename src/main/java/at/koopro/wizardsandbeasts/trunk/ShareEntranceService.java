@@ -92,7 +92,7 @@ public final class ShareEntranceService {
             if (now % 4 == 0) {
                 ServerLevel dl = event.getServer().getLevel(d.dim());
                 if (dl != null) {
-                    dl.sendParticles(ParticleTypes.PORTAL,
+                    dl.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                             d.pos().getX() + 0.5, d.pos().getY() + 1.0, d.pos().getZ() + 0.5,
                             12, 0.35, 0.9, 0.35, 0.02);
                     dl.sendParticles(ParticleTypes.REVERSE_PORTAL,

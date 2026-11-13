@@ -306,7 +306,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                 say(player, "brew.wizards_and_beasts.cauldron.catalyst_accepted");
                 level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.9f, 1.4f);
                 if (level instanceof ServerLevel server) {
-                    server.sendParticles(ParticleTypes.END_ROD,
+                    server.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                             pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 16, 0.25, 0.2, 0.25, 0.02);
                 }
             }
@@ -562,7 +562,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             }
             case DONE -> {
                 if (random.nextInt(4) == 0) {
-                    level.addParticle(ParticleTypes.END_ROD,
+                    level.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                             cx + (random.nextDouble() - 0.5) * 0.4, cy + 0.1,
                             cz + (random.nextDouble() - 0.5) * 0.4, 0, 0.01, 0);
                 }

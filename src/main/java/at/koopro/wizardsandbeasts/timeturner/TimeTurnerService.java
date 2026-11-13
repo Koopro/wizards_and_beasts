@@ -105,7 +105,7 @@ public final class TimeTurnerService {
             return Result.OCCUPIED;
         }
 
-        level.sendParticles(ParticleTypes.PORTAL, from.x, from.y + 1.0, from.z, 36, 0.4, 0.6, 0.4, 0.05);
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.gold(), from.x, from.y + 1.0, from.z, 36, 0.4, 0.6, 0.4, 0.05);
         player.stopRiding();
         player.teleportTo(to.x, to.y, to.z);
         player.resetFallDistance();

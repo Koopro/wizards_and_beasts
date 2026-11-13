@@ -251,7 +251,7 @@ public final class WandResonanceSystem {
             }
             if (player instanceof ServerPlayer sp) {
                 sp.level().playSound(null, sp.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1.0f, 1.0f);
-                sp.level().sendParticles(ParticleTypes.ENCHANT, sp.getX(), sp.getEyeY(), sp.getZ(), 24, 0.35, 0.25, 0.35, 0.02);
+                sp.level().sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), sp.getX(), sp.getEyeY(), sp.getZ(), 24, 0.35, 0.25, 0.35, 0.02);
                 Component woodName = woodOpt.map(h -> h.value().displayName()).orElse(Component.literal(woodKey.toString()));
                 Component coreName = registryAccess.lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY)
                         .get(coreKey).map(h -> h.value().displayName()).orElse(Component.literal(coreKey.toString()));

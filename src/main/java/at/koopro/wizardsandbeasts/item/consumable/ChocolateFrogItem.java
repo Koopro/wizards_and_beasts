@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.item.trinket.FamousWizardCardItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -104,7 +103,7 @@ public class ChocolateFrogItem extends ConsumedItem {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.SLIME_JUMP_SMALL, SoundSource.PLAYERS, 0.7f, 1.4f);
         if (level instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+            server.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                     player.getX(), player.getEyeY(), player.getZ(), 6, 0.3, 0.2, 0.3, 0.0);
         }
         player.displayClientMessage(

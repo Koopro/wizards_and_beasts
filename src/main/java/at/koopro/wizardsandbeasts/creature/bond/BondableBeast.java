@@ -526,7 +526,7 @@ public interface BondableBeast {
         if (owner != null) {
             at.koopro.wizardsandbeasts.owl.career.track.CareerProgression.record(owner, at.koopro.wizardsandbeasts.owl.career.track.ActivityType.CREATURE_BRED, bondSpecies());
         }
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, mob.getX(),
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.healing(), mob.getX(),
                 mob.getY() + mob.getBbHeight() * 0.5, mob.getZ(), 8, 0.4, 0.4, 0.4, 0.0);
     }
 

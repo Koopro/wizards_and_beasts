@@ -615,7 +615,7 @@ public final class MinistryCasework {
         }
         if (!data.hasEvidence(posted.id(), EvidenceKind.SCENE_RESIDUE) && within(holder, posted.scene(), 48.0)) {
             BlockPos scene = posted.scene();
-            level.sendParticles(ParticleTypes.WITCH, scene.getX() + 0.5, scene.getY() + 0.6, scene.getZ() + 0.5,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), scene.getX() + 0.5, scene.getY() + 0.6, scene.getZ() + 0.5,
                     6, 0.6, 0.4, 0.6, 0.01);
         }
         if (!posted.identified()) {

@@ -248,7 +248,7 @@ public final class WandAllegianceService {
             PlayerFeedback.toast(caster, NoticeKind.UNLOCK,
                     Component.translatable("wandcraft.allegiance.title"), Component.translatable(key));
             level.playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8f, 1.2f);
-            wandMotes(caster, ParticleTypes.ENCHANT);
+            wandMotes(caster, at.koopro.wizardsandbeasts.particle.MagicMotes.magic());
         } else if (after.ordinal() < before.ordinal()) {
             PlayerFeedback.actionBar(caster, Component.translatable("wandcraft.bond.fall"));
             level.playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 0.4f, 0.7f);
@@ -312,7 +312,7 @@ public final class WandAllegianceService {
         PlayerFeedback.toast(victor, NoticeKind.UNLOCK,
                 Component.translatable("wandcraft.allegiance.title"), Component.translatable(victorKey));
         victor.level().playSound(null, victor.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.7f, 0.8f);
-        wandMotes(victor, ParticleTypes.ENCHANT);
+        wandMotes(victor, at.koopro.wizardsandbeasts.particle.MagicMotes.magic());
         if (victim != null) {
             PlayerFeedback.toast(victim, NoticeKind.WARN,
                     Component.translatable("wandcraft.allegiance.title"), Component.translatable(victimKey));
@@ -423,7 +423,7 @@ public final class WandAllegianceService {
                 PlayerFeedback.actionBar(caster, Component.translatable("wandcraft.wand.repair.wandkeeper"));
                 caster.level().playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME,
                         SoundSource.PLAYERS, 0.7f, 1.2f);
-                wandMotes(caster, ParticleTypes.ENCHANT);
+                wandMotes(caster, at.koopro.wizardsandbeasts.particle.MagicMotes.magic());
                 return true;
             }
             PlayerFeedback.actionBar(caster, Component.translatable("wandcraft.wand.repair.refused"));
@@ -435,7 +435,7 @@ public final class WandAllegianceService {
         target.set(WandComponents.WAND_INTEGRITY.get(), 1.0f);
         PlayerFeedback.actionBar(caster, Component.translatable("wandcraft.wand.repair.elder"));
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9f, 1.0f);
-        wandMotes(caster, ParticleTypes.END_ROD);
+        wandMotes(caster, at.koopro.wizardsandbeasts.particle.MagicMotes.light());
         return true;
     }
 
@@ -453,7 +453,7 @@ public final class WandAllegianceService {
         return wands;
     }
 
-    private static void wandMotes(ServerPlayer player, net.minecraft.core.particles.SimpleParticleType type) {
+    private static void wandMotes(ServerPlayer player, net.minecraft.core.particles.ParticleOptions type) {
         player.level().sendParticles(type, player.getX(), player.getEyeY() - 0.4, player.getZ(),
                 16, 0.3, 0.2, 0.3, 0.02);
     }

@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -82,7 +81,7 @@ public final class ClientStatLevelUps {
             double ox = (random.nextDouble() - 0.5) * 2.0;
             double oy = random.nextDouble() * 2.0;
             double oz = (random.nextDouble() - 0.5) * 2.0;
-            mc.level.addParticle(ParticleTypes.ENCHANT,
+            mc.level.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                     player.getX() + ox, player.getY() + oy, player.getZ() + oz,
                     -ox * 0.5, -oy * 0.25, -oz * 0.5);
         }

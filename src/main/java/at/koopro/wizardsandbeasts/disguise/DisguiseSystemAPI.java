@@ -164,7 +164,7 @@ public final class DisguiseSystemAPI {
                 SoundSource.PLAYERS, 0.9f, 0.6f);
         level.sendParticles(ParticleTypes.SMOKE,
                 player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.7, 0.4, 0.03);
-        level.sendParticles(ParticleTypes.WITCH,
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                 player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.02);
     }
 }

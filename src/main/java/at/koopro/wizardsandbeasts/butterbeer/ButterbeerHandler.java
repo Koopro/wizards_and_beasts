@@ -55,7 +55,7 @@ public final class ButterbeerHandler {
             level.sendParticles(ParticleTypes.FALLING_HONEY,
                     entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),
                     2, 0.25, 0.2, 0.25, 0.0);
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.gold(),
                     entity.getX(), entity.getY() + entity.getBbHeight() * 0.5, entity.getZ(),
                     1, 0.2, 0.1, 0.2, 0.005);
         }

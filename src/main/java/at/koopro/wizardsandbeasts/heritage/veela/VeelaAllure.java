@@ -12,7 +12,6 @@ import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.stats.StatResistModifiers;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -156,7 +155,7 @@ public final class VeelaAllure {
         }
         level.playSound(null, veela.getX(), veela.getY(), veela.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE,
                 SoundSource.PLAYERS, 1.0f, 1.4f);
-        level.sendParticles(ParticleTypes.END_ROD, veela.getX(), veela.getY() + 1.0, veela.getZ(),
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.silver(), veela.getX(), veela.getY() + 1.0, veela.getZ(),
                 24, strength.radius() * 0.25, 0.6, strength.radius() * 0.25, 0.01);
         PlayerFeedback.actionBar(veela, Component.translatable("veela.wizards_and_beasts.allure.cast", count));
         return count;

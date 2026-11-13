@@ -229,13 +229,13 @@ public class BloodPactVialItem extends Item {
                 ModSounds.BLOOD_PACT_SEAL.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
 
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.ENCHANT,
+            serverLevel.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.dark(),
                     acceptor.getX(), acceptor.getY() + 1.0, acceptor.getZ(),
                     24, 0.5, 0.5, 0.5, 0.1);
             serverLevel.sendParticles(ParticleTypes.CRIMSON_SPORE,
                     acceptor.getX(), acceptor.getY() + 1.0, acceptor.getZ(),
                     12, 0.5, 0.5, 0.5, 0.05);
-            serverLevel.sendParticles(ParticleTypes.ENCHANT,
+            serverLevel.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.dark(),
                     initiator.getX(), initiator.getY() + 1.0, initiator.getZ(),
                     24, 0.5, 0.5, 0.5, 0.1);
             serverLevel.sendParticles(ParticleTypes.CRIMSON_SPORE,

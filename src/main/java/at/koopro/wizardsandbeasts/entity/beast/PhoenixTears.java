@@ -52,7 +52,7 @@ public final class PhoenixTears {
         target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1), phoenix);
         level.sendParticles(ParticleTypes.FALLING_WATER, target.getX(), target.getY() + target.getBbHeight(),
                 target.getZ(), 24, 0.3, 0.2, 0.3, 0.0);
-        level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY() + target.getBbHeight() * 0.6,
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.healing(), target.getX(), target.getY() + target.getBbHeight() * 0.6,
                 target.getZ(), 6, 0.25, 0.25, 0.25, 0.01);
         level.playSound(null, target.blockPosition(), ModSounds.PHOENIX_TEARS.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
     }

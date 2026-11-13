@@ -279,9 +279,9 @@ public final class FelixFortune {
     }
 
     public static void sparkle(ServerLevel level, ServerPlayer player, int count) {
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.gold(),
                 player.getX(), player.getY() + 1.1, player.getZ(), count, 0.4, 0.6, 0.4, 0.02);
-        level.sendParticles(ParticleTypes.END_ROD,
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.gold(),
                 player.getX(), player.getY() + 1.0, player.getZ(),
                 Math.max(1, count / 4), 0.3, 0.5, 0.3, 0.01);
     }

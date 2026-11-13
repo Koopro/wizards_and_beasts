@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
@@ -163,7 +162,7 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
                 double velocityX = (targetX - startX) * 0.05 + (random.nextDouble() - 0.5) * 0.01;
                 double velocityY = (targetY - startY) * 0.05 + 0.01;
                 double velocityZ = (targetZ - startZ) * 0.05 + (random.nextDouble() - 0.5) * 0.01;
-                tickerLevel.addParticle(ParticleTypes.ENCHANT, startX, startY, startZ, velocityX, velocityY, velocityZ);
+                tickerLevel.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), startX, startY, startZ, velocityX, velocityY, velocityZ);
             }
         };
     }

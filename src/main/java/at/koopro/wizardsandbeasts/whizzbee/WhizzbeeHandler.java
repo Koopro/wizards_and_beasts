@@ -52,7 +52,7 @@ public final class WhizzbeeHandler {
         jumper.level().playSound(null, jumper.getX(), jumper.getY(), jumper.getZ(),
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.35f, 1.9f);
         if (jumper.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                     jumper.getX(), jumper.getY() + 0.1, jumper.getZ(), 8, 0.2, 0.05, 0.2, 0.04);
         }
     }

@@ -8,7 +8,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
@@ -98,7 +97,7 @@ public final class TimeTrialClient {
             double angle = Math.PI * 2.0 * i / RING_POINTS;
             Vec3 p = centre.add(side.scale(Math.cos(angle) * radius)).add(up.scale(Math.sin(angle) * radius));
             if (next) {
-                mc.level.addParticle(ParticleTypes.END_ROD, p.x, p.y, p.z, 0.0, 0.0, 0.0);
+                mc.level.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.light(), p.x, p.y, p.z, 0.0, 0.0, 0.0);
             } else {
                 mc.level.addParticle(FAINT, p.x, p.y, p.z, 0.0, 0.0, 0.0);
             }

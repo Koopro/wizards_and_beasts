@@ -117,6 +117,33 @@ class VisualStyleConformanceTest {
         assertTrue(failures.isEmpty(), String.join("\n", failures));
     }
 
+    /**
+     * Vanilla's own sparkles keep their vanilla meaning (style guide §3): the villager's "trade accepted", the witch,
+     * the end rod, the enchanting table and the Enderman. The mod's magic draws {@code MagicMotes} or a tinted mod
+     * sprite instead. Dev capture harnesses are exempt.
+     */
+    @Test
+    void reservedVanillaParticlesStayVanillas() throws IOException {
+        Path root = Path.of("src", "main", "java", "at", "koopro", "wizardsandbeasts");
+        Pattern reserved = Pattern.compile("ParticleTypes\\.(HAPPY_VILLAGER|WITCH|END_ROD|ENCHANT|PORTAL)\\b");
+        List<String> failures = new ArrayList<>();
+        try (Stream<Path> files = Files.walk(root)) {
+            for (Path java : files.filter(f -> f.toString().endsWith(".java")).sorted().toList()) {
+                String rel = root.relativize(java).toString().replace('\\', '/');
+                if (rel.startsWith("client/debug/")) {
+                    continue;
+                }
+                List<String> lines = Files.readAllLines(java);
+                for (int i = 0; i < lines.size(); i++) {
+                    if (reserved.matcher(lines.get(i)).find()) {
+                        failures.add(rel + ":" + (i + 1) + " borrows a reserved vanilla particle");
+                    }
+                }
+            }
+        }
+        assertTrue(failures.isEmpty(), String.join("\n", failures));
+    }
+
     @Test
     void spellColoursAreRealAndOpaque() throws IOException {
         List<String> failures = new ArrayList<>();

@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.brew;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -83,7 +82,7 @@ public final class SilverRefining {
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.9f, 1.4f);
         level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.6f, 1.5f);
         if (level instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.END_ROD,
+            server.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.silver(),
                     pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 18, 0.25, 0.25, 0.25, 0.02);
         }
     }

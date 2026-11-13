@@ -10,7 +10,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -85,7 +84,7 @@ public final class SilveringHandler {
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9f, 1.2f);
         if (player.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.silver(),
                     player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.3, 0.3, 0.3, 0.02);
         }
         PlayerFeedback.actionBar(player,

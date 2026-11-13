@@ -6,7 +6,6 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.timeturner.TimeTurnerRules;
 import at.koopro.wizardsandbeasts.timeturner.TimeTurnerService;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -91,7 +90,7 @@ public class TimeTurnerItem extends Item implements AnimatedItem {
         if (wound / TimeTurnerRules.WIND_TICKS_PER_TURN > TimeTurnerRules.MAX_TURNS) {
             return; // fully wound: nothing more to count
         }
-        serverLevel.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY(0.7), player.getZ(),
+        serverLevel.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.gold(), player.getX(), player.getY(0.7), player.getZ(),
                 14, 0.35, 0.35, 0.35, 0.0);
         serverLevel.playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS,
                 0.35F, 0.8F + turns * 0.15F);

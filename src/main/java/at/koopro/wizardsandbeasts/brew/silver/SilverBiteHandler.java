@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.brew.silver;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -56,7 +55,7 @@ public final class SilverBiteHandler {
         victim.level().playSound(null, victim.getX(), victim.getY(), victim.getZ(),
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 1.8f);
         if (victim.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.silver(),
                     victim.getX(), victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(),
                     6, 0.2, 0.2, 0.2, 0.02);
         }

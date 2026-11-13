@@ -113,7 +113,7 @@ public final class DeluminatorReturnService {
                 pending.ticksRemaining--;
 
                 Vec3 trailStart = new Vec3(user.getX(), user.getEyeY(), user.getZ());
-                userLevel.sendParticles(ParticleTypes.END_ROD,
+                userLevel.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                         trailStart.x, trailStart.y, trailStart.z,
                         2, 0.08D, 0.08D, 0.08D, 0.004D);
 
@@ -152,8 +152,8 @@ public final class DeluminatorReturnService {
 
             userLevel.playSound(null, BlockPos.containing(origin), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8F, 1.2F);
             targetLevel.playSound(null, arrival, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8F, 1.2F);
-            userLevel.sendParticles(ParticleTypes.END_ROD, origin.x, origin.y + 1.0D, origin.z, 20, 0.2D, 0.4D, 0.2D, 0.02D);
-            targetLevel.sendParticles(ParticleTypes.END_ROD, arrival.getX() + 0.5D, arrival.getY() + 1.0D, arrival.getZ() + 0.5D, 20, 0.2D, 0.4D, 0.2D, 0.02D);
+            userLevel.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(), origin.x, origin.y + 1.0D, origin.z, 20, 0.2D, 0.4D, 0.2D, 0.02D);
+            targetLevel.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(), arrival.getX() + 0.5D, arrival.getY() + 1.0D, arrival.getZ() + 0.5D, 20, 0.2D, 0.4D, 0.2D, 0.02D);
             user.displayClientMessage(Component.translatable("item.wizards_and_beasts.deluminator.return_success", target.getName())
                     .withStyle(ChatFormatting.AQUA), true);
             iterator.remove();
@@ -175,7 +175,7 @@ public final class DeluminatorReturnService {
             double t = i / (double) steps;
             Vec3 p = start.add(delta.scale(t));
             double wobble = (level.random.nextDouble() - 0.5D) * 0.06D;
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                     p.x + wobble, p.y + wobble * 0.5D, p.z + wobble,
                     1, 0.02D, 0.03D, 0.02D, 0.008D);
             if (i == steps || i % 6 == 0) {

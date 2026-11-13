@@ -297,7 +297,7 @@ public class PhoenixEntity extends GeoEntityBase implements BondableBeast {
                 applyScale(WildlifeRules.REBORN_SCALE);
                 rebirthAge = tickCount;
                 level.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.3, getZ(), 40, 0.25, 0.9, 0.25, 0.04);
-                level.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.5, getZ(), 12, 0.3, 0.6, 0.3, 0.02);
+                level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.gold(), getX(), getY() + 0.5, getZ(), 12, 0.3, 0.6, 0.3, 0.02);
                 level.playSound(null, blockPosition(), ModSounds.PHOENIX_RISE.get(), SoundSource.NEUTRAL, 1.0f, 1.0f);
             }
             case REBORN -> setHealth(getMaxHealth() * WildlifeRules.REBORN_HEALTH_FRACTION);

@@ -109,7 +109,7 @@ public class FormRenderHandler {
                 mc.level.addParticle(ParticleTypes.SMOKE,
                         pos.x + ox, baseY + oy, pos.z + oz,
                         -velocity.x * 0.24, 0.02, -velocity.z * 0.24);
-                mc.level.addParticle(ParticleTypes.WITCH,
+                mc.level.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
                         pos.x + ox * 0.7, baseY + oy * 0.7, pos.z + oz * 0.7,
                         0.0, 0.01, 0.0);
             }
@@ -133,7 +133,7 @@ public class FormRenderHandler {
             double y = center.y + (mc.level.random.nextDouble() - 0.5) * (moving ? 0.6 : 0.45);
             mc.level.addParticle(ParticleTypes.LARGE_SMOKE, x, y, z, 0.0, 0.01, 0.0);
             if (!moving) {
-                mc.level.addParticle(ParticleTypes.WITCH, x, y, z, 0.0, 0.005, 0.0);
+                mc.level.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), x, y, z, 0.0, 0.005, 0.0);
             }
         }
     }

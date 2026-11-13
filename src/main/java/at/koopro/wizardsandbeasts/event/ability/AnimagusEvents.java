@@ -8,7 +8,6 @@ import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.form.FormSystemAPI;
 import at.koopro.wizardsandbeasts.registry.ConsumableItemRegistry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -81,9 +80,9 @@ public final class AnimagusEvents {
             mandrake.shrink(1);
         }
 
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(),
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), player.getX(), player.getY() + 1.0, player.getZ(),
                 24, 0.5, 0.8, 0.5, 0.01);
-        level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(),
+        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), player.getX(), player.getY() + 1.2, player.getZ(),
                 30, 0.5, 0.6, 0.5, 0.05);
         level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 0.6f);
 

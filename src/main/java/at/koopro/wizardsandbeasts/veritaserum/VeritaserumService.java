@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.polyjuice.PolyjuiceService;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -104,7 +103,7 @@ public final class VeritaserumService {
         if (player.level() instanceof ServerLevel level) {
             level.playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME,
                     SoundSource.PLAYERS, 0.6f, 0.7f);
-            level.sendParticles(ParticleTypes.END_ROD,
+            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                     player.getX(), player.getY() + 1.2, player.getZ(), 18, 0.3, 0.4, 0.3, 0.01);
         }
     }

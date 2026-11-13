@@ -3,7 +3,6 @@ package at.koopro.wizardsandbeasts.item.consumable;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.whizzbee.Whizzbee;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -63,7 +62,7 @@ public class FizzingWhizzbeeItem extends ConsumedItem {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 0.6f, 1.6f);
         if (level instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.END_ROD,
+            server.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
                     player.getX(), player.getY() + 0.1, player.getZ(), 12, 0.3, 0.05, 0.3, 0.05);
         }
 
