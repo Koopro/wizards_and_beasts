@@ -22,6 +22,13 @@ public final class ModParticleProviders {
         register(event, ModParticles.LIGHT_GLOW.get(), SpellFamily.LIGHT);
         register(event, ModParticles.WATER_DROPLET.get(), SpellFamily.WATER);
         register(event, ModParticles.PROTEGO_DEFLECT.get(), SpellFamily.ARCANE);
+        // Sent by the clash, a breached ward and the Killing Curse passing a shield; until 2026-11-12 these three
+        // had sprites and server senders but no provider, so the client dropped every one.
+        register(event, ModParticles.SPELL_CLASH.get(), SpellFamily.ELECTRIC);
+        event.registerSpriteSet(ModParticles.PROTEGO_SHATTER.get(),
+                sprites -> FragmentParticle.provider(sprites, FragmentParticle.Style.SHATTER));
+        event.registerSpriteSet(ModParticles.AK_BYPASS_FLASH.get(),
+                sprites -> FragmentParticle.provider(sprites, FragmentParticle.Style.FLASH));
         event.registerSpriteSet(ModParticles.SMOKE_PUFF.get(), SmokePuffParticle::provider);
 
         // Broom slipstreams. One particle class, three palettes: what separates a Cleansweep's dust
