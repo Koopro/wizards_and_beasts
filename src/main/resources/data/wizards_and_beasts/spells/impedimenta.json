@@ -4,7 +4,7 @@
   "category": "combat",
   "cooldownTicks": 50,
   "baseDamage": 0.0,
-  "color": -5422474,
+  "color": -2513855,
   "sound": {
     "id": "minecraft:entity.evoker.cast_spell",
     "volume": 0.8,

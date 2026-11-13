@@ -4,7 +4,7 @@
   "category": "combat",
   "cooldownTicks": 120,
   "baseDamage": 0.0,
-  "color": -5411500,
+  "color": -11181872,
   "sound": {
     "id": "minecraft:entity.illusioner.prepare_blindness",
     "volume": 0.8,

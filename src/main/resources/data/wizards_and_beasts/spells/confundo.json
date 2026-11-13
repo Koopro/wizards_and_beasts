@@ -4,7 +4,7 @@
   "category": "utility",
   "cooldownTicks": 80,
   "baseDamage": 0.0,
-  "color": -5415361,
+  "color": -3892225,
   "sound": {
     "id": "minecraft:entity.illusioner.cast_spell",
     "volume": 0.7,

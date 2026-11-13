@@ -4,7 +4,7 @@
   "category": "combat",
   "cooldownTicks": 120,
   "baseDamage": 5.0,
-  "color": -5416390,
+  "color": -24528,
   "sound": {
     "id": "minecraft:entity.blaze.shoot",
     "volume": 1.0,
