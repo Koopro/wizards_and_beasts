@@ -203,8 +203,36 @@ public final class ProtegoFeedback {
             return;
         }
         level.sendParticles(tint(tier), at.x, at.y, at.z, scaled(16), 0.15, 0.15, 0.15, 0.02);
+        ripple(level, shield, at);
         level.playSound(null, BlockPos.containing(at), ModSounds.PROTEGO_BLOCK.get(), SoundSource.PLAYERS,
                 0.8f, blockPitch(shield));
+    }
+
+    /**
+     * Two rings in the ward's colour round the point a spell struck, lying on the ward's surface: the shield
+     * visibly takes the blow there. Before, a blocked spell left only a small burst that read the same as any hit.
+     * The impact sits on the ward at {@code centre + direction * radius}, so the line from the centre is the
+     * surface normal for the frontal disc and the dome alike.
+     */
+    static void ripple(ServerLevel level, ProtegoShieldEntity shield, Vec3 at) {
+        Vec3 normal = at.subtract(shield.centre());
+        if (normal.lengthSqr() < 1.0e-6) {
+            return;
+        }
+        normal = normal.normalize();
+        Vec3 helper = Math.abs(normal.y) > 0.9 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+        Vec3 u = normal.cross(helper).normalize();
+        Vec3 v = normal.cross(u).normalize();
+        SpellTintParticleOptions options = tint(shield.tier());
+        double[][] rings = {{0.35, 10}, {0.65, 16}};
+        for (double[] ring : rings) {
+            int points = (int) ring[1];
+            for (int i = 0; i < points; i++) {
+                double a = i * Math.PI * 2 / points;
+                Vec3 p = at.add(u.scale(Math.cos(a) * ring[0])).add(v.scale(Math.sin(a) * ring[0]));
+                level.sendParticles(options, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            }
+        }
     }
 
     /**
