@@ -4,7 +4,6 @@ import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -81,20 +80,45 @@ public final class PortkeyService {
 
         for (ServerPlayer traveller : travellers) {
             Vec3 from = traveller.position();
-            level.sendParticles(ParticleTypes.CLOUD, from.x, from.y + 0.5, from.z, 16, 0.3, 0.3, 0.3, 0.1);
+            swirl(level, from);
             traveller.stopRiding();
             traveller.teleportTo(arrival.x, arrival.y, arrival.z);
             traveller.resetFallDistance();
             traveller.displayClientMessage(Component.translatable("item.wizards_and_beasts.portkey.jerk")
                     .withStyle(ChatFormatting.AQUA), true);
         }
-        level.sendParticles(ParticleTypes.CLOUD, arrival.x, arrival.y + 0.5, arrival.z, 24, 0.5, 0.3, 0.5, 0.1);
+        // Set down: a puff of the mod's own smoke where the travellers land, and the swirl dying out round them.
+        at.koopro.wizardsandbeasts.particle.MagicSmoke.burst(level, arrival.x, arrival.y + 0.4, arrival.z,
+                SMOKE, 10, 0.5, 0.2);
+        swirl(level, arrival);
         level.playSound(null, target.above(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0f, 0.6f);
 
         // Spent: the journey it was made for is made.
         portkey.shrink(1);
         tell(holder, "item.wizards_and_beasts.portkey.spent");
         return Result.TRAVELLED;
+    }
+
+    /** The pale grey of dust kicked up by a landing, not vanilla's cloud. */
+    private static final int SMOKE = 0xFFB8B4AC;
+
+    /**
+     * "Spinning in a howl of wind and swirling colour" (GoF ch. 6): three rising rings of motes in the charm colour
+     * round where a traveller stands. Was vanilla's cloud puff, which is not ours to borrow and read as a mob
+     * despawning.
+     */
+    private static void swirl(ServerLevel level, Vec3 where) {
+        var motes = at.koopro.wizardsandbeasts.registry.ModParticles.tinted(
+                at.koopro.wizardsandbeasts.spell.core.SpellFamily.ARCANE,
+                at.koopro.wizardsandbeasts.spell.core.MagicColours.MAGIC);
+        for (int ring = 0; ring < 3; ring++) {
+            double y = where.y + 0.3 + ring * 0.6;
+            double r = 0.9 - ring * 0.2;
+            for (int i = 0; i < 10; i++) {
+                double a = (i / 10.0 + ring * 0.15) * Math.PI * 2;
+                level.sendParticles(motes, where.x + Math.cos(a) * r, y, where.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            }
+        }
     }
 
     private static void tell(ServerPlayer player, String key) {
