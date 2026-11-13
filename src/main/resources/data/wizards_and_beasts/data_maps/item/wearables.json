@@ -312,6 +312,12 @@
           "operation": "add_value"
         }
       ]
+    },
+    "wizards_and_beasts:slytherins_locket": {
+      "equipment_type": "necklace"
+    },
+    "wizards_and_beasts:ravenclaws_diadem": {
+      "equipment_type": "headwear"
     }
   }
 }

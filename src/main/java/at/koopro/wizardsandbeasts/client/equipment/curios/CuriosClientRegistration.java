@@ -21,6 +21,10 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 public final class CuriosClientRegistration {
 
     private static final WornGeoCurioRenderer WORN_GEO = new WornGeoCurioRenderer();
+    private static final JewelleryCurioRenderer PENDANT =
+            new JewelleryCurioRenderer(JewelleryCurioRenderer.Placement.PENDANT);
+    private static final JewelleryCurioRenderer CIRCLET =
+            new JewelleryCurioRenderer(JewelleryCurioRenderer.Placement.CIRCLET);
 
     private CuriosClientRegistration() {}
 
@@ -30,5 +34,12 @@ public final class CuriosClientRegistration {
                 ICurioRenderer.register(item, () -> WORN_GEO);
             }
         }
+        // Jewellery drawn from its own item model: the pendants on the chest, the diadem on the brow.
+        ICurioRenderer.register(at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get(),
+                () -> PENDANT);
+        ICurioRenderer.register(at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.TIME_TURNER.get(),
+                () -> PENDANT);
+        ICurioRenderer.register(at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get(),
+                () -> CIRCLET);
     }
 }

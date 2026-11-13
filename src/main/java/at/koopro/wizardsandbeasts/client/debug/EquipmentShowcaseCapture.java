@@ -295,6 +295,16 @@ public final class EquipmentShowcaseCapture {
                 wear(p, stitched(p, ArmorItemRegistry.PROFESSOR_HAT.get(), "faculty_potions", 0));
                 wear(p, stitched(p, ArmorItemRegistry.SCARF.get(), "house_serpent", 0));
             }),
+            // Jewellery drawn from its own item model (JewelleryCurioRenderer): pendant on the chest, diadem on the brow.
+            new Outfit("acc_jewellery_locket_diadem", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
+                wear(p, new ItemStack(at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get()));
+                wear(p, new ItemStack(at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get()));
+            }),
+            new Outfit("acc_jewellery_time_turner", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), "house_lion", 1));
+                wear(p, new ItemStack(at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.TIME_TURNER.get()));
+            }),
             // Phase E3: the four remaining cuts, at the ranks that show the most of them.
             new Outfit("e3_travel_coat", p -> {
                 wear(p, stitched(p, ArmorItemRegistry.TRAVEL_COAT_CHEST.get(), "canvas_umber", 0));
