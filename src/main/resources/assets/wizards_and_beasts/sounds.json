@@ -183,10 +183,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_cast_generic",
     "sounds": [
       {
-        "name": "minecraft:entity.evoker.prepare_summon",
-        "volume": 0.75,
-        "pitch": 1.15,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/cast_generic_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_generic_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_generic_3",
+        "volume": 0.9
       }
     ]
   },
@@ -194,9 +200,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_cast_dark",
     "sounds": [
       {
-        "name": "minecraft:mob/blaze/death",
-        "volume": 0.45,
-        "pitch": 0.55
+        "name": "wizards_and_beasts:spell/cast_dark_1",
+        "volume": 0.54
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_dark_2",
+        "volume": 0.54
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_dark_3",
+        "volume": 0.54
       }
     ]
   },
@@ -204,9 +217,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_cast_charm",
     "sounds": [
       {
-        "name": "minecraft:mob/allay/idle_with_item1",
-        "volume": 0.55,
-        "pitch": 1.35
+        "name": "wizards_and_beasts:spell/cast_charm_1",
+        "volume": 0.66
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_charm_2",
+        "volume": 0.66
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_charm_3",
+        "volume": 0.66
       }
     ]
   },
@@ -214,10 +234,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_impact_generic",
     "sounds": [
       {
-        "name": "minecraft:block.amethyst_cluster.break",
-        "volume": 0.6,
-        "pitch": 1.25,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/impact_generic_1",
+        "volume": 0.72
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_generic_2",
+        "volume": 0.72
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_generic_3",
+        "volume": 0.72
       }
     ]
   },
@@ -236,10 +262,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_impact_stupefy",
     "sounds": [
       {
-        "name": "minecraft:block.copper_bulb.turn_off",
-        "volume": 0.85,
-        "pitch": 1.45,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/impact_stupefy_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_stupefy_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_stupefy_3",
+        "volume": 1.0
       }
     ]
   },
@@ -301,16 +333,16 @@
     "subtitle": "subtitles.wizards_and_beasts.patronus_summon",
     "sounds": [
       {
-        "name": "minecraft:entity.allay.item_given",
-        "volume": 0.8,
-        "pitch": 1.1,
-        "type": "event"
+        "name": "wizards_and_beasts:patronus/summon_1",
+        "volume": 0.96
       },
       {
-        "name": "minecraft:entity.evoker.prepare_summon",
-        "volume": 0.5,
-        "pitch": 1.35,
-        "type": "event"
+        "name": "wizards_and_beasts:patronus/summon_2",
+        "volume": 0.96
+      },
+      {
+        "name": "wizards_and_beasts:patronus/summon_3",
+        "volume": 0.96
       }
     ]
   },
@@ -329,10 +361,16 @@
     "subtitle": "subtitles.wizards_and_beasts.protego_block",
     "sounds": [
       {
-        "name": "minecraft:enchant.thorns.hit",
-        "volume": 0.75,
-        "pitch": 1.12,
-        "type": "event"
+        "name": "wizards_and_beasts:protego/block_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:protego/block_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:protego/block_3",
+        "volume": 0.9
       }
     ]
   },
@@ -428,16 +466,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_clash",
     "sounds": [
       {
-        "name": "minecraft:block.amethyst_cluster.break",
-        "volume": 0.65,
-        "pitch": 1.45,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/clash_1",
+        "volume": 0.78
       },
       {
-        "name": "minecraft:block.copper_bulb.turn_off",
-        "volume": 0.5,
-        "pitch": 1.2,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/clash_2",
+        "volume": 0.78
+      },
+      {
+        "name": "wizards_and_beasts:spell/clash_3",
+        "volume": 0.78
       }
     ]
   },
@@ -834,16 +872,16 @@
     "subtitle": "subtitles.wizards_and_beasts.apparition_crack_wizard",
     "sounds": [
       {
-        "name": "minecraft:entity.firework_rocket.blast",
-        "volume": 0.6,
-        "pitch": 1.6,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/crack_wizard_1",
+        "volume": 0.72
       },
       {
-        "name": "minecraft:entity.generic.explode",
-        "volume": 0.35,
-        "pitch": 1.9,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/crack_wizard_2",
+        "volume": 0.72
+      },
+      {
+        "name": "wizards_and_beasts:apparition/crack_wizard_3",
+        "volume": 0.72
       }
     ]
   },
@@ -851,16 +889,16 @@
     "subtitle": "subtitles.wizards_and_beasts.apparition_crack_elf",
     "sounds": [
       {
-        "name": "minecraft:entity.firework_rocket.blast",
-        "volume": 0.5,
-        "pitch": 2.0,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/crack_elf_1",
+        "volume": 0.6
       },
       {
-        "name": "minecraft:entity.firework_rocket.blast_far",
-        "volume": 0.45,
-        "pitch": 2.0,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/crack_elf_2",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:apparition/crack_elf_3",
+        "volume": 0.6
       }
     ]
   },
