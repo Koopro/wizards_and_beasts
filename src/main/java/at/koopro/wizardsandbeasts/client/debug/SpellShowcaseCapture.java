@@ -106,7 +106,7 @@ public final class SpellShowcaseCapture {
     private SpellShowcaseCapture() {}
 
     /** The particle scenes a lone caster cannot cause by casting at a dummy (WB_SPELL_SHOWCASE=fx). */
-    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward");
+    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel");
 
     private static List<String> chooseSpells() {
         if ("fx".equalsIgnoreCase(MODE)) {
@@ -218,6 +218,24 @@ public final class SpellShowcaseCapture {
                 SCRIPT.add(new Step("ward_hit_1", 2, Cam.CASTER, NONE, NOTHING));
                 SCRIPT.add(new Step("ward_hit_2", 4, Cam.CASTER, NONE, NOTHING));
             }
+            case "fx:duel" -> {
+                // A real lock: the caster's Stupefy and an Expelliarmus sent back by the dummy, head-on along
+                // the lane in the same tick, so the bolts meet mid-way and SpellClashEntity takes over.
+                String stupefy = Spells.byId("stupefy").getId();
+                SCRIPT.add(new Step("", 24, Cam.WIDE, p -> {
+                    setUse(false);
+                    Minecraft.getInstance().particleEngine.clearParticles();
+                }, p -> prepare(p, stupefy)));
+                SCRIPT.add(new Step("", 1, Cam.WIDE, NONE, SpellShowcaseCapture::duel));
+                SCRIPT.add(new Step("duel_flight", 3, Cam.WIDE, NONE, NOTHING));
+                SCRIPT.add(new Step("duel_lock_wide", 4, Cam.WIDE, NONE, NOTHING));
+                SCRIPT.add(new Step("duel_lock_close", 6, Cam.CLOSE, NONE, NOTHING));
+                SCRIPT.add(new Step("duel_lock_late", 12, Cam.CLOSE, NONE, p -> LOGGER.info(
+                        "Spell showcase: duel clash entities {}", p.level().getEntitiesOfClass(
+                                at.koopro.wizardsandbeasts.entity.spell.SpellClashEntity.class,
+                                p.getBoundingBox().inflate(20)).size())));
+                SCRIPT.add(new Step("duel_end_wide", 30, Cam.WIDE, NONE, NOTHING));
+            }
             case "fx:flash" -> {
                 SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));
                 SCRIPT.add(new Step("", 1, Cam.CASTER, NONE, p -> p.level().sendParticles(
@@ -240,6 +258,34 @@ public final class SpellShowcaseCapture {
                 SCRIPT.add(new Step("clash_2", 4, Cam.CLOSE, NONE, NOTHING));
             }
         }
+    }
+
+    /** Both bolts of the duel, fired in one tick: the caster's from the eye eastwards, the dummy's back west. */
+    private static void duel(ServerPlayer p) {
+        ServerLevel level = p.level();
+        var dummies = level.getEntitiesOfClass(at.koopro.wizardsandbeasts.entity.dummy.DuellingDummyEntity.class,
+                p.getBoundingBox().inflate(16));
+        if (dummies.isEmpty()) {
+            LOGGER.warn("Spell showcase: duel has no dummy");
+            return;
+        }
+        var dummy = dummies.getFirst();
+        p.teleportTo(level, CASTER_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+        Spell stupefy = Spells.byId("stupefy");
+        Spell expelliarmus = Spells.byId("expelliarmus");
+        if (stupefy == null || expelliarmus == null) {
+            return;
+        }
+        float speed = 1.6F;
+        var mine = new at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity(level, p, stupefy.getId());
+        mine.setPos(p.getX(), p.getEyeY() - 0.1, p.getZ());
+        mine.shoot(1.0, 0.0, 0.0, speed, 0.0F);
+        var theirs = new at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity(level, dummy, expelliarmus.getId());
+        theirs.setPos(dummy.getX(), p.getEyeY() - 0.1, dummy.getZ());
+        theirs.shoot(-1.0, 0.0, 0.0, speed, 0.0F);
+        level.addFreshEntity(mine);
+        level.addFreshEntity(theirs);
+        LOGGER.info("Spell showcase: duel bolts away");
     }
 
     private static void setUse(boolean down) {
