@@ -72,6 +72,9 @@ public final class BasiliskBreedingRitual {
         }
         Entity spawned = basiliskType.get().create(level, EntitySpawnReason.TRIGGERED);
         if (spawned instanceof GenericBeastEntity basilisk) {
+            if (basilisk instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity hatchling) {
+                hatchling.setAgeTicks(0);   // the ritual hatches one; it grows from here
+            }
             basilisk.setPos(impactPos.x, impactPos.y, impactPos.z);
             level.addFreshEntity(basilisk);
             level.playSound(null, pos, SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 1.0f, 0.6f);

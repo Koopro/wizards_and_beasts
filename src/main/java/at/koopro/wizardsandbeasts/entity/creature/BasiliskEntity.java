@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.basilisk.BasiliskGrowth;
 import at.koopro.wizardsandbeasts.chamber.ChamberBasilisk;
 import at.koopro.wizardsandbeasts.effect.BasiliskVenomEffect;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -19,7 +21,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -49,6 +58,9 @@ import software.bernie.geckolib.animation.state.AnimationTest;
  *   <li><b>The eyes.</b> {@link #headPosition()} is where {@code DeathGazeGoal} looks from.</li>
  *   <li><b>Death.</b> Recorded against the Chamber it died in, so that Chamber never wakes another
  *       ({@link ChamberBasilisk}).</li>
+ *   <li><b>Growth.</b> It hatches small and grows ({@link BasiliskGrowth}): body, health and bite scale with its age,
+ *       the gaze does not. The ritual and spawn eggs hatch one; a wild one is met grown; the Chamber's wakes at the
+ *       cap. One with no saved age (spawned by a command, or from before growth existed) is an adult.</li>
  * </ul>
  */
 public class BasiliskEntity extends GenericGroundBeastEntity {
@@ -86,6 +98,13 @@ public class BasiliskEntity extends GenericGroundBeastEntity {
     private int stillTicks;
     private int pendingBite;
 
+    // ── growth ───────────────────────────────────────────────────────────────
+    private static final Identifier GROWTH_ID = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "basilisk_growth");
+    /** How often a growing basilisk re-applies its size; size changes in hundredths over hours, not per tick. */
+    private static final int GROWTH_INTERVAL = 200;
+    private long ageTicks = BasiliskGrowth.ADULT_TICKS;
+    private float appliedGrowth = -1f;
+
     public BasiliskEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         // A serpent flows over a block's edge rather than hopping it.
@@ -115,7 +134,71 @@ public class BasiliskEntity extends GenericGroundBeastEntity {
     public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
                                                   EntitySpawnReason reason, @Nullable SpawnGroupData data) {
         setHome(blockPosition());
+        switch (reason) {
+            case SPAWN_ITEM_USE, BREEDING -> setAgeTicks(0);
+            case NATURAL, CHUNK_GENERATION, STRUCTURE -> setAgeTicks(BasiliskGrowth.wildAge(getRandom()));
+            default -> { }
+        }
         return super.finalizeSpawn(level, difficulty, reason, data);
+    }
+
+    // ── growth ───────────────────────────────────────────────────────────────
+
+    public long ageTicks() {
+        return ageTicks;
+    }
+
+    /** Sets its age and applies the size that goes with it at once. */
+    public void setAgeTicks(long ticks) {
+        ageTicks = Math.max(0, ticks);
+        applyGrowth();
+    }
+
+    /** The current growth factor relative to an adult. */
+    public float growth() {
+        return BasiliskGrowth.size(ageTicks);
+    }
+
+    private void applyGrowth() {
+        float growth = growth();
+        if (Math.abs(growth - appliedGrowth) < 0.002f) {
+            return;
+        }
+        appliedGrowth = growth;
+        float healthShare = getMaxHealth() > 0 ? getHealth() / getMaxHealth() : 1f;
+        growthModifier(Attributes.SCALE, growth);
+        growthModifier(Attributes.MAX_HEALTH, growth);
+        growthModifier(Attributes.ATTACK_DAMAGE, growth);
+        refreshDimensions();
+        if (isAlive()) {
+            setHealth(Math.max(1f, healthShare * getMaxHealth()));
+        }
+    }
+
+    private void growthModifier(Holder<Attribute> attribute, float growth) {
+        AttributeInstance instance = getAttribute(attribute);
+        if (instance == null) {
+            return;
+        }
+        instance.removeModifier(GROWTH_ID);
+        if (growth != 1f) {
+            // On top of everything else (species body, abilities, Engorgio): multiplies the total.
+            instance.addPermanentModifier(new AttributeModifier(GROWTH_ID, growth - 1.0,
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
+    }
+
+    @Override
+    protected void addAdditionalSaveData(@NonNull ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putLong("BasiliskAge", ageTicks);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(@NonNull ValueInput input) {
+        super.readAdditionalSaveData(input);
+        ageTicks = input.getLongOr("BasiliskAge", BasiliskGrowth.ADULT_TICKS);
+        appliedGrowth = -1f;
     }
 
     // ── territory ────────────────────────────────────────────────────────────
@@ -173,6 +256,12 @@ public class BasiliskEntity extends GenericGroundBeastEntity {
         }
         if (pendingBite > 0 && --pendingBite == 0) {
             triggerDeclared("bite");
+        }
+        if (ageTicks < BasiliskGrowth.CAP_TICKS) {
+            ageTicks++;
+        }
+        if (appliedGrowth < 0 || tickCount % GROWTH_INTERVAL == 0) {
+            applyGrowth();
         }
         if (tickCount % 10 == 0 && ModuleManager.isEnabled(Module.CREATURES)) {
             boolean still = getDeltaMovement().horizontalDistanceSqr() < 1.0e-4 && getNavigation().isDone();

@@ -170,6 +170,10 @@ public class ChamberHeartBlockEntity extends BlockEntity {
         if (snake instanceof Mob mob) {
             mob.setPersistenceRequired();
         }
+        if (snake instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity ancient) {
+            // Slytherin's monster is a thousand years old: it wakes at its full size.
+            ancient.setAgeTicks(at.koopro.wizardsandbeasts.basilisk.BasiliskGrowth.CAP_TICKS);
+        }
         snake.setData(ModAttachments.CHAMBER_HEART.get(), getBlockPos().asLong());
         basilisk = snake.getUUID();
         level.addFreshEntity(snake);

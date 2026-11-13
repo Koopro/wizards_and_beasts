@@ -546,6 +546,10 @@ public final class EntityShowcaseCapture {
             mob.setNoAi(true);
             mob.setPersistenceRequired();
         }
+        if (entity instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity basilisk
+                && entry.props().containsKey("age")) {
+            basilisk.setAgeTicks(Long.parseLong(entry.props().get("age")));   // hatchling, adult or full grown
+        }
         if (entity instanceof at.koopro.wizardsandbeasts.entity.spell.PatronusEntity patronus
                 && entry.props().containsKey("form")) {
             patronus.holdForShowcase(entry.props().get("form"));   // e.g. form=minecraft:horse
