@@ -181,7 +181,7 @@ final class SpellCastTargetedHandler {
                             caster.displayClientMessage(
                                     Component.literal("Bombarda Maxima").withStyle(ChatFormatting.RED), true);
                         }
-                        SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
+                        SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell);
                         SpellHelper.pushNearbyLightweightEntities(level, caster, blockHit.getLocation(),
                                 look, 1.3f * chargeMult, 3.0 * chargeMult);
                     }
@@ -196,7 +196,7 @@ final class SpellCastTargetedHandler {
                     if (controlled != null) {
                         int duration = Math.min(600, Math.max(40, 200 + (int) (spell.getProficiencyScalar(caster) * 400)));
                         ImperioServerLogic.beginControl(level, caster, controlled, duration);
-                        SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell.getColor());
+                        SpellHelper.playSpellImpact(level, blockHit.getLocation(), spell);
                         successful = true;
                     }
                 }
@@ -297,7 +297,7 @@ final class SpellCastTargetedHandler {
             SpellImpactBurstS2CPayload.sendToTracking(
                     target,
                     target.getBoundingBox().getCenter(),
-                    SpellFamilies.of(spell),
+                    spell.vfx().impact().particleFamily(),
                     spell.getColor(),
                     14,
                     0.14f);
@@ -349,7 +349,7 @@ final class SpellCastTargetedHandler {
         }
         ColloportusLockStore.lock(level, pos);
         level.playSound(null, pos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.55f, 0.85f);
-        SpellHelper.playSpellImpact(level, Vec3.atCenterOf(pos), spell.getColor());
+        SpellHelper.playSpellImpact(level, Vec3.atCenterOf(pos), spell);
         return true;
     }
 

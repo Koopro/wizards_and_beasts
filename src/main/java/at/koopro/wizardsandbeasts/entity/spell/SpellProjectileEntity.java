@@ -12,7 +12,6 @@ import at.koopro.wizardsandbeasts.registry.ModEntities;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.spell.def.SpellVfx;
 import at.koopro.wizardsandbeasts.spell.core.Spell;
-import at.koopro.wizardsandbeasts.spell.core.SpellFamilies;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellProficiencyTracker;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import at.koopro.wizardsandbeasts.spell.lib.SpellHelper;
@@ -185,8 +184,11 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         }
 
         if (level() instanceof ServerLevel && cachedSpell != null) {
+            // The spell's authored impact (vfx.impact / impactCount), not its family: Confringo bursts in embers,
+            // Stupefy in sparks. Until 2026-11-12 every bolt burst in arcane motes whatever it authored.
+            var vfx = cachedSpell.vfx();
             SpellImpactBurstS2CPayload.sendToTracking(this, hit.getBoundingBox().getCenter(),
-                    SpellFamilies.of(cachedSpell), cachedSpell.getColor(), 18, 0.35f);
+                    vfx.impact().particleFamily(), cachedSpell.getColor(), Math.max(1, vfx.impactCount()), 0.35f);
         }
 
         if (owner instanceof ServerPlayer player) {
@@ -249,8 +251,10 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                     }
                 }
                 if (cachedSpell != null) {
+                    var vfx = cachedSpell.vfx();
                     SpellImpactBurstS2CPayload.sendToTracking(this, result.getLocation(),
-                            SpellFamilies.of(cachedSpell), cachedSpell.getColor(), 14, 0.28f);
+                            vfx.impact().particleFamily(), cachedSpell.getColor(),
+                            Math.max(1, vfx.impactCount() * 3 / 4), 0.28f);
                 }
             }
             Entity owner = getOwner();

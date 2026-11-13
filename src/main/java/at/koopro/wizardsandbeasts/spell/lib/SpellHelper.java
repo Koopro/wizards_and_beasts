@@ -175,6 +175,16 @@ public final class SpellHelper {
     }
 
     /** Common impact burst + soft impact sound for world interactions. */
+    /**
+     * A spell's own impact where it meets a block: its authored {@code vfx.impact} particle (embers for a blasting
+     * curse, light for an unlocking charm) rather than the generic dust burst of the colour-only overload.
+     */
+    public static void playSpellImpact(ServerLevel level, Vec3 pos, Spell spell) {
+        SpellParticles.spawnBurst(level, spell, pos, Math.max(1, spell.vfx().impactCount()), 0.18);
+        level.playSound(null, BlockPos.containing(pos), ModSounds.SPELL_IMPACT_GENERIC.get(), SoundSource.PLAYERS,
+                0.22f, 1.05f + level.random.nextFloat() * 0.12f);
+    }
+
     public static void playSpellImpact(ServerLevel level, Vec3 pos, int color) {
         spawnBurst(level, pos, color, 10, 0.18);
         level.playSound(null, BlockPos.containing(pos), ModSounds.SPELL_IMPACT_GENERIC.get(), SoundSource.PLAYERS,
