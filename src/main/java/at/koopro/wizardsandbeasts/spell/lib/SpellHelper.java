@@ -185,6 +185,35 @@ public final class SpellHelper {
                 0.22f, 1.05f + level.random.nextFloat() * 0.12f);
     }
 
+    /**
+     * What the struck surface does when a bolt hits it: chips of the block itself (vanilla's block particle draws
+     * the block's own texture, so stone chips, wood splinters and glass shards come from the block), the block's own
+     * hit sound, and hot sparks off metal. Presentation only; what the spell does to the block is decided elsewhere.
+     * Before 2026-11-13 every surface answered a spell the same way: a coloured burst and nothing from the block.
+     */
+    public static void surfaceImpact(ServerLevel level, net.minecraft.world.phys.BlockHitResult hit) {
+        BlockPos pos = hit.getBlockPos();
+        net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+        if (state.isAir()) {
+            return;
+        }
+        // Just off the face, so the chips start in the air rather than inside the block.
+        Vec3 off = hit.getLocation().add(Vec3.atLowerCornerOf(hit.getDirection().getUnitVec3i()).scale(0.08));
+        level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(
+                        net.minecraft.core.particles.ParticleTypes.BLOCK, state),
+                off.x, off.y, off.z, 18, 0.15, 0.15, 0.15, 0.3);
+        net.minecraft.world.level.block.SoundType sound = state.getSoundType();
+        level.playSound(null, pos, sound.getHitSound(), SoundSource.BLOCKS, 0.7f, sound.getPitch() * 0.9f);
+        if (sound == net.minecraft.world.level.block.SoundType.METAL
+                || sound == net.minecraft.world.level.block.SoundType.COPPER
+                || sound == net.minecraft.world.level.block.SoundType.ANVIL
+                || sound == net.minecraft.world.level.block.SoundType.CHAIN) {
+            level.sendParticles(at.koopro.wizardsandbeasts.registry.ModParticles.tinted(
+                            at.koopro.wizardsandbeasts.spell.core.SpellFamily.FIRE, 0xFFFFE8A0),
+                    off.x, off.y, off.z, 10, 0.12, 0.12, 0.12, 0.2);
+        }
+    }
+
     public static void playSpellImpact(ServerLevel level, Vec3 pos, int color) {
         spawnBurst(level, pos, color, 10, 0.18);
         level.playSound(null, BlockPos.containing(pos), ModSounds.SPELL_IMPACT_GENERIC.get(), SoundSource.PLAYERS,

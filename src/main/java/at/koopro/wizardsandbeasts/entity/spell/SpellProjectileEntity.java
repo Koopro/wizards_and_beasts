@@ -256,6 +256,7 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                             vfx.impact().particleFamily(), cachedSpell.getColor(),
                             Math.max(1, vfx.impactCount() * 3 / 4), 0.28f);
                 }
+                SpellHelper.surfaceImpact(serverLevel, result);
             }
             Entity owner = getOwner();
             if (successfulHit && cachedSpell != null && owner instanceof ServerPlayer player) {
