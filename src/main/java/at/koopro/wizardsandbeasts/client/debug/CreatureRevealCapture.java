@@ -76,7 +76,7 @@ public final class CreatureRevealCapture {
             new View("attack", 40, 6000, Action.ATTACK, 6), new View("hit", 40, 6000, Action.HIT, 4),
             // Night after the day's moments: the client's sky lags a set time by a few ticks, and a 4-tick hit shot
             // taken just after night came out dark.
-            new View("night", 30, 18000, Action.NONE, 12), new View("death", 40, 6000, Action.DEATH, 14));
+            new View("night", 30, 18000, Action.NONE, 30), new View("death", 40, 6000, Action.DEATH, 14));
 
     private static final List<String> IDS = new ArrayList<>();
     private static int idIndex;
@@ -149,7 +149,7 @@ public final class CreatureRevealCapture {
         }
         capture = false;
         Minecraft mc = Minecraft.getInstance();
-        String name = IDS.get(idIndex).replace('@', '_') + "__" + VIEWS.get(viewIndex).name() + ".png";
+        String name = IDS.get(idIndex).replace('@', '_').replace(':', '_') + "__" + VIEWS.get(viewIndex).name() + ".png";
         Path file = mc.gameDirectory.toPath().resolve(Path.of(Screenshot.SCREENSHOT_DIR, "reveal")).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -234,6 +234,10 @@ public final class CreatureRevealCapture {
      * age, {@code basilisk@0}, for a creature that grows.
      */
     private static void spawn(ServerLevel level, String spec) {
+        if (spec.startsWith("scene:")) {
+            meadow(level);
+            return;
+        }
         String id = spec.contains("@") ? spec.substring(0, spec.indexOf('@')) : spec;
         long age = spec.contains("@") ? Long.parseLong(spec.substring(spec.indexOf('@') + 1)) : -1;
         AABB box = new AABB(-14, STAGE_Y - 2, -14, 14, STAGE_Y + 20, 14);
@@ -268,6 +272,28 @@ public final class CreatureRevealCapture {
             scaleFigure = villager;
         }
         LOGGER.info("Reveal capture: {} spawned, {}x{}", spec, creature.getBbWidth(), creature.getBbHeight());
+    }
+
+    /** {@code scene:meadow}: the stage planted with grass and flowers, for the world's own night magic. */
+    private static void meadow(ServerLevel level) {
+        AABB box = new AABB(-14, STAGE_Y - 2, -14, 14, STAGE_Y + 20, 14);
+        for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
+            e.discard();
+        }
+        net.minecraft.util.RandomSource random = level.random;
+        net.minecraft.world.level.block.Block[] flora = {Blocks.SHORT_GRASS, Blocks.SHORT_GRASS, Blocks.FERN,
+                Blocks.POPPY, Blocks.DANDELION, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.AZURE_BLUET};
+        for (int x = -12; x <= 12; x++) {
+            for (int z = -12; z <= 12; z++) {
+                if (random.nextFloat() < 0.45f) {
+                    level.setBlock(new BlockPos(x, STAGE_Y, z), flora[random.nextInt(flora.length)].defaultBlockState(),
+                            Block.UPDATE_CLIENTS);
+                }
+            }
+        }
+        subject = null;
+        subjectHeight = 2.0;
+        LOGGER.info("Reveal capture: meadow planted");
     }
 
     /** Strips invisibility from every creature on the stage, every tick, so camouflage cannot hide it. */
