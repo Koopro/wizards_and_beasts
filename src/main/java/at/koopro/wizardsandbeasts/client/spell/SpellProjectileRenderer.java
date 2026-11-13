@@ -35,6 +35,8 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
         super.extractRenderState(entity, state, partialTick);
         Spell spell = Spells.byId(entity.getSpellId());
         state.spellColor = spell != null ? spell.getColor() : 0xFFFFFFFF;
+        state.jet = spell != null && JET_LOOK.stream().anyMatch(id -> at.koopro.wizardsandbeasts.spell.core.SpellIds.matches(spell.getId(), id));
+        state.flown = entity.tickCount + partialTick;
         Vec3 motion = entity.getDeltaMovement();
         state.dx = (float) motion.x;
         state.dy = (float) motion.y;
@@ -53,6 +55,10 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
         if (speed < 0.001) return;
 
         Vec3 dir = vel.normalize();
+        if (state.jet) {
+            submitJet(state, dir, speed, poseStack, collector);
+            return;
+        }
         float trailLength = (float) Math.min(speed * 5.0, 2.5);
 
         // Perpendicular axes for quad orientation
@@ -104,6 +110,36 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
         });
     }
 
+    /**
+     * Spells drawn as a jet: the example of the 2026-11-12 spell pass, shown to the owner before any other spell
+     * moves to it. The comet above is a 0.05-block additive ribbon that washes out against a day sky; seen from
+     * ten blocks a Stunner was a faint pink dot (spell showcase). The jet is the beams' own whole-pixel geometry,
+     * a red rod two pixels thick with stepped shells, alpha-blended so the red stays red against the sky.
+     */
+    static final java.util.Set<String> JET_LOOK = java.util.Set.of("stupefy");
+
+    /** A jet's length behind its head, in blocks: the canon "jet of light", short enough to read as a bolt. */
+    private static final double JET_LENGTH = 1.6;
+
+    private static void submitJet(ProjectileState state, Vec3 dir, double speed, PoseStack poseStack,
+                                  SubmitNodeCollector collector) {
+        // Never longer than the way it has come, so the tail does not reach back into the caster's hand.
+        double length = Math.min(JET_LENGTH, Math.max(0.2, state.flown * speed));
+        int rgb = state.spellColor & 0xFFFFFF;
+        int glow = mixRgb(rgb, 0xFFFFFF, 0.25f);
+        at.koopro.wizardsandbeasts.client.beam.BeamStyle style = new at.koopro.wizardsandbeasts.client.beam.BeamStyle(
+                2.0f, 2.0f, rgb, glow, 1.0f, 0.6f, 2, 0.0f, false, 0.5f);
+        new at.koopro.wizardsandbeasts.client.beam.Laser().render(style, dir.scale(-length), Vec3.ZERO, 1.0f, 0,
+                poseStack, collector, (int) state.flown, state.flown - (int) state.flown);
+    }
+
+    private static int mixRgb(int a, int b, float t) {
+        int r = Math.round(((a >> 16) & 0xFF) * (1 - t) + ((b >> 16) & 0xFF) * t);
+        int g = Math.round(((a >> 8) & 0xFF) * (1 - t) + ((b >> 8) & 0xFF) * t);
+        int bl = Math.round((a & 0xFF) * (1 - t) + (b & 0xFF) * t);
+        return (r << 16) | (g << 8) | bl;
+    }
+
     private static void renderHead(Matrix4f matrix, VertexConsumer consumer,
                                     Vec3 axis1, Vec3 axis2, float size,
                                     float r, float g, float b, float a) {
@@ -149,5 +185,7 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
     public static class ProjectileState extends EntityRenderState {
         public int spellColor = 0xFFFFFFFF;
         public float dx, dy, dz;
+        public boolean jet;
+        public float flown;
     }
 }
