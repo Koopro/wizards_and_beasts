@@ -70,7 +70,7 @@ class ApparitionAudiovisualTest {
     }
 
     @Test
-    void everyApparitionSoundResolvesToSomethingVanillaShips() throws IOException {
+    void everyApparitionSoundResolvesToASampleThatExists() throws IOException {
         JsonObject sounds = read(SOUNDS_JSON);
         for (String name : apparitionSounds()) {
             JsonObject entry = sounds.getAsJsonObject(name);
@@ -80,9 +80,13 @@ class ApparitionAudiovisualTest {
             assertTrue(!layers.isEmpty(), name + " has an empty sounds array");
             for (var layer : layers) {
                 String sample = layer.getAsJsonObject().get("name").getAsString();
-                assertTrue(sample.startsWith("minecraft:"),
-                        name + " layer \"" + sample + "\" is not a vanilla sample, and this mod ships no "
-                                + "audio files of its own");
+                // A vanilla sample, or one of the mod's own (tools/sound_synth.py) whose file is really there.
+                boolean own = sample.startsWith("wizards_and_beasts:") && java.nio.file.Files.exists(
+                        java.nio.file.Path.of("src/main/resources/assets/wizards_and_beasts/sounds",
+                                sample.substring("wizards_and_beasts:".length()) + ".ogg"));
+                assertTrue(sample.startsWith("minecraft:") || own,
+                        name + " layer \"" + sample + "\" is neither a vanilla sample nor a sound file this mod "
+                                + "ships");
             }
         }
     }
