@@ -22,7 +22,11 @@ public final class FragmentParticle extends SingleQuadParticle {
         /** Glass from a breached ward: drifts out, tumbles down, steps out of sight. */
         SHATTER(at.koopro.wizardsandbeasts.spell.core.MagicColours.PROTECTION, 0.10f, 16, 0.04f),
         /** The Killing Curse through a shield: a bright flash, gone in a few ticks. */
-        FLASH(at.koopro.wizardsandbeasts.spell.core.MagicColours.DEATH, 0.22f, 5, 0.0f);
+        FLASH(at.koopro.wizardsandbeasts.spell.core.MagicColours.DEATH, 0.22f, 5, 0.0f),
+        /** Where any spell lands: a larger flash in the spell's own colour (the options carry it). */
+        IMPACT(0xFFFFFFFF, 0.38f, 6, 0.0f),
+        /** A cast leaving the wand: the impact flash at wand-tip size. */
+        RELEASE(0xFFFFFFFF, 0.14f, 4, 0.0f);
 
         final int argb;
         final float size;
@@ -41,10 +45,10 @@ public final class FragmentParticle extends SingleQuadParticle {
     private final float baseSize;
 
     private FragmentParticle(ClientLevel level, double x, double y, double z,
-                             double xd, double yd, double zd, Style style, SpriteSet sprites) {
+                             double xd, double yd, double zd, Style style, int argb, SpriteSet sprites) {
         super(level, x, y, z, xd, yd, zd, sprites.get(level.getRandom()));
         this.style = style;
-        int c = style.argb;
+        int c = argb;
         setColor(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
         setAlpha(0.95f);
         baseSize = style.size * (0.8f + random.nextFloat() * 0.4f);
@@ -80,7 +84,7 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     @Override
     public float getQuadSize(float partialTick) {
-        if (style == Style.FLASH) {
+        if (style != Style.SHATTER) {
             float t = Mth.clamp((age + partialTick) / lifetime, 0.0f, 1.0f);
             return baseSize * (1.0f + 0.6f * t);
         }
@@ -94,6 +98,17 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     public static ParticleProvider<SimpleParticleType> provider(SpriteSet sprites, Style style) {
         return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) ->
-                new FragmentParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, style, sprites);
+                new FragmentParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, style, style.argb, sprites);
+    }
+
+    /**
+     * The impact flash: colour from the options, so one type serves every spell. A non-zero {@code ySpeed} asks
+     * for the small wand-tip release flash instead (the speed itself is not used; the flash does not move).
+     */
+    public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> impactProvider(
+            SpriteSet sprites) {
+        return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) ->
+                new FragmentParticle(level, x, y, z, 0, 0, 0, ySpeed > 0 ? Style.RELEASE : Style.IMPACT,
+                        options.argb() | 0xFF000000, sprites);
     }
 }

@@ -35,6 +35,12 @@ public final class ModParticles {
             registerTint("spell_clash");
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> PROTEGO_DEFLECT =
             registerTint("protego_deflect");
+    /**
+     * One bright flash in the spell's colour where a spell lands, so a hit reads at a glance: the burst of motes
+     * alone was gone or unreadable by the time the eye got there (spell showcase, 2026-11-12).
+     */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> IMPACT_FLASH =
+            registerTint("impact_flash");
     /** Pixel smoke that dissipates in four frames; tinted by meaning (see {@code MagicSmoke}). */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> SMOKE_PUFF =
             registerTint("smoke_puff");

@@ -77,6 +77,11 @@ public final class SpellVfxClient {
             return;
         }
         RandomSource rand = mc.level.random;
+        // A hit gets one flash in the spell's colour first; a tiny burst (a wand-tip puff, a fizzle) does not.
+        if (count >= 10) {
+            mc.level.addParticle(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(
+                    ModParticles.IMPACT_FLASH.get(), argb), pos.x, pos.y, pos.z, 0.0, 0.0, 0.0);
+        }
         var opts = ModParticles.tinted(family, argb);
         for (int i = 0; i < count; i++) {
             double ox = (rand.nextDouble() - 0.5) * spread * 2.0;
@@ -84,6 +89,41 @@ public final class SpellVfxClient {
             double oz = (rand.nextDouble() - 0.5) * spread * 2.0;
             mc.level.addParticle(opts, pos.x + ox, pos.y + oy, pos.z + oz, 0.0, 0.02, 0.0);
         }
+    }
+
+    /**
+     * A flash in the spell's colour at the caster's wand tip as a cast is taken. Most self-cast charms (Episkey,
+     * Reparo, Frigora, Arresto Momentum…) showed nothing at all when cast (spell showcase, 2026-11-12). Beams are
+     * left out: their beam is the cast's mark, and a flash as the hold ends would read as a second spell.
+     */
+    public static void releaseFlash(int casterId, String spellId) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || !(mc.level.getEntity(casterId) instanceof net.minecraft.world.entity.LivingEntity caster)) {
+            return;
+        }
+        var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(spellId);
+        if (spell == null || spell.getProperties() == null) {
+            return;
+        }
+        var type = spell.getProperties().getCastType();
+        if (type == at.koopro.wizardsandbeasts.spell.core.CastType.BEAM_CHANNEL
+                || type == at.koopro.wizardsandbeasts.spell.core.CastType.BEAM_LETHAL) {
+            return;
+        }
+        // Two ticks on: the strike payload arrives while the arm is still in the wind-up, so a flash now would sit
+        // where the wand was gathered (above the shoulder), not where it points (seen 2026-11-13).
+        CastChargeMotes.flashLater(caster.getId(), spell.getColor(), 2);
+    }
+
+    /** The small release flash at a caster's current wand tip, now. */
+    static void releaseFlashNow(net.minecraft.world.entity.LivingEntity caster, int argb) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        Vec3 tip = at.koopro.wizardsandbeasts.client.beam.WandTipTracker.resolve(caster, 1.0f);
+        mc.level.addParticle(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(
+                ModParticles.IMPACT_FLASH.get(), argb), tip.x, tip.y, tip.z, 0.0, 1.0, 0.0);
     }
 
     public static void spawnTintBeam(Vec3 from, Vec3 to, SpellFamily family, int argb) {

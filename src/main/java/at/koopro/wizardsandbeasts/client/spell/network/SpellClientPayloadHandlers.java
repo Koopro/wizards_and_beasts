@@ -150,7 +150,13 @@ public final class SpellClientPayloadHandlers {
      * yet. Storing it now is what keeps the client from inventing its own timing later.
      */
     public static void handleSpellCastAnimation(SpellCastAnimationS2CPayload pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientCastAnimationState.handle(pkt, ClientCastAnimationState.clientTick()));
+        ctx.enqueueWork(() -> {
+            ClientCastAnimationState.handle(pkt, ClientCastAnimationState.clientTick());
+            // The server sends the strike only once it took the cast: mark that moment at the wand.
+            if (pkt.holdPhase() == SpellCastAnimationS2CPayload.NO_HOLD && pkt.ticks() > 0 && !pkt.spellId().isEmpty()) {
+                at.koopro.wizardsandbeasts.client.spell.SpellVfxClient.releaseFlash(pkt.entityId(), pkt.spellId());
+            }
+        });
     }
 
     public static void handleSpellImpactBurst(SpellImpactBurstS2CPayload pkt, IPayloadContext ctx) {
