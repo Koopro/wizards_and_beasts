@@ -28,7 +28,11 @@ public final class FragmentParticle extends SingleQuadParticle {
         /** A cast leaving the wand: the impact flash at wand-tip size. */
         RELEASE(0xFFFFFFFF, 0.14f, 4, 0.0f),
         /** A firefly: tiny, its own light, two to three seconds of slow drifting and pulsing. */
-        FIREFLY(0xFFFFFFFF, 0.14f, 50, 0.0f);
+        FIREFLY(0xFFFFFFFF, 0.14f, 50, 0.0f),
+        /** A bog wisp: large and soft, six to nine seconds of hanging, swaying and a slow breath of light. */
+        WISP(0xFFFFFFFF, 0.5f, 120, 0.0f),
+        /** A pollen mote: a speck drifting slowly down, steady, gone in four to six seconds. */
+        MOTE(0xFFFFFFFF, 0.1f, 80, 0.0f);
 
         final int argb;
         final float size;
@@ -88,6 +92,26 @@ public final class FragmentParticle extends SingleQuadParticle {
             setAlpha(Math.max(0.05f, (0.25f + 0.75f * pulse) * fade));
             return;
         }
+        if (style == Style.WISP) {
+            // Hang and sway; brighten and dim like a slow breath; fade in and out over a second.
+            xd += Mth.sin((age + phase) * 0.05f) * 0.0006;
+            zd += Mth.cos((age + phase) * 0.043f) * 0.0006;
+            yd += (random.nextDouble() - 0.5) * 0.0008;
+            float breath = 0.5f + 0.5f * Mth.sin((age + phase) * 0.07f);
+            float fade = Math.min(1f, Math.min(age / 20f, (lifetime - age) / 25f));
+            setAlpha(Math.max(0.03f, (0.45f + 0.5f * breath) * fade));
+            return;
+        }
+        if (style == Style.MOTE) {
+            // Drift: a little sideways wander over a slow fall; a glint now and then as it turns in the sun.
+            xd += (random.nextDouble() - 0.5) * 0.002;
+            zd += (random.nextDouble() - 0.5) * 0.002;
+            yd = Math.max(-0.006, yd - 0.0004);
+            float glint = Mth.sin((age + phase) * 0.18f) > 0.85f ? 1f : 0.7f;
+            float fade = Math.min(1f, Math.min(age / 10f, (lifetime - age) / 15f));
+            setAlpha(glint * fade);
+            return;
+        }
         if (style == Style.SHATTER) {
             oRoll = roll;
             roll += 0.25f;
@@ -99,7 +123,7 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     @Override
     public float getQuadSize(float partialTick) {
-        if (style == Style.FIREFLY) {
+        if (style == Style.FIREFLY || style == Style.WISP || style == Style.MOTE) {
             return baseSize;
         }
         if (style != Style.SHATTER) {
@@ -120,6 +144,34 @@ public final class FragmentParticle extends SingleQuadParticle {
     }
 
     /** A firefly, coloured by its options, set drifting slowly. */
+    /** A bog wisp, tinted by the spawner; starts almost still. */
+    public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> wispProvider(
+            SpriteSet sprites) {
+        return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) -> {
+            FragmentParticle p = new FragmentParticle(level, x, y, z, 0, 0, 0, Style.WISP,
+                    options.argb() | 0xFF000000, sprites);
+            p.friction = 0.96f;
+            p.xd = (random.nextDouble() - 0.5) * 0.006;
+            p.yd = (random.nextDouble() - 0.5) * 0.004;
+            p.zd = (random.nextDouble() - 0.5) * 0.006;
+            return p;
+        };
+    }
+
+    /** A pollen mote, tinted by the spawner; starts with a slight fall. */
+    public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> moteProvider(
+            SpriteSet sprites) {
+        return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) -> {
+            FragmentParticle p = new FragmentParticle(level, x, y, z, 0, 0, 0, Style.MOTE,
+                    options.argb() | 0xFF000000, sprites);
+            p.friction = 0.98f;
+            p.xd = (random.nextDouble() - 0.5) * 0.01;
+            p.yd = -0.002;
+            p.zd = (random.nextDouble() - 0.5) * 0.01;
+            return p;
+        };
+    }
+
     public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> fireflyProvider(
             SpriteSet sprites) {
         return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) -> {

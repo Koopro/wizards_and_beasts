@@ -44,6 +44,12 @@ public final class ModParticles {
     /** A firefly over grass at night (client ambient magic): its own light, a slow drift and a pulse. */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> FIREFLY =
             registerTint("firefly");
+    /** A bog wisp over swamp water at night: a large soft light that hangs, sways and fades (ambient magic). */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> WISP =
+            registerTint("wisp");
+    /** A pollen mote drifting down over flowers by day (ambient magic). */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> MOTE =
+            registerTint("mote");
     /** Pixel smoke that dissipates in four frames; tinted by meaning (see {@code MagicSmoke}). */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> SMOKE_PUFF =
             registerTint("smoke_puff");

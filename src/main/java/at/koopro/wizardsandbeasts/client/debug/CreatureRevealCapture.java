@@ -181,7 +181,8 @@ public final class CreatureRevealCapture {
         String id = IDS.get(idIndex);
         View view = VIEWS.get(viewIndex);
         boolean firstView = viewIndex == 0;
-        wait = firstView ? 40 : view.settle();
+        // A scene is shot for the world's ambient particles, which need a few seconds to gather as they would in play.
+        wait = firstView ? 40 : id.startsWith("scene:") ? Math.max(100, view.settle()) : view.settle();
         server.execute(() -> {
             ServerPlayer p = server.getPlayerList().getPlayers().getFirst();
             ServerLevel level = p.level();
@@ -234,6 +235,10 @@ public final class CreatureRevealCapture {
      * age, {@code basilisk@0}, for a creature that grows.
      */
     private static void spawn(ServerLevel level, String spec) {
+        if (spec.equals("scene:swamp")) {
+            swamp(level);
+            return;
+        }
         if (spec.startsWith("scene:")) {
             meadow(level);
             return;
@@ -294,6 +299,37 @@ public final class CreatureRevealCapture {
         subject = null;
         subjectHeight = 2.0;
         LOGGER.info("Reveal capture: meadow planted");
+    }
+
+    /**
+     * {@code scene:swamp}: the stage flooded into a pond with lily pads and its biome turned to swamp, for the bog wisps
+     * that hang over swamp water at night. {@code fillbiome} sends the new biome to the client.
+     */
+    private static void swamp(ServerLevel level) {
+        meadow(level);
+        net.minecraft.util.RandomSource random = level.random;
+        // Wider than the meadow: wisps appear up to 24 blocks out and only over water.
+        for (int x = -22; x <= 22; x++) {
+            for (int z = -22; z <= 22; z++) {
+                if (Math.abs(x) <= 1 && Math.abs(z) <= 1) {
+                    continue;   // a tussock for the camera's subject point
+                }
+                level.setBlock(new BlockPos(x, STAGE_Y - 1, z), Blocks.WATER.defaultBlockState(), Block.UPDATE_CLIENTS);
+                level.setBlock(new BlockPos(x, STAGE_Y, z), random.nextFloat() < 0.12f
+                        ? Blocks.LILY_PAD.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            }
+        }
+        MinecraftServer server = level.getServer();
+        // Kept under the command's 32,768-block limit (a 65 x 29 x 65 box failed silently).
+        try {
+            int changed = server.getCommands().getDispatcher().execute(
+                    "fillbiome -24 " + (STAGE_Y - 2) + " -24 24 " + (STAGE_Y + 4) + " 24 minecraft:swamp",
+                    server.createCommandSourceStack().withSuppressedOutput());
+            LOGGER.info("Reveal capture: fillbiome swamp -> {}", changed);
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+            LOGGER.warn("Reveal capture: fillbiome failed: {}", e.getMessage());
+        }
+        LOGGER.info("Reveal capture: swamp flooded");
     }
 
     /** Strips invisibility from every creature on the stage, every tick, so camouflage cannot hide it. */
