@@ -63,17 +63,19 @@ class BeamAppearanceDefaultsTest {
         assertEquals(new Lightning(6, 4f, 2), look.shape());
     }
 
+    /** Redrawn 2026-11-13 (spell pass): a green core alpha-blended, so the curse stays green against the sky. */
     @Test
-    void avadaIsTheSameJet() {
+    void avadaIsAGreenJet() {
         BeamAppearance.Appearance look = of(BeamVisualDefaults.AVADA, GREEN);
-        assertDrawsLike(new BeamStyle(3.0f, 3.0f, 0xCCFFCC, GREEN, 0.9f, 0.6f, 4, 0f, true), look.style());
+        assertDrawsLike(new BeamStyle(3.0f, 3.0f, 0x3CFF6A, 0x9CFFB0, 0.95f, 0.6f, 2, 0f, false), look.style());
         assertInstanceOf(Laser.class, look.shape());
     }
 
+    /** Redrawn 2026-11-13 (spell pass): water blue, alpha-blended; it was a white laser that read as light. */
     @Test
-    void aguamentiIsTheSameLaser() {
+    void aguamentiIsAJetOfWater() {
         BeamAppearance.Appearance look = of(BeamVisualDefaults.AGUAMENTI, BLUE);
-        assertDrawsLike(BeamStyle.laser(oldGlowFor(BLUE)), look.style());
+        assertDrawsLike(new BeamStyle(2.0f, 2.0f, 0x3A8CFF, 0x9ADCFF, 0.95f, 0.6f, 2, 0f, false), look.style());
         assertInstanceOf(Laser.class, look.shape());
     }
 

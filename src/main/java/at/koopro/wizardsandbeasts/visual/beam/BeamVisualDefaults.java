@@ -57,9 +57,13 @@ public final class BeamVisualDefaults {
         return switch (key) {
             // Jagged and thin: a fat, heavily-bloomed core smears a zig-zag back into a solid bar.
             case CRUCIO -> visual(true, BeamShapeKind.LIGHTNING, 0xFFFFFF, glowFor(color), 1, 1.0, 0.5, 2);
-            // "A jet of green light": additive, pale green core, saturated green halo, wider than a normal beam.
-            case AVADA -> visual(true, BeamShapeKind.LASER, 0xCCFFCC, color, 3, 0.9, 0.6, 2);
-            case AGUAMENTI -> visual(true, BeamShapeKind.LASER, 0xFFFFFF, glowFor(color), 2, 1.0, 0.55, 2);
+            // "A jet of green light" (GoF 1, 32): a green core with a pale spine and a green halo, wider than a normal
+            // beam, alpha-blended. Additive, the pale core turned cyan-white against a day sky (spell showcase,
+            // 2026-11-12) and the curse no longer read as green.
+            case AVADA -> visual(true, BeamShapeKind.LASER, 0x3CFF6A, 0x9CFFB0, 3, 0.95, 0.6, 2, false);
+            // A jet of water (HBP 26-27): water-blue core, pale-blue shells, alpha-blended. It was a white additive
+            // laser and read as light, not water.
+            case AGUAMENTI -> visual(true, BeamShapeKind.LASER, 0x3A8CFF, 0x9ADCFF, 2, 0.95, 0.6, 2, false);
             // Leviosa channels but has never drawn a beam: the levitation is the feedback, and a beam to a floating
             // block read as an attack. Off by default; an administrator may turn it on.
             default -> visual(false, BeamShapeKind.LASER, 0xFFFFFF, glowFor(color), 2, 1.0, 0.55, 2);
@@ -68,8 +72,13 @@ public final class BeamVisualDefaults {
 
     private static BeamVisual visual(boolean enabled, BeamShapeKind shape, int core, int glow, int size,
                                      double coreBrightness, double glowBrightness, int shells) {
+        return visual(enabled, shape, core, glow, size, coreBrightness, glowBrightness, shells, true);
+    }
+
+    private static BeamVisual visual(boolean enabled, BeamShapeKind shape, int core, int glow, int size,
+                                     double coreBrightness, double glowBrightness, int shells, boolean additive) {
         return new BeamVisual(enabled, shape, core, glow, size, size, coreBrightness, glowBrightness, shells,
-                BeamVisual.DEFAULT_SPARK_DENSITY, 0.0, true,
+                BeamVisual.DEFAULT_SPARK_DENSITY, 0.0, additive,
                 6, 4.0, 2, // the bolt Crucio has always drawn; inert for a laser
                 0, 0, 1.0);
     }
