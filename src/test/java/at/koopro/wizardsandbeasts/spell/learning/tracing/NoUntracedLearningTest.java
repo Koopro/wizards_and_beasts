@@ -38,7 +38,8 @@ class NoUntracedLearningTest {
             "spell/debug/SpellDevKit.java",                    // dev kit — operator override
             "client/debug/UiScreenCapture.java",               // screenshot harness — dev only, disposable world
             "client/debug/EquipmentShowcaseCapture.java",      // cast harness's real cast — dev only, disposable world
-            "client/debug/SpellShowcaseCapture.java"           // spell VFX harness, every spell cast — dev only, disposable world
+            "client/debug/SpellShowcaseCapture.java",          // spell VFX harness, every spell cast — dev only, disposable world
+            "spell/debug/DuelStage.java"                       // two-client duel capture, server half — dev only, env-gated
     );
 
     /** Files allowed to call the service's commit entry points. */
