@@ -46,7 +46,11 @@ public class GillyweedTintLayer extends RenderLayer<AvatarRenderState, PlayerMod
                 RenderTypes.entityTranslucent(renderState.skin.body().texturePath()),
                 packedLight,
                 OverlayTexture.NO_OVERLAY,
+                // The full overload, colour first: the short one takes its last int as the *outline* colour
+                // (colour fixed at -1), which drew the wearer as a solid glowing cut-out (seen 2026-11-13).
                 TINT_ARGB,
+                null,
+                0,
                 null);
     }
 
