@@ -163,7 +163,9 @@ public final class SpellShowcaseCapture {
             return;
         }
         SCRIPT.add(new Step("hold_wide", 1, Cam.WIDE, NONE, NOTHING));
-        SCRIPT.add(new Step("", 1, Cam.WIDE, p -> setUse(false), NOTHING));
+        SCRIPT.add(new Step("hold_caster", 4, Cam.CASTER, NONE, NOTHING));
+        SCRIPT.add(new Step("", 1, Cam.CASTER, p -> setUse(false), NOTHING));
+        SCRIPT.add(new Step("release_caster", 1, Cam.CASTER, NONE, NOTHING));
         SCRIPT.add(new Step("release_shoulder", 2, Cam.SHOULDER, NONE, NOTHING));
         SCRIPT.add(new Step("flight_wide", 1, Cam.WIDE, NONE, NOTHING));
         SCRIPT.add(new Step("flight_close", 2, Cam.CLOSE, NONE, NOTHING));
