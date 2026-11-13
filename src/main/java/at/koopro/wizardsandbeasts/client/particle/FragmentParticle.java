@@ -26,7 +26,9 @@ public final class FragmentParticle extends SingleQuadParticle {
         /** Where any spell lands: a larger flash in the spell's own colour (the options carry it). */
         IMPACT(0xFFFFFFFF, 0.38f, 6, 0.0f),
         /** A cast leaving the wand: the impact flash at wand-tip size. */
-        RELEASE(0xFFFFFFFF, 0.14f, 4, 0.0f);
+        RELEASE(0xFFFFFFFF, 0.14f, 4, 0.0f),
+        /** A firefly: tiny, its own light, two to three seconds of slow drifting and pulsing. */
+        FIREFLY(0xFFFFFFFF, 0.14f, 50, 0.0f);
 
         final int argb;
         final float size;
@@ -43,11 +45,14 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     private final Style style;
     private final float baseSize;
+    /** A firefly's place in its pulse, so a swarm does not blink in step. */
+    private final float phase;
 
     private FragmentParticle(ClientLevel level, double x, double y, double z,
                              double xd, double yd, double zd, Style style, int argb, SpriteSet sprites) {
         super(level, x, y, z, xd, yd, zd, sprites.get(level.getRandom()));
         this.style = style;
+        this.phase = level.getRandom().nextFloat() * 25f;
         int c = argb;
         setColor(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f);
         setAlpha(0.95f);
@@ -73,6 +78,16 @@ public final class FragmentParticle extends SingleQuadParticle {
     @Override
     public void tick() {
         super.tick();
+        if (style == Style.FIREFLY) {
+            // Wander a little, and pulse: on, dim, on, never a steady dot.
+            xd += (random.nextDouble() - 0.5) * 0.004;
+            yd += (random.nextDouble() - 0.5) * 0.003;
+            zd += (random.nextDouble() - 0.5) * 0.004;
+            float pulse = 0.5f + 0.5f * Mth.sin((age + phase) * 0.25f);
+            float fade = Math.min(1f, Math.min(age / 6f, (lifetime - age) / 8f));
+            setAlpha(Math.max(0.05f, (0.25f + 0.75f * pulse) * fade));
+            return;
+        }
         if (style == Style.SHATTER) {
             oRoll = roll;
             roll += 0.25f;
@@ -84,6 +99,9 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     @Override
     public float getQuadSize(float partialTick) {
+        if (style == Style.FIREFLY) {
+            return baseSize;
+        }
         if (style != Style.SHATTER) {
             float t = Mth.clamp((age + partialTick) / lifetime, 0.0f, 1.0f);
             return baseSize * (1.0f + 0.6f * t);
@@ -99,6 +117,19 @@ public final class FragmentParticle extends SingleQuadParticle {
     public static ParticleProvider<SimpleParticleType> provider(SpriteSet sprites, Style style) {
         return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) ->
                 new FragmentParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, style, style.argb, sprites);
+    }
+
+    /** A firefly, coloured by its options, set drifting slowly. */
+    public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> fireflyProvider(
+            SpriteSet sprites) {
+        return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) -> {
+            FragmentParticle p = new FragmentParticle(level, x, y, z, 0, 0, 0, Style.FIREFLY,
+                    options.argb() | 0xFF000000, sprites);
+            p.xd = (random.nextDouble() - 0.5) * 0.02;
+            p.yd = (random.nextDouble() - 0.4) * 0.01;
+            p.zd = (random.nextDouble() - 0.5) * 0.02;
+            return p;
+        };
     }
 
     /**

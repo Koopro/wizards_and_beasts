@@ -313,6 +313,10 @@ public class Config {
     private static final ModConfigSpec.DoubleValue BROOM_WIND_VOLUME = BUILDER
             .comment("Volume of the speed-scaled flight wind, 0.0 to silence it. Client-side.")
             .defineInRange("broomWindVolume", 0.6D, 0.0D, 1.0D);
+    private static final ModConfigSpec.DoubleValue AMBIENT_MAGIC_DENSITY = BUILDER
+            .comment("How much quiet magic the world shows around you: fireflies over grass and flowers on clear",
+                    "nights. 1.0 is the designed amount, 0.0 turns it off. Client-side and purely cosmetic.")
+            .defineInRange("ambientMagicDensity", 1.0D, 0.0D, 2.0D);
     private static final ModConfigSpec.DoubleValue BROOM_FOV_EFFECT = BUILDER
             .comment("How much the field of view widens at full broom speed, as a fraction.",
                     "0.0 disables it entirely — motion-sickness sufferers should set this to 0.",
@@ -579,6 +583,7 @@ public class Config {
     public static boolean broomGentleLanding = true;
     public static float broomWindVolume = 0.6f;
     public static float broomFovEffect = 0.12f;
+    public static float ambientMagicDensity = 1.0f;
     public static boolean broomSpeedParticles = true;
     public static float spellPowerSoftCapKnee = 1.5f;
     public static float spellPowerMaxMultiplier = 3.0f;
@@ -716,6 +721,7 @@ public class Config {
         broomGentleLanding = BROOM_GENTLE_LANDING.get();
         broomWindVolume = BROOM_WIND_VOLUME.get().floatValue();
         broomFovEffect = BROOM_FOV_EFFECT.get().floatValue();
+        ambientMagicDensity = AMBIENT_MAGIC_DENSITY.get().floatValue();
         broomSpeedParticles = BROOM_SPEED_PARTICLES.get();
         spellPowerSoftCapKnee = SPELL_POWER_SOFT_CAP_KNEE.get().floatValue();
         spellPowerMaxMultiplier = SPELL_POWER_MAX_MULTIPLIER.get().floatValue();

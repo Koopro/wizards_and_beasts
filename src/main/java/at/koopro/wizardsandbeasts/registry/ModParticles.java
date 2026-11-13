@@ -41,6 +41,9 @@ public final class ModParticles {
      */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> IMPACT_FLASH =
             registerTint("impact_flash");
+    /** A firefly over grass at night (client ambient magic): its own light, a slow drift and a pulse. */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> FIREFLY =
+            registerTint("firefly");
     /** Pixel smoke that dissipates in four frames; tinted by meaning (see {@code MagicSmoke}). */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> SMOKE_PUFF =
             registerTint("smoke_puff");
