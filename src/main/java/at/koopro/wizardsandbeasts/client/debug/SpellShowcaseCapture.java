@@ -106,7 +106,7 @@ public final class SpellShowcaseCapture {
     private SpellShowcaseCapture() {}
 
     /** The particle scenes a lone caster cannot cause by casting at a dummy (WB_SPELL_SHOWCASE=fx). */
-    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash");
+    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward");
 
     private static List<String> chooseSpells() {
         if ("fx".equalsIgnoreCase(MODE)) {
@@ -199,6 +199,24 @@ public final class SpellShowcaseCapture {
                 }));
                 SCRIPT.add(new Step("breach_1", 2, Cam.CASTER, NONE, NOTHING));
                 SCRIPT.add(new Step("breach_2", 4, Cam.CASTER, NONE, NOTHING));
+            }
+            case "fx:ward" -> {
+                String protego = Spells.PROTEGO.getId();
+                SCRIPT.add(new Step("", 24, Cam.CASTER, p -> {
+                    setUse(false);
+                    Minecraft.getInstance().particleEngine.clearParticles();
+                }, p -> prepare(p, protego)));
+                SCRIPT.add(new Step("", 6, Cam.CASTER, p -> setUse(true), NOTHING));
+                SCRIPT.add(new Step("", 12, Cam.CASTER, p -> setUse(false), NOTHING));
+                // The feedback a blocked spell gets, struck on the ward's front (east, where the dummy stands).
+                SCRIPT.add(new Step("", 1, Cam.CASTER, NONE, p -> p.level().getEntitiesOfClass(
+                        at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity.class,
+                        p.getBoundingBox().inflate(6)).forEach(shield -> {
+                            var hit = shield.centre().add(1.0 * shield.tier().radius() * 0.9, 0.0, 0.0);
+                            at.koopro.wizardsandbeasts.spell.protego.ProtegoFeedback.spellImpact(p.level(), shield, hit, false);
+                        })));
+                SCRIPT.add(new Step("ward_hit_1", 2, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("ward_hit_2", 4, Cam.CASTER, NONE, NOTHING));
             }
             case "fx:flash" -> {
                 SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));
