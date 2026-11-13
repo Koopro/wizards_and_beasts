@@ -49,7 +49,8 @@ public class SpellDiamondOverlay {
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
         if (!at.koopro.wizardsandbeasts.Config.showSpellHudOverlay) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        // F1 hides the whole HUD in vanilla; a mod layer has to ask for itself (owner OK, 2026-11-13).
+        if (mc.player == null || mc.level == null || mc.options.hideGui) return;
         SpellHudUiModel spellHudUi = UiStateProjection.spellHud(mc);
         if (!spellHudUi.canRenderSpellHud()) return;
         var data = spellHudUi.spellData();
