@@ -78,7 +78,7 @@ public final class SpellShowcaseCapture {
     private static final int WALL_X = 16;
 
     /** WIDE sees the whole lane from the south; SHOULDER sits behind the caster; TARGET looks at the dummy. */
-    private enum Cam { WIDE, SHOULDER, TARGET, CLOSE, CASTER }
+    private enum Cam { WIDE, SHOULDER, TARGET, CLOSE, CASTER, WALL }
 
     private record Step(String shot, int ticks, Cam cam, Consumer<LocalPlayer> client, Consumer<ServerPlayer> server) {
         boolean shoots() {
@@ -106,7 +106,7 @@ public final class SpellShowcaseCapture {
     private SpellShowcaseCapture() {}
 
     /** The particle scenes a lone caster cannot cause by casting at a dummy (WB_SPELL_SHOWCASE=fx). */
-    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel");
+    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel", "fx:surfaces");
 
     private static List<String> chooseSpells() {
         if ("fx".equalsIgnoreCase(MODE)) {
@@ -236,6 +236,26 @@ public final class SpellShowcaseCapture {
                                 p.getBoundingBox().inflate(20)).size())));
                 SCRIPT.add(new Step("duel_end_wide", 30, Cam.WIDE, NONE, NOTHING));
             }
+            case "fx:surfaces" -> {
+                // One Stupefy into each wall material: what the surface itself does when a bolt strikes it.
+                String stupefy = Spells.byId("stupefy").getId();
+                SCRIPT.add(new Step("", 24, Cam.WALL, p -> {
+                    setUse(false);
+                    Minecraft.getInstance().particleEngine.clearParticles();
+                }, p -> {
+                    prepare(p, stupefy);
+                    p.level().getEntitiesOfClass(at.koopro.wizardsandbeasts.entity.dummy.DuellingDummyEntity.class,
+                            p.getBoundingBox().inflate(16)).forEach(net.minecraft.world.entity.Entity::discard);
+                }));
+                String[] names = {"stone", "oak", "iron", "glass"};
+                double[] zs = {-4.5, -1.5, 1.5, 4.5};
+                for (int i = 0; i < names.length; i++) {
+                    double z = zs[i];
+                    SCRIPT.add(new Step("", 1, Cam.WALL, NONE, p -> boltAt(p, z)));
+                    SCRIPT.add(new Step("surface_" + names[i], 9, Cam.WALL, NONE, NOTHING));
+                    SCRIPT.add(new Step("surface_" + names[i] + "_late", 6, Cam.WALL, NONE, NOTHING));
+                }
+            }
             case "fx:flash" -> {
                 SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));
                 SCRIPT.add(new Step("", 1, Cam.CASTER, NONE, p -> p.level().sendParticles(
@@ -258,6 +278,21 @@ public final class SpellShowcaseCapture {
                 SCRIPT.add(new Step("clash_2", 4, Cam.CLOSE, NONE, NOTHING));
             }
         }
+    }
+
+    /** A Stupefy from the caster's eye to the wall at {@code z}, at chest height. */
+    private static void boltAt(ServerPlayer p, double z) {
+        Spell stupefy = Spells.byId("stupefy");
+        if (stupefy == null) {
+            return;
+        }
+        var bolt = new at.koopro.wizardsandbeasts.entity.spell.SpellProjectileEntity(p.level(), p, stupefy.getId());
+        net.minecraft.world.phys.Vec3 from = new net.minecraft.world.phys.Vec3(p.getX() + 1.0, p.getEyeY() - 0.2, p.getZ());
+        net.minecraft.world.phys.Vec3 to = new net.minecraft.world.phys.Vec3(WALL_X, STAGE_Y + 1.4, z);
+        net.minecraft.world.phys.Vec3 dir = to.subtract(from).normalize();
+        bolt.setPos(from.x, from.y, from.z);
+        bolt.shoot(dir.x, dir.y, dir.z, 2.0F, 0.0F);
+        p.level().addFreshEntity(bolt);
     }
 
     /** Both bolts of the duel, fired in one tick: the caster's from the eye eastwards, the dummy's back west. */
@@ -550,6 +585,14 @@ public final class SpellShowcaseCapture {
                 lookX = DUMMY_X;
                 lookY = y + 1.2;
                 lookZ = 0.5;
+            }
+            case WALL -> {
+                camX = WALL_X - 4.0;
+                camY = y + 2.0;
+                camZ = 6.5;
+                lookX = WALL_X;
+                lookY = y + 1.4;
+                lookZ = 0.0;
             }
             case CASTER -> {
                 camX = CASTER_X + 2.0;
