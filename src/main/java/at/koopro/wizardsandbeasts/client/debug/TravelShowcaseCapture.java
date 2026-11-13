@@ -124,6 +124,18 @@ public final class TravelShowcaseCapture {
                 "Travel showcase: after floo at {} {} {}", Math.round(p.getX()), Math.round(p.getY()),
                 Math.round(p.getZ()))));
         SCRIPT.add(new Step("floo_arrived_third", 4, Cam.THIRD, NOTHING));
+        // Portkey: an old boot set for the east end of the stage, used where the Apparition began.
+        SCRIPT.add(new Step("", 20, Cam.WIDE, p -> p.teleportTo(p.level(), -10.5, STAGE_Y, 4.5, Set.of(), -90.0F, 0.0F, true)));
+        SCRIPT.add(new Step("portkey_before", 2, Cam.WIDE, NOTHING));
+        SCRIPT.add(new Step("", 1, Cam.WIDE, p -> {
+            var boot = new net.minecraft.world.item.ItemStack(
+                    at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.PORTKEY.get());
+            at.koopro.wizardsandbeasts.portkey.PortkeyService.set(boot, p.level(), new BlockPos(10, STAGE_Y - 1, 4));
+            LOGGER.info("Travel showcase: portkey {}", at.koopro.wizardsandbeasts.portkey.PortkeyService.travel(p, boot));
+        }));
+        SCRIPT.add(new Step("portkey_1", 2, Cam.WIDE, NOTHING));
+        SCRIPT.add(new Step("portkey_2", 4, Cam.WIDE, NOTHING));
+        SCRIPT.add(new Step("portkey_third", 4, Cam.THIRD, NOTHING));
     }
 
     // ------------------------------------------------------------------ server side
