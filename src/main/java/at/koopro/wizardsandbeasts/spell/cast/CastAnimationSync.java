@@ -79,9 +79,13 @@ public final class CastAnimationSync {
         return type == CastType.BEAM_CHANNEL || type == CastType.BEAM_LETHAL;
     }
 
-    private static @Nullable CastType castType(@Nullable String spellId) {
-        SpellDefinition def = definition(spellId);
-        return def == null ? null : def.castType();
+    /**
+     * Any spell's cast type, Java spells included. Reading it off the JSON definition alone left the Killing Curse
+     * (a Java beam) holding the wind-up, wand behind the head, while its beam already fired (seen 2026-11-12).
+     */
+    static @Nullable CastType castType(@Nullable String spellId) {
+        Spell spell = spellId == null ? null : Spells.byId(spellId);
+        return spell == null || spell.getProperties() == null ? null : spell.getProperties().getCastType();
     }
 
     private static @Nullable SpellDefinition definition(@Nullable String spellId) {

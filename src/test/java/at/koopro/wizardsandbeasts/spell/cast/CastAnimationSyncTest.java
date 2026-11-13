@@ -36,4 +36,14 @@ class CastAnimationSyncTest {
         }
         assertFalse(CastAnimationSync.isBeam(null));
     }
+
+    @Test
+    void aJavaSpellIsReadForItsCastTypeToo() {
+        // The Killing Curse is a Java spell: read off JSON alone it had no type, so it held the wind-up while its
+        // beam fired from behind the caster's head (spell showcase, 2026-11-12).
+        var avada = at.koopro.wizardsandbeasts.spell.core.Spells.AVADA_KEDAVRA;
+        assertTrue(CastAnimationSync.castType(avada.getId()) == CastType.BEAM_LETHAL);
+        assertTrue(CastAnimationSync.isBeam(CastAnimationSync.castType(avada.getId())));
+        assertTrue(CastAnimationSync.castType(null) == null);
+    }
 }
