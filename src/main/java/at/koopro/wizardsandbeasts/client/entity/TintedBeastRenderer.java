@@ -75,6 +75,18 @@ public class TintedBeastRenderer<R extends EntityRenderState & GeoRenderState>
         return super.getRenderType(renderState, texture);
     }
 
+    /**
+     * The shadow follows the creature's size. GeckoLib's entity renderer keeps vanilla's fixed {@code shadowRadius}, so a
+     * hatchling basilisk (0.18 of an adult) cast the adult's two-block shadow, and a shrunken or Engorgio'd creature
+     * the wrong one too.
+     */
+    @Override
+    protected float getShadowRadius(@NonNull R renderState) {
+        float radius = super.getShadowRadius(renderState);
+        return renderState instanceof net.minecraft.client.renderer.entity.state.LivingEntityRenderState living
+                ? radius * living.scale : radius;
+    }
+
     /** Provider mirroring {@code GeoRendererHelper.simple}/{@code DragonRenderer.provider} for the manifest loop. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Entity & GeoEntity> EntityRendererProvider<T> provider(String modelName) {
