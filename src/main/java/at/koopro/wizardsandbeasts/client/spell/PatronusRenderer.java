@@ -56,7 +56,10 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/entity/form/placeholder.png");
     /** Icy translucent silver-blue. */
-    private static final int TINT = 0x99B8E6FF;
+    private static final int TINT = 0xB0C8ECFF;
+    /** The halo: a faint, paler shell round the form. */
+    private static final int GLOW_TINT = 0x30DDEEFF;
+    private static final float GLOW_SCALE = 1.08f;
     private static final int FULL_BRIGHT = 0xF000F0;
     /** Standard vanilla entity-model vertical flip offset (origin sits at the top of the model). */
     private static final float MODEL_Y_OFFSET = -1.501f;
@@ -85,6 +88,7 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
         super.extractRenderState(entity, state, partialTick);
         state.corporeal = entity.isCorporeal();
         state.formId = entity.getFormId();
+        state.facing = net.minecraft.util.Mth.rotLerp(partialTick, entity.yRotO, entity.getYRot());
     }
 
     @Override
@@ -100,19 +104,19 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
 
         Model vanilla = buildVanillaModel(pathOf(state.formId));
         if (vanilla != null) {
-            renderVanillaForm(poseStack, collector, age, vanilla);
+            renderVanillaForm(poseStack, collector, age, state.facing, vanilla);
         } else {
-            renderStag(poseStack, collector, age);
+            renderStag(poseStack, collector, age, state.facing);
         }
     }
 
     /** The classic silvery stag — the wizardkind form and the fallback for any form without a model. */
-    private void renderStag(PoseStack poseStack, SubmitNodeCollector collector, float age) {
+    private void renderStag(PoseStack poseStack, SubmitNodeCollector collector, float age, float facing) {
         poseStack.pushPose();
         // Entity model space is inverted; lift so the legs rest near the entity origin.
         poseStack.translate(0.0, 1.4, 0.0);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.mulPose(Axis.YP.rotationDegrees(age * 1.5f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-facing));
         poseStack.translate(0.0, (float) Math.sin(age * 0.12f) * 0.04f, 0.0);
 
         RenderType renderType = RenderTypes.entityTranslucent(TEXTURE);
@@ -121,15 +125,19 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
             temp.last().pose().set(pose.pose());
             temp.last().normal().set(pose.normal());
             stagModel.render(temp, consumer, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, TINT);
+            // The glow round it: the same form a little larger and faint, so the edge haloes.
+            temp.scale(GLOW_SCALE, GLOW_SCALE, GLOW_SCALE);
+            stagModel.render(temp, consumer, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, GLOW_TINT);
         });
         poseStack.popPose();
     }
 
     /** Renders a borrowed vanilla beast model in silver-blue, applying the vanilla Y-down flip. */
-    private void renderVanillaForm(PoseStack poseStack, SubmitNodeCollector collector, float age, Model model) {
+    private void renderVanillaForm(PoseStack poseStack, SubmitNodeCollector collector, float age, float facing,
+                                   Model model) {
         poseStack.pushPose();
-        poseStack.translate(0.0, 1.4, 0.0);
-        poseStack.mulPose(Axis.YP.rotationDegrees(age * 1.5f));
+        // A vanilla model already stands on the entity's position once flipped (MODEL_Y_OFFSET); no lift.
+        poseStack.mulPose(Axis.YP.rotationDegrees(-facing));
         poseStack.translate(0.0, (float) Math.sin(age * 0.12f) * 0.04f, 0.0);
 
         RenderType renderType = RenderTypes.entityTranslucent(TEXTURE);
@@ -141,6 +149,12 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
             temp.scale(-1.0f, -1.0f, 1.0f);
             temp.translate(0.0f, MODEL_Y_OFFSET, 0.0f);
             model.renderToBuffer(temp, consumer, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, TINT);
+            // The glow round it: the same form a little larger and faint, so the edge haloes; scaled about the
+            // model's middle so the halo sits evenly round it.
+            temp.translate(0.0f, 1.0f, 0.0f);
+            temp.scale(GLOW_SCALE, GLOW_SCALE, GLOW_SCALE);
+            temp.translate(0.0f, -1.0f, 0.0f);
+            model.renderToBuffer(temp, consumer, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, GLOW_TINT);
         });
         poseStack.popPose();
     }
@@ -359,5 +373,7 @@ public class PatronusRenderer extends EntityRenderer<PatronusEntity, PatronusRen
     public static class PatronusRenderState extends EntityRenderState {
         public boolean corporeal;
         public String formId = "";
+        /** The direction the form faces, in degrees, interpolated for the frame. */
+        public float facing;
     }
 }

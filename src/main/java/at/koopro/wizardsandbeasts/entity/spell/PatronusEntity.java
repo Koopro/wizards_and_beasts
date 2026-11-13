@@ -119,15 +119,29 @@ public class PatronusEntity extends Mob {
     protected void registerGoals() {
     }
 
+    /** Turns the form to face along (dx, dz), body and head together. */
+    private void face(double dx, double dz) {
+        if (dx * dx + dz * dz < 1.0e-8) {
+            return;
+        }
+        float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+        setYRot(yaw);
+        setYHeadRot(yaw);
+        yBodyRot = yaw;
+    }
+
     @Override
     public void tick() {
         super.tick();
         if (level().isClientSide()) {
-            if (tickCount % 5 == 0) {
+            // A silver trail of self-lit motes: the world-lit glow sprite went dark at night, which is when a
+            // Patronus is cast against Dementors.
+            if (tickCount % 2 == 0) {
                 level().addParticle(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(
-                                at.koopro.wizardsandbeasts.registry.ModParticles.LIGHT_GLOW.get(),
+                                at.koopro.wizardsandbeasts.registry.ModParticles.FIREFLY.get(),
                                 at.koopro.wizardsandbeasts.spell.core.MagicColours.PROTECTION),
-                        getX(), getY(), getZ(), 0.0, 0.02, 0.0);
+                        getX() + (random.nextDouble() - 0.5) * 0.6, getY() + 0.4 + random.nextDouble() * 0.8,
+                        getZ() + (random.nextDouble() - 0.5) * 0.6, 0.0, 0.0, 0.0);
             }
             return;
         }
@@ -156,6 +170,7 @@ public class PatronusEntity extends Mob {
                 Vec3 dir = to.scale(1.0 / dist);
                 setDeltaMovement(dir.scale(Math.min(2.2, 0.35 + patronusPower * 0.012)));
                 move(net.minecraft.world.entity.MoverType.SELF, getDeltaMovement());
+                face(dir.x, dir.z);
             }
             if (distanceToSqr(darkMob) < 2.25) {
                 darkMob.hurt(sl.damageSources().magic(), 2.0f + patronusPower * 0.03f);
@@ -166,11 +181,17 @@ public class PatronusEntity extends Mob {
                 darkMob.hurtMarked = true;
             }
         } else {
-            orbitAngle += 0.8f + proficiencyScalar * 0.4f;
+            // A calm guard circling its caster, about one lap in four to five seconds. It was 0.8 radians a tick
+            // (two and a half laps a second): the form jumped two blocks a tick round the caster.
+            orbitAngle += 0.06f + proficiencyScalar * 0.03f;
             double radius = 3.0 + patronusPower * 0.05;
             double ox = owner.getX() + Math.cos(orbitAngle) * radius;
             double oz = owner.getZ() + Math.sin(orbitAngle) * radius;
-            setPos(ox, owner.getY() + 1.2 + Math.sin(tickCount * 0.08) * 0.15, oz);
+            // Feet just off the ground: the renderer stands the form on the entity, and at the caster's height + 1.2
+            // it ran two and a half blocks up, over the caster's head.
+            setPos(ox, owner.getY() + 0.15 + Math.sin(tickCount * 0.08) * 0.1, oz);
+            // Facing along the circle, the way it is going.
+            face(-Math.sin(orbitAngle), Math.cos(orbitAngle));
             setDeltaMovement(Vec3.ZERO);
 
             for (LivingEntity hostile : sl.getEntitiesOfClass(LivingEntity.class,
