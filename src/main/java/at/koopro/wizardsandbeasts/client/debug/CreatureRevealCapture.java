@@ -249,10 +249,7 @@ public final class CreatureRevealCapture {
         }
         String id = spec.contains("@") ? spec.substring(0, spec.indexOf('@')) : spec;
         long age = spec.contains("@") ? Long.parseLong(spec.substring(spec.indexOf('@') + 1)) : -1;
-        AABB box = new AABB(-14, STAGE_Y - 2, -14, 14, STAGE_Y + 20, 14);
-        for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
-            e.discard();
-        }
+        lawn(level);
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id));
         Entity creature = type.create(level, EntitySpawnReason.COMMAND);
         if (creature == null) {
@@ -285,10 +282,7 @@ public final class CreatureRevealCapture {
 
     /** {@code scene:meadow}: the stage planted with grass and flowers, for the world's own night magic. */
     private static void meadow(ServerLevel level) {
-        AABB box = new AABB(-14, STAGE_Y - 2, -14, 14, STAGE_Y + 20, 14);
-        for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
-            e.discard();
-        }
+        lawn(level);
         net.minecraft.util.RandomSource random = level.random;
         net.minecraft.world.level.block.Block[] flora = {Blocks.SHORT_GRASS, Blocks.SHORT_GRASS, Blocks.FERN,
                 Blocks.POPPY, Blocks.DANDELION, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.AZURE_BLUET};
@@ -306,23 +300,37 @@ public final class CreatureRevealCapture {
     }
 
     /**
-     * {@code scene:template=<id>}: a structure template (a hamlet house, say) stood on a cleared lawn in the middle of
-     * the stage, its south side toward the front view, framed by its size. Ids may use {@code ~} for {@code :} so the
-     * list stays comma-and-colon safe, e.g. {@code scene:template=wizards_and_beasts~wizarding_hamlet/wandmaker/a}.
+     * Resets the stage to a bare lawn: no entities, grass underfoot, air above, so a template or a flooded scene from an
+     * earlier run cannot wall the camera in.
      */
-    private static void template(ServerLevel level, String id) {
-        AABB box = new AABB(-24, STAGE_Y - 2, -24, 24, STAGE_Y + 30, 24);
+    private static void lawn(ServerLevel level) {
+        AABB box = new AABB(-24, STAGE_Y - 8, -24, 24, STAGE_Y + 34, 24);
         for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
             e.discard();
         }
         for (int x = -24; x <= 24; x++) {
             for (int z = -24; z <= 24; z++) {
+                for (int y = STAGE_Y - 7; y <= STAGE_Y - 2; y++) {
+                    level.setBlock(new BlockPos(x, y, z), Blocks.DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
                 level.setBlock(new BlockPos(x, STAGE_Y - 1, z), Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
-                for (int y = STAGE_Y; y <= STAGE_Y + 28; y++) {
+                for (int y = STAGE_Y; y <= STAGE_Y + 32; y++) {
                     level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
             }
         }
+    }
+
+    /**
+     * {@code scene:template=<id>}: a structure template (a hamlet house, say) stood on a cleared lawn in the middle of
+     * the stage, its south side toward the front view, framed by its size. Ids may use {@code ~} for {@code :} so the
+     * list stays comma-and-colon safe, e.g. {@code scene:template=wizards_and_beasts~wizarding_hamlet/wandmaker/a}. A
+     * {@code @n} suffix sinks it n blocks, for a house on a cellar.
+     */
+    private static void template(ServerLevel level, String spec) {
+        String id = spec.contains("@") ? spec.substring(0, spec.indexOf('@')) : spec;
+        int sink = spec.contains("@") ? Integer.parseInt(spec.substring(spec.indexOf('@') + 1)) : 0;
+        lawn(level);
         Identifier key = Identifier.parse(id.replace('~', ':'));
         var found = level.getStructureManager().get(key);
         if (found.isEmpty()) {
@@ -331,7 +339,7 @@ public final class CreatureRevealCapture {
         }
         var template = found.get();
         net.minecraft.core.Vec3i size = template.getSize();
-        BlockPos base = new BlockPos(-size.getX() / 2, STAGE_Y - 1, -size.getZ() / 2);
+        BlockPos base = new BlockPos(-size.getX() / 2, STAGE_Y - 1 - sink, -size.getZ() / 2);
         template.placeInWorld(level, base, base, new net.minecraft.world.level.levelgen.structure.templatesystem
                 .StructurePlaceSettings(), level.random, Block.UPDATE_CLIENTS);
         subject = null;
