@@ -61,12 +61,22 @@ public final class CreatureRevealCapture {
     private static final boolean ENABLED = MODE != null && !FMLEnvironment.isProduction();
     private static final int STAGE_Y = 240;
 
-    private record View(String name, float camYaw, int dayTime) {}
+    /** What the server does to the creature before the view is shot: nothing, or one of its one-shot moments. */
+    private enum Action { NONE, ATTACK, HIT, DEATH }
 
-    /** Camera bearings round the creature (degrees, 0 = from the south) and the time of day. */
+    private record View(String name, float camYaw, int dayTime, Action action, int settle) {}
+
+    /**
+     * Camera bearings round the creature (degrees, 0 = from the south), the time of day, and the one-shot clips —
+     * attack, hit, death — caught a few ticks after the game event that plays them (the death last).
+     */
     private static final List<View> VIEWS = List.of(
-            new View("front", 0, 6000), new View("quarter", 40, 6000), new View("side", 90, 6000),
-            new View("back", 180, 6000), new View("night", 30, 18000));
+            new View("front", 0, 6000, Action.NONE, 12), new View("quarter", 40, 6000, Action.NONE, 12),
+            new View("side", 90, 6000, Action.NONE, 12), new View("back", 180, 6000, Action.NONE, 12),
+            new View("attack", 40, 6000, Action.ATTACK, 6), new View("hit", 40, 6000, Action.HIT, 4),
+            // Night after the day's moments: the client's sky lags a set time by a few ticks, and a 4-tick hit shot
+            // taken just after night came out dark.
+            new View("night", 30, 18000, Action.NONE, 12), new View("death", 40, 6000, Action.DEATH, 14));
 
     private static final List<String> IDS = new ArrayList<>();
     private static int idIndex;
@@ -139,7 +149,7 @@ public final class CreatureRevealCapture {
         }
         capture = false;
         Minecraft mc = Minecraft.getInstance();
-        String name = IDS.get(idIndex) + "__" + VIEWS.get(viewIndex).name() + ".png";
+        String name = IDS.get(idIndex).replace('@', '_') + "__" + VIEWS.get(viewIndex).name() + ".png";
         Path file = mc.gameDirectory.toPath().resolve(Path.of(Screenshot.SCREENSHOT_DIR, "reveal")).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -171,7 +181,7 @@ public final class CreatureRevealCapture {
         String id = IDS.get(idIndex);
         View view = VIEWS.get(viewIndex);
         boolean firstView = viewIndex == 0;
-        wait = firstView ? 40 : 12;
+        wait = firstView ? 40 : view.settle();
         server.execute(() -> {
             ServerPlayer p = server.getPlayerList().getPlayers().getFirst();
             ServerLevel level = p.level();
@@ -179,6 +189,7 @@ public final class CreatureRevealCapture {
             if (firstView) {
                 spawn(level, id);
             }
+            act(level, view.action());
         });
     }
 
@@ -198,8 +209,33 @@ public final class CreatureRevealCapture {
         p.teleportTo(level, 0.5, STAGE_Y + 4, 10.5, Set.of(), 0.0F, 0.0F, true);
     }
 
-    /** Clears the stage and stands the creature in the middle, with a villager beside it for scale. */
-    private static void spawn(ServerLevel level, String id) {
+    private static Entity subject;
+    private static Entity scaleFigure;
+
+    /** Plays one of the creature's one-shot moments through the game event that triggers it. */
+    private static void act(ServerLevel level, Action action) {
+        if (subject == null || !subject.isAlive()) {
+            return;
+        }
+        switch (action) {
+            case ATTACK -> {
+                if (subject instanceof Mob mob && scaleFigure != null) {
+                    mob.doHurtTarget(level, scaleFigure);
+                }
+            }
+            case HIT -> subject.hurtServer(level, level.damageSources().generic(), 1.0F);
+            case DEATH -> subject.kill(level);
+            default -> { }
+        }
+    }
+
+    /**
+     * Clears the stage and stands the creature in the middle, with a villager beside it for scale. An id may carry an
+     * age, {@code basilisk@0}, for a creature that grows.
+     */
+    private static void spawn(ServerLevel level, String spec) {
+        String id = spec.contains("@") ? spec.substring(0, spec.indexOf('@')) : spec;
+        long age = spec.contains("@") ? Long.parseLong(spec.substring(spec.indexOf('@') + 1)) : -1;
         AABB box = new AABB(-14, STAGE_Y - 2, -14, 14, STAGE_Y + 20, 14);
         for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
             e.discard();
@@ -217,7 +253,11 @@ public final class CreatureRevealCapture {
             mob.yBodyRot = 0.0F;
         }
         level.addFreshEntity(creature);
-        subjectHeight = Math.max(1.0, creature.getBbHeight());
+        if (age >= 0 && creature instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity basilisk) {
+            basilisk.setAgeTicks(age);
+        }
+        subject = creature;
+        subjectHeight = Math.max(1.0, Math.max(creature.getBbHeight(), creature.getBbWidth() * 0.6));
         Entity villager = EntityType.VILLAGER.create(level, EntitySpawnReason.COMMAND);
         if (villager != null) {
             villager.snapTo(-0.5 - Math.max(1.5, creature.getBbWidth()), STAGE_Y, 0.5, 0.0F, 0.0F);
@@ -225,8 +265,9 @@ public final class CreatureRevealCapture {
                 mob.setNoAi(true);
             }
             level.addFreshEntity(villager);
+            scaleFigure = villager;
         }
-        LOGGER.info("Reveal capture: {} spawned, {}x{}", id, creature.getBbWidth(), creature.getBbHeight());
+        LOGGER.info("Reveal capture: {} spawned, {}x{}", spec, creature.getBbWidth(), creature.getBbHeight());
     }
 
     /** Strips invisibility from every creature on the stage, every tick, so camouflage cannot hide it. */
