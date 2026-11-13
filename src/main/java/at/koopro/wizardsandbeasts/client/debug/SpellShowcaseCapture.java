@@ -78,7 +78,7 @@ public final class SpellShowcaseCapture {
     private static final int WALL_X = 16;
 
     /** WIDE sees the whole lane from the south; SHOULDER sits behind the caster; TARGET looks at the dummy. */
-    private enum Cam { WIDE, SHOULDER, TARGET, CLOSE }
+    private enum Cam { WIDE, SHOULDER, TARGET, CLOSE, CASTER }
 
     private record Step(String shot, int ticks, Cam cam, Consumer<LocalPlayer> client, Consumer<ServerPlayer> server) {
         boolean shoots() {
@@ -105,7 +105,13 @@ public final class SpellShowcaseCapture {
 
     private SpellShowcaseCapture() {}
 
+    /** The particle scenes a lone caster cannot cause by casting at a dummy (WB_SPELL_SHOWCASE=fx). */
+    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash");
+
     private static List<String> chooseSpells() {
+        if ("fx".equalsIgnoreCase(MODE)) {
+            return FX_SCENES;
+        }
         if (!"1".equals(MODE) && !"all".equalsIgnoreCase(MODE)) {
             List<String> ids = new ArrayList<>();
             for (String raw : MODE.split(",")) {
@@ -136,6 +142,10 @@ public final class SpellShowcaseCapture {
      */
     private static void buildScript(String spellId) {
         SCRIPT.clear();
+        if (spellId.startsWith("fx:")) {
+            buildFxScript(spellId);
+            return;
+        }
         Spell spell = Spells.byId(spellId);
         boolean beam = spell != null && spell.getProperties().getCastType().name().startsWith("BEAM");
         SCRIPT.add(new Step("", 24, Cam.WIDE, p -> {
@@ -160,6 +170,56 @@ public final class SpellShowcaseCapture {
         SCRIPT.add(new Step("arrive_wide", 3, Cam.WIDE, NONE, NOTHING));
         SCRIPT.add(new Step("hit_target", 3, Cam.TARGET, NONE, NOTHING));
         SCRIPT.add(new Step("after_wide", 20, Cam.WIDE, NONE, p -> report(p, spellId)));
+    }
+
+    /**
+     * A breached ward (a real Protego, then the breach a hostile spell would cause), the Killing Curse's flash
+     * where it passes a shield, and the sparks of two jets meeting: the three particles that had no provider until
+     * 2026-11-12, shown in the world.
+     */
+    private static void buildFxScript(String scene) {
+        switch (scene) {
+            case "fx:breach" -> {
+                String protego = Spells.PROTEGO.getId();
+                SCRIPT.add(new Step("", 24, Cam.CASTER, p -> {
+                    setUse(false);
+                    Minecraft.getInstance().particleEngine.clearParticles();
+                }, p -> prepare(p, protego)));
+                SCRIPT.add(new Step("", 6, Cam.CASTER, p -> setUse(true), NOTHING));
+                SCRIPT.add(new Step("", 12, Cam.CASTER, p -> setUse(false), NOTHING));
+                SCRIPT.add(new Step("shield", 1, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.CASTER, NONE, p -> {
+                    var shields = p.level().getEntitiesOfClass(
+                            at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity.class,
+                            p.getBoundingBox().inflate(6));
+                    LOGGER.info("Spell showcase: fx breach on {} shield(s)", shields.size());
+                    shields.forEach(shield -> at.koopro.wizardsandbeasts.spell.protego.ProtegoFeedback.breach(p.level(), shield));
+                }));
+                SCRIPT.add(new Step("breach_1", 2, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("breach_2", 4, Cam.CASTER, NONE, NOTHING));
+            }
+            case "fx:flash" -> {
+                SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.CASTER, NONE, p -> p.level().sendParticles(
+                        at.koopro.wizardsandbeasts.registry.ModParticles.AK_BYPASS_FLASH.get(),
+                        CASTER_X + 2.5, STAGE_Y + 1.4, 0.5, 8, 0.12, 0.12, 0.12, 0.01)));
+                SCRIPT.add(new Step("flash_1", 2, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("flash_2", 3, Cam.CASTER, NONE, NOTHING));
+            }
+            default -> {
+                SCRIPT.add(new Step("", 10, Cam.CLOSE, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.CLOSE, NONE, p -> {
+                    var type = at.koopro.wizardsandbeasts.registry.ModParticles.SPELL_CLASH.get();
+                    double x = (CASTER_X + DUMMY_X) / 2.0;
+                    p.level().sendParticles(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(type,
+                            0xFFE8262E), x, STAGE_Y + 1.4, 0.5, 20, 0.3, 0.3, 0.3, 0.1);
+                    p.level().sendParticles(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(type,
+                            0xFF3CFF6A), x, STAGE_Y + 1.4, 0.5, 20, 0.3, 0.3, 0.3, 0.1);
+                }));
+                SCRIPT.add(new Step("clash_1", 2, Cam.CLOSE, NONE, NOTHING));
+                SCRIPT.add(new Step("clash_2", 4, Cam.CLOSE, NONE, NOTHING));
+            }
+        }
     }
 
     private static void setUse(boolean down) {
@@ -423,6 +483,14 @@ public final class SpellShowcaseCapture {
                 camZ = 1.6;
                 lookX = DUMMY_X;
                 lookY = y + 1.2;
+                lookZ = 0.5;
+            }
+            case CASTER -> {
+                camX = CASTER_X + 2.0;
+                camY = y + 1.8;
+                camZ = 4.5;
+                lookX = CASTER_X + 1.5;
+                lookY = y + 1.3;
                 lookZ = 0.5;
             }
             case CLOSE -> {
