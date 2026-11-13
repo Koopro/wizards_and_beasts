@@ -149,7 +149,7 @@ public final class CreatureRevealCapture {
         }
         capture = false;
         Minecraft mc = Minecraft.getInstance();
-        String name = IDS.get(idIndex).replace('@', '_').replace(':', '_') + "__" + VIEWS.get(viewIndex).name() + ".png";
+        String name = IDS.get(idIndex).replaceAll("[@:~=/]", "_") + "__" + VIEWS.get(viewIndex).name() + ".png";
         Path file = mc.gameDirectory.toPath().resolve(Path.of(Screenshot.SCREENSHOT_DIR, "reveal")).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -235,6 +235,10 @@ public final class CreatureRevealCapture {
      * age, {@code basilisk@0}, for a creature that grows.
      */
     private static void spawn(ServerLevel level, String spec) {
+        if (spec.startsWith("scene:template=")) {
+            template(level, spec.substring("scene:template=".length()));
+            return;
+        }
         if (spec.equals("scene:swamp")) {
             swamp(level);
             return;
@@ -299,6 +303,40 @@ public final class CreatureRevealCapture {
         subject = null;
         subjectHeight = 2.0;
         LOGGER.info("Reveal capture: meadow planted");
+    }
+
+    /**
+     * {@code scene:template=<id>}: a structure template (a hamlet house, say) stood on a cleared lawn in the middle of
+     * the stage, its south side toward the front view, framed by its size. Ids may use {@code ~} for {@code :} so the
+     * list stays comma-and-colon safe, e.g. {@code scene:template=wizards_and_beasts~wizarding_hamlet/wandmaker/a}.
+     */
+    private static void template(ServerLevel level, String id) {
+        AABB box = new AABB(-24, STAGE_Y - 2, -24, 24, STAGE_Y + 30, 24);
+        for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
+            e.discard();
+        }
+        for (int x = -24; x <= 24; x++) {
+            for (int z = -24; z <= 24; z++) {
+                level.setBlock(new BlockPos(x, STAGE_Y - 1, z), Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+                for (int y = STAGE_Y; y <= STAGE_Y + 28; y++) {
+                    level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
+            }
+        }
+        Identifier key = Identifier.parse(id.replace('~', ':'));
+        var found = level.getStructureManager().get(key);
+        if (found.isEmpty()) {
+            LOGGER.warn("Reveal capture: no template {}", key);
+            return;
+        }
+        var template = found.get();
+        net.minecraft.core.Vec3i size = template.getSize();
+        BlockPos base = new BlockPos(-size.getX() / 2, STAGE_Y - 1, -size.getZ() / 2);
+        template.placeInWorld(level, base, base, new net.minecraft.world.level.levelgen.structure.templatesystem
+                .StructurePlaceSettings(), level.random, Block.UPDATE_CLIENTS);
+        subject = null;
+        subjectHeight = Math.max(size.getY(), Math.max(size.getX(), size.getZ()) * 0.8) * 0.6;   // fills the frame
+        LOGGER.info("Reveal capture: template {} placed, {}", key, size);
     }
 
     /**
