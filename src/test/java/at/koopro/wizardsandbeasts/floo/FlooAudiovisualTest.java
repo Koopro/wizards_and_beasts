@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * one emerald constant, and the fact that every Floo sound event this mod registers actually resolves
  * to something in {@code sounds.json}.
  *
- * <p>That second check is worth more than it looks. This mod ships <b>no {@code .ogg} files at all</b>
- * — every sound is a vanilla sample re-pitched in {@code sounds.json} — so a registered
+ * <p>That second check is worth more than it looks. A sound is either a vanilla sample re-pitched in
+ * {@code sounds.json} or one of the mod's own files (made by {@code tools/sound_synth.py}), so a registered
  * {@code SoundEvent} with no entry there is not a quiet sound, it is a silent one, and nothing at
  * runtime complains. The failure mode is a feature that simply has no audio and no error to say so.
  */
@@ -58,7 +58,7 @@ class FlooAudiovisualTest {
     }
 
     @Test
-    void everyFlooSoundResolvesToARealVanillaSample() throws IOException {
+    void everyFlooSoundResolvesToASampleThatExists() throws IOException {
         JsonObject sounds = read(SOUNDS_JSON);
         for (String name : FLOO_SOUNDS) {
             var entry = sounds.getAsJsonObject(name);
@@ -67,11 +67,13 @@ class FlooAudiovisualTest {
             assertTrue(!layers.isEmpty(), name + " has an empty sounds array");
             for (var layer : layers) {
                 String sample = layer.getAsJsonObject().get("name").getAsString();
-                // A mod-namespaced sample would need an .ogg this repo does not contain. Every layer
-                // has to point at something the vanilla jar already ships.
-                assertTrue(sample.startsWith("minecraft:"),
-                        name + " layer \"" + sample + "\" is not a vanilla sample, and this mod ships "
-                                + "no audio files of its own");
+                // A vanilla sample, or one of the mod's own (tools/sound_synth.py) whose file is really there.
+                boolean own = sample.startsWith("wizards_and_beasts:") && java.nio.file.Files.exists(
+                        Path.of("src/main/resources/assets/wizards_and_beasts/sounds",
+                                sample.substring("wizards_and_beasts:".length()) + ".ogg"));
+                assertTrue(sample.startsWith("minecraft:") || own,
+                        name + " layer \"" + sample + "\" is neither a vanilla sample nor a sound file this mod "
+                                + "ships");
             }
         }
     }
