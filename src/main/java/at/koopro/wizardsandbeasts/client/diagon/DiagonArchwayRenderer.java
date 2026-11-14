@@ -1,38 +1,45 @@
 package at.koopro.wizardsandbeasts.client.diagon;
 
-import at.koopro.wizardsandbeasts.diagon.DiagonArchwayMovingBlock;
+import at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks;
 import at.koopro.wizardsandbeasts.diagon.DiagonArchwayBlockEntity;
+import at.koopro.wizardsandbeasts.diagon.DiagonArchwayMovingBlock;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Draws a brick of the archway into Diagon Alley, and plays its part when the arch opens or closes.
+ * Draws a brick of the archway into Diagon Alley while it moves, and plays its part.
  *
- * <p>Opening, ring by ring out from the tapped brick: a brick wriggles in its place, then folds back into the wall, out
- * along it away from the tap, shrinking to nothing; the arch stands open behind them. Closing plays it backwards, the
- * outer ring first, each brick growing back out of the wall and settling with a last shiver. A brick at rest is a plain
- * brick, drawn as the alley's own brick block so it cannot be told from its neighbours.
+ * <p>Opening, ring by ring out from the tapped brick: a brick wriggles in its place, then folds into the side of the
+ * arch. It turns edge-on like a card, squeezing thin, as it slides into the nearer jamb, or, in the top course and
+ * the middle column, up into the lintel. It slides into the standing wall, which hides it, and the arch is open behind
+ * it. Closing plays it backwards, the outer ring first: each brick unfolds out of the side and settles with a shiver.
+ * Drawn as the alley's own brick block, lit from the air in front of the wall, so it matches the bricks round it.
  */
 public final class DiagonArchwayRenderer implements BlockEntityRenderer<DiagonArchwayBlockEntity, DiagonArchwayRenderer.State> {
 
     /** Seconds between one ring starting and the next. */
     private static final float RING_DELAY = 0.12f;
-    private static final float WRIGGLE = 0.35f;
-    private static final float FOLD = 0.5f;
+    private static final float WRIGGLE = 0.3f;
+    private static final float FOLD = 0.7f;
     private static final float SETTLE = 0.2f;
-    /** How far along the wall a brick slides as it folds away, in blocks. */
-    private static final float SLIDE = 0.6f;
+    /** How thin a brick squeezes as it turns edge-on, as a share of its depth. */
+    private static final float SQUEEZE = 0.85f;
     /** Rings an arch can have; closing starts at the outside. */
     private static final int OUTER_RING = 4;
 
@@ -41,9 +48,12 @@ public final class DiagonArchwayRenderer implements BlockEntityRenderer<DiagonAr
         /** Seconds into this brick's own part; below zero it has not started. */
         float local;
         boolean resting;
-        float outX;
-        float outY;
-        float outZ;
+        float foldX;
+        float foldY;
+        float foldZ;
+        float slide;
+        float normalX;
+        float normalZ;
         float seed;
     }
 
@@ -64,29 +74,30 @@ public final class DiagonArchwayRenderer implements BlockEntityRenderer<DiagonAr
             int order = state.open ? brick.ring() : Math.max(0, OUTER_RING - brick.ring());
             state.local = seconds - order * RING_DELAY;
         }
-        state.outX = brick.outX();
-        state.outY = brick.outY();
-        state.outZ = brick.outZ();
+        state.foldX = brick.outX();
+        state.foldY = brick.outY();
+        state.foldZ = brick.outZ();
+        state.slide = brick.slide();
+        state.normalX = brick.normalX();
+        state.normalZ = brick.normalZ();
         state.seed = (brick.getBlockPos().hashCode() & 0xFF) / 255f * Mth.TWO_PI;
-        // Lit like the wall's faces, from the air in front of it: the light inside a solid wall is near nothing, and a
-        // brick lit from inside showed darker than its neighbours.
+        // Lit like the wall's faces, from the air in front of it: the light inside a solid wall is near nothing.
         if (level != null) {
             int sky = 0;
             int block = 0;
-            for (net.minecraft.core.Direction side : net.minecraft.core.Direction.values()) {
-                int packed = net.minecraft.client.renderer.LevelRenderer.getLightColor(level, brick.getBlockPos().relative(side));
-                sky = Math.max(sky, net.minecraft.client.renderer.LightTexture.sky(packed));
-                block = Math.max(block, net.minecraft.client.renderer.LightTexture.block(packed));
+            for (Direction side : Direction.values()) {
+                int packed = LevelRenderer.getLightColor(level, brick.getBlockPos().relative(side));
+                sky = Math.max(sky, LightTexture.sky(packed));
+                block = Math.max(block, LightTexture.block(packed));
             }
-            state.lightCoords = net.minecraft.client.renderer.LightTexture.pack(block, sky);
+            state.lightCoords = LightTexture.pack(block, sky);
         }
     }
 
     @Override
     public void submit(@NonNull State state, @NonNull PoseStack poseStack, @NonNull SubmitNodeCollector collector,
                        @NonNull CameraRenderState camera) {
-        float scale = 1f;
-        float slide = 0f;
+        float fold = 0f;                                   // 0 in the wall, 1 folded away into the side
         float shiver = 0f;
         if (state.resting) {
             if (state.open) {
@@ -94,46 +105,49 @@ public final class DiagonArchwayRenderer implements BlockEntityRenderer<DiagonAr
             }
         } else if (state.open) {
             if (state.local >= WRIGGLE + FOLD) {
-                return;                                    // folded away: the arch is open here
+                return;                                    // folded into the side: the arch is open here
             }
             if (state.local > 0f && state.local < WRIGGLE) {
-                shiver = 1f - state.local / WRIGGLE * 0.3f;
+                shiver = 1f - state.local / WRIGGLE * 0.4f;
             } else if (state.local >= WRIGGLE) {
-                float f = ease((state.local - WRIGGLE) / FOLD);
-                scale = 1f - f;
-                slide = f * SLIDE;
-                shiver = 0.4f * (1f - f);
+                fold = ease((state.local - WRIGGLE) / FOLD);
+                shiver = 0.5f * (1f - fold);
             }
         } else {
             if (state.local <= 0f) {
                 return;                                    // not back yet: still open here
             }
             if (state.local < FOLD) {
-                float f = ease(state.local / FOLD);
-                scale = f;
-                slide = (1f - f) * SLIDE;
+                fold = 1f - ease(state.local / FOLD);
             } else if (state.local < FOLD + SETTLE) {
                 shiver = 1f - (state.local - FOLD) / SETTLE;
             }
         }
-        if (scale <= 0.01f) {
+        if (fold >= 0.995f) {
             return;
         }
         float time = state.local + state.seed;
-        int light = state.lightCoords;
         poseStack.pushPose();
-        poseStack.translate(0.5f + state.outX * slide, 0.5f + state.outY * slide, 0.5f + state.outZ * slide);
+        // Slide toward the side, turning about the line in the wall square to the slide, like a card turning edge-on.
+        float travel = fold * state.slide;
+        poseStack.translate(0.5f + state.foldX * travel, 0.5f + state.foldY * travel, 0.5f + state.foldZ * travel);
+        Vector3f axis = new Vector3f(state.foldX, state.foldY, state.foldZ).cross(state.normalX, 0f, state.normalZ);
+        if (fold > 0f && axis.lengthSquared() > 1.0e-4f) {
+            axis.normalize();
+            poseStack.mulPose(new Quaternionf().rotateAxis(fold * Mth.HALF_PI, axis.x, axis.y, axis.z));
+        }
         if (shiver > 0f) {
             poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(time * 45f) * 5f * shiver));
             poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(time * 38f + 1.3f) * 5f * shiver));
             poseStack.translate(Mth.sin(time * 51f) * 0.02f * shiver, 0f, Mth.cos(time * 47f) * 0.02f * shiver);
         }
-        poseStack.scale(scale, scale, scale);
+        // Squeezed thin along its slide as it folds, so it tucks into the side rather than poking out of it.
+        float squeeze = 1f - SQUEEZE * fold;
+        poseStack.scale(Math.abs(state.foldX) > 0.5f ? squeeze : 1f, Math.abs(state.foldY) > 0.5f ? squeeze : 1f,
+                Math.abs(state.foldZ) > 0.5f ? squeeze : 1f);
         poseStack.translate(-0.5f, -0.5f, -0.5f);
-        // The alley's own brick block, drawn as a block: same model, same face shading as the wall round it, so a
-        // brick at rest cannot be told from its neighbours (a hand-built cube lit like an entity showed darker).
-        collector.submitBlock(poseStack, at.koopro.wizardsandbeasts.block.location.DiagonAlleyBlocks.DIAGON_BRICK.base()
-                .get().defaultBlockState(), light, OverlayTexture.NO_OVERLAY, 0);
+        collector.submitBlock(poseStack, DiagonAlleyBlocks.DIAGON_BRICK.base().get().defaultBlockState(),
+                state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
         poseStack.popPose();
     }
 

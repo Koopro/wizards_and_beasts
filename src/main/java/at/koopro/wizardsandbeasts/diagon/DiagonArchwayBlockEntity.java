@@ -15,8 +15,9 @@ import org.jspecify.annotations.NullMarked;
 
 /**
  * One brick of the archway's own story: when it last moved, which ring of the opening it belongs to (how far it is from
- * the tapped brick), and which way it folds away (out from the tapped brick, along the wall). The renderer plays the
- * brick's part from these; the block's {@code OPEN} state says which way it went.
+ * the tapped brick), which side of the arch it folds into and how far it slides to get there, and the wall's normal
+ * (the axis it turns about is in the wall, square to its fold). The renderer plays the brick's part from these; the
+ * block's {@code OPEN} state says which way it went.
  */
 @NullMarked
 public final class DiagonArchwayBlockEntity extends BlockEntity {
@@ -26,18 +27,24 @@ public final class DiagonArchwayBlockEntity extends BlockEntity {
     private float outX;
     private float outY;
     private float outZ;
+    private float slide;
+    private float normalX;
+    private float normalZ;
 
     public DiagonArchwayBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.DIAGON_ARCHWAY.get(), pos, state);
     }
 
     /** Starts this brick's part of an opening or a closing at game time {@code now}. */
-    void start(long now, int ring, float outX, float outY, float outZ) {
+    void start(long now, int ring, float outX, float outY, float outZ, float slide, float normalX, float normalZ) {
         this.changedAt = now;
         this.ring = ring;
         this.outX = outX;
         this.outY = outY;
         this.outZ = outZ;
+        this.slide = slide;
+        this.normalX = normalX;
+        this.normalZ = normalZ;
         setChanged();
         if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
@@ -64,6 +71,20 @@ public final class DiagonArchwayBlockEntity extends BlockEntity {
         return outZ;
     }
 
+    /** How far the brick slides to vanish into the side of the arch, in blocks. */
+    public float slide() {
+        return slide;
+    }
+
+    /** The wall's normal, horizontal (the arch stands in a vertical wall). */
+    public float normalX() {
+        return normalX;
+    }
+
+    public float normalZ() {
+        return normalZ;
+    }
+
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
@@ -72,6 +93,9 @@ public final class DiagonArchwayBlockEntity extends BlockEntity {
         output.putFloat("out_x", outX);
         output.putFloat("out_y", outY);
         output.putFloat("out_z", outZ);
+        output.putFloat("slide", slide);
+        output.putFloat("normal_x", normalX);
+        output.putFloat("normal_z", normalZ);
     }
 
     @Override
@@ -82,6 +106,9 @@ public final class DiagonArchwayBlockEntity extends BlockEntity {
         outX = input.getFloatOr("out_x", 0f);
         outY = input.getFloatOr("out_y", 0f);
         outZ = input.getFloatOr("out_z", 0f);
+        slide = input.getFloatOr("slide", 1f);
+        normalX = input.getFloatOr("normal_x", 1f);
+        normalZ = input.getFloatOr("normal_z", 0f);
     }
 
     @Override

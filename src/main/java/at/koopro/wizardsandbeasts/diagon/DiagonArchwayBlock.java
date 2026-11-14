@@ -106,26 +106,55 @@ public final class DiagonArchwayBlock extends Block {
 
     /**
      * Opens or closes the whole archway round the key brick: every brick becomes a moving brick, told its ring (its
-     * distance from the key) and the way it folds (out from the key, along the wall).
+     * distance from the key, so the hole starts where the wand touched) and the side of the arch it folds into. Bricks in
+     * the top course and the middle column fold up into the lintel; the rest fold sideways into the nearer jamb.
      */
     static void setArch(ServerLevel level, BlockPos key, boolean open) {
         long now = level.getGameTime();
         BlockState moving = ModBlocks.DIAGON_ARCHWAY_MOVING.get().defaultBlockState()
                 .setValue(DiagonArchwayMovingBlock.OPEN, open);
-        for (BlockPos pos : group(level, key)) {
+        List<BlockPos> bricks = group(level, key);
+        int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+        int minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
+        for (BlockPos pos : bricks) {
+            minX = Math.min(minX, pos.getX());
+            maxX = Math.max(maxX, pos.getX());
+            minY = Math.min(minY, pos.getY());
+            maxY = Math.max(maxY, pos.getY());
+            minZ = Math.min(minZ, pos.getZ());
+            maxZ = Math.max(maxZ, pos.getZ());
+        }
+        // The wall runs along whichever horizontal axis the arch spreads over; its normal is the other.
+        boolean alongZ = maxZ - minZ >= maxX - minX;
+        float normalX = alongZ ? 1f : 0f;
+        float normalZ = alongZ ? 0f : 1f;
+        for (BlockPos pos : bricks) {
             boolean isKey = isKey(level.getBlockState(pos));
             level.setBlock(pos, moving.setValue(DiagonArchwayMovingBlock.KEY, isKey), Block.UPDATE_ALL);
+            int along = alongZ ? pos.getZ() : pos.getX();
+            int lo = alongZ ? minZ : minX;
+            int hi = alongZ ? maxZ : maxX;
+            int toLo = along - lo;
+            int toHi = hi - along;
+            float fx = 0f, fy = 0f, fz = 0f, slide;
+            if (pos.getY() == maxY || toLo == toHi) {
+                fy = 1f;                                   // up into the lintel
+                slide = maxY - pos.getY() + 1;
+            } else {
+                float sign = toHi < toLo ? 1f : -1f;       // into the nearer jamb
+                if (alongZ) {
+                    fz = sign;
+                } else {
+                    fx = sign;
+                }
+                slide = Math.min(toLo, toHi) + 1;
+            }
             if (level.getBlockEntity(pos) instanceof DiagonArchwayBlockEntity brick) {
                 float dx = pos.getX() - key.getX();
                 float dy = pos.getY() - key.getY();
                 float dz = pos.getZ() - key.getZ();
-                float length = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-                if (length > 0f) {
-                    dx /= length;
-                    dy /= length;
-                    dz /= length;
-                }
-                brick.start(now, Math.round(length), dx, dy, dz);
+                int ring = Math.round((float) Math.sqrt(dx * dx + dy * dy + dz * dz));
+                brick.start(now, ring, fx, fy, fz, slide, normalX, normalZ);
             }
             if (!open) {
                 level.scheduleTick(pos, ModBlocks.DIAGON_ARCHWAY_MOVING.get(), DiagonArchwayMovingBlock.SETTLE_TICKS);
