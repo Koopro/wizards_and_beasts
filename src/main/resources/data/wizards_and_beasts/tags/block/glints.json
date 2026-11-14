@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:gold_block",
+    "minecraft:raw_gold_block",
+    "minecraft:gilded_blackstone",
+    "minecraft:bell",
+    "wizards_and_beasts:galleon_pile",
+    "wizards_and_beasts:mixed_coin_pile",
+    "wizards_and_beasts:galleon_stacks",
+    "wizards_and_beasts:gringotts_scales",
+    "wizards_and_beasts:ministry_gilded_trim",
+    "wizards_and_beasts:ministry_gilded_black_marble"
+  ]
+}

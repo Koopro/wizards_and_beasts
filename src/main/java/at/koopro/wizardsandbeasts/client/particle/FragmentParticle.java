@@ -32,7 +32,9 @@ public final class FragmentParticle extends SingleQuadParticle {
         /** A bog wisp: large and soft, six to nine seconds of hanging, swaying and a slow breath of light. */
         WISP(0xFFFFFFFF, 0.5f, 120, 0.0f),
         /** A pollen mote: a speck drifting slowly down, steady, gone in four to six seconds. */
-        MOTE(0xFFFFFFFF, 0.1f, 80, 0.0f);
+        MOTE(0xFFFFFFFF, 0.1f, 80, 0.0f),
+        /** Light catching gold: a still four-point star that swells and shrinks in half a second. */
+        GLINT(0xFFFFFFFF, 0.2f, 9, 0.0f);
 
         final int argb;
         final float size;
@@ -112,6 +114,12 @@ public final class FragmentParticle extends SingleQuadParticle {
             setAlpha(glint * fade);
             return;
         }
+        if (style == Style.GLINT) {
+            // Held still and upright; the size does the work (getQuadSize).
+            xd = yd = zd = 0;
+            setAlpha(1.0f);
+            return;
+        }
         if (style == Style.SHATTER) {
             oRoll = roll;
             roll += 0.25f;
@@ -125,6 +133,12 @@ public final class FragmentParticle extends SingleQuadParticle {
     public float getQuadSize(float partialTick) {
         if (style == Style.FIREFLY || style == Style.WISP || style == Style.MOTE) {
             return baseSize;
+        }
+        if (style == Style.GLINT) {
+            // Swell to full and shrink back: a twinkle, not a flash. Stepped to quarters so it stays pixel-crisp.
+            float t = Mth.clamp((age + partialTick) / lifetime, 0.0f, 1.0f);
+            float s = Mth.sin(t * Mth.PI);
+            return baseSize * (Math.round(s * 4f) / 4f);
         }
         if (style != Style.SHATTER) {
             float t = Mth.clamp((age + partialTick) / lifetime, 0.0f, 1.0f);
@@ -168,6 +182,19 @@ public final class FragmentParticle extends SingleQuadParticle {
             p.xd = (random.nextDouble() - 0.5) * 0.01;
             p.yd = -0.002;
             p.zd = (random.nextDouble() - 0.5) * 0.01;
+            return p;
+        };
+    }
+
+    /** A glint on gold, tinted by the spawner; still and upright, so the star's arms stay square to the screen. */
+    public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> glintProvider(
+            SpriteSet sprites) {
+        return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) -> {
+            FragmentParticle p = new FragmentParticle(level, x, y, z, 0, 0, 0, Style.GLINT,
+                    options.argb() | 0xFF000000, sprites);
+            p.roll = 0f;
+            p.oRoll = 0f;
+            p.lifetime = Style.GLINT.life + random.nextInt(4);
             return p;
         };
     }

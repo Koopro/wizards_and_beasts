@@ -50,6 +50,9 @@ public final class ModParticles {
     /** A pollen mote drifting down over flowers by day (ambient magic). */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> MOTE =
             registerTint("mote");
+    /** Light catching gold near the player: coin heaps, gilt, gold blocks (ambient magic). */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> GLINT =
+            registerTint("glint");
     /** Pixel smoke that dissipates in four frames; tinted by meaning (see {@code MagicSmoke}). */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> SMOKE_PUFF =
             registerTint("smoke_puff");

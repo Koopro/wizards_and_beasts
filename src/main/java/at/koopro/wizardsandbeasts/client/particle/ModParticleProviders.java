@@ -33,6 +33,7 @@ public final class ModParticleProviders {
         event.registerSpriteSet(ModParticles.FIREFLY.get(), FragmentParticle::fireflyProvider);
         event.registerSpriteSet(ModParticles.WISP.get(), FragmentParticle::wispProvider);
         event.registerSpriteSet(ModParticles.MOTE.get(), FragmentParticle::moteProvider);
+        event.registerSpriteSet(ModParticles.GLINT.get(), FragmentParticle::glintProvider);
         event.registerSpriteSet(ModParticles.SMOKE_PUFF.get(), SmokePuffParticle::provider);
 
         // Broom slipstreams. One particle class, three palettes: what separates a Cleansweep's dust
