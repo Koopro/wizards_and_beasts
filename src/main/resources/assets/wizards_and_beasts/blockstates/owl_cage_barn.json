@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/deco/owl_cage_barn_particle"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/deco/owl_cage_barn_particle"
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/deco/owl_cage_barn_particle"
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/deco/owl_cage_barn_particle"
+    }
+  }
+}

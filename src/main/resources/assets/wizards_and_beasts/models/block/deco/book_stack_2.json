@@ -1,0 +1,154 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/book_stack",
+    "particle": "wizards_and_beasts:block/deco/book_stack"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        3
+      ],
+      "to": [
+        12,
+        3,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            3.3333,
+            4.5,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            7.0,
+            3.3333,
+            9.0,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            4.5,
+            3.3333,
+            7.0,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            3.3333,
+            2.5,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.5,
+            0.0,
+            4.5,
+            3.3333
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            4.5,
+            3.3333,
+            6.5,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        3,
+        4
+      ],
+      "to": [
+        11,
+        5,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            9.5,
+            7.0,
+            11.0,
+            7.6667
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            13.0,
+            7.0,
+            14.5,
+            7.6667
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            11.0,
+            7.0,
+            13.0,
+            7.6667
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            7.5,
+            7.0,
+            9.5,
+            7.6667
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            9.5,
+            4.3333,
+            11.0,
+            7.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            11.0,
+            7.0,
+            12.5,
+            4.3333
+          ],
+          "texture": "#all"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8.0,
+          4.0,
+          8.0
+        ],
+        "axis": "y",
+        "angle": 22.5
+      }
+    }
+  ]
+}

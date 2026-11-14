@@ -1,0 +1,134 @@
+package at.koopro.wizardsandbeasts.registry;
+
+import at.koopro.wizardsandbeasts.block.deco.AnimatedDecoBlock;
+import at.koopro.wizardsandbeasts.block.deco.AnimatedDecoBlockEntity;
+import at.koopro.wizardsandbeasts.block.deco.DecoPileBlock;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
+import org.jspecify.annotations.NullMarked;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+
+/**
+ * Set dressing for the wizarding streets and rooms (tasks/todo.md, "Deco items and blocks"). Models, textures and
+ * animations come from {@code tools/deco_models.py}; this only says what each piece is, how it sounds and its outline.
+ * Each animated rig has a block-entity type of its own, so its renderer knows its model without asking.
+ */
+@NullMarked
+public final class DecoBlocks {
+
+    private DecoBlocks() {}
+
+    /** Every deco item, in creative-tab order. */
+    public static final List<DeferredItem<BlockItem>> ITEMS = new ArrayList<>();
+    /** Animated deco: block-entity type per block id, and the rig and sheet its renderer draws. */
+    public static final Map<String, DeferredHolder<BlockEntityType<?>, BlockEntityType<AnimatedDecoBlockEntity>>> TYPES =
+            new LinkedHashMap<>();
+    public static final Map<String, String> RIGS = new LinkedHashMap<>();
+    /** Every pile, for its count-keyed loot table. */
+    public static final List<DeferredBlock<DecoPileBlock>> PILES = new ArrayList<>();
+
+    private static BlockBehaviour.Properties props(MapColor color, SoundType sound) {
+        return BlockBehaviour.Properties.of().mapColor(color).sound(sound).strength(0.3f).noOcclusion()
+                .pushReaction(PushReaction.DESTROY);
+    }
+
+    private static DeferredBlock<DecoPileBlock> pile(String id, MapColor color, SoundType sound, VoxelShape... shapes) {
+        DeferredBlock<DecoPileBlock> block = ModBlocks.BLOCKS.registerBlock(id,
+                properties -> new DecoPileBlock(properties, shapes), () -> props(color, sound));
+        ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        PILES.add(block);
+        return block;
+    }
+
+    private static DeferredBlock<AnimatedDecoBlock> animated(String id, String rig, MapColor color, SoundType sound,
+                                                             VoxelShape shape) {
+        Supplier<BlockEntityType<AnimatedDecoBlockEntity>> type = () -> TYPES.get(id).get();
+        DeferredBlock<AnimatedDecoBlock> block = ModBlocks.BLOCKS.registerBlock(id,
+                properties -> new AnimatedDecoBlock(properties, shape, rig, type), () -> props(color, sound));
+        TYPES.put(id, ModBlockEntities.BLOCK_ENTITY_TYPES.register(id,
+                () -> new BlockEntityType<>(AnimatedDecoBlockEntity::new, Set.<Block>of(block.get()))));
+        RIGS.put(id, rig);
+        ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        return block;
+    }
+
+    // -- Gringotts -----------------------------------------------------------------------------------------------------
+    public static final DeferredBlock<DecoPileBlock> GALLEON_PILE = coins("galleon_pile", MapColor.GOLD);
+    public static final DeferredBlock<DecoPileBlock> SICKLE_PILE = coins("sickle_pile", MapColor.METAL);
+    public static final DeferredBlock<DecoPileBlock> KNUT_PILE = coins("knut_pile", MapColor.TERRACOTTA_ORANGE);
+    public static final DeferredBlock<DecoPileBlock> MIXED_COIN_PILE = coins("mixed_coin_pile", MapColor.GOLD);
+    public static final DeferredBlock<DecoPileBlock> GALLEON_STACKS = stacks("galleon_stacks", MapColor.GOLD);
+    public static final DeferredBlock<DecoPileBlock> SICKLE_STACKS = stacks("sickle_stacks", MapColor.METAL);
+    public static final DeferredBlock<DecoPileBlock> KNUT_STACKS = stacks("knut_stacks", MapColor.TERRACOTTA_ORANGE);
+    public static final DeferredBlock<DecoPileBlock> COIN_POUCH = pile("coin_pouch", MapColor.COLOR_BROWN, SoundType.WOOL,
+            Block.box(5, 0, 6, 10, 7, 10), Block.box(5, 0, 5, 12, 7, 12), Block.box(5, 0, 5, 14, 7, 13),
+            Block.box(2, 0, 3, 14, 7, 13));
+
+    private static DeferredBlock<DecoPileBlock> stacks(String id, MapColor color) {
+        return pile(id, color, SoundType.CHAIN, Block.box(4, 0, 5, 7, 5, 8), Block.box(4, 0, 4, 11, 5, 8),
+                Block.box(4, 0, 4, 12, 7, 12), Block.box(4, 0, 4, 12, 7, 14));
+    }
+
+    private static DeferredBlock<DecoPileBlock> coins(String id, MapColor color) {
+        return pile(id, color, SoundType.CHAIN, Block.box(3, 0, 4, 13, 2, 12), Block.box(3, 0, 4, 13, 4, 12),
+                Block.box(3, 0, 4, 13, 4, 14), Block.box(3, 0, 4, 14, 6, 14));
+    }
+
+    public static final DeferredBlock<AnimatedDecoBlock> GRINGOTTS_SCALES = animated("gringotts_scales",
+            "gringotts_scales", MapColor.GOLD, SoundType.CHAIN, Block.box(1, 0, 5, 15, 13, 11));
+    public static final DeferredBlock<AnimatedDecoBlock> GRINGOTTS_SCALES_SILVER = animated("gringotts_scales_silver",
+            "gringotts_scales", MapColor.METAL, SoundType.CHAIN, Block.box(1, 0, 5, 15, 13, 11));
+    public static final DeferredBlock<AnimatedDecoBlock> ENCHANTED_QUILL = animated("enchanted_quill",
+            "enchanted_quill", MapColor.WOOL, SoundType.WOOL, Block.box(2, 0, 3, 14, 4, 13));
+    public static final DeferredBlock<AnimatedDecoBlock> ENCHANTED_QUILL_RAVEN = animated("enchanted_quill_raven",
+            "enchanted_quill", MapColor.WOOL, SoundType.WOOL, Block.box(2, 0, 3, 14, 4, 13));
+    public static final DeferredBlock<AnimatedDecoBlock> ENCHANTED_QUILL_PEACOCK = animated("enchanted_quill_peacock",
+            "enchanted_quill", MapColor.WOOL, SoundType.WOOL, Block.box(2, 0, 3, 14, 4, 13));
+
+    // -- Shops -----------------------------------------------------------------------------------------------------------
+    public static final DeferredBlock<DecoPileBlock> POTION_BOTTLES = bottles("potion_bottles");
+    public static final DeferredBlock<DecoPileBlock> POTION_BOTTLES_DARK = bottles("potion_bottles_dark");
+    public static final DeferredBlock<DecoPileBlock> POTION_BOTTLES_BRIGHT = bottles("potion_bottles_bright");
+    public static final DeferredBlock<DecoPileBlock> BOOK_STACK = books("book_stack", MapColor.COLOR_RED);
+    public static final DeferredBlock<DecoPileBlock> BOOK_STACK_LEATHER = books("book_stack_leather", MapColor.COLOR_BROWN);
+    public static final DeferredBlock<DecoPileBlock> BOOK_STACK_BRIGHT = books("book_stack_bright", MapColor.COLOR_YELLOW);
+
+    private static DeferredBlock<DecoPileBlock> bottles(String id) {
+        return pile(id, MapColor.COLOR_PURPLE, SoundType.GLASS, Block.box(5, 0, 5, 11, 7, 11),
+                Block.box(2, 0, 5, 11, 7, 11), Block.box(2, 0, 2, 13, 8, 11), Block.box(2, 0, 2, 14, 8, 14));
+    }
+
+    private static DeferredBlock<DecoPileBlock> books(String id, MapColor color) {
+        return pile(id, color, SoundType.WOOL, Block.box(3, 0, 2, 13, 3, 14), Block.box(3, 0, 2, 13, 5, 14),
+                Block.box(3, 0, 2, 13, 8, 14), Block.box(3, 0, 2, 13, 10, 14));
+    }
+    public static final DeferredBlock<AnimatedDecoBlock> OWL_CAGE_SNOWY = animated("owl_cage_snowy", "owl_cage",
+            MapColor.GOLD, SoundType.CHAIN, Block.box(3, 0, 3, 13, 15, 13));
+    public static final DeferredBlock<AnimatedDecoBlock> OWL_CAGE_BARN = animated("owl_cage_barn", "owl_cage",
+            MapColor.GOLD, SoundType.CHAIN, Block.box(3, 0, 3, 13, 15, 13));
+    public static final DeferredBlock<AnimatedDecoBlock> OWL_CAGE_TAWNY = animated("owl_cage_tawny", "owl_cage",
+            MapColor.GOLD, SoundType.CHAIN, Block.box(3, 0, 3, 13, 15, 13));
+
+    /** Loads the class, so every holder above is queued before the registries fire. */
+    public static void init() {}
+
+    public static List<DeferredItem<BlockItem>> items() {
+        return Collections.unmodifiableList(ITEMS);
+    }
+}

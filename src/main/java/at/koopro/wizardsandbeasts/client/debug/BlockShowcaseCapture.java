@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.debug;
 
+import at.koopro.wizardsandbeasts.block.deco.DecoBlock;
+import at.koopro.wizardsandbeasts.block.deco.DecoPileBlock;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlock;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlockEntity;
@@ -59,7 +61,15 @@ public final class BlockShowcaseCapture {
             "trunks", List.of("enchanted_trunk", "expanded_trunk", "masters_trunk", "moodys_trunk", "newts_case_item"),
             "stations", List.of("floo_fireplace", "vanishing_cabinet", "settlement_post", "broom_rack",
                     "pocket_configurator"),
-            "cabinet", List.of("vanishing_cabinet"));
+            "cabinet", List.of("vanishing_cabinet"),
+            // Set dressing, batch 1; "#n" places a pile at count n. The hotbar holds the same, to judge the items.
+            "deco", List.of("galleon_pile#4", "potion_bottles#4", "book_stack#4", "owl_cage_snowy", "gringotts_scales",
+                    "enchanted_quill", "sickle_pile#2", "knut_pile#1"),
+            "deco_variants", List.of("galleon_stacks#4", "sickle_stacks#3", "knut_stacks#2", "mixed_coin_pile#4",
+                    "coin_pouch#4", "galleon_pile#2", "owl_cage_barn", "owl_cage_tawny"),
+            "deco_variants2", List.of("potion_bottles_dark#4", "potion_bottles_bright#4", "book_stack_leather#4",
+                    "book_stack_bright#4", "gringotts_scales_silver", "enchanted_quill_raven", "enchanted_quill_peacock",
+                    "coin_pouch#1"));
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
@@ -130,6 +140,23 @@ public final class BlockShowcaseCapture {
         return batches;
     }
 
+    /** Set dressing: the row, then each piece close from the front and from three-quarters, and once more a beat on. */
+    private static List<Step> decoScript() {
+        List<String> ids = SETS.getOrDefault(SET, List.of());
+        List<Step> steps = new ArrayList<>(List.of(new Step("", 60, BlockShowcaseCapture::stage),
+                new Step("row", 20, p -> {})));
+        for (int i = 0; i < ids.size(); i++) {
+            double x = -ids.size() + 2 * i + 0.5;
+            String name = ids.get(i).replace('#', '_');
+            steps.add(new Step("", 15, p -> look(p, x, -4.3, 180f, 38f)));
+            steps.add(new Step(name, 5, p -> {}));
+            steps.add(new Step(name + "_later", 30, p -> {}));
+            steps.add(new Step("", 15, p -> look(p, x + 1.3, -4.6, 135f, 36f)));
+            steps.add(new Step(name + "_quarter", 5, p -> {}));
+        }
+        return steps;
+    }
+
     private static List<Step> galleryScript() {
         gallery = galleryBatches();
         List<Step> steps = new ArrayList<>();
@@ -198,10 +225,20 @@ public final class BlockShowcaseCapture {
         }
         placed.clear();
         int x = -ids.size();
-        for (String id : ids) {
+        int slot = 0;
+        for (String spec : ids) {
+            String id = spec.contains("#") ? spec.substring(0, spec.indexOf('#')) : spec;
             Block block = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id));
             BlockPos at = origin.offset(x, 0, -6);
-            place(level, at, facing(block.defaultBlockState()));
+            BlockState shown = facing(block.defaultBlockState());
+            if (spec.contains("#") && shown.hasProperty(DecoPileBlock.COUNT)) {
+                shown = shown.setValue(DecoPileBlock.COUNT,
+                        Integer.parseInt(spec.substring(spec.indexOf('#') + 1)));
+            }
+            if (block instanceof DecoBlock && slot < 9) {
+                p.getInventory().setItem(slot++, new net.minecraft.world.item.ItemStack(block.asItem()));
+            }
+            place(level, at, shown);
             placed.add(at);
             x += 2;
         }
@@ -267,7 +304,7 @@ public final class BlockShowcaseCapture {
             return;
         }
         opened = true;
-        SCRIPT = "gallery".equals(SET) ? galleryScript() : SET_SCRIPT;
+        SCRIPT = "gallery".equals(SET) ? galleryScript() : SET.startsWith("deco") ? decoScript() : SET_SCRIPT;
         Minecraft mc = Minecraft.getInstance();
         mc.options.pauseOnLostFocus = false;
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1280, 720);

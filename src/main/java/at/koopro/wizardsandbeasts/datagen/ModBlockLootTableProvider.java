@@ -64,6 +64,21 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                         .setProperties(StatePropertiesPredicate.Builder.properties()
                                 .hasProperty(CropBlock.AGE, ModBlocks.MANDRAKE_CROP.get().getMaxAge()))));
         dropSelf(ModBlocks.DEVILS_SNARE.get());
+        // Set dressing: an animated piece drops itself, a pile as many as it holds (as sea pickles do).
+        for (var block : at.koopro.wizardsandbeasts.registry.DecoBlocks.PILES) {
+            add(block.get(), pile -> net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(
+                    net.minecraft.world.level.storage.loot.LootPool.lootPool().add(applyExplosionDecay(pile,
+                            net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(pile).apply(
+                                    java.util.List.of(2, 3, 4), n -> net.minecraft.world.level.storage.loot.functions
+                                            .SetItemCountFunction.setCount(net.minecraft.world.level.storage.loot.providers
+                                                    .number.ConstantValue.exactly(n))
+                                            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(pile)
+                                                    .setProperties(StatePropertiesPredicate.Builder.properties()
+                                                            .hasProperty(at.koopro.wizardsandbeasts.block.deco.DecoPileBlock.COUNT, n))))))));
+        }
+        at.koopro.wizardsandbeasts.registry.DecoBlocks.TYPES.keySet().forEach(id -> dropSelf(
+                net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier
+                        .fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, id))));
         dropSelf(ModBlocks.MALLOWSWEET.get());
         // Acromantula silk has no item of its own; it breaks to string, like the hand-written
         // table it replaces (every hand, no shears or silk touch needed; lost to explosions).

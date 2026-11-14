@@ -388,6 +388,8 @@ public class ModCreativeTabs {
                     .withSlotColor(SLOT_STONE)
                     .displayItems((parameters, rawOutput) -> {
                         CreativeModeTab.Output output = gated(rawOutput);
+                        // Set dressing: coins, bottles, books, cages, scales, quills
+                        DecoBlocks.items().forEach(item -> output.accept(item.get()));
                         // Ministry of Magic
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.baseItem().get());
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.slabItem().get());

@@ -1,0 +1,145 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/knut_pile",
+    "particle": "wizards_and_beasts:block/deco/knut_pile"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        2,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.5,
+            6.0,
+            3.0,
+            7.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            4.5,
+            6.0,
+            6.0,
+            7.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            3.0,
+            6.0,
+            4.5,
+            7.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            1.5,
+            7.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            1.5,
+            4.5,
+            3.0,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            3.0,
+            6.0,
+            4.5,
+            4.5
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        10,
+        0,
+        5
+      ],
+      "to": [
+        12,
+        1,
+        7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.0,
+            8.0,
+            2.0,
+            8.5
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            3.0,
+            8.0,
+            4.0,
+            8.5
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            2.0,
+            8.0,
+            3.0,
+            8.5
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            8.0,
+            1.0,
+            8.5
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            1.0,
+            7.0,
+            2.0,
+            8.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            2.0,
+            8.0,
+            3.0,
+            7.0
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

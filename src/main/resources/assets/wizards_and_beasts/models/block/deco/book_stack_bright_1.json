@@ -1,0 +1,77 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/book_stack_bright",
+    "particle": "wizards_and_beasts:block/deco/book_stack_bright"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        3
+      ],
+      "to": [
+        12,
+        3,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            3.3333,
+            4.5,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            7.0,
+            3.3333,
+            9.0,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            4.5,
+            3.3333,
+            7.0,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            3.3333,
+            2.5,
+            4.3333
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.5,
+            0.0,
+            4.5,
+            3.3333
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            4.5,
+            3.3333,
+            6.5,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/potion_bottles",
+    "particle": "wizards_and_beasts:block/deco/potion_bottles"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        4,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.0,
+            4.0,
+            2.0,
+            8.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            3.0,
+            4.0,
+            4.0,
+            8.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            2.0,
+            4.0,
+            3.0,
+            8.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            4.0,
+            1.0,
+            8.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            1.0,
+            0.0,
+            2.0,
+            4.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            2.0,
+            4.0,
+            3.0,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        4,
+        7
+      ],
+      "to": [
+        9,
+        6,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4.5,
+            10.0,
+            5.0,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            5.5,
+            10.0,
+            6.0,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            5.0,
+            10.0,
+            5.5,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            4.0,
+            10.0,
+            4.5,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            4.5,
+            8.0,
+            5.0,
+            10.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            5.0,
+            10.0,
+            5.5,
+            8.0
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        6,
+        7
+      ],
+      "to": [
+        9,
+        7,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6.5,
+            10.0,
+            7.0,
+            11.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            7.5,
+            10.0,
+            8.0,
+            11.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            7.0,
+            10.0,
+            7.5,
+            11.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            6.0,
+            10.0,
+            6.5,
+            11.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            6.5,
+            8.0,
+            7.0,
+            10.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            7.0,
+            10.0,
+            7.5,
+            8.0
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

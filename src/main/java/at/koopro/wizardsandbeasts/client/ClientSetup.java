@@ -94,6 +94,10 @@ public class ClientSetup {
         // Station rigs (tools/station_rigs.py). The configurator and the cabinet draw the whole block (both are
         // RenderShape.INVISIBLE; the cabinet two blocks tall from its lower half). The Floo roar is an overlay on the
         // baked hearth, empty until a traveller leaves or arrives, and glows.
+        // Animated set dressing: one type per block, each drawing its rig with its own sheet.
+        at.koopro.wizardsandbeasts.registry.DecoBlocks.TYPES.forEach((id, type) ->
+                event.registerBlockEntityRenderer(type.get(), GeoRendererHelper.simpleBlock(GeoRendererHelper.rig(
+                        "deco/" + at.koopro.wizardsandbeasts.registry.DecoBlocks.RIGS.get(id), "deco/" + id), 1.0)));
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.POCKET_CONFIGURATOR.get(),
                 GeoRendererHelper.simpleBlock(GeoRendererHelper.rig("pocket_configurator", "pocket_configurator_rig"), 1.0));
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.VANISHING_CABINET.get(),

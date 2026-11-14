@@ -79,6 +79,7 @@ public class WizardsAndBeastsMod {
         at.koopro.wizardsandbeasts.gametest.WizardsAndBeastsGameTests.registerTypes(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        at.koopro.wizardsandbeasts.registry.DecoBlocks.init();
         WandItemRegistry.init();
         BroomItemRegistry.init();
         at.koopro.wizardsandbeasts.travel.TravelItems.init();
