@@ -67,6 +67,12 @@ public final class ModBlockEntities {
                             ModBlocks.RAVENCLAW_BANNER.get(),
                             ModBlocks.HUFFLEPUFF_BANNER.get())));
 
+    /** The archway into Diagon Alley: each brick remembers its part in the opening, for its renderer. */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<at.koopro.wizardsandbeasts.diagon.DiagonArchwayBlockEntity>> DIAGON_ARCHWAY =
+            BLOCK_ENTITY_TYPES.register("diagon_archway", () ->
+                    new BlockEntityType<>(at.koopro.wizardsandbeasts.diagon.DiagonArchwayBlockEntity::new,
+                            Set.of(ModBlocks.DIAGON_ARCHWAY_MOVING.get())));
+
     // Tent preview harness — one type per block (model choice lives at the renderer factory, see
     // GeoRendererHelper.simpleBlock), not one shared type across both like TRUNK above.
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TentBlockEntity>> TENT_CANVAS =

@@ -64,6 +64,25 @@ public final class DiagonWalkCapture {
             new Step("passage", 6, p -> {}),
             new Step("", 40, p -> {}),
             new Step("yard", 10, p -> {}),
+            new Step("", 20, p -> lookPocket(p, 5.5, 7, 17.5, -90f, -5f)),
+            new Step("wall", 10, p -> {}),
+            new Step("", 2, DiagonWalkCapture::tapKey),
+            new Step("arch_a", 4, p -> {}),
+            new Step("arch_b", 5, p -> {}),
+            new Step("arch_c", 5, p -> {}),
+            new Step("arch_d", 6, p -> {}),
+            new Step("arch_e", 8, p -> {}),
+            new Step("arch_open", 14, p -> {}),
+            new Step("", 10, p -> lookPocket(p, 15.5, 7, 17.5, 90f, -3f)),
+            new Step("arch_from_street", 10, p -> {}),
+            new Step("", 5, p -> lookPocket(p, 5.5, 7, 17.5, -90f, -5f)),
+            new Step("", 105, p -> {}),
+            new Step("close_a", 5, p -> {}),
+            new Step("close_b", 5, p -> {}),
+            new Step("close_c", 5, p -> {}),
+            new Step("close_d", 5, p -> {}),
+            new Step("close_e", 8, p -> {}),
+            new Step("closed", 20, p -> {}),
             new Step("", 30, p -> lookPocket(p, 12.6, 7, 17.5, -90f, 0f)),
             new Step("alley", 10, p -> {}),
             new Step("", 30, p -> lookPocket(p, 17.5, 7, 20.5, 180f, -10f)),
@@ -116,6 +135,24 @@ public final class DiagonWalkCapture {
         BlockState state = level.getBlockState(door);
         LOGGER.info("Diagon walk: using {} at {}", state, door);
         state.useWithoutItem(level, p, new BlockHitResult(Vec3.atCenterOf(door), Direction.NORTH, door, false));
+    }
+
+    /** A wand in hand, used on the key brick the way a player's right-click uses it. */
+    private static void tapKey(ServerPlayer p) {
+        ServerLevel pocket = p.level().getServer().getLevel(DiagonAlley.LEVEL);
+        if (pocket == null) {
+            return;
+        }
+        net.minecraft.world.item.ItemStack wand = net.minecraft.core.registries.BuiltInRegistries.ITEM.stream()
+                .filter(item -> item instanceof at.koopro.wizardsandbeasts.item.wand.WandItem).findFirst()
+                .map(net.minecraft.world.item.ItemStack::new).orElse(net.minecraft.world.item.ItemStack.EMPTY);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, wand);
+        BlockPos key = DiagonAlley.ORIGIN.offset(11, 9, 17);
+        BlockState state = pocket.getBlockState(key);
+        LOGGER.info("Diagon walk: tapping {} at {} with {}", state, key, wand);
+        var result = state.useItemOn(wand, pocket, p, net.minecraft.world.InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(key), Direction.WEST, key, false));
+        LOGGER.info("Diagon walk: tap -> {}", result);
     }
 
     private static void useBackDoor(ServerPlayer p) {

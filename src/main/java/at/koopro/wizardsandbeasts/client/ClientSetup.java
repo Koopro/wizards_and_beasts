@@ -72,6 +72,10 @@ public class ClientSetup {
                 GeoRendererHelper.simpleBlock(
                         at.koopro.wizardsandbeasts.client.brew.CauldronGeoModel::new, 1.0));
 
+        // Diagon Alley's archway: each brick drawn by its renderer so it can fold away (the block is INVISIBLE).
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.DIAGON_ARCHWAY.get(),
+                context -> new at.koopro.wizardsandbeasts.client.diagon.DiagonArchwayRenderer());
+
         // House banners are waving cloth rebuilt every frame — the block itself is RenderShape.INVISIBLE.
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.HOUSE_BANNER.get(),
                 context -> new at.koopro.wizardsandbeasts.client.banner.HouseBannerRenderer());

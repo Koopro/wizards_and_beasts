@@ -212,6 +212,18 @@ public class ModBlocks {
             BLOCKS.registerBlock("leaky_cauldron_door", at.koopro.wizardsandbeasts.diagon.PassageDoorBlock::new,
                     () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_OAK_DOOR)
                             .strength(-1.0f, 3600000.0f).noLootTable().pushReaction(PushReaction.BLOCK));
+    /** The bricks of the archway into Diagon Alley, at rest: a wand on the marked one folds them open. */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.diagon.DiagonArchwayBlock> DIAGON_ARCHWAY =
+            BLOCKS.registerBlock("diagon_archway", at.koopro.wizardsandbeasts.diagon.DiagonArchwayBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
+                            .strength(-1.0f, 3600000.0f).noLootTable()
+                            .pushReaction(PushReaction.BLOCK));
+    /** An archway brick while it folds away, stands open or comes back: drawn by its renderer, occluding nothing. */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.diagon.DiagonArchwayMovingBlock> DIAGON_ARCHWAY_MOVING =
+            BLOCKS.registerBlock("diagon_archway_moving", at.koopro.wizardsandbeasts.diagon.DiagonArchwayMovingBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
+                            .strength(-1.0f, 3600000.0f).noLootTable().noOcclusion()
+                            .pushReaction(PushReaction.BLOCK));
     public static final DeferredBlock<at.koopro.wizardsandbeasts.chamber.ChamberGateBlock> CHAMBER_GATE =
             BLOCKS.registerBlock("chamber_gate", at.koopro.wizardsandbeasts.chamber.ChamberGateBlock::new,
                     () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_PRISMARINE)

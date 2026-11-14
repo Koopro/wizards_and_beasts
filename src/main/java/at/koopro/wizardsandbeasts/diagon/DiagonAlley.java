@@ -48,7 +48,7 @@ public final class DiagonAlley {
     /** The alley's template: the yard, the wall and the street behind it. */
     public static final Identifier ALLEY = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "diagon_alley/preview/a");
     /** Bumped whenever the template changes, so a saved world rebuilds its pocket. */
-    public static final int LAYOUT = 1;
+    public static final int LAYOUT = 3;
     /** Where the template's corner stands: its street level (layer 6) lands at y 64. */
     public static final BlockPos ORIGIN = new BlockPos(0, 58, 0);
     /** The yard's door back into the pub, lower half, in template coordinates; it faces into the yard (east). */
