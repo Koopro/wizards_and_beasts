@@ -25,10 +25,11 @@ import org.jspecify.annotations.Nullable;
 /**
  * Draws a brick of the archway into Diagon Alley while it moves, and plays its part.
  *
- * <p>Opening, ring by ring out from the tapped brick: a brick wriggles in its place, then folds into the side of the
- * arch. It turns edge-on like a card, squeezing thin, as it slides into the nearer jamb, or, in the top course and
- * the middle column, up into the lintel. It slides into the standing wall, which hides it, and the arch is open behind
- * it. Closing plays it backwards, the outer ring first: each brick unfolds out of the side and settles with a shiver.
+ * <p>As the films show it: the tapped brick quivers, a hole opens there, and ring by ring the bricks round it shuffle
+ * outward, each spinning flat in the face of the wall as it slides and squeezes into the nearer side of the arch (the
+ * top course and the middle column up into its crown), until the arch stands open. A brick never tips out of the wall;
+ * it slides into the standing wall beside it, which hides it. Closing plays it backwards, the outer ring first: each
+ * brick spins back out of the side and settles with a shiver.
  * Drawn as the alley's own brick block, lit from the air in front of the wall, so it matches the bricks round it.
  */
 public final class DiagonArchwayRenderer implements BlockEntityRenderer<DiagonArchwayBlockEntity, DiagonArchwayRenderer.State> {
@@ -128,13 +129,13 @@ public final class DiagonArchwayRenderer implements BlockEntityRenderer<DiagonAr
         }
         float time = state.local + state.seed;
         poseStack.pushPose();
-        // Slide toward the side, turning about the line in the wall square to the slide, like a card turning edge-on.
+        // Slide toward the side, spinning flat in the wall's face (about its normal), rolling the way it travels.
         float travel = fold * state.slide;
         poseStack.translate(0.5f + state.foldX * travel, 0.5f + state.foldY * travel, 0.5f + state.foldZ * travel);
-        Vector3f axis = new Vector3f(state.foldX, state.foldY, state.foldZ).cross(state.normalX, 0f, state.normalZ);
-        if (fold > 0f && axis.lengthSquared() > 1.0e-4f) {
-            axis.normalize();
-            poseStack.mulPose(new Quaternionf().rotateAxis(fold * Mth.HALF_PI, axis.x, axis.y, axis.z));
+        if (fold > 0f) {
+            Vector3f roll = new Vector3f(state.normalX, 0f, state.normalZ).cross(state.foldX, state.foldY, state.foldZ);
+            float sense = roll.y < 0f || (roll.y == 0f && roll.x + roll.z < 0f) ? -1f : 1f;
+            poseStack.mulPose(new Quaternionf().rotateAxis(sense * fold * Mth.HALF_PI, state.normalX, 0f, state.normalZ));
         }
         if (shiver > 0f) {
             poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(time * 45f) * 5f * shiver));
