@@ -52,7 +52,7 @@ public final class DiagonAlley {
     /** How far the backdrop's corner stands out from the alley's, on both horizontal axes. */
     static final int BACKDROP_MARGIN = 14;
     /** Bumped whenever the templates change, so a saved world rebuilds its pocket. */
-    public static final int LAYOUT = 8;
+    public static final int LAYOUT = 10;
     /** Where the template's corner stands: its street level (layer 6) lands at y 64. */
     public static final BlockPos ORIGIN = new BlockPos(0, 58, 0);
     /** The yard's door back into the pub, lower half, in template coordinates; it faces into the yard (east). */
@@ -121,15 +121,17 @@ public final class DiagonAlley {
         }
         // The old shops' people go with them: their posts are gone, so their records are, and the new posts staff
         // themselves. A copy still in a region file is refused on joining (SettlementEvents.onJoin).
-        at.koopro.wizardsandbeasts.settlement.SettlementData.get(pocket).forget(
-                at.koopro.wizardsandbeasts.settlement.SettlementData.siteKey(pocket,
-                        new net.minecraft.world.level.ChunkPos(ORIGIN)));
+        // Every site in the pocket, not only today's: posts of older layouts were filed under their own chunks.
+        int sites = at.koopro.wizardsandbeasts.settlement.SettlementData.get(pocket).forgetDimension(LEVEL);
+        int staff = 0;
         for (net.minecraft.world.entity.Entity entity : pocket.getAllEntities()) {
             if (entity.hasData(at.koopro.wizardsandbeasts.registry.ModAttachments.SETTLEMENT_POST.get())) {
                 entity.discard();
+                staff++;
             }
         }
-        LOGGER.info("Diagon Alley: cleared {} blocks of the old layout", cleared);
+        LOGGER.info("Diagon Alley: cleared {} blocks of the old layout, forgot {} sites, sent {} staff away", cleared,
+                sites, staff);
     }
 
     /** Keeps the alley's chunks, and a ring round them, loaded: a traveller arrives to a street already there. */

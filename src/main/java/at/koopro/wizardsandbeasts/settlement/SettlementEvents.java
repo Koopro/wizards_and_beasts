@@ -63,6 +63,8 @@ public final class SettlementEvents {
         SettlementData.Post post = SettlementData.get(level).post(entity.getData(ModAttachments.SETTLEMENT_POST.get()));
         if (post == null || post.status() != PostRules.Status.PRESENT
                 || post.npc().filter(entity.getUUID()::equals).isEmpty()) {
+            com.mojang.logging.LogUtils.getLogger().debug("[Settlement] refused stale {} at {} (record {})",
+                    entity.getUUID(), entity.blockPosition(), post);
             event.setCanceled(true);
         }
     }

@@ -153,6 +153,20 @@ public final class SettlementData extends SavedData {
         }
     }
 
+    /**
+     * Drops every site in {@code dimension}: a place rebuilt from scratch (Diagon Alley's pocket) whose posts may have
+     * been filed under older keys than the one it uses now.
+     */
+    public int forgetDimension(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension) {
+        String prefix = dimension.identifier() + "@";
+        int before = sites.size();
+        sites.keySet().removeIf(key -> key.startsWith(prefix));
+        if (sites.size() != before) {
+            setDirty();
+        }
+        return before - sites.size();
+    }
+
     public @Nullable Site site(String key) {
         return sites.get(key);
     }
