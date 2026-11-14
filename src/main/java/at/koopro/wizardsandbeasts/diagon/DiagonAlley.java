@@ -52,7 +52,7 @@ public final class DiagonAlley {
     /** How far the backdrop's corner stands out from the alley's, on both horizontal axes. */
     static final int BACKDROP_MARGIN = 14;
     /** Bumped whenever the templates change, so a saved world rebuilds its pocket. */
-    public static final int LAYOUT = 7;
+    public static final int LAYOUT = 8;
     /** Where the template's corner stands: its street level (layer 6) lands at y 64. */
     public static final BlockPos ORIGIN = new BlockPos(0, 58, 0);
     /** The yard's door back into the pub, lower half, in template coordinates; it faces into the yard (east). */
