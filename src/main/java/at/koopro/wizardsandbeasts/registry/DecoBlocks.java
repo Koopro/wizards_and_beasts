@@ -125,6 +125,53 @@ public final class DecoBlocks {
     public static final DeferredBlock<AnimatedDecoBlock> OWL_CAGE_TAWNY = animated("owl_cage_tawny", "owl_cage",
             MapColor.GOLD, SoundType.CHAIN, Block.box(3, 0, 3, 13, 15, 13));
 
+    // -- Batch 2: Ollivanders, the apothecary, studies, Knockturn ----------------------------------------------------
+    public static final DeferredBlock<DecoPileBlock> WAND_BOXES = wandBoxes("wand_boxes", MapColor.COLOR_GREEN);
+    public static final DeferredBlock<DecoPileBlock> WAND_BOXES_PALE = wandBoxes("wand_boxes_pale", MapColor.SAND);
+    public static final DeferredBlock<DecoPileBlock> SPECIMEN_JARS = jars("specimen_jars", MapColor.COLOR_LIGHT_GREEN);
+    public static final DeferredBlock<DecoPileBlock> SPECIMEN_JARS_MURKY = jars("specimen_jars_murky", MapColor.COLOR_GREEN);
+    public static final DeferredBlock<DecoPileBlock> SCROLL_PILE = scrolls("scroll_pile");
+    public static final DeferredBlock<DecoPileBlock> SCROLL_PILE_SEALED = scrolls("scroll_pile_sealed");
+
+    private static DeferredBlock<DecoPileBlock> wandBoxes(String id, MapColor color) {
+        return pile(id, color, SoundType.WOOD, Block.box(3, 0, 3, 6, 2, 13), Block.box(3, 0, 2, 10, 2, 13),
+                Block.box(3, 0, 2, 10, 4, 14), Block.box(3, 0, 2, 14, 4, 14));
+    }
+
+    private static DeferredBlock<DecoPileBlock> jars(String id, MapColor color) {
+        return pile(id, color, SoundType.GLASS, Block.box(6, 0, 6, 9, 5, 9), Block.box(2, 0, 6, 9, 6, 11),
+                Block.box(2, 0, 3, 13, 6, 11), Block.box(2, 0, 3, 14, 6, 14));
+    }
+
+    private static DeferredBlock<DecoPileBlock> scrolls(String id) {
+        return pile(id, MapColor.SAND, SoundType.WOOL, Block.box(3, 0, 4, 11, 2, 6), Block.box(3, 0, 4, 13, 2, 10),
+                Block.box(3, 0, 4, 13, 4, 10), Block.box(2, 0, 4, 13, 4, 13));
+    }
+
+    public static final DeferredBlock<AnimatedDecoBlock> BUBBLING_POT_PEWTER = pot("bubbling_pot_pewter");
+    public static final DeferredBlock<AnimatedDecoBlock> BUBBLING_POT_BRASS = pot("bubbling_pot_brass");
+    public static final DeferredBlock<AnimatedDecoBlock> BUBBLING_POT_COPPER = pot("bubbling_pot_copper");
+    public static final DeferredBlock<AnimatedDecoBlock> CRYSTAL_BALL = animated("crystal_ball", "crystal_ball",
+            MapColor.COLOR_LIGHT_BLUE, SoundType.GLASS, Block.box(5, 0, 5, 11, 10, 11));
+    public static final DeferredBlock<AnimatedDecoBlock> CRYSTAL_BALL_SMOKY = animated("crystal_ball_smoky",
+            "crystal_ball", MapColor.COLOR_PURPLE, SoundType.GLASS, Block.box(5, 0, 5, 11, 10, 11));
+    public static final DeferredBlock<AnimatedDecoBlock> HOURGLASS = animated("hourglass", "hourglass", MapColor.GOLD,
+            SoundType.GLASS, Block.box(4, 0, 4, 12, 12, 12));
+    public static final DeferredBlock<AnimatedDecoBlock> HOURGLASS_SILVER = animated("hourglass_silver", "hourglass",
+            MapColor.METAL, SoundType.GLASS, Block.box(4, 0, 4, 12, 12, 12));
+    public static final DeferredBlock<AnimatedDecoBlock> ORRERY = animated("orrery", "orrery", MapColor.GOLD,
+            SoundType.CHAIN, Block.box(4, 0, 4, 12, 12, 12));
+    public static final DeferredBlock<AnimatedDecoBlock> ORRERY_SILVER = animated("orrery_silver", "orrery",
+            MapColor.METAL, SoundType.CHAIN, Block.box(4, 0, 4, 12, 12, 12));
+    public static final DeferredBlock<AnimatedDecoBlock> SHRUNKEN_HEADS = animated("shrunken_heads", "shrunken_heads",
+            MapColor.COLOR_BROWN, SoundType.WOOL, Block.box(5, 1, 6, 11, 16, 10));
+    public static final DeferredBlock<AnimatedDecoBlock> HANGING_SHRUNKEN_HEAD = animated("hanging_shrunken_head", "shrunken_head",
+            MapColor.COLOR_BROWN, SoundType.WOOL, Block.box(5, 4, 5, 11, 16, 11));
+
+    private static DeferredBlock<AnimatedDecoBlock> pot(String id) {
+        return animated(id, "bubbling_pot", MapColor.METAL, SoundType.METAL, Block.box(2, 0, 3, 14, 9, 13));
+    }
+
     /** Loads the class, so every holder above is queued before the registries fire. */
     public static void init() {}
 

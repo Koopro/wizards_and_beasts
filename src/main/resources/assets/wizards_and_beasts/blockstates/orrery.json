@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/deco/orrery_particle"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/deco/orrery_particle"
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/deco/orrery_particle"
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/deco/orrery_particle"
+    }
+  }
+}

@@ -9273,5 +9273,22 @@
   "block.wizards_and_beasts.book_stack_bright": "Stack of Bright Books",
   "block.wizards_and_beasts.gringotts_scales_silver": "Silver Scales",
   "block.wizards_and_beasts.enchanted_quill_raven": "Enchanted Raven Quill",
-  "block.wizards_and_beasts.enchanted_quill_peacock": "Enchanted Peacock Quill"
+  "block.wizards_and_beasts.enchanted_quill_peacock": "Enchanted Peacock Quill",
+  "block.wizards_and_beasts.wand_boxes": "Wand Boxes",
+  "block.wizards_and_beasts.wand_boxes_pale": "Pale Wand Boxes",
+  "block.wizards_and_beasts.specimen_jars": "Specimen Jars",
+  "block.wizards_and_beasts.specimen_jars_murky": "Murky Specimen Jars",
+  "block.wizards_and_beasts.scroll_pile": "Pile of Scrolls",
+  "block.wizards_and_beasts.scroll_pile_sealed": "Sealed Scrolls",
+  "block.wizards_and_beasts.bubbling_pot_pewter": "Bubbling Pewter Pot",
+  "block.wizards_and_beasts.bubbling_pot_brass": "Bubbling Brass Pot",
+  "block.wizards_and_beasts.bubbling_pot_copper": "Bubbling Copper Pot",
+  "block.wizards_and_beasts.crystal_ball": "Crystal Ball",
+  "block.wizards_and_beasts.crystal_ball_smoky": "Smoky Crystal Ball",
+  "block.wizards_and_beasts.hourglass": "Hourglass",
+  "block.wizards_and_beasts.hourglass_silver": "Silver Hourglass",
+  "block.wizards_and_beasts.orrery": "Orrery",
+  "block.wizards_and_beasts.orrery_silver": "Silver Orrery",
+  "block.wizards_and_beasts.shrunken_heads": "String of Shrunken Heads",
+  "block.wizards_and_beasts.hanging_shrunken_head": "Hanging Shrunken Head"
 }

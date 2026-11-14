@@ -1,0 +1,213 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/wand_boxes",
+    "particle": "wizards_and_beasts:block/deco/wand_boxes"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        6,
+        2,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            5.0,
+            3.25,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            5.75,
+            5.0,
+            6.5,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            3.25,
+            5.0,
+            5.75,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            5.0,
+            2.5,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.5,
+            0.0,
+            3.25,
+            5.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            3.25,
+            5.0,
+            4.0,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        0,
+        2
+      ],
+      "to": [
+        10,
+        2,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            9.0,
+            5.0,
+            9.75,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            12.25,
+            5.0,
+            13.0,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            9.75,
+            5.0,
+            12.25,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            6.5,
+            5.0,
+            9.0,
+            6.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            9.0,
+            0.0,
+            9.75,
+            5.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            9.75,
+            5.0,
+            10.5,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        2,
+        4
+      ],
+      "to": [
+        7,
+        4,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            11.0,
+            3.25,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            5.75,
+            11.0,
+            6.5,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            3.25,
+            11.0,
+            5.75,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            11.0,
+            2.5,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.5,
+            6.0,
+            3.25,
+            11.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            3.25,
+            11.0,
+            4.0,
+            6.0
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

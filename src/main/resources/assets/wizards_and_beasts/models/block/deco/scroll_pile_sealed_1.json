@@ -1,0 +1,77 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/scroll_pile_sealed",
+    "particle": "wizards_and_beasts:block/deco/scroll_pile_sealed"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        4
+      ],
+      "to": [
+        11,
+        2,
+        6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.5,
+            2.0,
+            2.5,
+            4.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            3.0,
+            2.0,
+            5.0,
+            4.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            2.5,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            2.0,
+            0.5,
+            4.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            0.5,
+            0.0,
+            2.5,
+            2.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            2.5,
+            2.0,
+            4.5,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

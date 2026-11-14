@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "wizards_and_beasts:blocks/orrery_silver",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:orrery_silver"
+        }
+      ]
+    }
+  ]
+}

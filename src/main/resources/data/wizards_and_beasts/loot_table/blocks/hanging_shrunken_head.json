@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "wizards_and_beasts:blocks/hanging_shrunken_head",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:hanging_shrunken_head"
+        }
+      ]
+    }
+  ]
+}

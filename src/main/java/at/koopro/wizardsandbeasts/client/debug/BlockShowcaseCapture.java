@@ -69,7 +69,12 @@ public final class BlockShowcaseCapture {
                     "coin_pouch#4", "galleon_pile#2", "owl_cage_barn", "owl_cage_tawny"),
             "deco_variants2", List.of("potion_bottles_dark#4", "potion_bottles_bright#4", "book_stack_leather#4",
                     "book_stack_bright#4", "gringotts_scales_silver", "enchanted_quill_raven", "enchanted_quill_peacock",
-                    "coin_pouch#1"));
+                    "coin_pouch#1"),
+            "deco2", List.of("wand_boxes#4", "specimen_jars#4", "scroll_pile_sealed#4", "bubbling_pot_copper",
+                    "crystal_ball", "hourglass", "orrery", "shrunken_heads"),
+            "deco2_variants", List.of("wand_boxes_pale#3", "specimen_jars_murky#4", "scroll_pile#3",
+                    "bubbling_pot_pewter", "bubbling_pot_brass", "crystal_ball_smoky", "hourglass_silver",
+                    "hanging_shrunken_head"));
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
