@@ -1,0 +1,13 @@
+{
+  "type": "wizards_and_beasts:diagon_alley",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "wizards_and_beasts:diagon_alley",
+      "features": false,
+      "lakes": false,
+      "layers": [],
+      "structure_overrides": []
+    }
+  }
+}

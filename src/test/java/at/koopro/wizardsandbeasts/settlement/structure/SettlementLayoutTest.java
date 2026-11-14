@@ -119,7 +119,7 @@ class SettlementLayoutTest {
                 assertTrue(lang.get(key).getAsString().length() <= 15, key);
             }
         }
-        assertEquals(32, lines);
+        assertEquals(52, lines);   // the hamlet's 32 and Diagon Alley's 20
     }
 
     private static List<String> postRoles(Path template) throws IOException {

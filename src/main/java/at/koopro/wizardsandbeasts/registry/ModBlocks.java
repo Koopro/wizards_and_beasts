@@ -207,6 +207,11 @@ public class ModBlocks {
                     () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)
                             .strength(-1.0f, 3600000.0f).noLootTable().noOcclusion()
                             .pushReaction(PushReaction.BLOCK));
+    /** The Leaky Cauldron's back door and the yard's door: they take you through, never open (Diagon Alley). */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.diagon.PassageDoorBlock> LEAKY_CAULDRON_DOOR =
+            BLOCKS.registerBlock("leaky_cauldron_door", at.koopro.wizardsandbeasts.diagon.PassageDoorBlock::new,
+                    () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_OAK_DOOR)
+                            .strength(-1.0f, 3600000.0f).noLootTable().pushReaction(PushReaction.BLOCK));
     public static final DeferredBlock<at.koopro.wizardsandbeasts.chamber.ChamberGateBlock> CHAMBER_GATE =
             BLOCKS.registerBlock("chamber_gate", at.koopro.wizardsandbeasts.chamber.ChamberGateBlock::new,
                     () -> BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DARK_PRISMARINE)

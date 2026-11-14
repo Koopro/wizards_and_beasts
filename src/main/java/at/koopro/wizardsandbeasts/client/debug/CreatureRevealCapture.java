@@ -87,6 +87,12 @@ public final class CreatureRevealCapture {
     private static boolean capture;
     private static ArmorStand camera;
     private static double subjectHeight = 1.8;
+    /**
+     * Cameras set inside a template, {@code x|y|z|yaw|pitch} in its own coordinates, used in turn by the views in place
+     * of the orbit: a street is judged from the street, not from over the roofs. Empty for every other scene.
+     */
+    private static final List<double[]> templateCameras = new java.util.ArrayList<>();
+    private static BlockPos templateBase = BlockPos.ZERO;
 
     private CreatureRevealCapture() {}
 
@@ -149,7 +155,7 @@ public final class CreatureRevealCapture {
         }
         capture = false;
         Minecraft mc = Minecraft.getInstance();
-        String name = IDS.get(idIndex).replaceAll("[@:~=/]", "_") + "__" + VIEWS.get(viewIndex).name() + ".png";
+        String name = IDS.get(idIndex).replaceAll("!.*", "").replaceAll("[@:~=/]", "_") + "__" + VIEWS.get(viewIndex).name() + ".png";
         Path file = mc.gameDirectory.toPath().resolve(Path.of(Screenshot.SCREENSHOT_DIR, "reveal")).resolve(name);
         Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> Util.ioPool().execute(() -> {
             try (image) {
@@ -235,8 +241,16 @@ public final class CreatureRevealCapture {
      * age, {@code basilisk@0}, for a creature that grows.
      */
     private static void spawn(ServerLevel level, String spec) {
+        templateCameras.clear();
         if (spec.startsWith("scene:template=")) {
-            template(level, spec.substring("scene:template=".length()));
+            String rest = spec.substring("scene:template=".length());
+            if (rest.contains("!")) {
+                for (String cam : rest.substring(rest.indexOf('!') + 1).split(";")) {
+                    templateCameras.add(java.util.Arrays.stream(cam.split("[|]")).mapToDouble(Double::parseDouble).toArray());
+                }
+                rest = rest.substring(0, rest.indexOf('!'));
+            }
+            template(level, rest);
             return;
         }
         if (spec.equals("scene:swamp")) {
@@ -340,6 +354,7 @@ public final class CreatureRevealCapture {
         var template = found.get();
         net.minecraft.core.Vec3i size = template.getSize();
         BlockPos base = new BlockPos(-size.getX() / 2, STAGE_Y - 1 - sink, -size.getZ() / 2);
+        templateBase = base;
         template.placeInWorld(level, base, base, new net.minecraft.world.level.levelgen.structure.templatesystem
                 .StructurePlaceSettings(), level.random, Block.UPDATE_CLIENTS);
         subject = null;
@@ -397,6 +412,24 @@ public final class CreatureRevealCapture {
         if (camera == null || camera.level() != mc.level) {
             camera = new ArmorStand(EntityType.ARMOR_STAND, mc.level);
             camera.setInvisible(true);
+        }
+        if (!templateCameras.isEmpty()) {
+            double[] c = templateCameras.get(viewIndex % templateCameras.size());
+            camera.setPos(templateBase.getX() + c[0], templateBase.getY() + c[1] - camera.getEyeHeight(),
+                    templateBase.getZ() + c[2]);
+            camera.setYRot((float) c[3]);
+            camera.setXRot((float) c[4]);
+            camera.setYHeadRot((float) c[3]);
+            camera.xo = camera.getX();
+            camera.yo = camera.getY();
+            camera.zo = camera.getZ();
+            camera.yRotO = (float) c[3];
+            camera.xRotO = (float) c[4];
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+            if (mc.getCameraEntity() != camera) {
+                mc.setCameraEntity(camera);
+            }
+            return;
         }
         double distance = 3.0 + subjectHeight * 1.6;
         double rad = Math.toRadians(view.camYaw());

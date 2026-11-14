@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:leaky_cauldron",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "wizards_and_beasts:one_per_world",
+    "salt": 70312459,
+    "target_biomes": "#wizards_and_beasts:has_structure/leaky_cauldron",
+    "min_chunk_radius": 32,
+    "max_chunk_radius": 80
+  }
+}

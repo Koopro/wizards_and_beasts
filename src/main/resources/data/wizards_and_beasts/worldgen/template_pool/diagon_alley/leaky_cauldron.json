@@ -1,0 +1,15 @@
+{
+  "name": "wizards_and_beasts:diagon_alley/leaky_cauldron",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "wizards_and_beasts:diagon_alley/leaky_cauldron/a",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}
