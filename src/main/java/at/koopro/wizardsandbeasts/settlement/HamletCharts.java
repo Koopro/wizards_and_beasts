@@ -57,6 +57,13 @@ public final class HamletCharts {
                 || level.dimension() != Level.OVERWORLD) {
             return;
         }
+        // A world with a Leaky Cauldron (every world made since Diagon Alley replaced the hamlets) is charted to it at
+        // once: there is one, and its place is known. The hamlet search stays for worlds made before.
+        BlockPos pub = at.koopro.wizardsandbeasts.diagon.DiagonAlley.locatePub(level);
+        if (pub != null) {
+            give(player, pub);
+            return;
+        }
         begin(player, TreasureCharts.walk(level, HAMLETS, player.blockPosition(), SEARCH_RINGS));
     }
 
@@ -99,9 +106,13 @@ public final class HamletCharts {
     }
 
     private static void give(ServerPlayer player, SiteSearch.Site site) {
+        give(player, new BlockPos(site.locateX(), 0, site.locateZ()));
+    }
+
+    private static void give(ServerPlayer player, BlockPos target) {
         // The Overworld's map, wherever the player has gone since they were promised it.
         ServerLevel level = player.level().getServer().overworld();
-        InventoryHandover.giveOrDrop(player, TreasureCharts.draw(level, new BlockPos(site.locateX(), 0, site.locateZ()),
+        InventoryHandover.giveOrDrop(player, TreasureCharts.draw(level, target,
                 Component.translatable("item.wizards_and_beasts.wayfarers_chart")));
         player.setData(ModAttachments.KNOWN_PLACES.get(), player.getData(ModAttachments.KNOWN_PLACES.get()).withChart());
         player.sendSystemMessage(Component.translatable("settlement.wizards_and_beasts.chart.given"));

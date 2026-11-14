@@ -99,6 +99,12 @@ public final class DiagonAlleyEvents {
         }
     }
 
+    /** Whether {@code pos} stands inside the Leaky Cauldron. */
+    public static boolean inPub(ServerLevel level, BlockPos pos) {
+        Optional<Structure> pub = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOptional(PUB);
+        return pub.isPresent() && level.structureManager().getStructureWithPieceAt(pos, pub.get()).isValid();
+    }
+
     @SubscribeEvent
     static void onBreak(BlockEvent.BreakEvent event) {
         if (inPocket(event.getLevel()) && !event.getPlayer().isCreative()) {

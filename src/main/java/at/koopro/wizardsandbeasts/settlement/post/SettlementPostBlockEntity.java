@@ -157,7 +157,10 @@ public class SettlementPostBlockEntity extends BlockEntity {
     private PostRef reference(ServerLevel level, BlockPos pos) {
         if (site == null) {
             StructureStart start = level.structureManager().getStructureWithPieceAt(pos, SETTLEMENTS);
-            ChunkPos chunk = start.isValid() ? start.getChunkPos() : new ChunkPos(pos);
+            // Every shop of Diagon Alley is one place, though its posts stand in many chunks of the pocket.
+            ChunkPos chunk = level.dimension() == at.koopro.wizardsandbeasts.diagon.DiagonAlley.LEVEL
+                    ? new ChunkPos(at.koopro.wizardsandbeasts.diagon.DiagonAlley.ORIGIN)
+                    : start.isValid() ? start.getChunkPos() : new ChunkPos(pos);
             site = SettlementData.siteKey(level, chunk);
             SettlementData.get(level).site(site, level.getSeed() ^ chunk.toLong() * 0x9E3779B97F4A7C15L);
         }

@@ -23,6 +23,19 @@ public final class SettlementDiscovery {
             return;
         }
         player.setData(ModAttachments.KNOWN_PLACES.get(), known.with(site));
+        // Diagon Alley and the Leaky Cauldron have names of their own; anything else is a hamlet with a rolled one.
+        if (player.level().dimension() == at.koopro.wizardsandbeasts.diagon.DiagonAlley.LEVEL) {
+            PlayerFeedback.toast(player, NoticeKind.DISCOVERY,
+                    Component.translatable("settlement.wizards_and_beasts.diagon_alley.title"),
+                    Component.translatable("settlement.wizards_and_beasts.diagon_alley.subtitle"));
+            return;
+        }
+        if (at.koopro.wizardsandbeasts.diagon.DiagonAlleyEvents.inPub(player.level(), player.blockPosition())) {
+            PlayerFeedback.toast(player, NoticeKind.DISCOVERY,
+                    Component.translatable("settlement.wizards_and_beasts.leaky_cauldron.title"),
+                    Component.translatable("settlement.wizards_and_beasts.leaky_cauldron.subtitle"));
+            return;
+        }
         SettlementData.Site data = SettlementData.get(player.level()).site(site);
         Component name = data == null ? Component.translatable("settlement.wizards_and_beasts.unnamed")
                 : SettlementNames.ofSeed(data.seed());
