@@ -9290,5 +9290,22 @@
   "block.wizards_and_beasts.orrery": "Orrery",
   "block.wizards_and_beasts.orrery_silver": "Silver Orrery",
   "block.wizards_and_beasts.shrunken_heads": "String of Shrunken Heads",
-  "block.wizards_and_beasts.hanging_shrunken_head": "Hanging Shrunken Head"
+  "block.wizards_and_beasts.hanging_shrunken_head": "Hanging Shrunken Head",
+  "block.wizards_and_beasts.dress_form_black": "Dress Form with Black Robes",
+  "block.wizards_and_beasts.dress_form_green": "Dress Form with Green Robes",
+  "block.wizards_and_beasts.dress_form_plum": "Dress Form with Plum Robes",
+  "block.wizards_and_beasts.quaffle_crate": "Crate of Quaffles",
+  "block.wizards_and_beasts.bludger_crate": "Crate of Bludgers",
+  "block.wizards_and_beasts.wizard_chess": "Wizard Chess Set",
+  "block.wizards_and_beasts.herb_bundle_lavender": "Drying Lavender",
+  "block.wizards_and_beasts.herb_bundle_wolfsbane": "Drying Wolfsbane",
+  "block.wizards_and_beasts.herb_bundle_garlic": "String of Garlic",
+  "block.wizards_and_beasts.desk_set": "Desk Set",
+  "block.wizards_and_beasts.broom_barrel": "Barrel of Brooms",
+  "block.wizards_and_beasts.butterbeer_tankards": "Tankards of Butterbeer",
+  "block.wizards_and_beasts.firewhisky_bottles": "Bottles of Firewhisky",
+  "block.wizards_and_beasts.luggage": "Luggage",
+  "block.wizards_and_beasts.daily_prophet_stack": "Stack of Daily Prophets",
+  "block.wizards_and_beasts.quibbler_stack": "Stack of Quibblers",
+  "block.wizards_and_beasts.spider_cage": "Cage of Spiders"
 }

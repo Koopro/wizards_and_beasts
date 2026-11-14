@@ -1,0 +1,145 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/daily_prophet_stack",
+    "particle": "wizards_and_beasts:block/deco/daily_prophet_stack"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        3,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            5.0,
+            5.0,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            7.5,
+            5.0,
+            10.0,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            5.0,
+            5.0,
+            7.5,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            5.0,
+            2.5,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.5,
+            0.0,
+            5.0,
+            5.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            5.0,
+            5.0,
+            7.5,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        3,
+        3
+      ],
+      "to": [
+        13,
+        4,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            11.5,
+            5.0,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            7.5,
+            11.5,
+            10.0,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            5.0,
+            11.5,
+            7.5,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            11.5,
+            2.5,
+            12.0
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.5,
+            6.5,
+            5.0,
+            11.5
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            5.0,
+            11.5,
+            7.5,
+            6.5
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

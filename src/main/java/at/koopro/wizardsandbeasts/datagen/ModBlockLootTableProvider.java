@@ -76,6 +76,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                                                     .setProperties(StatePropertiesPredicate.Builder.properties()
                                                             .hasProperty(at.koopro.wizardsandbeasts.block.deco.DecoPileBlock.COUNT, n))))))));
         }
+        at.koopro.wizardsandbeasts.registry.DecoBlocks.SINGLES.forEach(block -> dropSelf(block.get()));
         at.koopro.wizardsandbeasts.registry.DecoBlocks.TYPES.keySet().forEach(id -> dropSelf(
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier
                         .fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, id))));

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/deco/desk_set"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/deco/desk_set",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/deco/desk_set",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/deco/desk_set",
+      "y": 270
+    }
+  }
+}

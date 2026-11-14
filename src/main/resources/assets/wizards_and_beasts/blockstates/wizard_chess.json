@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/deco/wizard_chess"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/deco/wizard_chess",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/deco/wizard_chess",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/deco/wizard_chess",
+      "y": 270
+    }
+  }
+}

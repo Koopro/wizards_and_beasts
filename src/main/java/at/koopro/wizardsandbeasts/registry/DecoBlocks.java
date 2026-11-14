@@ -42,6 +42,8 @@ public final class DecoBlocks {
     public static final Map<String, String> RIGS = new LinkedHashMap<>();
     /** Every pile, for its count-keyed loot table. */
     public static final List<DeferredBlock<DecoPileBlock>> PILES = new ArrayList<>();
+    /** Every static single piece, for its drop-itself loot table. */
+    public static final List<DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock>> SINGLES = new ArrayList<>();
 
     private static BlockBehaviour.Properties props(MapColor color, SoundType sound) {
         return BlockBehaviour.Properties.of().mapColor(color).sound(sound).strength(0.3f).noOcclusion()
@@ -53,6 +55,15 @@ public final class DecoBlocks {
                 properties -> new DecoPileBlock(properties, shapes), () -> props(color, sound));
         ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
         PILES.add(block);
+        return block;
+    }
+
+    private static DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> simple(String id, MapColor color, SoundType sound,
+                                                                         VoxelShape shape) {
+        DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> block = ModBlocks.BLOCKS.registerBlock(id,
+                properties -> new at.koopro.wizardsandbeasts.block.deco.DecoBlock(properties, shape), () -> props(color, sound));
+        ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        SINGLES.add(block);
         return block;
     }
 
@@ -171,6 +182,46 @@ public final class DecoBlocks {
     private static DeferredBlock<AnimatedDecoBlock> pot(String id) {
         return animated(id, "bubbling_pot", MapColor.METAL, SoundType.METAL, Block.box(2, 0, 3, 14, 9, 13));
     }
+
+    // -- Batch 3: shops, the pub, Knockturn ----------------------------------------------------------------------
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> DRESS_FORM_BLACK = simple("dress_form_black",
+            MapColor.COLOR_BLACK, SoundType.WOOL, Block.box(4, 0, 5, 12, 16, 11));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> DRESS_FORM_GREEN = simple("dress_form_green",
+            MapColor.COLOR_GREEN, SoundType.WOOL, Block.box(4, 0, 5, 12, 16, 11));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> DRESS_FORM_PLUM = simple("dress_form_plum",
+            MapColor.COLOR_PURPLE, SoundType.WOOL, Block.box(4, 0, 5, 12, 16, 11));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> QUAFFLE_CRATE = simple("quaffle_crate",
+            MapColor.WOOD, SoundType.WOOD, Block.box(2, 0, 2, 14, 8, 14));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> BLUDGER_CRATE = simple("bludger_crate",
+            MapColor.WOOD, SoundType.WOOD, Block.box(2, 0, 2, 14, 8, 14));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> WIZARD_CHESS = simple("wizard_chess",
+            MapColor.WOOD, SoundType.STONE, Block.box(3, 0, 3, 13, 5, 13));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> HERB_BUNDLE_LAVENDER = simple("herb_bundle_lavender",
+            MapColor.COLOR_PURPLE, SoundType.GRASS, Block.box(5, 3, 5, 11, 16, 11));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> HERB_BUNDLE_WOLFSBANE = simple("herb_bundle_wolfsbane",
+            MapColor.COLOR_BLUE, SoundType.GRASS, Block.box(5, 3, 5, 11, 16, 11));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> HERB_BUNDLE_GARLIC = simple("herb_bundle_garlic",
+            MapColor.SAND, SoundType.GRASS, Block.box(5, 3, 5, 11, 16, 11));
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> DESK_SET = simple("desk_set",
+            MapColor.COLOR_GREEN, SoundType.WOOD, Block.box(2, 0, 4, 14, 3, 12));
+    public static final DeferredBlock<DecoPileBlock> BROOM_BARREL = pile("broom_barrel", MapColor.WOOD, SoundType.WOOD,
+            Block.box(4, 0, 4, 12, 16, 12), Block.box(4, 0, 4, 12, 16, 12), Block.box(4, 0, 4, 12, 16, 12),
+            Block.box(4, 0, 4, 12, 16, 12));
+    public static final DeferredBlock<DecoPileBlock> BUTTERBEER_TANKARDS = pile("butterbeer_tankards", MapColor.METAL,
+            SoundType.METAL, Block.box(5, 0, 5, 10, 5, 9), Block.box(5, 0, 5, 14, 5, 12), Block.box(2, 0, 5, 14, 5, 14),
+            Block.box(2, 0, 3, 14, 5, 14));
+    public static final DeferredBlock<DecoPileBlock> FIREWHISKY_BOTTLES = pile("firewhisky_bottles",
+            MapColor.COLOR_ORANGE, SoundType.GLASS, Block.box(6, 0, 6, 9, 9, 9), Block.box(6, 0, 6, 13, 9, 12),
+            Block.box(3, 0, 6, 13, 9, 12), Block.box(3, 0, 3, 13, 9, 12));
+    public static final DeferredBlock<DecoPileBlock> LUGGAGE = pile("luggage", MapColor.COLOR_BROWN, SoundType.WOOD,
+            Block.box(2, 0, 4, 13, 5, 12), Block.box(2, 0, 4, 13, 9, 12), Block.box(2, 0, 4, 13, 12, 12),
+            Block.box(2, 0, 4, 16, 12, 16));
+    public static final DeferredBlock<AnimatedDecoBlock> DAILY_PROPHET_STACK = animated("daily_prophet_stack",
+            "newspaper", MapColor.WOOL, SoundType.WOOL, Block.box(3, 0, 3, 13, 4, 13));
+    public static final DeferredBlock<AnimatedDecoBlock> QUIBBLER_STACK = animated("quibbler_stack", "newspaper",
+            MapColor.COLOR_YELLOW, SoundType.WOOL, Block.box(3, 0, 3, 13, 4, 13));
+    public static final DeferredBlock<AnimatedDecoBlock> SPIDER_CAGE = animated("spider_cage", "spider_cage",
+            MapColor.METAL, SoundType.CHAIN, Block.box(3, 0, 3, 13, 12, 13));
 
     /** Loads the class, so every holder above is queued before the registries fire. */
     public static void init() {}

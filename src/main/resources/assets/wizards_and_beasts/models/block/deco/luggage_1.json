@@ -1,0 +1,77 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "wizards_and_beasts:block/deco/luggage",
+    "particle": "wizards_and_beasts:block/deco/luggage"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        4
+      ],
+      "to": [
+        13,
+        5,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.0,
+            4.0,
+            4.75,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            6.75,
+            4.0,
+            9.5,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            4.75,
+            4.0,
+            6.75,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            4.0,
+            2.0,
+            6.5
+          ],
+          "texture": "#all"
+        },
+        "up": {
+          "uv": [
+            2.0,
+            0.0,
+            4.75,
+            4.0
+          ],
+          "texture": "#all"
+        },
+        "down": {
+          "uv": [
+            4.75,
+            4.0,
+            7.5,
+            0.0
+          ],
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}
