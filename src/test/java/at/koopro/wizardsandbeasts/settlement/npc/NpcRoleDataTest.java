@@ -69,8 +69,8 @@ class NpcRoleDataTest {
     }
 
     @Test
-    void theFirstSettlementIsStaffed() {
-        assertEquals(Set.of("keeper", "wandmaker", "apothecary", "scholar", "teller"), ALL.keySet());
+    void theFirstSettlementIsStaffedAndKnockturnHasItsFence() {
+        assertEquals(Set.of("keeper", "wandmaker", "apothecary", "scholar", "teller", "borgin"), ALL.keySet());
     }
 
     @Test

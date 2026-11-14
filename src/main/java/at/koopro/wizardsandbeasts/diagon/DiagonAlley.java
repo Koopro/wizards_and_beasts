@@ -52,7 +52,7 @@ public final class DiagonAlley {
     /** How far the backdrop's corner stands out from the alley's, on both horizontal axes. */
     static final int BACKDROP_MARGIN = 14;
     /** Bumped whenever the templates change, so a saved world rebuilds its pocket. */
-    public static final int LAYOUT = 5;
+    public static final int LAYOUT = 7;
     /** Where the template's corner stands: its street level (layer 6) lands at y 64. */
     public static final BlockPos ORIGIN = new BlockPos(0, 58, 0);
     /** The yard's door back into the pub, lower half, in template coordinates; it faces into the yard (east). */
@@ -83,6 +83,9 @@ public final class DiagonAlley {
         StructureTemplate template = found.get();
         Vec3i size = template.getSize();
         keepLoaded(pocket, size);
+        if (data.built() > 0) {
+            clearOld(pocket, size);
+        }
         pocket.getStructureManager().get(BACKDROP).ifPresent(backdrop -> {
             BlockPos corner = ORIGIN.offset(-BACKDROP_MARGIN, 0, -BACKDROP_MARGIN);
             backdrop.placeInWorld(pocket, corner, corner, new StructurePlaceSettings(), pocket.getRandom(),
@@ -92,6 +95,41 @@ public final class DiagonAlley {
                 Block.UPDATE_CLIENTS);
         data.markBuilt(LAYOUT);
         LOGGER.info("Diagon Alley: built layout {} at {} ({})", LAYOUT, ORIGIN, size);
+    }
+
+    /** How far past the new backdrop an older layout's blocks are swept away: an older alley may have been larger. */
+    private static final int SWEEP = 24;
+    /** How high above the template's corner an older layout may have reached (Gringotts' pediment and chimneys). */
+    private static final int SWEEP_HEIGHT = 64;
+
+    /**
+     * Empties the ground an older layout stood on, so a street that moved or shrank leaves nothing of its old self
+     * behind. No drops and no block-entity side effects: the old shops' chests and shelves simply go.
+     */
+    private static void clearOld(ServerLevel pocket, Vec3i size) {
+        int margin = BACKDROP_MARGIN + SWEEP;
+        BlockPos from = ORIGIN.offset(-margin, 0, -margin);
+        BlockPos to = ORIGIN.offset(size.getX() + margin, SWEEP_HEIGHT, size.getZ() + margin);
+        int flags = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS
+                | Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS;
+        int cleared = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(from, to)) {
+            if (!pocket.getBlockState(pos).isAir()) {
+                pocket.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), flags);
+                cleared++;
+            }
+        }
+        // The old shops' people go with them: their posts are gone, so their records are, and the new posts staff
+        // themselves. A copy still in a region file is refused on joining (SettlementEvents.onJoin).
+        at.koopro.wizardsandbeasts.settlement.SettlementData.get(pocket).forget(
+                at.koopro.wizardsandbeasts.settlement.SettlementData.siteKey(pocket,
+                        new net.minecraft.world.level.ChunkPos(ORIGIN)));
+        for (net.minecraft.world.entity.Entity entity : pocket.getAllEntities()) {
+            if (entity.hasData(at.koopro.wizardsandbeasts.registry.ModAttachments.SETTLEMENT_POST.get())) {
+                entity.discard();
+            }
+        }
+        LOGGER.info("Diagon Alley: cleared {} blocks of the old layout", cleared);
     }
 
     /** Keeps the alley's chunks, and a ring round them, loaded: a traveller arrives to a street already there. */

@@ -203,6 +203,9 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_WHOOSH = register("floo_whoosh");
     public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_IGNITE = register("floo_ignite");
     public static final DeferredHolder<SoundEvent, SoundEvent> FLOO_LAND = register("floo_land");
+    /** Diagon Alley's wall opening to a wand, and closing again (tools/sound_synth.py, diagon/). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> DIAGON_ARCHWAY_OPEN = register("diagon_archway_open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DIAGON_ARCHWAY_CLOSE = register("diagon_archway_close");
 
     // Sneakoscope — one spinning top wound tighter and tighter, so the three tiers read as the
     // same object rather than three unrelated noises. Pitch does the winding; see SneakoscopeTuning.

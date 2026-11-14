@@ -8,7 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -164,10 +163,7 @@ public final class DiagonArchwayBlock extends Block {
                         pos.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.02);
             }
         }
-        level.playSound(null, key, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.9f, open ? 0.55f : 0.45f);
-        level.playSound(null, key, SoundEvents.DEEPSLATE_BRICKS_PLACE, SoundSource.BLOCKS, 0.8f, 0.6f);
-        if (open) {
-            level.playSound(null, key, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.7f, 0.8f);
-        }
+        level.playSound(null, key, open ? at.koopro.wizardsandbeasts.registry.ModSounds.DIAGON_ARCHWAY_OPEN.get()
+                : at.koopro.wizardsandbeasts.registry.ModSounds.DIAGON_ARCHWAY_CLOSE.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
     }
 }

@@ -156,7 +156,7 @@ places and five services, with no change to the engine beyond the market section
 |---|---|---|---|
 | `apothecary` | villager `apothecary` (job site: any wizarding cauldron) | gringotts | market (23 bought, 8 sold), creature treatment, supply contracts |
 | `ministry` | villager `ministry_clerk` (job site: examination desk) | ministry | Ministry notices, Portkey Office |
-| `knockturn_dealer` | wandering trader | ministry | `risk`: every deal may reach the Ministry; smuggling contracts; memory charm, forged papers |
+| `knockturn_dealer` | wandering trader; Mr Borgin (`settlement_npc`, role `borgin`) | ministry | `risk`: every deal may reach the Ministry; smuggling contracts; memory charm, forged papers |
 | `ollivanders` | wandmaker | wands | gained a market and wand commissions (broom servicing moved to `broom_shop`) |
 | `broom_shop` | broommaker (broom rack) | broom_flight | sells brooms and supplies, broom servicing (2026-10-13) |
 
@@ -173,6 +173,19 @@ Stock is kept apart from price. `MarketBook` stays one global pressure per good.
 (`settlement/shop`, stored in `SettlementData`), seeded per site. A villager host has no shelves and trades as before.
 
 See `LIVING_WORLD_AUDIT.md`.
+
+## 4d. Diagon Alley (2026-11-14, replaces new hamlets)
+
+One per world. Only the Leaky Cauldron stands in the overworld (`structure_set/leaky_cauldron`, `one_per_world`); its
+hearth is the public Floo stop "Diagon Alley" and its back door (`leaky_cauldron_door`) leads into the pocket dimension
+`wizards_and_beasts:diagon_alley`, where the yard, the wand-opened wall, the bending street, Knockturn Alley and
+Gringotts are built once from `structure/diagon_alley/{alley,backdrop}` (`DiagonAlley.LAYOUT`; a bump clears the old
+layout and its staff and rebuilds). Nothing of it exists outside the pocket; in it nobody but a creative player breaks
+or places a block, and nobody but a spectator leaves the alley's box or rises over its roofs (`DiagonHull`).
+
+Working counters: Ollivanders (wandmaker), Slug & Jiggers (apothecary), Flourish and Blotts (scholar), six goblin
+tellers in Gringotts' hall, and Borgin and Burkes at the end of Knockturn Alley (`knockturn_dealer`: a fence, every deal
+a risk, ministry module only). Tom keeps the pub (`keeper`). The other fronts are dressing.
 
 ## 5. Roadmap for the remaining places
 

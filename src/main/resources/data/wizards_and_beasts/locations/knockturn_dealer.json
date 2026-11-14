@@ -4,7 +4,8 @@
   "skin": "marauders_map",
   "risk": { "chance": 0.08, "watch_radius": 16.0 },
   "presence": {
-    "hosts": ["minecraft:wandering_trader"],
+    "hosts": ["minecraft:wandering_trader", "wizards_and_beasts:settlement_npc"],
+    "host_role": "wizards_and_beasts:borgin",
     "host_reach": 6.0
   },
   "standing": {
