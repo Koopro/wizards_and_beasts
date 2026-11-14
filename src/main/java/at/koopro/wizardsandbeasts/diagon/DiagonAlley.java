@@ -45,10 +45,14 @@ public final class DiagonAlley {
 
     public static final ResourceKey<Level> LEVEL = ResourceKey.create(Registries.DIMENSION,
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "diagon_alley"));
-    /** The alley's template: the yard, the wall and the street behind it. */
-    public static final Identifier ALLEY = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "diagon_alley/preview/a");
-    /** Bumped whenever the template changes, so a saved world rebuilds its pocket. */
-    public static final int LAYOUT = 4;
+    /** The alley's template: the yard, the wall, the street and its shops, and Gringotts at the end. */
+    public static final Identifier ALLEY = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "diagon_alley/alley/a");
+    /** London round it: a ring of roofs and chimneys, so from the street there is never an edge or a void. */
+    public static final Identifier BACKDROP = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "diagon_alley/backdrop/a");
+    /** How far the backdrop's corner stands out from the alley's, on both horizontal axes. */
+    static final int BACKDROP_MARGIN = 14;
+    /** Bumped whenever the templates change, so a saved world rebuilds its pocket. */
+    public static final int LAYOUT = 5;
     /** Where the template's corner stands: its street level (layer 6) lands at y 64. */
     public static final BlockPos ORIGIN = new BlockPos(0, 58, 0);
     /** The yard's door back into the pub, lower half, in template coordinates; it faces into the yard (east). */
@@ -79,6 +83,11 @@ public final class DiagonAlley {
         StructureTemplate template = found.get();
         Vec3i size = template.getSize();
         keepLoaded(pocket, size);
+        pocket.getStructureManager().get(BACKDROP).ifPresent(backdrop -> {
+            BlockPos corner = ORIGIN.offset(-BACKDROP_MARGIN, 0, -BACKDROP_MARGIN);
+            backdrop.placeInWorld(pocket, corner, corner, new StructurePlaceSettings(), pocket.getRandom(),
+                    Block.UPDATE_CLIENTS);
+        });
         template.placeInWorld(pocket, ORIGIN, ORIGIN, new StructurePlaceSettings(), pocket.getRandom(),
                 Block.UPDATE_CLIENTS);
         data.markBuilt(LAYOUT);
