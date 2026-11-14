@@ -55,7 +55,16 @@ public final class DiagonWalkCapture {
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
-    private static final List<Step> SCRIPT = List.of(
+    /** {@code WB_DIAGON_WALK=find}: the naturally generated pub, found the way the world finds it, and its Floo entry. */
+    private static final List<Step> FIND = List.of(
+            new Step("", 40, DiagonWalkCapture::findPub),
+            new Step("", 60, p -> lookPub(p, 4, 1, 22, 180f)),
+            new Step("natural_front", 10, p -> {}),
+            new Step("", 30, p -> lookPub(p, -6, 3, 24, -150f)),
+            new Step("natural_quarter", 10, p -> {}),
+            new Step("", 30, DiagonWalkCapture::checkHearth),
+            new Step("natural_from_hearth", 10, p -> {}));
+    private static final List<Step> WALK = List.of(
             new Step("", 60, DiagonWalkCapture::stage),
             new Step("", 30, p -> lookPub(p, 4, 1, 11, 180f)),
             new Step("pub_bar", 10, p -> {}),
@@ -110,7 +119,9 @@ public final class DiagonWalkCapture {
             new Step("", 45, p -> {}),
             new Step("back_in_bar", 10, p -> {}));
 
+    private static final List<Step> SCRIPT = "find".equals(System.getenv("WB_DIAGON_WALK")) ? FIND : WALK;
     private static BlockPos pub = BlockPos.ZERO;
+    private static BlockPos hearth = BlockPos.ZERO;
     private static boolean opened;
     private static int stage;
     private static int wait;
@@ -127,6 +138,50 @@ public final class DiagonWalkCapture {
                 new StructurePlaceSettings(), level.getRandom(), 2));
         level.setDayTime(6000);
         p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+    }
+
+    /** Logs the hearth's Floo entry and stands where a Floo traveller arrives, on the hearth. */
+    private static void checkHearth(ServerPlayer p) {
+        ServerLevel level = p.level().getServer().overworld();
+        var entry = at.koopro.wizardsandbeasts.floo.FlooNetworkManager.get(level)
+                .findByPos(net.minecraft.world.level.Level.OVERWORLD.identifier(), hearth);
+        LOGGER.info("Diagon walk: Floo entry at the hearth {}: {}", hearth, entry);
+        p.teleportTo(level, hearth.getX() + 0.5, hearth.getY() + 1, hearth.getZ() + 0.5, Set.of(), 0f, 0f, false);
+    }
+
+    /** Finds the one Leaky Cauldron, loads its chunk (which puts its hearth on the Floo Network), stands by it. */
+    private static void findPub(ServerPlayer p) {
+        ServerLevel level = p.level().getServer().overworld();
+        p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+        level.setDayTime(6000);
+        var structures = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE);
+        var holder = structures.getOrThrow(net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.STRUCTURE,
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "leaky_cauldron")));
+        BlockPos found = DiagonAlley.locatePub(level);
+        if (found == null) {
+            LOGGER.warn("Diagon walk: no Leaky Cauldron in this world");
+            return;
+        }
+        BlockPos near = found;
+        var start = level.getChunk(near.getX() >> 4, near.getZ() >> 4).getStartForStructure(holder.value());
+        if (start == null) {
+            LOGGER.warn("Diagon walk: the Leaky Cauldron's chunk {} holds no start (biome?)", near);
+            return;
+        }
+        LOGGER.info("Diagon walk: Leaky Cauldron located at {} ({} blocks from spawn), start valid {}", near,
+                (int) Math.sqrt(near.distSqr(p.blockPosition())), start.isValid());
+        for (var piece : start.getPieces()) {
+            if (piece instanceof net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece element) {
+                pub = element.getPosition();
+                hearth = pub.offset(net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.transform(
+                        new BlockPos(5, 1, 1), net.minecraft.world.level.block.Mirror.NONE, element.getRotation(),
+                        BlockPos.ZERO));
+                LOGGER.info("Diagon walk: pub piece at {} turned {}", pub, element.getRotation());
+            }
+        }
+        p.teleportTo(level, near.getX() + 0.5, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types
+                .MOTION_BLOCKING, near.getX(), near.getZ()) + 2, near.getZ() + 0.5, Set.of(), 0f, 0f, false);
     }
 
     private static void lookPub(ServerPlayer p, int x, int y, int z, float yaw) {
@@ -194,6 +249,20 @@ public final class DiagonWalkCapture {
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1280, 720);
         stage = 1;
         wait = 80;
+        if (SCRIPT == FIND) {
+            // A fresh, normally generated world, so the pub generates the way it does for a player.
+            String name = "diagon_find_" + Long.toHexString(System.currentTimeMillis());
+            long seed = Long.parseLong(System.getenv().getOrDefault("WB_DIAGON_WALK_SEED", "271828182"));
+            var rules = new net.minecraft.world.level.gamerules.GameRules(
+                    net.minecraft.world.level.WorldDataConfiguration.DEFAULT.enabledFeatures());
+            mc.createWorldOpenFlows().createFreshLevel(name, new net.minecraft.world.level.LevelSettings(name,
+                            net.minecraft.world.level.GameType.CREATIVE, false, net.minecraft.world.Difficulty.PEACEFUL,
+                            true, rules, net.minecraft.world.level.WorldDataConfiguration.DEFAULT),
+                    new net.minecraft.world.level.levelgen.WorldOptions(seed, true, false),
+                    net.minecraft.world.level.levelgen.presets.WorldPresets::createNormalWorldDimensions, new TitleScreen());
+            wait = 200;
+            return;
+        }
         mc.createWorldOpenFlows().openWorld(
                 System.getenv().getOrDefault("WB_DIAGON_WALK_WORLD", "wb_entity_showcase"), () -> stage = 3);
     }
@@ -210,6 +279,21 @@ public final class DiagonWalkCapture {
         }
         if (mc.screen instanceof PauseScreen) {
             mc.setScreen(null);
+        }
+        // A new character meets the heritage screen, and a world may ask before it opens: press on through either.
+        if (SCRIPT == FIND && mc.screen != null
+                && !(mc.screen instanceof at.koopro.wizardsandbeasts.client.diagon.DiagonPassageScreen)) {
+            for (var child : mc.screen.children()) {
+                if (child instanceof net.minecraft.client.gui.components.Button button
+                        && button.getMessage().getString().matches("(?i).*(proceed|continue|yes|open).*")) {
+                    button.onPress(new net.minecraft.client.input.KeyEvent(
+                            com.mojang.blaze3d.platform.InputConstants.KEY_RETURN, 0, 0));
+                    break;
+                }
+            }
+            if (mc.player != null) {
+                mc.setScreen(null);
+            }
         }
         if (captureThisFrame || --wait > 0) {
             return;

@@ -107,6 +107,22 @@ public final class DiagonAlley {
         }
     }
 
+    /**
+     * Where the Leaky Cauldron stands, as the middle of its chunk at sea level, or {@code null} if the world has none.
+     * Loading that chunk, which a caller may do, puts the pub's hearth on the Floo Network ({@link DiagonAlleyEvents}).
+     */
+    public static @org.jspecify.annotations.Nullable BlockPos locatePub(ServerLevel overworld) {
+        var sets = overworld.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE_SET);
+        var set = sets.getOptional(ResourceKey.create(net.minecraft.core.registries.Registries.STRUCTURE_SET,
+                Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "leaky_cauldron")));
+        if (set.isEmpty() || !(set.get().placement()
+                instanceof at.koopro.wizardsandbeasts.azkaban.structure.OnePerWorldPlacement placement)) {
+            return null;
+        }
+        net.minecraft.world.level.ChunkPos chunk = placement.target(overworld.getChunkSource().getGeneratorState());
+        return new BlockPos(chunk.getMiddleBlockX(), overworld.getSeaLevel(), chunk.getMiddleBlockZ());
+    }
+
     /** From the bar, through the back door, into the yard. Remembers the door so the way out leads back to it. */
     static void enter(ServerPlayer player, BlockPos pubDoor, Direction pubFacing) {
         MinecraftServer server = player.level().getServer();

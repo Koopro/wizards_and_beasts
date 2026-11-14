@@ -88,6 +88,14 @@ public final class OnePerWorldPlacement extends StructurePlacement {
         return target.x == chunkX && target.z == chunkZ;
     }
 
+    /**
+     * The one chunk this placement puts its structure in, for this world. Vanilla's locate only walks random-spread
+     * and concentric-ring placements, so a structure placed here is found by asking for this instead.
+     */
+    public @NonNull ChunkPos target(@NonNull ChunkGeneratorStructureState state) {
+        return targetBySeed.computeIfAbsent(state.getLevelSeed(), seed -> computeTarget(state, seed));
+    }
+
     private ChunkPos computeTarget(ChunkGeneratorStructureState state, long seed) {
         RandomSource random = RandomSource.create(seed ^ (long) salt());
         ChunkPos fallback = null;
