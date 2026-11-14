@@ -19,6 +19,11 @@ import org.jspecify.annotations.NonNull;
 public record MoonBound() implements CreatureAbility {
 
     private static final int CHECK_TICKS = 40;
+    /**
+     * Development captures stand a werewolf on a daylit stage to judge its model; a creature carrying this tag stays
+     * there. Ignored in production, so no world can keep a werewolf by day.
+     */
+    public static final String CAPTURE_HOLD = "wb_capture_hold";
 
     public static final MapCodec<MoonBound> CODEC = MapCodec.unit(MoonBound::new);
 
@@ -30,6 +35,9 @@ public record MoonBound() implements CreatureAbility {
     @Override
     public void tick(@NonNull GenericBeastEntity entity) {
         if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, CHECK_TICKS)) {
+            return;
+        }
+        if (!net.neoforged.fml.loading.FMLEnvironment.isProduction() && entity.getTags().contains(CAPTURE_HOLD)) {
             return;
         }
         if (!WerewolfRules.fullMoonNight(level)) {

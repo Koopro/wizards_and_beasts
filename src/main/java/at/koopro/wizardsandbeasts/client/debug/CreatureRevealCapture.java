@@ -257,6 +257,10 @@ public final class CreatureRevealCapture {
             swamp(level);
             return;
         }
+        if (spec.equals("scene:vault")) {
+            vault(level);
+            return;
+        }
         if (spec.startsWith("scene:")) {
             meadow(level);
             return;
@@ -276,6 +280,8 @@ public final class CreatureRevealCapture {
             mob.setYHeadRot(0.0F);
             mob.yBodyRot = 0.0F;
         }
+        // A moon-bound werewolf would leave the daylit stage within two seconds.
+        creature.addTag(at.koopro.wizardsandbeasts.creature.ability.MoonBound.CAPTURE_HOLD);
         level.addFreshEntity(creature);
         if (age >= 0 && creature instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity basilisk) {
             basilisk.setAgeTicks(age);
@@ -292,6 +298,39 @@ public final class CreatureRevealCapture {
             scaleFigure = villager;
         }
         LOGGER.info("Reveal capture: {} spawned, {}x{}", spec, creature.getBbWidth(), creature.getBbHeight());
+    }
+
+    /**
+     * {@code scene:vault}: a heap of gold on the lawn, gold blocks under coin heaps with gilt and a pair of Gringotts
+     * scales beside it, for the glints that light catches off gold ({@code AmbientMagic}).
+     */
+    private static void vault(ServerLevel level) {
+        lawn(level);
+        net.minecraft.util.RandomSource random = level.random;
+        var count = at.koopro.wizardsandbeasts.block.deco.DecoPileBlock.COUNT;
+        Block[] coins = {at.koopro.wizardsandbeasts.registry.DecoBlocks.GALLEON_PILE.get(),
+                at.koopro.wizardsandbeasts.registry.DecoBlocks.MIXED_COIN_PILE.get(),
+                at.koopro.wizardsandbeasts.registry.DecoBlocks.GALLEON_STACKS.get()};
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -4; z <= 4; z++) {
+                int height = Math.max(0, 3 - (Math.abs(x) + Math.abs(z) + 1) / 2);
+                for (int y = 0; y < height; y++) {
+                    Block block = random.nextFloat() < 0.15f ? Blocks.GILDED_BLACKSTONE : Blocks.GOLD_BLOCK;
+                    level.setBlock(new BlockPos(x, STAGE_Y + y, z), block.defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
+                if (height > 0 || random.nextFloat() < 0.5f) {
+                    Block pile = coins[random.nextInt(coins.length)];
+                    level.setBlock(new BlockPos(x, STAGE_Y + height, z),
+                            pile.defaultBlockState().setValue(count, 1 + random.nextInt(4)), Block.UPDATE_CLIENTS);
+                }
+            }
+        }
+        level.setBlock(new BlockPos(-6, STAGE_Y, 1),
+                at.koopro.wizardsandbeasts.registry.DecoBlocks.GRINGOTTS_SCALES.get().defaultBlockState(),
+                Block.UPDATE_CLIENTS);
+        subject = null;
+        subjectHeight = 1.4;   // close: the glints spawn round the camera, as they do round a player
+        LOGGER.info("Reveal capture: vault heaped");
     }
 
     /** {@code scene:meadow}: the stage planted with grass and flowers, for the world's own night magic. */
