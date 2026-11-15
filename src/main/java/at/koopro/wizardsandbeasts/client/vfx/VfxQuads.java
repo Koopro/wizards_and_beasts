@@ -143,6 +143,18 @@ public final class VfxQuads {
         return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/vfx/" + name + ".png");
     }
 
+    /**
+     * The vanilla Particles option thins rings and marks too: they are not particles, but a player who turned
+     * particles down asked for less on screen. Half on Decreased, a quarter on Minimal.
+     */
+    static float particleShare(net.minecraft.server.level.ParticleStatus status) {
+        return switch (status) {
+            case ALL -> 1.0f;
+            case DECREASED -> 0.5f;
+            case MINIMAL -> 0.25f;
+        };
+    }
+
     static int cap(Config.VfxQuality q) {
         return switch (q) {
             case LOW -> 24;
@@ -168,7 +180,7 @@ public final class VfxQuads {
         if (eye.distanceToSqr(pos) > MAX_SPAWN_DISTANCE * MAX_SPAWN_DISTANCE) {
             return null;
         }
-        int cap = cap(VfxBudget.quality());
+        int cap = Math.max(4, Math.round(cap(VfxBudget.quality()) * particleShare(mc.options.particles().get())));
         while (LIVE.size() >= cap) {
             LIVE.pollFirst();
         }

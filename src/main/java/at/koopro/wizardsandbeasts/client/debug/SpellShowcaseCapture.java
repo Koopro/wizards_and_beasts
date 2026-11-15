@@ -473,7 +473,13 @@ public final class SpellShowcaseCapture {
         mc.options.pauseOnLostFocus = false;
         mc.options.bobView().set(false);
         // Spell particles are the subject: every one of them, not the capped few other harnesses keep.
-        mc.options.particles().set(net.minecraft.server.level.ParticleStatus.ALL);
+        // WB_SPELL_SHOWCASE_PARTICLES=decreased|minimal photographs the reduced settings (VFX budget check).
+        String particles = System.getenv().getOrDefault("WB_SPELL_SHOWCASE_PARTICLES", "all");
+        mc.options.particles().set(switch (particles.toLowerCase(Locale.ROOT)) {
+            case "minimal" -> net.minecraft.server.level.ParticleStatus.MINIMAL;
+            case "decreased" -> net.minecraft.server.level.ParticleStatus.DECREASED;
+            default -> net.minecraft.server.level.ParticleStatus.ALL;
+        });
         mc.debugEntries.setStatus(net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES,
                 net.minecraft.client.gui.components.debug.DebugScreenEntryStatus.NEVER);
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1280, 720);
