@@ -152,7 +152,7 @@ public final class EquipmentShowcaseCapture {
     /** The wearables whose inventory icons {@code tools/wearable_icons.py} draws, plus the Probity Probe. */
     private static final List<String> ICON_IDS = List.of(
             "student_robe_chest", "auror_robe_chest", "death_eater_robe_chest", "wizard_robe_chest",
-            "scholar_gown_chest", "travel_coat_chest", "healer_coat_chest", "ministry_robe_chest",
+            "scholar_gown_chest", "winter_uniform_chest", "travel_coat_chest", "healer_coat_chest", "ministry_robe_chest",
             "master_mantle_chest", "quidditch_robes", "student_robe_legs", "student_robe_boots",
             "auror_robe_legs", "auror_robe_boots", "death_eater_robe_legs", "death_eater_robe_boots",
             "school_cape", "travel_cloak", "invisibility_cloak", "deathly_hallow_cloak", "shield_cloak",
@@ -337,6 +337,17 @@ public final class EquipmentShowcaseCapture {
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
                 cosmetic(p, stitched(p, ArmorItemRegistry.TRAVEL_HAT.get(), "umber", 0));
             }),
+            // Wardrobe 2.0 W1: the winter uniform in each house, a rank apiece, and once as a cosmetic over netherite.
+            new Outfit("w1_winter_lion", p -> winter(p, "house_lion", 0)),
+            new Outfit("w1_winter_serpent_r1", p -> winter(p, "house_serpent", 1)),
+            new Outfit("w1_winter_eagle_r2", p -> winter(p, "house_eagle", 2)),
+            new Outfit("w1_winter_badger_r3", p -> winter(p, "house_badger", 3)),
+            new Outfit("w1_winter_cosmetic_over_netherite", p -> {
+                netherite(p, false, true, false, false);
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+                cosmetic(p, stitched(p, ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), "house_lion", 0));
+            }),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
@@ -398,6 +409,12 @@ public final class EquipmentShowcaseCapture {
         if (!EquipmentAPI.tryEquip(p, stack)) {
             LOGGER.warn("Equipment showcase: could not wear {}", stack);
         }
+    }
+
+    private static void winter(ServerPlayer p, String house, int rank) {
+        p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+        p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+        wear(p, stitched(p, ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), house, rank));
     }
 
     private static void cosmetic(ServerPlayer p, ItemStack stack) {

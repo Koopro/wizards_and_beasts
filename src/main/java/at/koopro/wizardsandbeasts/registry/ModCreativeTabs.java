@@ -310,6 +310,10 @@ public class ModCreativeTabs {
                         for (String house : new String[]{"house_lion", "house_serpent", "house_eagle", "house_badger"}) {
                             output.accept(outfit(ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), house, 0));
                         }
+                        output.accept(ArmorItemRegistry.WINTER_UNIFORM_CHEST.get());
+                        for (String house : new String[]{"house_lion", "house_serpent", "house_eagle", "house_badger"}) {
+                            output.accept(outfit(ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), house, 0));
+                        }
                         for (int rank = 1; rank <= 3; rank++) {
                             output.accept(outfit(ArmorItemRegistry.STUDENT_ROBE_CHEST.get(), "house_lion", rank));
                             output.accept(outfit(ArmorItemRegistry.AUROR_ROBE_CHEST.get(), "auror_office", rank));

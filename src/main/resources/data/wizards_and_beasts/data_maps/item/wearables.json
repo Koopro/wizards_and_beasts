@@ -318,6 +318,20 @@
     },
     "wizards_and_beasts:ravenclaws_diadem": {
       "equipment_type": "headwear"
+    },
+    "wizards_and_beasts:winter_uniform_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "faction": "hogwarts",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
     }
   }
 }

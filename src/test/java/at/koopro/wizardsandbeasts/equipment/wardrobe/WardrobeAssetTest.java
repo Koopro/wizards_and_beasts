@@ -47,6 +47,7 @@ class WardrobeAssetTest {
             Map.entry("travel_hat", new String[]{"travel_hat", "umber"}),
             robe(
 "student_robe_chest", "student_robe", "school_plain"),
+            robe("winter_uniform_chest", "winter_uniform", "school_plain"),
             robe("auror_robe_chest", "auror_robe", "auror_office"),
             robe("death_eater_robe_chest", "death_eater_robe", "dark_order"),
             robe("wizard_robe_chest", "wizard_robe", "slate"),

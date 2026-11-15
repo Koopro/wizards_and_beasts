@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:student_robe_chest",
+    "minecraft:light_gray_wool",
+    "minecraft:light_gray_wool"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:winter_uniform_chest",
+    "count": 1
+  }
+}

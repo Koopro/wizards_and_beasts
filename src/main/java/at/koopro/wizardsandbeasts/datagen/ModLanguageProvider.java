@@ -851,6 +851,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.wizard_robe_chest.desc", "A working wizard's robe, worn open over waistcoat and shirt, a sash at the waist.");
         add("item.wizards_and_beasts.scholar_gown_chest", "Scholar's Gown");
         add("item.wizards_and_beasts.scholar_gown_chest.desc", "A floor-length teaching gown with a velvet yoke and the hood lined in the faculty colour.");
+        add("item.wizards_and_beasts.winter_uniform_chest", "Winter School Uniform");
+        add("item.wizards_and_beasts.winter_uniform_chest.desc", "The school robe worn open over a knitted V-neck jumper, the house colours round the V, shirt and tie beneath.");
         add("item.wizards_and_beasts.travel_coat_chest", "Travelling Coat");
         add("item.wizards_and_beasts.travel_coat_chest.desc", "A buttoned canvas duster to the knee under a short shoulder cape.");
         add("item.wizards_and_beasts.healer_coat_chest", "Healer's Coat");
