@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:red_wool",
+    "minecraft:red_wool",
+    "minecraft:red_wool",
+    "minecraft:leather",
+    "minecraft:leather",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:quidditch_robes",
+    "count": 1
+  }
+}

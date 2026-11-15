@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.client.gui.character.CharacterSheetScreen;
 import at.koopro.wizardsandbeasts.equipment.EquipmentAPI;
 import at.koopro.wizardsandbeasts.item.armor.RobeHood;
 import at.koopro.wizardsandbeasts.registry.ArmorItemRegistry;
+import at.koopro.wizardsandbeasts.registry.CanonItemRegistry;
 import at.koopro.wizardsandbeasts.registry.DarkArtefactItemRegistry;
 import at.koopro.wizardsandbeasts.registry.TrinketItemRegistry;
 import com.mojang.logging.LogUtils;
@@ -348,6 +349,13 @@ public final class EquipmentShowcaseCapture {
                 p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
                 cosmetic(p, stitched(p, ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), "house_lion", 0));
             }),
+            // Wardrobe 2.0 W2.
+            new Outfit("w2_summer_lion", p -> wear(p, stitched(p, ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get(), "house_lion", 0))),
+            new Outfit("w2_summer_eagle_prefect", p -> wear(p, stitched(p, ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get(), "house_eagle", 1))),
+            new Outfit("w2_dress_bottle_green", p -> wear(p, stitched(p, ArmorItemRegistry.DRESS_ROBES_CHEST.get(), "dress_bottle_green", 1))),
+            new Outfit("w2_dress_periwinkle", p -> wear(p, stitched(p, ArmorItemRegistry.DRESS_ROBES_CHEST.get(), "dress_periwinkle", 0))),
+            new Outfit("w2_quidditch_lion_captain", p -> wear(p, stitched(p, CanonItemRegistry.QUIDDITCH_ROBES.get(), "house_lion", 1))),
+            new Outfit("w2_quidditch_serpent", p -> wear(p, stitched(p, CanonItemRegistry.QUIDDITCH_ROBES.get(), "house_serpent", 0))),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));

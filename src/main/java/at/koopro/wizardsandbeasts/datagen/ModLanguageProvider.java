@@ -853,6 +853,18 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.wizards_and_beasts.scholar_gown_chest.desc", "A floor-length teaching gown with a velvet yoke and the hood lined in the faculty colour.");
         add("item.wizards_and_beasts.winter_uniform_chest", "Winter School Uniform");
         add("item.wizards_and_beasts.winter_uniform_chest.desc", "The school robe worn open over a knitted V-neck jumper, the house colours round the V, shirt and tie beneath.");
+        add("item.wizards_and_beasts.summer_uniform_chest", "Summer School Uniform");
+        add("item.wizards_and_beasts.summer_uniform_chest.desc", "A white shirt and the house tie under a knitted sweater vest, the house colours round its V.");
+        add("item.wizards_and_beasts.dress_robes_chest", "Dress Robes");
+        add("item.wizards_and_beasts.dress_robes_chest.desc", "Formal robes for a ball: to the floor, velvet lapels on a white shirt and a black bow tie.");
+        add("wardrobe.wizards_and_beasts.rank.summer_uniform_chest.1", "Prefect");
+        add("wardrobe.wizards_and_beasts.rank.dress_robes_chest.1", "Decorated");
+        add("wardrobe.wizards_and_beasts.rank.quidditch_robes.1", "Captain");
+        add("livery.wizards_and_beasts.dress_bottle_green", "Bottle Green");
+        add("livery.wizards_and_beasts.dress_midnight", "Midnight");
+        add("livery.wizards_and_beasts.dress_burgundy", "Burgundy");
+        add("livery.wizards_and_beasts.dress_black", "Black");
+        add("livery.wizards_and_beasts.dress_periwinkle", "Periwinkle");
         add("item.wizards_and_beasts.travel_coat_chest", "Travelling Coat");
         add("item.wizards_and_beasts.travel_coat_chest.desc", "A buttoned canvas duster to the knee under a short shoulder cape.");
         add("item.wizards_and_beasts.healer_coat_chest", "Healer's Coat");

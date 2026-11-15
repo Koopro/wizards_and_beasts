@@ -3,7 +3,9 @@
     "wizards_and_beasts:student_robe_chest",
     "wizards_and_beasts:winter_uniform_chest",
     "wizards_and_beasts:school_cape",
-    "wizards_and_beasts:scarf"
+    "wizards_and_beasts:scarf",
+    "wizards_and_beasts:summer_uniform_chest",
+    "wizards_and_beasts:quidditch_robes"
   ],
   "faction": "school_house_eagle"
 }

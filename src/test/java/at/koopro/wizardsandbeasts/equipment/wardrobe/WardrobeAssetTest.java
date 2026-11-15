@@ -38,6 +38,10 @@ class WardrobeAssetTest {
     private static final Path LIVERIES = Path.of("src", "main", "resources", "data", MOD, MOD, "livery");
 
     /** Cut item → (model name, default livery). Mirrors each item's {@code defaultLivery()}. */
+    /** Body cuts worn without a robe over them, so with no skirt: the summer uniform (shirt and vest).
+     */
+    private static final java.util.Set<String> SKIRTLESS = java.util.Set.of("summer_uniform_chest");
+
     private static final Map<String, String[]> CUTS = Map.ofEntries(
             Map.entry("leather_belt", new String[]{"leather_belt", "leather_brown"}),
             Map.entry("duty_belt", new String[]{"duty_belt", "auror_office"}),
@@ -48,6 +52,9 @@ class WardrobeAssetTest {
             robe(
 "student_robe_chest", "student_robe", "school_plain"),
             robe("winter_uniform_chest", "winter_uniform", "school_plain"),
+            robe("summer_uniform_chest", "summer_uniform", "school_plain"),
+            robe("dress_robes_chest", "dress_robes", "dress_bottle_green"),
+            robe("quidditch_robes", "quidditch_robes", "house_lion"),
             robe("auror_robe_chest", "auror_robe", "auror_office"),
             robe("death_eater_robe_chest", "death_eater_robe", "dark_order"),
             robe("wizard_robe_chest", "wizard_robe", "slate"),
@@ -127,13 +134,17 @@ class WardrobeAssetTest {
             if (ACCESSORIES.contains(entry.getKey())) {
                 continue;
             }
+            if (SKIRTLESS.contains(entry.getKey())) {
+                assertEquals(null, parents.get("robeSkirt"), cut[0] + ": a cut worn without a robe has no skirt");
+                continue;
+            }
             if (CAPES.contains(entry.getKey())) {
                 assertEquals("armorBody", parents.get("capeRoot"), cut[0] + ": capeRoot must hang off armorBody");
                 assertEquals("capeRoot", parents.get("capeHem"), cut[0] + ": capeHem must hang off capeRoot");
                 continue;
             }
             assertEquals("armorBody", parents.get("robeSkirt"), cut[0] + ": robeSkirt must hang off armorBody");
-            for (String bone : List.of("clothLegR", "clothLegL", "clothHipFront")) {
+            for (String bone : List.of("clothLegR", "clothLegL", "clothHipFront", "clothHip")) {
                 assertEquals("robeSkirt", parents.get(bone), cut[0] + ": " + bone + " must hang off robeSkirt");
             }
         }

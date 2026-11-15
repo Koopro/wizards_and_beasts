@@ -206,8 +206,13 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("bludger", Item::new);
     public static final DeferredItem<Item> BEATERS_BAT =
             ModItems.ITEMS.registerItem("beaters_bat", Item::new);
-    public static final DeferredItem<Item> QUIDDITCH_ROBES =
-            ModItems.ITEMS.registerItem("quidditch_robes", Item::new);
+    /**
+     * Worn since Wardrobe 2.0 (W2): a body cut in the house liveries, where it used to be a plain item that did
+     * nothing. Same id, so a stack in an old save becomes the Gryffindor robes.
+     */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.RobeCutItem> QUIDDITCH_ROBES =
+            ModItems.ITEMS.registerItem("quidditch_robes",
+                    props -> new at.koopro.wizardsandbeasts.item.armor.RobeCutItem(props, "quidditch_robes", "house_lion", true));
 
     // --- Potions & remedies ------------------------------------------------
     //

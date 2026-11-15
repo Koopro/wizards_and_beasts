@@ -55,6 +55,14 @@ public final class ArmorItemRegistry {
     public static final DeferredItem<RobeCutItem> WINTER_UNIFORM_CHEST = ModItems.ITEMS.registerItem(
             "winter_uniform_chest", props -> new RobeCutItem(props, "winter_uniform", "school_plain"));
 
+    /** Wardrobe 2.0 W2: the warm-term uniform, a shirt and tie under a knit sweater vest, no robe. */
+    public static final DeferredItem<RobeCutItem> SUMMER_UNIFORM_CHEST = ModItems.ITEMS.registerItem(
+            "summer_uniform_chest", props -> new RobeCutItem(props, "summer_uniform", "school_plain", true));
+
+    /** Wardrobe 2.0 W2: formal robes for a ball, five colourways. */
+    public static final DeferredItem<RobeCutItem> DRESS_ROBES_CHEST = ModItems.ITEMS.registerItem(
+            "dress_robes_chest", props -> new RobeCutItem(props, "dress_robes", "dress_bottle_green"));
+
     /** Neutral pointed hat — not part of any set, wearable with all of them. */
     public static final DeferredItem<WizardHatItem> WIZARD_HAT =
             ModItems.ITEMS.registerItem("wizard_hat", WizardHatItem::new);
@@ -158,7 +166,7 @@ public final class ArmorItemRegistry {
      * in the hotbar — precisely because nothing enumerated them.
      */
     public static final List<DeferredItem<? extends WizardArmorItem>> ALL = List.of(
-            STUDENT_ROBE_CHEST, STUDENT_ROBE_LEGS, STUDENT_ROBE_BOOTS, WINTER_UNIFORM_CHEST, WIZARD_HAT,
+            STUDENT_ROBE_CHEST, STUDENT_ROBE_LEGS, STUDENT_ROBE_BOOTS, WINTER_UNIFORM_CHEST, SUMMER_UNIFORM_CHEST, DRESS_ROBES_CHEST, WIZARD_HAT,
             AUROR_ROBE_CHEST, AUROR_ROBE_LEGS, AUROR_ROBE_BOOTS,
             DEATH_EATER_ROBE_CHEST, DEATH_EATER_ROBE_LEGS, DEATH_EATER_ROBE_BOOTS,
             WIZARD_ROBE_CHEST, SCHOLAR_GOWN_CHEST, SCHOOL_CAPE, TRAVEL_CLOAK,

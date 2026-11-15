@@ -332,6 +332,50 @@
           "operation": "add_value"
         }
       ]
+    },
+    "wizards_and_beasts:summer_uniform_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "faction": "hogwarts",
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:dress_robes_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:quidditch_robes": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:white_wool",
+    "minecraft:light_gray_wool",
+    "minecraft:light_gray_wool",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:summer_uniform_chest",
+    "count": 1
+  }
+}
