@@ -29,10 +29,11 @@ import java.util.stream.IntStream;
 /**
  * Restyling a wand at the bench: the wand drawn large on the left, a row per look on the right, the price beneath.
  *
- * <p>The large wand is the real wand renderer drawing the wand as it would come out ({@link WandRestyle#apply}), so
- * a change of colour, metal, grain, light or shape shows on it the frame the arrow is clicked: the click is run on
- * this side's copy of the menu at once ({@link WandRestyleMenu#clickMenuButton}) and sent to the server, which runs
- * the same rules to make the wand the player takes. The wand as it is now sits small in the corner for comparison.
+ * <p>The large wand is a 3D model on a turntable ({@link WandPreviewRenderer}), drawn by the real wand renderer as
+ * it would come out ({@link WandRestyle#apply}); dragging it turns it by hand. A change of colour, metal, grain, light
+ * or shape shows on it the frame the arrow is clicked: the click is run on this side's copy of the menu at once
+ * ({@link WandRestyleMenu#clickMenuButton}) and sent to the server, which runs the same rules to make the wand the
+ * player takes. The wand as it is now sits small in the corner for comparison.
  */
 @NullMarked
 public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> {
@@ -174,7 +175,7 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
         renderTooltip(g, mouseX, mouseY);
     }
 
-    /** The wand as it will come out, large, and as it is now, small in the corner. */
+    /** The wand as it will come out, as a turning 3D model, and as it is now, small in the corner. */
     private void renderPreview(GuiGraphics g) {
         ItemStack wand = menu.wand();
         int x = leftPos + PREVIEW_X;
@@ -184,61 +185,79 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
                     y + PREVIEW_H / 2 - 4, PREVIEW_W - 12, 0xFFEDE4D2);
             return;
         }
-        ItemStack after = minecraft == null || minecraft.level == null ? wand
-                : WandRestyle.apply(minecraft.level.registryAccess(), wand, menu.selection());
-        int size = Math.round(16 * PREVIEW_SCALE);
-        int sx = x + (PREVIEW_W - size) / 2;
-        int sy = y + (PREVIEW_H - size) / 2 + 6;
-        drawScaled(g, after, sx, sy, PREVIEW_SCALE);
-        renderCoreLight(g, after, sx, sy, size);
+        if (minecraft == null || minecraft.level == null) {
+            return;
+        }
+        ItemStack after = WandRestyle.apply(minecraft.level.registryAccess(), wand, menu.selection());
+        at.koopro.wizardsandbeasts.wand.visual.WandLook look =
+                at.koopro.wizardsandbeasts.client.wand.WandLookCache.look(minecraft.level.registryAccess(), after);
+        float tip = look.drawnLength() * FRAME_SCALE / 16.0f * TIP_SHARE;
+        g.submitPictureInPictureRenderState(new WandPreviewRenderState(after, yaw(), pitch, PIXELS_PER_BLOCK,
+                look.elder() ? 0 : look.glint() & 0xFFFFFF, tip,
+                x, y, x + PREVIEW_W, y + PREVIEW_H, null));
         if (WandRestyle.changes(menu.selection())) {
             g.drawString(font, Component.translatable(KEY + "now"), x + 3, y + 3, 0xFFEDE4D2, false);
             drawScaled(g, wand, x + 3, y + 12, 1.5f);
         }
+        g.drawString(font, Component.translatable(KEY + "drag"), x + 3, y + PREVIEW_H - 11, 0xFFD6CCB8, false);
     }
 
-    /**
-     * Where the point of a 13-inch wand lands in the preview square, as a share of its side, measured off the drawn
-     * wand (the slot pose turns it up and to the right). A longer or shorter wand reaches further or less far.
-     */
-    private static final float TIP_X = 0.747f;
-    private static final float TIP_Y = 0.156f;
-    private static final float REFERENCE_DRAWN = 28.4f;
+    // ── turning the wand ─────────────────────────────────────────────────
 
-    /**
-     * The core's light at the wand's point, with the odd mote drifting off it, in the light the wand will show in a
-     * hand (WandIdleEffects). Drawn here because the wand model has no lit tip of its own since the tips were retired,
-     * and a light chosen with nothing to show for it is a choice made blind.
-     */
-    private void renderCoreLight(GuiGraphics g, ItemStack wand, int sx, int sy, int size) {
-        if (minecraft == null || minecraft.level == null) {
-            return;
+    /** The wand's model length shown in a frame pose is scaled by this (wand.json "fixed"). */
+    private static final float FRAME_SCALE = 0.618f;
+    private static final float PIXELS_PER_BLOCK = 88.0f;
+    /** The point's distance from the wand's middle, as a share of its frame-pose length; measured off the model. */
+    private static final float TIP_SHARE = 0.433f;
+    /** Degrees a second the turntable turns while nobody holds the wand. */
+    private static final float TURN_SPEED = 30.0f;
+    /** After a drag, the wand stays where it was left this long before turning again. */
+    private static final long RESUME_MS = 3000L;
+
+    private float yawBase = 30.0f;
+    private float pitch = 12.0f;
+    private long turntableFrom = net.minecraft.util.Util.getMillis();
+    private boolean dragging;
+
+    private float yaw() {
+        long idle = net.minecraft.util.Util.getMillis() - turntableFrom;
+        return dragging || idle < 0 ? yawBase : yawBase + idle / 1000.0f * TURN_SPEED;
+    }
+
+    private boolean overStage(double mx, double my) {
+        int x = leftPos + PREVIEW_X;
+        int y = topPos + PREVIEW_Y;
+        return mx >= x && mx < x + PREVIEW_W && my >= y && my < y + PREVIEW_H;
+    }
+
+    @Override
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0 && overStage(event.x(), event.y()) && !menu.wand().isEmpty()) {
+            yawBase = yaw();
+            dragging = true;
+            return true;
         }
-        at.koopro.wizardsandbeasts.wand.visual.WandLook look =
-                at.koopro.wizardsandbeasts.client.wand.WandLookCache.look(minecraft.level.registryAccess(), wand);
-        int rgb = look.glint() & 0xFFFFFF;
-        if (rgb == 0 || look.elder()) {
-            return;
+        return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dx, double dy) {
+        if (dragging) {
+            yawBase += (float) dx * 2.5f;
+            pitch = net.minecraft.util.Mth.clamp(pitch + (float) dy * 2.0f, -60.0f, 60.0f);
+            return true;
         }
-        float reach = look.drawnLength() / REFERENCE_DRAWN;
-        int cx = sx + Math.round(size * (0.5f + (TIP_X - 0.5f) * reach));
-        int cy = sy + Math.round(size * (0.5f + (TIP_Y - 0.5f) * reach));
-        float pulse = 0.75f + 0.25f * (float) Math.sin(net.minecraft.util.Util.getMillis() / 300.0);
-        int[] radius = {7, 5, 3, 1};
-        int[] alpha = {40, 70, 120, 230};
-        for (int i = 0; i < radius.length; i++) {
-            int a = Math.round(alpha[i] * pulse);
-            g.fill(cx - radius[i], cy - radius[i], cx + radius[i] + 1, cy + radius[i] + 1, a << 24 | rgb);
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        if (dragging && event.button() == 0) {
+            dragging = false;
+            turntableFrom = net.minecraft.util.Util.getMillis() + RESUME_MS;
+            return true;
         }
-        // Three motes on their own slow loops, falling away from the point the way they leave a held wand.
-        long now = net.minecraft.util.Util.getMillis();
-        for (int i = 0; i < 3; i++) {
-            float t = ((now + i * 900L) % 2700L) / 2700.0f;
-            int mx = cx + Math.round((float) Math.sin(i * 2.1 + t * 3.0) * 4);
-            int my = cy + 3 + Math.round(t * 22);
-            int a = Math.round(220 * (1.0f - t));
-            g.fill(mx, my, mx + 2, my + 2, a << 24 | rgb);
-        }
+        return super.mouseReleased(event);
     }
 
     private static void drawScaled(GuiGraphics g, ItemStack stack, int x, int y, float scale) {

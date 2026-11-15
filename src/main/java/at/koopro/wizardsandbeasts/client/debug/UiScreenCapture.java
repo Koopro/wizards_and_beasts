@@ -197,6 +197,7 @@ public final class UiScreenCapture {
                 Step.server("wand_restyle_holly", p -> openRestyle(p, true, false)),
                 Step.server("wand_restyle_styled", p -> openRestyle(p, true, true)),
                 Step.server("wand_restyle_pale", UiScreenCapture::openRestylePale),
+                Step.server("wand_restyle_turned", p -> openRestyle(p, true, true)),
                 Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
                 Step.server("niffler_pouch", UiScreenCapture::openNifflerPouch),
                 Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),

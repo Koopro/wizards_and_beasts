@@ -61,6 +61,9 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(ClientSetup::registerRenderers);
         modEventBus.addListener(ClientSetup::registerLayers);
         modEventBus.addListener(ModParticleProviders::register);
+        modEventBus.addListener((net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent event) ->
+                event.register(at.koopro.wizardsandbeasts.client.wand.gui.WandPreviewRenderState.class,
+                        at.koopro.wizardsandbeasts.client.wand.gui.WandPreviewRenderer::new));
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.brew.BrewTintSource::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);

@@ -820,6 +820,7 @@
   "gui.wizards_and_beasts.wand_restyle.natural": "Its own",
   "gui.wizards_and_beasts.wand_restyle.empty": "Put a wand in the slot below",
   "gui.wizards_and_beasts.wand_restyle.now": "Now",
+  "gui.wizards_and_beasts.wand_restyle.drag": "Drag to turn",
   "gui.wizards_and_beasts.wand_restyle.status.no_wand": "Put a finished wand in the slot.",
   "gui.wizards_and_beasts.wand_restyle.status.no_change": "Pick a new look on the right.",
   "gui.wizards_and_beasts.wand_restyle.aspect.handle": "Handle",
