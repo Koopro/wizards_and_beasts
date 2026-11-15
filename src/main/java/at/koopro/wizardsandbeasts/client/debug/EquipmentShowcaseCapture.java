@@ -368,6 +368,25 @@ public final class EquipmentShowcaseCapture {
                 wear(p, stitched(p, ArmorItemRegistry.HEALER_COAT_CHEST.get(), "mungo_lime", 2));
                 wear(p, new ItemStack(CanonItemRegistry.SHIELD_GLOVES.get()));
             }),
+            // Wardrobe 2.0 W4.
+            new Outfit("w4_ritual_black_hood_up", p -> {
+                ItemStack robe = stitched(p, ArmorItemRegistry.RITUAL_ROBE_CHEST.get(), "ritual_black", 1);
+                RobeHood.setUp(robe, true);
+                wear(p, robe);
+            }),
+            new Outfit("w4_ritual_crimson_hood_down", p -> wear(p, stitched(p, ArmorItemRegistry.RITUAL_ROBE_CHEST.get(), "ritual_crimson", 0))),
+            new Outfit("w4_ritual_blighted_masked", p -> {
+                ItemStack robe = stitched(p, ArmorItemRegistry.RITUAL_ROBE_CHEST.get(), "blighted", 0);
+                RobeHood.setUp(robe, true);
+                wear(p, robe);
+                wear(p, new ItemStack(ArmorItemRegistry.DEATH_EATER_MASK_2.get()));
+            }),
+            new Outfit("w4_dark_order_blighted", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.DEATH_EATER_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "blighted", 0));
+            }),
+            new Outfit("w4_moss_blighted", p -> wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "blighted", 0))),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));

@@ -53,6 +53,7 @@ class WardrobeAssetTest {
 "student_robe_chest", "student_robe", "school_plain"),
             robe("winter_uniform_chest", "winter_uniform", "school_plain"),
             robe("summer_uniform_chest", "summer_uniform", "school_plain"),
+            robe("ritual_robe_chest", "ritual_robe", "ritual_black"),
             robe("shopkeeper_chest", "shopkeeper", "apron_canvas"),
             robe("field_coat_chest", "field_coat", "field_peacock"),
             robe("potioneer_coat_chest", "potioneer_coat", "potioneer_black"),

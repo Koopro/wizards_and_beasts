@@ -883,6 +883,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add("livery.wizards_and_beasts.field_peacock", "Peacock Blue");
         add("livery.wizards_and_beasts.potioneer_black", "Potioneer's Black");
         add("livery.wizards_and_beasts.potioneer_bottle", "Bottle Green");
+        add("item.wizards_and_beasts.ritual_robe_chest", "Ritual Robe");
+        add("item.wizards_and_beasts.ritual_robe_chest.desc", "Closed to the floor under a deep cowl, runes worked round the hem, a cord at the waist.");
+        add("wardrobe.wizards_and_beasts.rank.ritual_robe_chest.1", "Adept");
+        add("livery.wizards_and_beasts.blighted", "Blighted");
+        add("livery.wizards_and_beasts.ritual_black", "Ritual Black");
+        add("livery.wizards_and_beasts.ritual_crimson", "Ritual Crimson");
+        add("livery.wizards_and_beasts.ritual_ash", "Ritual Ash");
         add("item.wizards_and_beasts.travel_coat_chest", "Travelling Coat");
         add("item.wizards_and_beasts.travel_coat_chest.desc", "A buttoned canvas duster to the knee under a short shoulder cape.");
         add("item.wizards_and_beasts.healer_coat_chest", "Healer's Coat");

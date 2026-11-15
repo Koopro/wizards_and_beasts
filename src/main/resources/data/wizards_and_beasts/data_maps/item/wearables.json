@@ -427,6 +427,24 @@
     },
     "wizards_and_beasts:shield_gloves": {
       "equipment_type": "hands"
+    },
+    "wizards_and_beasts:ritual_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "hides_with_hood_up": [
+        "head"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        }
+      ]
     }
   }
 }

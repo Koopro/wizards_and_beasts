@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:black_wool",
+    "minecraft:black_wool",
+    "minecraft:black_wool",
+    "minecraft:string",
+    "minecraft:red_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:ritual_robe_chest",
+    "count": 1
+  }
+}

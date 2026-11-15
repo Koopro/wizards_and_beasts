@@ -328,6 +328,12 @@ public class ModCreativeTabs {
                         output.accept(ArmorItemRegistry.POTIONEER_COAT_CHEST.get());
                         output.accept(outfit(ArmorItemRegistry.POTIONEER_COAT_CHEST.get(), "potioneer_bottle", 0));
                         output.accept(outfit(ArmorItemRegistry.HEALER_COAT_CHEST.get(), "mungo_lime", 1));
+                        output.accept(ArmorItemRegistry.RITUAL_ROBE_CHEST.get());
+                        for (String rite : new String[]{"ritual_crimson", "ritual_ash", "blighted"}) {
+                            output.accept(outfit(ArmorItemRegistry.RITUAL_ROBE_CHEST.get(), rite, 0));
+                        }
+                        output.accept(outfit(ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "blighted", 0));
+                        output.accept(outfit(ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "blighted", 0));
                         output.accept(ArmorItemRegistry.DRESS_ROBES_CHEST.get());
                         for (String dress : new String[]{"dress_midnight", "dress_burgundy", "dress_black", "dress_periwinkle"}) {
                             output.accept(outfit(ArmorItemRegistry.DRESS_ROBES_CHEST.get(), dress, 0));
