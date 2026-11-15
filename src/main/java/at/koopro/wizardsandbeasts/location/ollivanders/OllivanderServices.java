@@ -51,6 +51,7 @@ public final class OllivanderServices {
         sink.register("wand_evaluation", new Evaluation());
         sink.register("broom_servicing", new BroomServicing());
         sink.register("wand_commission", new WandCommission());
+        sink.register("wand_restyle", new WandRestyleService());
     }
 
     static final class Evaluation implements LocationService {

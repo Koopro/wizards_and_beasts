@@ -148,6 +148,12 @@
       "discount_per_tier": 0.15
     },
     {
+      "service": "wizards_and_beasts:wand_restyle",
+      "min_tier": "patron",
+      "fee_knuts": 986,
+      "discount_per_tier": 0.1
+    },
+    {
       "service": "wizards_and_beasts:wand_commission",
       "min_tier": "regular",
       "fee_knuts": 1479,
