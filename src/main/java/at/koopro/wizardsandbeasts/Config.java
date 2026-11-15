@@ -317,6 +317,15 @@ public class Config {
             .comment("How much quiet magic the world shows around you: fireflies over grass and flowers on clear",
                     "nights. 1.0 is the designed amount, 0.0 turns it off. Client-side and purely cosmetic.")
             .defineInRange("ambientMagicDensity", 1.0D, 0.0D, 2.0D);
+    private static final ModConfigSpec.EnumValue<WandEffects> WAND_EFFECTS = BUILDER
+            .comment("How much a wand at rest shows its core: OFF, SUBTLE (a mote of the core's light now and then,",
+                    "a glint on gilt fittings) or FULL (about three times as often). Client-side and purely cosmetic;",
+                    "the light drawn on the wand itself and the spell's own gathering while casting are unaffected.")
+            .defineEnum("wandEffects", WandEffects.SUBTLE);
+    private static final ModConfigSpec.BooleanValue LEGENDARY_GROUND_SHIMMER = BUILDER
+            .comment("If true, a legendary item lying on the ground (a Hallow, a founder's relic, a gilt wand) catches",
+                    "the light now and then, so it is not lost in the grass. Client-side and purely cosmetic.")
+            .define("legendaryGroundShimmer", true);
     private static final ModConfigSpec.DoubleValue BROOM_FOV_EFFECT = BUILDER
             .comment("How much the field of view widens at full broom speed, as a fraction.",
                     "0.0 disables it entirely — motion-sickness sufferers should set this to 0.",
@@ -584,6 +593,8 @@ public class Config {
     public static float broomWindVolume = 0.6f;
     public static float broomFovEffect = 0.12f;
     public static float ambientMagicDensity = 1.0f;
+    public static WandEffects wandEffects = WandEffects.SUBTLE;
+    public static boolean legendaryGroundShimmer = true;
     public static boolean broomSpeedParticles = true;
     public static float spellPowerSoftCapKnee = 1.5f;
     public static float spellPowerMaxMultiplier = 3.0f;
@@ -630,6 +641,13 @@ public class Config {
         DYNAMIC,
         ON_RESET,
         OFF
+    }
+
+    /** How much a wand at rest shows its core ({@code WandIdleEffects}). */
+    public enum WandEffects {
+        OFF,
+        SUBTLE,
+        FULL
     }
 
     public enum PerfProfile {
@@ -722,6 +740,8 @@ public class Config {
         broomWindVolume = BROOM_WIND_VOLUME.get().floatValue();
         broomFovEffect = BROOM_FOV_EFFECT.get().floatValue();
         ambientMagicDensity = AMBIENT_MAGIC_DENSITY.get().floatValue();
+        wandEffects = WAND_EFFECTS.get();
+        legendaryGroundShimmer = LEGENDARY_GROUND_SHIMMER.get();
         broomSpeedParticles = BROOM_SPEED_PARTICLES.get();
         spellPowerSoftCapKnee = SPELL_POWER_SOFT_CAP_KNEE.get().floatValue();
         spellPowerMaxMultiplier = SPELL_POWER_MAX_MULTIPLIER.get().floatValue();

@@ -49,7 +49,7 @@ public final class WandLookCache {
 
     private WandLookCache() {}
 
-    static WandLook look(HolderLookup.@Nullable Provider registries, ItemStack stack) {
+    public static WandLook look(HolderLookup.@Nullable Provider registries, ItemStack stack) {
         if (registries != lastRegistries) {
             LOOKS.clear();
             lastRegistries = registries;
