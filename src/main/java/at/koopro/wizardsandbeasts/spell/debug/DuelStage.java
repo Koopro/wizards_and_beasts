@@ -76,6 +76,9 @@ public final class DuelStage {
             data.setCooldown(spell.getId(), 0L);
             data.setGlobalCooldownEndTick(0L);
         }
+        if (System.getenv("WB_DUEL_WARDROBE") != null) {
+            dress(player, west);
+        }
         LOGGER.info("Duel stage: {} armed with {} in the {}", player.getGameProfile().name(),
                 spell == null ? "nothing" : spell.getId(), west ? "west" : "east");
         // Both duellists in: mark them both at once, so the two clients start from one moment (the marker is a
@@ -95,5 +98,35 @@ public final class DuelStage {
             }
             LOGGER.info("Duel stage: both in, marked");
         }
+    }
+
+    /**
+     * Wardrobe 2.0 W9, the multiplayer check: each duellist wears what the other client must see. DuelA, a summer
+     * uniform cut with a skirt worn as a cosmetic over a netherite chestplate, and a Prefect badge; DuelB, a blighted
+     * ritual robe with its hood up, and a ring. Cosmetic slots, the fit, the livery and the hood all travel to the
+     * other client only through Curios' sync and the stack's components.
+     */
+    private static void dress(ServerPlayer player, boolean west) {
+        var access = player.level().registryAccess();
+        if (west) {
+            player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST,
+                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_CHESTPLATE));
+            var uniform = new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get());
+            at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.stamp(uniform,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "house_lion"), 1, access);
+            at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.toggleFit(uniform);
+            at.koopro.wizardsandbeasts.equipment.EquipmentAPI.tryEquipCosmetic(player, uniform);
+            at.koopro.wizardsandbeasts.equipment.EquipmentAPI.tryEquip(player,
+                    new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.PREFECT_BADGE.get()));
+        } else {
+            var robe = new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.RITUAL_ROBE_CHEST.get());
+            at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.stamp(robe,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "blighted"), 0, access);
+            at.koopro.wizardsandbeasts.item.armor.RobeHood.setUp(robe, true);
+            at.koopro.wizardsandbeasts.equipment.EquipmentAPI.tryEquip(player, robe);
+            at.koopro.wizardsandbeasts.equipment.EquipmentAPI.tryEquip(player,
+                    new net.minecraft.world.item.ItemStack(at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.WIZARD_RING.get()));
+        }
+        LOGGER.info("Duel stage: {} dressed for the wardrobe check", player.getGameProfile().name());
     }
 }
