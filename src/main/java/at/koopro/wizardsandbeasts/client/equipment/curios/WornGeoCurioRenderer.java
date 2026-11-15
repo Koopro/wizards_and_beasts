@@ -69,7 +69,19 @@ public final class WornGeoCurioRenderer implements ICurioRenderer {
             // Vanilla draws no cape over an elytra either; the wings take the back.
             return;
         }
-        EquipmentSlot slot = item.armorType().getSlot();
+        EquipmentSlot own = item.armorType().getSlot();
+        // An outfit that dresses the legs draws its model once per slot, so GeckoLib shows each slot's bones.
+        for (EquipmentSlot slot : item.dressesLegs() && own == EquipmentSlot.CHEST
+                ? new EquipmentSlot[]{EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}
+                : new EquipmentSlot[]{own}) {
+            renderSlot(item, stack, slot, slotContext, poseStack, collector, packedLight, renderState, parentModel);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void renderSlot(WizardArmorItem item, ItemStack stack, EquipmentSlot slot, SlotContext slotContext,
+                                   PoseStack poseStack, SubmitNodeCollector collector, int packedLight,
+                                   LivingEntityRenderState renderState, HumanoidModel<?> parentModel) {
         GeoArmorRenderer renderer = GeoRenderProvider.of(stack).getGeoArmorRenderer(stack, slot);
         if (renderer == null) {
             return;

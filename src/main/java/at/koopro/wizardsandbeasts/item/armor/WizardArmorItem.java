@@ -91,6 +91,15 @@ public abstract class WizardArmorItem extends GeoItemBase {
      * piece that is also its slot; for clothing it only picks bones (a robe body draws the
      * chestplate group). Read by {@link HoodedRobe} to tell the robe body from its trousers and boots.
      */
+    /**
+     * Whether this body piece, worn as clothing, also dresses the legs and feet from its own model: an outfit with
+     * no robe skirt over them (the summer uniform's trousers, the Quidditch robes' breeches and boots). Most robes
+     * leave the legs to their separate {@code _legs}/{@code _boots} armour, and the skirt covers them.
+     */
+    public boolean dressesLegs() {
+        return false;
+    }
+
     public ArmorType armorType() {
         return this.armorType;
     }

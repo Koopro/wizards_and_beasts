@@ -96,13 +96,22 @@ public final class EquipmentRenderStateModifier {
      * fraction apart and the skin's layer shows through the cloth (seen in game at 0.25 and 0.3).
      */
     private static void wearClothAsSkin(LivingEntity wearer, AvatarRenderState state) {
-        if (EquipmentAPI.getEquippedBodyClothing(wearer).getItem() instanceof WizardArmorItem robe
-                && !(robe instanceof CapeItem)) {
+        // What is drawn in the body slot, a cosmetic over a worn piece included (2026-11-15: reading the worn piece
+        // left the skin's jacket showing through a cosmetic robe).
+        WizardArmorItem[] drawn = new WizardArmorItem[1];
+        at.koopro.wizardsandbeasts.equipment.curios.CuriosEquipment.forEachRendered(wearer, (slotId, index, stack) -> {
+            if (slotId.equals(at.koopro.wizardsandbeasts.equipment.EquipmentType.BODY_CLOTHING.slotId())
+                    && stack.getItem() instanceof WizardArmorItem robe && !(robe instanceof CapeItem)) {
+                drawn[0] = robe;
+            }
+        });
+        if (drawn[0] != null) {
             state.showJacket = false;
             state.showLeftSleeve = false;
             state.showRightSleeve = false;
         }
-        if (state.legsEquipment.getItem() instanceof WizardArmorItem) {
+        // An outfit that dresses the legs (summer uniform, Quidditch robes) is a trouser leg like the robe's own.
+        if (state.legsEquipment.getItem() instanceof WizardArmorItem || (drawn[0] != null && drawn[0].dressesLegs())) {
             state.showLeftPants = false;
             state.showRightPants = false;
         }
