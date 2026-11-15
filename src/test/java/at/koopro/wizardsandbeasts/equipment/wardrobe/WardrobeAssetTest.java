@@ -53,6 +53,11 @@ class WardrobeAssetTest {
 "student_robe_chest", "student_robe", "school_plain"),
             robe("winter_uniform_chest", "winter_uniform", "school_plain"),
             robe("summer_uniform_chest", "summer_uniform", "school_plain"),
+            robe("shopkeeper_chest", "shopkeeper", "apron_canvas"),
+            robe("field_coat_chest", "field_coat", "field_peacock"),
+            robe("potioneer_coat_chest", "potioneer_coat", "potioneer_black"),
+            Map.entry("dragon_hide_gloves", new String[]{"gloves", "dragonhide"}),
+            Map.entry("shield_gloves", new String[]{"gloves", "shield_blue"}),
             robe("dress_robes_chest", "dress_robes", "dress_bottle_green"),
             robe("quidditch_robes", "quidditch_robes", "house_lion"),
             robe("auror_robe_chest", "auror_robe", "auror_office"),
@@ -68,7 +73,8 @@ class WardrobeAssetTest {
 
     /** Accessories: neither a skirt nor a cape, so no motion bones to check. */
     private static final java.util.Set<String> ACCESSORIES =
-            java.util.Set.of("leather_belt", "duty_belt", "scarf", "gloves", "professor_hat", "travel_hat");
+            java.util.Set.of("leather_belt", "duty_belt", "scarf", "gloves", "professor_hat", "travel_hat",
+                    "dragon_hide_gloves", "shield_gloves");
 
     private static Map.Entry<String, String[]> robe(String item, String model, String livery) {
         return Map.entry(item, new String[]{model, livery});

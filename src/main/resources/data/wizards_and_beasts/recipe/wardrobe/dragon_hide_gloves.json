@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:leather",
+    "minecraft:green_dye",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:dragon_hide_gloves",
+    "count": 1
+  }
+}

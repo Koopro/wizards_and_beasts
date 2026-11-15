@@ -356,6 +356,18 @@ public final class EquipmentShowcaseCapture {
             new Outfit("w2_dress_periwinkle", p -> wear(p, stitched(p, ArmorItemRegistry.DRESS_ROBES_CHEST.get(), "dress_periwinkle", 0))),
             new Outfit("w2_quidditch_lion_captain", p -> wear(p, stitched(p, CanonItemRegistry.QUIDDITCH_ROBES.get(), "house_lion", 1))),
             new Outfit("w2_quidditch_serpent", p -> wear(p, stitched(p, CanonItemRegistry.QUIDDITCH_ROBES.get(), "house_serpent", 0))),
+            // Wardrobe 2.0 W3.
+            new Outfit("w3_shopkeeper_canvas", p -> wear(p, stitched(p, ArmorItemRegistry.SHOPKEEPER_CHEST.get(), "apron_canvas", 1))),
+            new Outfit("w3_shopkeeper_parlour", p -> wear(p, stitched(p, ArmorItemRegistry.SHOPKEEPER_CHEST.get(), "apron_parlour", 0))),
+            new Outfit("w3_field_peacock", p -> wear(p, stitched(p, ArmorItemRegistry.FIELD_COAT_CHEST.get(), "field_peacock", 1))),
+            new Outfit("w3_potioneer_black_gloves", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.POTIONEER_COAT_CHEST.get(), "potioneer_black", 1));
+                wear(p, new ItemStack(CanonItemRegistry.DRAGON_HIDE_GLOVES.get()));
+            }),
+            new Outfit("w3_healer_lime", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.HEALER_COAT_CHEST.get(), "mungo_lime", 2));
+                wear(p, new ItemStack(CanonItemRegistry.SHIELD_GLOVES.get()));
+            }),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));

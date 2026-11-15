@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:gloves",
+    "minecraft:blue_dye",
+    "minecraft:lapis_lazuli"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:shield_gloves",
+    "count": 1
+  }
+}

@@ -376,6 +376,57 @@
           "operation": "add_value"
         }
       ]
+    },
+    "wizards_and_beasts:shopkeeper_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:field_coat_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:potioneer_coat_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 2,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:dragon_hide_gloves": {
+      "equipment_type": "hands"
+    },
+    "wizards_and_beasts:shield_gloves": {
+      "equipment_type": "hands"
     }
   }
 }

@@ -133,8 +133,10 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("shield_hat", Item::new);
     public static final DeferredItem<Item> SHIELD_CLOAK =
             ModItems.ITEMS.registerItem("shield_cloak", Item::new);
-    public static final DeferredItem<Item> SHIELD_GLOVES =
-            ModItems.ITEMS.registerItem("shield_gloves", Item::new);
+    /** Worn since Wardrobe 2.0 (W3): the gloves accessory in its shield_blue livery; was a plain item. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.AccessoryItem> SHIELD_GLOVES =
+            ModItems.ITEMS.registerItem("shield_gloves", props -> new at.koopro.wizardsandbeasts.item.armor.AccessoryItem(
+                    props, "gloves", "shield_blue", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
     public static final DeferredItem<Item> PORTABLE_SWAMP =
             ModItems.ITEMS.registerItem("portable_swamp", Item::new);
     public static final DeferredItem<Item> WILDFIRE_WHIZ_BANGS =
@@ -164,8 +166,10 @@ public final class CanonItemRegistry {
      */
     public static final DeferredItem<Item> STANDARD_BOOK_OF_SPELLS =
             ModItems.ITEMS.registerItem("standard_book_of_spells", SpellSourceItem.Animated::new);
-    public static final DeferredItem<Item> DRAGON_HIDE_GLOVES =
-            ModItems.ITEMS.registerItem("dragon_hide_gloves", Item::new);
+    /** Worn since Wardrobe 2.0 (W3): the gloves accessory in its dragonhide livery; was a plain item. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.AccessoryItem> DRAGON_HIDE_GLOVES =
+            ModItems.ITEMS.registerItem("dragon_hide_gloves", props -> new at.koopro.wizardsandbeasts.item.armor.AccessoryItem(
+                    props, "gloves", "dragonhide", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
     public static final DeferredItem<Item> MONSTER_BOOK_OF_MONSTERS =
             ModItems.ITEMS.registerItem("monster_book_of_monsters", AnimatedItem.Plain::new);
     /** The N.E.W.T. potions text: reading it teaches the advanced recipes (brewing them keeps the N.E.W.T. gates). */

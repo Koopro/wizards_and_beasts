@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:white_wool",
+    "minecraft:brown_wool",
+    "minecraft:brown_wool",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:shopkeeper_chest",
+    "count": 1
+  }
+}

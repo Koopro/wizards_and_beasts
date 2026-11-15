@@ -319,6 +319,15 @@ public class ModCreativeTabs {
                             output.accept(outfit(ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get(), house, 0));
                             output.accept(outfit(CanonItemRegistry.QUIDDITCH_ROBES.get(), house, 0));
                         }
+                        output.accept(ArmorItemRegistry.SHOPKEEPER_CHEST.get());
+                        for (String apron : new String[]{"apron_leather", "apron_green", "apron_parlour"}) {
+                            output.accept(outfit(ArmorItemRegistry.SHOPKEEPER_CHEST.get(), apron, 0));
+                        }
+                        output.accept(ArmorItemRegistry.FIELD_COAT_CHEST.get());
+                        output.accept(outfit(ArmorItemRegistry.FIELD_COAT_CHEST.get(), "field_olive", 0));
+                        output.accept(ArmorItemRegistry.POTIONEER_COAT_CHEST.get());
+                        output.accept(outfit(ArmorItemRegistry.POTIONEER_COAT_CHEST.get(), "potioneer_bottle", 0));
+                        output.accept(outfit(ArmorItemRegistry.HEALER_COAT_CHEST.get(), "mungo_lime", 1));
                         output.accept(ArmorItemRegistry.DRESS_ROBES_CHEST.get());
                         for (String dress : new String[]{"dress_midnight", "dress_burgundy", "dress_black", "dress_periwinkle"}) {
                             output.accept(outfit(ArmorItemRegistry.DRESS_ROBES_CHEST.get(), dress, 0));
