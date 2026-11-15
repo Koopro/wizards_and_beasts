@@ -237,6 +237,26 @@ public class WandItem extends GeoItemBase {
         return true;
     }
 
+    /**
+     * The name in its wood's rarity colour ({@link at.koopro.wizardsandbeasts.wand.visual.WandRarity}): the
+     * colour is set on the name itself, which wins over the item's default rarity in every place a name is
+     * shown (tooltip, the name over the hotbar, a dropped wand's label).
+     */
+    @Override
+    public Component getName(ItemStack stack) {
+        Component name = super.getName(stack);
+        net.minecraft.core.HolderLookup.Provider registries = at.koopro.wizardsandbeasts.util.SidedRegistries.get();
+        if (registries == null) {
+            return name;
+        }
+        at.koopro.wizardsandbeasts.wand.visual.WandLook look =
+                at.koopro.wizardsandbeasts.wand.visual.WandLookResolver.resolve(registries, stack);
+        var wood = at.koopro.wizardsandbeasts.wand.WandAppearance.definition(registries, WandComponents.getWood(stack));
+        net.minecraft.world.item.Rarity rarity = at.koopro.wizardsandbeasts.wand.visual.WandRarity.of(
+                wood == null ? null : wood.rarity(), look.rareIndex(), look.elder());
+        return rarity == net.minecraft.world.item.Rarity.COMMON ? name : name.copy().withStyle(rarity.color());
+    }
+
     @Override
     public boolean isFoil(ItemStack stack) {
         return WandComponents.getMaster(stack).isPresent();

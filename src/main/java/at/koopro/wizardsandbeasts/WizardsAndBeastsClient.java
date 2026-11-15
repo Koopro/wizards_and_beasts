@@ -50,6 +50,11 @@ public class WizardsAndBeastsClient {
         modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                 (container, modListScreen) -> new WizardsConfigScreen(modListScreen));
 
+        at.koopro.wizardsandbeasts.util.SidedRegistries.installClient(() -> {
+            var level = net.minecraft.client.Minecraft.getInstance().level;
+            return level == null ? null : level.registryAccess();
+        });
+
         // Beam shapes are a client-only visual concern, so the registry lives on the client bus.
         ModBeamShapes.init(modEventBus);
 
