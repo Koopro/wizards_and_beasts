@@ -419,6 +419,10 @@ public final class EquipmentShowcaseCapture {
                 wear(p, new ItemStack(CanonItemRegistry.SHIELD_CLOAK.get()));
                 wear(p, new ItemStack(ArmorItemRegistry.SPEW_BADGE.get()));
             }),
+            new Outfit("w9_headless_hat_winter", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), "house_serpent", 0));
+                wear(p, new ItemStack(CanonItemRegistry.HEADLESS_HAT.get()));
+            }),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));

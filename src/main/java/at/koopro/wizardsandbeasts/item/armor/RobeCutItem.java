@@ -39,6 +39,11 @@ public class RobeCutItem extends WizardArmorItem {
         this.fits = fits;
     }
 
+    /** The cut this item draws, as named in {@code tools/wardrobe_model.py}. */
+    public String assetName() {
+        return assetName;
+    }
+
     @Override
     public boolean hasFits() {
         return fits;

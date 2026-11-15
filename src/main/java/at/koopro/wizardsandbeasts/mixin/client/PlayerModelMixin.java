@@ -53,6 +53,8 @@ public class PlayerModelMixin {
         // rewriting riding and petrification poses in the same change that introduces the layer they
         // would be rewritten onto.
         PlayerPoseHandler.applyPose(model, state);
+        // The Headless Hat (Wardrobe 2.0): the head is hidden from the render state's flag, and shown for everyone else.
+        at.koopro.wizardsandbeasts.client.equipment.HeadlessHat.applyToModel(model, state);
         ModelDebugPartTransforms.apply(model);
     }
 }

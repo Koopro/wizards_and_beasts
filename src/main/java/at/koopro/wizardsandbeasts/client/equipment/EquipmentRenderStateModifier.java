@@ -58,6 +58,10 @@ public final class EquipmentRenderStateModifier {
     }
 
     private static void apply(LivingEntity wearer, AvatarRenderState state) {
+        if (HeadlessHat.worn(wearer)) {
+            state.setRenderData(HeadlessHat.KEY, true);
+            state.showHat = false;
+        }
         EquipmentVisibility.Result visibility = EquipmentVisibility.resolve(wearer);
         if (visibility == EquipmentVisibility.NONE) {
             wearClothAsSkin(wearer, state);
