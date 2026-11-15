@@ -3,5 +3,6 @@
   "icon": "wizards_and_beasts:slot/empty_face_slot",
   "validators": [
     "wizards_and_beasts:wearable"
-  ]
+  ],
+  "add_cosmetic": true
 }

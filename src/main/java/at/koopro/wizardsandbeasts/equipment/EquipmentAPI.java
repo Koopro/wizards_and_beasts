@@ -149,6 +149,23 @@ public final class EquipmentAPI {
         return true;
     }
 
+    /**
+     * Wears one of {@code stack} for its looks only, in its slot's cosmetic twin: drawn over whatever the real slot
+     * holds, granting nothing. Players do this through the Curios screen; this is the code path for commands and
+     * captures.
+     */
+    public static boolean tryEquipCosmetic(LivingEntity entity, ItemStack stack) {
+        WearableDefinition definition = WearableDefinitions.get(stack);
+        if (definition == null) {
+            return false;
+        }
+        if (!CuriosEquipment.equipCosmetic(entity, definition.type().slotId(), stack.copyWithCount(1))) {
+            return false;
+        }
+        stack.shrink(1);
+        return true;
+    }
+
     /** Whether {@link #tryEquip} would succeed: the stack is defined and a matching slot is free. */
     public static boolean canEquip(LivingEntity entity, ItemStack stack) {
         WearableDefinition definition = WearableDefinitions.get(stack);

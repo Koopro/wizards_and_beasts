@@ -1,5 +1,6 @@
 {
   "validators": [
     "wizards_and_beasts:wearable"
-  ]
+  ],
+  "add_cosmetic": true
 }

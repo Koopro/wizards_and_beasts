@@ -158,6 +158,48 @@ public final class CuriosEquipment {
         return true;
     }
 
+    /**
+     * Puts {@code stack} into the first empty <em>cosmetic</em> slot of {@code slotId}: worn for its looks only. Curios
+     * draws it in place of the real slot's stack, grants it nothing and syncs it to every tracking client; armour under
+     * it is hidden exactly as under a real piece ({@link #forEachRendered}).
+     *
+     * @return {@code true} if the stack was placed
+     */
+    public static boolean equipCosmetic(LivingEntity entity, String slotId, ItemStack stack) {
+        ICurioStacksHandler handler = stacksHandler(entity, slotId);
+        if (handler == null || stack.isEmpty()) {
+            return false;
+        }
+        IDynamicStackHandler cosmetics = handler.getCosmeticStacks();
+        for (int i = 0; i < cosmetics.getSlots(); i++) {
+            if (cosmetics.getStackInSlot(i).isEmpty()
+                    && CuriosApi.isStackValid(new SlotContext(slotId, entity, i, true, true), stack)) {
+                cosmetics.setStackInSlot(i, stack);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Empties every cosmetic slot, returning what was taken. Debug and capture use only: players own their looks. */
+    public static List<ItemStack> clearCosmetics(LivingEntity entity) {
+        ICuriosItemHandler inventory = CuriosApi.getCuriosInventoryOrNull(entity);
+        if (inventory == null) {
+            return List.of();
+        }
+        List<ItemStack> taken = new ArrayList<>();
+        for (ICurioStacksHandler handler : inventory.getCurios().values()) {
+            IDynamicStackHandler cosmetics = handler.getCosmeticStacks();
+            for (int i = 0; i < cosmetics.getSlots(); i++) {
+                if (!cosmetics.getStackInSlot(i).isEmpty()) {
+                    taken.add(cosmetics.getStackInSlot(i).copy());
+                    cosmetics.setStackInSlot(i, ItemStack.EMPTY);
+                }
+            }
+        }
+        return taken;
+    }
+
     private static int freeSlot(LivingEntity entity, String slotId, ItemStack stack) {
         ICurioStacksHandler handler = stacksHandler(entity, slotId);
         if (handler == null || stack.isEmpty()) {

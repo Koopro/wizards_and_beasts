@@ -326,6 +326,20 @@ public final class EquipmentShowcaseCapture {
                 RobeHood.setUp(robe, true);
                 wear(p, robe);
                 wear(p, stitched(p, ArmorItemRegistry.TRAVEL_HAT.get(), "slate", 0));
+            }),
+            // Wardrobe 2.0 W0, the cosmetic layer: an Auror's robe worn for real (its armour counts) with an everyday
+            // robe in the body slot's cosmetic twin, which is what must be drawn; then the everyday robe alone as a
+            // cosmetic, over netherite, which it must hide while adding no armour of its own.
+            new Outfit("w0_cosmetic_moss_over_auror", p -> {
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.AUROR_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.AUROR_ROBE_BOOTS.get()));
+                wear(p, stitched(p, ArmorItemRegistry.AUROR_ROBE_CHEST.get(), "auror_office", 3));
+                cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
+                cosmetic(p, stitched(p, ArmorItemRegistry.TRAVEL_HAT.get(), "umber", 0));
+            }),
+            new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
+                netherite(p, false, true, true, true);
+                cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
             }));
 
     /**
@@ -386,8 +400,15 @@ public final class EquipmentShowcaseCapture {
         }
     }
 
+    private static void cosmetic(ServerPlayer p, ItemStack stack) {
+        if (!EquipmentAPI.tryEquipCosmetic(p, stack)) {
+            LOGGER.warn("Equipment showcase: no cosmetic slot took {}", stack);
+        }
+    }
+
     private static void undress(ServerPlayer p) {
         EquipmentAPI.stripWearables(p, s -> false);
+        at.koopro.wizardsandbeasts.equipment.curios.CuriosEquipment.clearCosmetics(p);
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST,
                 EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
             p.setItemSlot(slot, ItemStack.EMPTY);
@@ -447,10 +468,15 @@ public final class EquipmentShowcaseCapture {
             p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
             current.dress().accept(p);
         }));
+        // What the outfit grants, read after Curios has applied its modifiers: a cosmetic piece must add nothing.
+        SCRIPT.add(new Step("stats", 2, false, Cam.QUARTER, NONE, p -> LOGGER.info("Wardrobe showcase: {} armor {} toughness {}",
+                current.name(), p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR),
+                p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS))));
         SCRIPT.add(new Step("quarter", 4, true, Cam.QUARTER, NONE, NOTHING));
         SCRIPT.add(new Step("front", 4, true, Cam.FRONT, NONE, NOTHING));
         SCRIPT.add(new Step("side", 4, true, Cam.SIDE, NONE, NOTHING));
         SCRIPT.add(new Step("back", 4, true, Cam.BACK, NONE, NOTHING));
+        SCRIPT.add(new Step("first_person", 6, true, Cam.SELF, NONE, NOTHING));
         SCRIPT.add(new Step("walk_side_a", 10, true, Cam.SIDE, p -> moves(true, false), NOTHING));
         SCRIPT.add(new Step("walk_side_b", 2, true, Cam.SIDE, NONE, NOTHING));
         SCRIPT.add(new Step("walk_side_c", 2, true, Cam.SIDE, NONE, NOTHING));
