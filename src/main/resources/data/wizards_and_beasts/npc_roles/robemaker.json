@@ -1,0 +1,31 @@
+{
+ "location": "wizards_and_beasts:madam_malkins",
+ "names": [
+  "npc.wizards_and_beasts.robemaker.name.0"
+ ],
+ "greetings": [
+  {
+   "text": "npc.wizards_and_beasts.robemaker.greet.default"
+  },
+  {
+   "text": "npc.wizards_and_beasts.robemaker.greet.fitting"
+  }
+ ],
+ "topics": [
+  {
+   "id": "uniforms",
+   "label": "npc.wizards_and_beasts.robemaker.topic.uniforms",
+   "reply": "npc.wizards_and_beasts.robemaker.reply.uniforms"
+  },
+  {
+   "id": "fits",
+   "label": "npc.wizards_and_beasts.robemaker.topic.fits",
+   "reply": "npc.wizards_and_beasts.robemaker.reply.fits"
+  },
+  {
+   "id": "dyes",
+   "label": "npc.wizards_and_beasts.robemaker.topic.dyes",
+   "reply": "npc.wizards_and_beasts.robemaker.reply.dyes"
+  }
+ ]
+}

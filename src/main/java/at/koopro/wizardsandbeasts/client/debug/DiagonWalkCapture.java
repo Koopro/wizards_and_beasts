@@ -96,6 +96,9 @@ public final class DiagonWalkCapture {
             new Step("alley", 10, p -> {}),
             new Step("", 30, p -> lookPocket(p, 17.5, 7, 20.5, 180f, -10f)),
             new Step("ollivanders", 10, p -> {}),
+            // Wardrobe 2.0 W8: Madam Malkin's is staffed; inside, facing her counter, and who keeps which post.
+            new Step("", 30, p -> lookPocket(p, 41.5, 7, 10.5, 180f, 4f)),
+            new Step("malkins_counter", 10, DiagonWalkCapture::logKeepers),
             new Step("", 30, p -> lookPocket(p, 22.5, 7, 17.5, -90f, -6f)),
             new Step("street_1", 10, p -> {}),
             new Step("", 30, p -> lookPocket(p, 40.5, 7, 18.5, -90f, -6f)),
@@ -399,5 +402,18 @@ public final class DiagonWalkCapture {
                 current.server().accept(player);
             }
         });
+    }
+
+    /** Logs every settlement keeper in the pocket with the role they keep (Wardrobe 2.0 W8: the robemaker). */
+    private static void logKeepers(ServerPlayer p) {
+        ServerLevel pocket = p.level().getServer().getLevel(DiagonAlley.LEVEL);
+        if (pocket == null) {
+            return;
+        }
+        for (var npc : pocket.getEntitiesOfClass(at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity.class,
+                p.getBoundingBox().inflate(160))) {
+            LOGGER.info("Diagon walk: keeper {} role {} at {}", npc.getName().getString(), npc.roleId(),
+                    npc.blockPosition());
+        }
     }
 }

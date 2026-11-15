@@ -1,0 +1,246 @@
+{
+ "_comment": "Madam Malkin's Robes for All Occasions, Diagon Alley (Wardrobe 2.0, W8): a settlement keeper posted with the robemaker role keeps it. Sneak-use opens the board. Sells school uniforms and everyday clothes to anyone, dress robes, furs, rings and field coats to regulars, the old cuts to valued customers; prices move with trade (market/MarketPricing). Issued uniforms (Auror, Ministry, healer) are not sold here: careers issue them. Standing is earned by buying here and by cloth contracts.",
+ "module": "gringotts",
+ "skin": "workbench",
+ "presence": {
+  "hosts": [
+   "wizards_and_beasts:settlement_npc"
+  ],
+  "host_role": "wizards_and_beasts:robemaker",
+  "host_reach": 6.0
+ },
+ "standing": {
+  "max_active": 2,
+  "board_size": 3,
+  "xp_rules": [
+   {
+    "when": {
+     "activity": "goods_traded",
+     "species": [
+      "wizards_and_beasts:madam_malkins"
+     ]
+    },
+    "xp": 6,
+    "daily_cap": 36
+   },
+   {
+    "when": {
+     "activity": "courier_delivered",
+     "species": [
+      "wizards_and_beasts:madam_malkins"
+     ]
+    },
+    "xp": 12,
+    "daily_cap": 36
+   }
+  ],
+  "ranks": [
+   {
+    "id": "customer",
+    "xp": 0
+   },
+   {
+    "id": "regular",
+    "xp": 100
+   },
+   {
+    "id": "valued_customer",
+    "xp": 300,
+    "requires": [
+     {
+      "type": "contracts_completed",
+      "count": 3
+     }
+    ]
+   }
+  ],
+  "contracts": [
+   {
+    "id": "black_cloth",
+    "min_rank": "customer",
+    "duration_days": 4,
+    "cooldown_days": 2,
+    "weight": 10,
+    "objective": {
+     "type": "delivery",
+     "item": "minecraft:black_wool",
+     "count": 16
+    },
+    "reward": {
+     "knuts": 145,
+     "xp": 30
+    }
+   },
+   {
+    "id": "thread",
+    "min_rank": "customer",
+    "duration_days": 4,
+    "cooldown_days": 2,
+    "weight": 10,
+    "objective": {
+     "type": "delivery",
+     "item": "minecraft:string",
+     "count": 24
+    },
+    "reward": {
+     "knuts": 116,
+     "xp": 25
+    }
+   },
+   {
+    "id": "furs",
+    "min_rank": "regular",
+    "duration_days": 5,
+    "cooldown_days": 3,
+    "weight": 8,
+    "objective": {
+     "type": "delivery",
+     "item": "minecraft:rabbit_hide",
+     "count": 12
+    },
+    "reward": {
+     "knuts": 290,
+     "xp": 45
+    }
+   }
+  ]
+ },
+ "services": [
+  {
+   "service": "wizards_and_beasts:courier_dispatch",
+   "min_tier": "customer"
+  }
+ ],
+ "market": {
+  "half_life_days": 4.0,
+  "demand_bonus": 0.0,
+  "sells": [
+   {
+    "id": "student_robe",
+    "item": "wizards_and_beasts:student_robe_chest",
+    "price_knuts": 290,
+    "depth": 6
+   },
+   {
+    "id": "winter_uniform",
+    "item": "wizards_and_beasts:winter_uniform_chest",
+    "price_knuts": 348,
+    "depth": 4
+   },
+   {
+    "id": "summer_uniform",
+    "item": "wizards_and_beasts:summer_uniform_chest",
+    "price_knuts": 232,
+    "depth": 4
+   },
+   {
+    "id": "school_cape",
+    "item": "wizards_and_beasts:school_cape",
+    "price_knuts": 174,
+    "depth": 4
+   },
+   {
+    "id": "scarf",
+    "item": "wizards_and_beasts:scarf",
+    "price_knuts": 87,
+    "depth": 6
+   },
+   {
+    "id": "bobble_hat",
+    "item": "wizards_and_beasts:bobble_hat",
+    "price_knuts": 87,
+    "depth": 4
+   },
+   {
+    "id": "gloves",
+    "item": "wizards_and_beasts:gloves",
+    "price_knuts": 116,
+    "depth": 4
+   },
+   {
+    "id": "wizard_robe",
+    "item": "wizards_and_beasts:wizard_robe_chest",
+    "price_knuts": 290,
+    "depth": 4
+   },
+   {
+    "id": "waistcoat_suit",
+    "item": "wizards_and_beasts:waistcoat_suit_chest",
+    "price_knuts": 261,
+    "depth": 3
+   },
+   {
+    "id": "knit_jumper",
+    "item": "wizards_and_beasts:knit_jumper_chest",
+    "price_knuts": 174,
+    "depth": 4
+   },
+   {
+    "id": "travel_cloak",
+    "item": "wizards_and_beasts:travel_cloak",
+    "price_knuts": 261,
+    "depth": 3
+   },
+   {
+    "id": "hood",
+    "item": "wizards_and_beasts:hood",
+    "price_knuts": 116,
+    "depth": 3
+   },
+   {
+    "id": "wizard_hat",
+    "item": "wizards_and_beasts:wizard_hat",
+    "price_knuts": 145,
+    "depth": 3
+   },
+   {
+    "id": "travel_hat",
+    "item": "wizards_and_beasts:travel_hat",
+    "price_knuts": 145,
+    "depth": 3
+   },
+   {
+    "id": "dress_robes",
+    "item": "wizards_and_beasts:dress_robes_chest",
+    "price_knuts": 580,
+    "depth": 2,
+    "min_tier": "regular"
+   },
+   {
+    "id": "fur_mantle",
+    "item": "wizards_and_beasts:fur_mantle",
+    "price_knuts": 406,
+    "depth": 2,
+    "min_tier": "regular"
+   },
+   {
+    "id": "wizard_ring",
+    "item": "wizards_and_beasts:wizard_ring",
+    "price_knuts": 348,
+    "depth": 2,
+    "min_tier": "regular"
+   },
+   {
+    "id": "field_coat",
+    "item": "wizards_and_beasts:field_coat_chest",
+    "price_knuts": 464,
+    "depth": 2,
+    "min_tier": "regular"
+   },
+   {
+    "id": "founder_robe",
+    "item": "wizards_and_beasts:founder_robe_chest",
+    "price_knuts": 870,
+    "depth": 1,
+    "min_tier": "valued_customer"
+   },
+   {
+    "id": "scholar_gown",
+    "item": "wizards_and_beasts:scholar_gown_chest",
+    "price_knuts": 696,
+    "depth": 1,
+    "min_tier": "valued_customer"
+   }
+  ]
+ }
+}
