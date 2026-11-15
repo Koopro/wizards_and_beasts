@@ -149,6 +149,12 @@ final class WandBeamSpellHandlers {
         if (s.aguamentiWaterHold >= 20) {
             recordBeamProficiencyHit(player, spell.getId(), s, 40);
         }
+        if (s.beamTicks % 10 == 1) {
+            // Where the jet lands: the client splashes and wets the spot.
+            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(level, spell.getId(),
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.CHANNEL,
+                    waterAim.getCenter(), Vec3.ZERO, player.getId());
+        }
         if (s.beamTicks % 3 == 0) {
             Vec3 c = waterAim.getCenter();
             beamImpact(player, spell.getId(), c, SpellFamilies.of(spell), spell.getColor(), 5, 0.12f, false);
@@ -521,6 +527,11 @@ final class WandBeamSpellHandlers {
         target.fallDistance = 0f;
         s.leviosaLastCommandedSpeed = (float) blendedVelocity.length();
 
+        if (s.beamTicks % 10 == 1 && caster.level() instanceof ServerLevel cueLevel) {
+            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(cueLevel, "wingardium_leviosa",
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.CHANNEL,
+                    target.position(), Vec3.ZERO, target.getId());
+        }
         if (s.beamTicks % LEVIOSA_SPARK_INTERVAL_TICKS == 0) {
             beamImpact(caster, BeamVisualDefaults.LEVIOSA, target.getBoundingBox().getCenter(),
                     SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6 * LEVIOSA_SPARK_INTERVAL_TICKS, 0.18f, false);

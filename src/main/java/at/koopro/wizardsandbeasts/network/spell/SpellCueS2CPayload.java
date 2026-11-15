@@ -43,7 +43,12 @@ public record SpellCueS2CPayload(String spellId, Stage stage, Vec3 pos, Vec3 nor
         /** A ward went up. */
         RAISE,
         /** A ward was broken. */
-        BREAK
+        BREAK,
+        /**
+         * A cone or targeted cast reached from the wand to a point: {@code pos} is the wand end, {@code normal} the
+         * offset to the far end (not a unit vector). The client draws the spell's line and what happens where it ends.
+         */
+        LINE
     }
 
     public static final Type<SpellCueS2CPayload> TYPE = new Type<>(
@@ -85,7 +90,10 @@ public record SpellCueS2CPayload(String spellId, Stage stage, Vec3 pos, Vec3 nor
 
     public static void send(ServerLevel level, String spellId, Stage stage, Vec3 pos, Vec3 normal, float scale,
                             int argb, int entity) {
-        PacketDistributor.sendToPlayersNear(level, null, pos.x, pos.y, pos.z, RANGE,
+        // A line is seen from anywhere near either end.
+        double range = stage == Stage.LINE ? RANGE + normal.length() : RANGE;
+        Vec3 at = stage == Stage.LINE ? pos.add(normal.scale(0.5)) : pos;
+        PacketDistributor.sendToPlayersNear(level, null, at.x, at.y, at.z, range,
                 new SpellCueS2CPayload(spellId, stage, pos, normal, scale, argb, entity));
     }
 

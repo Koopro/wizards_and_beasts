@@ -69,6 +69,9 @@ public final class VfxQuads {
     public static final Identifier SCORCH = tex("scorch");
     public static final Identifier RUNE_CIRCLE = tex("rune_circle");
     public static final Identifier CORRUPTION = tex("corruption");
+    public static final Identifier FROST = tex("frost");
+    public static final Identifier SLASH = tex("slash");
+    public static final Identifier CRACK = tex("crack");
 
     static final double MAX_SPAWN_DISTANCE = 48.0;
     /** Lifts a quad off the surface it lies on, so it does not z-fight the block face. */
@@ -317,8 +320,8 @@ public final class VfxQuads {
         LIVE.clear();
     }
 
-    /** Test seam: drops every quad. */
-    static void clear() {
+    /** Drops every quad (tests, and the spell showcase between spells). */
+    public static void clear() {
         LIVE.clear();
     }
 }

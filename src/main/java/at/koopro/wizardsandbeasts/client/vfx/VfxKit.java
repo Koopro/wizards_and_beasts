@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.client.vfx;
 
 import at.koopro.wizardsandbeasts.client.beam.WandTipTracker;
+import at.koopro.wizardsandbeasts.particle.ShapeLayout;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.spell.core.SpellFamily;
@@ -173,5 +174,169 @@ public final class VfxKit {
                     pos.z + (level.random.nextDouble() - 0.5) * spread * 2,
                     0.0, up, 0.0);
         }
+    }
+    // ── motes that move with intent (VfxMoteParticle keeps the spawner's velocity) ──────────────
+
+    private static SpellTintParticleOptions mote(int argb) {
+        return new SpellTintParticleOptions(ModParticles.VFX_MOTE.get(), argb);
+    }
+
+    /** One mote at {@code p} moving at {@code v}, if the budget allows. */
+    public static void moteAt(ClientLevel level, Vec3 p, Vec3 v, int argb) {
+        if (VfxBudget.count(1, 0, p) > 0) {
+            level.addParticle(mote(argb), p.x, p.y, p.z, v.x, v.y, v.z);
+        }
+    }
+
+    /** The cast's plain line of tinted particles from wand to target, as the server loop drew it. */
+    public static void line(Vec3 from, Vec3 to, SpellFamily family, int argb, double perBlock) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
+            return;
+        }
+        double dist = from.distanceTo(to);
+        int points = VfxBudget.count(Math.max(8, (int) (dist * perBlock)) + 1, 6, from.lerp(to, 0.5));
+        var opts = ModParticles.tinted(family, argb);
+        ShapeLayout.line(from, to, points, (x, y, z) -> level.addParticle(opts,
+                x + level.random.nextGaussian() * 0.035, y + level.random.nextGaussian() * 0.035,
+                z + level.random.nextGaussian() * 0.035, 0.0, 0.0, 0.0));
+    }
+
+    /** Motes streaming from the far end of a line back to its near end for {@code life} ticks: a summoning. */
+    public static void pull(Vec3 near, Vec3 far, int argb, int life) {
+        Vec3 back = near.subtract(far);
+        if (back.length() < 0.1) {
+            return;
+        }
+        Vec3 dir = back.normalize();
+        VfxEmitters.start((level, rnd, age) -> {
+            for (int k = 0; k < 3; k++) {
+                double t = 0.35 + rnd.nextDouble() * 0.65;
+                Vec3 p = near.add(back.scale(-t)).add(rnd.nextGaussian() * 0.12, rnd.nextGaussian() * 0.12,
+                        rnd.nextGaussian() * 0.12);
+                moteAt(level, p, dir.scale(0.32 + rnd.nextDouble() * 0.12), argb);
+            }
+        }, life, 1);
+    }
+
+    /** Motes thrown along {@code dir} from {@code origin}: a gust, a banishing, a blast's sparks. */
+    public static void gust(Vec3 origin, Vec3 dir, int argb, int count, double speed, double spread) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
+            return;
+        }
+        Vec3 d = dir.lengthSqr() < 1.0e-6 ? UP : dir.normalize();
+        int n = VfxBudget.count(count, 2, origin);
+        for (int i = 0; i < n; i++) {
+            Vec3 v = d.scale(speed * (0.7 + level.random.nextDouble() * 0.6)).add(level.random.nextGaussian() * spread,
+                    level.random.nextGaussian() * spread, level.random.nextGaussian() * spread);
+            level.addParticle(mote(argb), origin.x, origin.y, origin.z, v.x, v.y, v.z);
+        }
+    }
+
+    /** Motes drawn in from a sphere of {@code radius} to {@code centre} for {@code life} ticks: mending, gathering. */
+    public static void converge(Vec3 centre, int argb, double radius, int life, int perTick) {
+        VfxEmitters.start((level, rnd, age) -> {
+            for (int k = 0; k < perTick; k++) {
+                Vec3 off = new Vec3(rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian());
+                if (off.lengthSqr() < 1.0e-6) {
+                    continue;
+                }
+                off = off.normalize().scale(radius);
+                moteAt(level, centre.add(off), off.scale(-0.11), argb);
+            }
+        }, life, 1);
+    }
+
+    /** Motes circling {@code centre} flat, {@code n} at a time, for {@code life} ticks: a mind spun round. */
+    public static void orbit(Vec3 centre, int argb, double radius, int life, int n) {
+        VfxEmitters.start((level, rnd, age) -> {
+            for (int k = 0; k < n; k++) {
+                double a = age * 0.45 + k * Math.PI * 2 / n;
+                moteAt(level, centre.add(Math.cos(a) * radius, Math.sin(age * 0.3 + k) * 0.06, Math.sin(a) * radius),
+                        Vec3.ZERO, argb);
+            }
+        }, life, 1);
+    }
+
+    /** Motes sinking slowly round {@code centre} for {@code life} ticks: movement as if through treacle. */
+    public static void sink(Vec3 centre, int argb, double radius, int life) {
+        VfxEmitters.start((level, rnd, age) -> {
+            double a = rnd.nextDouble() * Math.PI * 2;
+            Vec3 p = centre.add(Math.cos(a) * radius, 0.4 + rnd.nextDouble() * 0.6, Math.sin(a) * radius);
+            moteAt(level, p, new Vec3(0, -0.018, 0), argb);
+        }, life, 1);
+    }
+
+    /** Motes rising round {@code centre} for {@code life} ticks. */
+    public static void rise(Vec3 centre, int argb, double radius, int life, double speed) {
+        VfxEmitters.start((level, rnd, age) -> {
+            double a = rnd.nextDouble() * Math.PI * 2;
+            double r = radius * Math.sqrt(rnd.nextDouble());
+            moteAt(level, centre.add(Math.cos(a) * r, 0.05, Math.sin(a) * r), new Vec3(0, speed, 0), argb);
+        }, life, 1);
+    }
+
+    /** {@code count} puffs of tinted smoke round {@code pos}. */
+    public static void mist(Vec3 pos, int argb, int count, double spread, double rise) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
+            return;
+        }
+        int n = VfxBudget.count(count, 1, pos);
+        for (int i = 0; i < n; i++) {
+            level.addParticle(new SpellTintParticleOptions(ModParticles.SMOKE_PUFF.get(), argb),
+                    pos.x + level.random.nextGaussian() * spread, pos.y + level.random.nextGaussian() * spread * 0.5,
+                    pos.z + level.random.nextGaussian() * spread, 0.0, rise, 0.0);
+        }
+    }
+
+    /** Thin rings going out from {@code centre} one after another. */
+    public static void pulses(Vec3 centre, Vec3 normal, int argb, float from, float to, int life, int times,
+                              int gap) {
+        for (int i = 0; i < times; i++) {
+            thinRing(centre, normal, argb, from, to, life, i * gap);
+        }
+    }
+
+    /** Rings closing in on {@code centre}: a binding, a shrinking, a seal. */
+    public static void closing(Vec3 centre, Vec3 normal, int argb, float from, float to, int life, int times,
+                               int gap) {
+        for (int i = 0; i < times; i++) {
+            VfxQuads.spawn(VfxQuads.RING_THIN, VfxQuads.Look.GLOW, centre, normal, from, to, argb, life, 0,
+                    Math.max(1, life / 3), 0f, VfxQuads.Growth.LINEAR, i * gap);
+        }
+    }
+
+    /** A slow ring that takes its time to spread: slowing, holding. */
+    public static void slowRing(Vec3 centre, Vec3 normal, int argb, float from, float to, int life, int delay) {
+        VfxQuads.spawn(VfxQuads.RING_THIN, VfxQuads.Look.GLOW, centre, normal, from, to, argb, life, 3,
+                Math.max(1, life / 2), 0f, VfxQuads.Growth.LINEAR, delay);
+    }
+
+    /** A light held at a caster's wand tip for {@code life} ticks (Lumos). */
+    public static void tipGlow(int casterId, int argb, int life) {
+        VfxEmitters.start((level, rnd, age) -> {
+            if (!(level.getEntity(casterId) instanceof LivingEntity caster)) {
+                return;
+            }
+            Vec3 tip = WandTipTracker.resolve(caster, 1.0f);
+            for (int k = 0; k < 3; k++) {
+                moteAt(level, tip.add(rnd.nextGaussian() * 0.04, rnd.nextGaussian() * 0.04, rnd.nextGaussian() * 0.04),
+                        Vec3.ZERO, argb);
+            }
+            if (VfxBudget.count(1, 0, tip) > 0) {
+                level.addParticle(ModParticles.tinted(SpellFamily.LIGHT, argb), tip.x, tip.y, tip.z, 0, 0, 0);
+            }
+        }, life, 1);
+    }
+
+    /** Runs {@code then} with the caster and its wand tip {@code delay} ticks from now, when the arm has come round. */
+    public static void atTip(int casterId, int delay, java.util.function.BiConsumer<LivingEntity, Vec3> then) {
+        VfxEmitters.start((level, rnd, age) -> {
+            if (level.getEntity(casterId) instanceof LivingEntity caster) {
+                then.accept(caster, WandTipTracker.resolve(caster, 1.0f));
+            }
+        }, 1, 1, delay);
     }
 }

@@ -41,10 +41,16 @@ final class SpellParticles {
                 pos.x, pos.y, pos.z, count, spread, spread, spread, 0.05);
     }
 
+    /**
+     * A cone or targeted cast's line from the wand: one cue, and each client draws the spell's own line and what
+     * happens where it ends (a pull for Accio, frost for Glacius, a glint on a lock for Alohomora). Unknown spells
+     * get the plain tinted line they always had.
+     */
     static void spawnBeam(ServerLevel level, Spell spell, Vec3 from, Vec3 to) {
-        SpellTintParticleOptions opts =
-                ModParticles.tinted(spell.vfx().trail().particleFamily(), spell.getColor());
-        beamTinted(level, from, to, opts);
+        if (from.distanceToSqr(to) <= 0.0025) return;
+        at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(level, spell.getId(),
+                at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.LINE, from, to.subtract(from),
+                1f, spell.getColor(), -1);
     }
 
     static void spawnBeam(ServerLevel level, Vec3 from, Vec3 to, int argbColor) {
@@ -62,10 +68,6 @@ final class SpellParticles {
         if (distance <= 0.05) return;
         int points = Math.max(8, (int) (distance * 10)) + 1;
         SpellVfxShapeS2CPayload.line(level, opts, from, to, points, 0.035f);
-    }
-
-    private static void beamTinted(ServerLevel level, Vec3 from, Vec3 to, SpellTintParticleOptions opts) {
-        line(level, from, to, opts);
     }
 
     private static void beamDust(ServerLevel level, Vec3 from, Vec3 to, int rgb) {

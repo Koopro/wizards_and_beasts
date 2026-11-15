@@ -60,6 +60,9 @@ public final class SpellClientPayloadHandlers {
             Vec3 to = new Vec3(pkt.endX(), pkt.endY(), pkt.endZ());
             SpellVfxClient.spawnTintBeam(from, to, SpellFamily.DARK, AVADA_ARGB);
             SpellVfxClient.spawnTintBurst(to, SpellFamily.DARK, AVADA_ARGB, 20, 0.4f);
+            at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector.cue("avada_kedavra",
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.HIT_ENTITY, to,
+                    from.subtract(to), 1f, AVADA_ARGB, -1);
         });
     }
 

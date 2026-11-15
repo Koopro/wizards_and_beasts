@@ -102,6 +102,11 @@ public final class VfxEmitters {
         LIVE.clear();
     }
 
+    /** Stops every emitter (the spell showcase between spells). */
+    public static void clear() {
+        LIVE.clear();
+    }
+
     public static int live() {
         return LIVE.size();
     }

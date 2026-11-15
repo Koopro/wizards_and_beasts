@@ -106,7 +106,7 @@ public final class SpellShowcaseCapture {
     private SpellShowcaseCapture() {}
 
     /** The particle scenes a lone caster cannot cause by casting at a dummy (WB_SPELL_SHOWCASE=fx). */
-    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel", "fx:surfaces");
+    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel", "fx:surfaces", "fx:obscurus");
 
     private static List<String> chooseSpells() {
         if ("fx".equalsIgnoreCase(MODE)) {
@@ -154,8 +154,10 @@ public final class SpellShowcaseCapture {
         boolean beam = spell != null && spell.getProperties().getCastType().name().startsWith("BEAM");
         SCRIPT.add(new Step("", 24, Cam.WIDE, p -> {
             setUse(false);
-            // Embers and smoke of the spell before must not stand in this one's shots.
+            // Embers and smoke of the spell before must not stand in this one's shots; nor its scorch or frost.
             Minecraft.getInstance().particleEngine.clearParticles();
+            at.koopro.wizardsandbeasts.client.vfx.VfxQuads.clear();
+            at.koopro.wizardsandbeasts.client.vfx.VfxEmitters.clear();
         }, p -> prepare(p, spellId)));
         SCRIPT.add(new Step("", 6, Cam.WIDE, p -> setUse(true), NOTHING));
         if (beam) {
@@ -271,6 +273,27 @@ public final class SpellShowcaseCapture {
                     SCRIPT.add(new Step("surface_" + names[i], 9, Cam.WALL, NONE, NOTHING));
                     SCRIPT.add(new Step("surface_" + names[i] + "_late", 6, Cam.WALL, NONE, NOTHING));
                 }
+            }
+            case "fx:obscurus" -> {
+                // The Obscurus spells need the Obscurial condition to cast; their look is the client's alone, so it
+                // is played straight through the director (spell VFX renaissance, 2026-11-15).
+                SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(),
+                        NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.CASTER, p -> at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector
+                        .release("obscurus_surge", p), NOTHING));
+                SCRIPT.add(new Step("surge_1", 4, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("surge_2", 14, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("", 30, Cam.WIDE, p -> Minecraft.getInstance().particleEngine.clearParticles(),
+                        NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.WIDE, p -> {
+                    var eye = p.getEyePosition();
+                    var far = new net.minecraft.world.phys.Vec3(DUMMY_X, STAGE_Y + 1.0, 0.5);
+                    at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector.cue("obscurus_grasp",
+                            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.LINE, eye,
+                            far.subtract(eye), 1f, 0, -1);
+                }, NOTHING));
+                SCRIPT.add(new Step("grasp_1", 4, Cam.WIDE, NONE, NOTHING));
+                SCRIPT.add(new Step("grasp_2", 8, Cam.TARGET, NONE, NOTHING));
             }
             case "fx:flash" -> {
                 SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));

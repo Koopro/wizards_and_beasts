@@ -37,6 +37,12 @@ public class WizardsAndBeastsCommands {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.hasEffect(ModEffects.LUMOS_FIELD)) {
             LumosFieldEffect.placeOrUpdateLight(player);
+            // Once a second, everyone near is told the wand is lit; the client keeps a light at its tip.
+            if (player.tickCount % 20 == 0) {
+                at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(player.level(), "lumos",
+                        at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.CHANNEL,
+                        player.getEyePosition(), net.minecraft.world.phys.Vec3.ZERO, player.getId());
+            }
         } else {
             LumosFieldEffect.removeLight(player);
         }
