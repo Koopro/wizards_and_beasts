@@ -90,9 +90,23 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
         renderState.addGeckolibData(RANK, outfit.rank());
         Identifier sheet = null;
         if (assetName != null && animatable instanceof WizardArmorItem item) {
-            sheet = Wardrobe.liveryTexture(assetName, item.defaultLivery(), outfit.livery());
+            // The livery in effect: the stamped one, else the item's own default. That default is usually the cut's
+            // base sheet, but not always: the Shield Gloves are the gloves cut in shield blue (2026-11-15), so a
+            // livery sheet is used whenever one exists and the base sheet only when it does not.
+            java.util.Optional<net.minecraft.resources.Identifier> effective = outfit.livery().isPresent()
+                    ? outfit.livery() : java.util.Optional.ofNullable(item.defaultLivery());
+            Identifier candidate = Wardrobe.liveryTexture(assetName, null, effective);
+            sheet = candidate != null && sheetExists(candidate) ? candidate : null;
         }
         renderState.addGeckolibData(LIVERY_TEXTURE, sheet == null ? BASE_SHEET : sheet);
+    }
+
+    private static final java.util.Map<Identifier, Boolean> SHEETS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Whether a livery sheet ships; looked up once per sheet. */
+    private static boolean sheetExists(Identifier sheet) {
+        return SHEETS.computeIfAbsent(sheet, id -> net.minecraft.client.Minecraft.getInstance().getResourceManager()
+                .getResource(id).isPresent());
     }
 
     /**
