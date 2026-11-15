@@ -275,10 +275,11 @@ class WandLookAssetTest {
 
     private static String line(String label, WandLook look) {
         return String.format(Locale.ROOT,
-                "%s grain=%s tint=%08X cfg=%s rare=%d len=%.3f girth=%.2f bow=%+.3f twist=%+.3f glint=%06X %s %.2f phase=%.4f elder=%s",
+                "%s grain=%s tint=%08X cfg=%s rare=%d len=%.3f girth=%.2f bow=%+.3f twist=%+.3f glint=%06X %s %.2f phase=%.4f elder=%s metal=%s",
                 label, look.grain() == null ? "-" : look.grain().getPath(), look.tint(), modules(look), look.rareIndex(),
                 look.lengthScale(), look.girth(), look.bowDegrees(), look.twistDegrees(), look.glint(),
-                look.pattern().getSerializedName(), look.glintStrength(), look.phase(), look.elder());
+                look.pattern().getSerializedName(), look.glintStrength(), look.phase(), look.elder(),
+                look.metal().name().toLowerCase(Locale.ROOT));
     }
 
     private static String modules(WandLook look) {

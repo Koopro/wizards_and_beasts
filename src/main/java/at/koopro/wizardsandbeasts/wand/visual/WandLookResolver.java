@@ -82,7 +82,7 @@ public final class WandLookResolver {
             // One specific wand, not a sample of a make: its own model and art, and no length, bend or
             // grain borrowed from the system every other wand goes through.
             return new WandLook(null, WandAppearance.UNTINTED, WandConfiguration.DEFAULT, -1,
-                    1.0f, 1.0f, 0.0f, 0.0f, ELDER_GLINT, WandGlintPattern.SMOKE, ELDER_GLINT_STRENGTH, phase, true);
+                    1.0f, 1.0f, 0.0f, 0.0f, ELDER_GLINT, WandGlintPattern.SMOKE, ELDER_GLINT_STRENGTH, phase, true, WandMetal.PEWTER);
         }
 
         int rare = explicit != null ? -1 : WandAppearance.rareIndex(woodDef, seed);
@@ -108,7 +108,8 @@ public final class WandLookResolver {
         return new WandLook(grain, tint, configuration, rare,
                 lengthScale(lengthInches), girth(flexibility), bow,
                 (unit(seed, SALT_TWIST) * 2.0f - 1.0f) * MAX_TWIST_DEGREES,
-                glint, pattern, glintStrength, phase, false);
+                glint, pattern, glintStrength, phase, false,
+                WandMetal.of(woodDef == null ? null : woodDef.rarity(), rare));
     }
 
     // ── the channels, each a pure function so tests can pin its shape ────────

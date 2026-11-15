@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
  * @param glintStrength how bright the core shows at its best, {@code [0, 1]}
  * @param phase         this wand's offset into its rhythm, {@code [0, 1)}
  * @param elder         the Elder Wand: its own model, never tinted, bent or resized
+ * @param metal         what the fittings are made of, from the wood's rarity ({@link WandMetal})
  */
 @NullMarked
 public record WandLook(@Nullable Identifier grain,
@@ -39,7 +40,8 @@ public record WandLook(@Nullable Identifier grain,
                        WandGlintPattern pattern,
                        float glintStrength,
                        float phase,
-                       boolean elder) {
+                       boolean elder,
+                       WandMetal metal) {
 
     /** The modular wand's planes ({@code tools/wand_model.py}): grip 0-11, shaft 11-23, tip 23-27.5. */
     public static final float MODEL_HANDLE = 11.0f;

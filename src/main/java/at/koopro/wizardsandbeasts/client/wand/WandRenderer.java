@@ -85,6 +85,8 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
     private static final Identifier WAND_TEXTURE = texture("wand");
     private static final Identifier ELDER_TEXTURE = texture("elder_wand");
     private static final Identifier TRIM_TEXTURE = texture("wand_trim");
+    private static final Identifier TRIM_SILVER_TEXTURE = texture("wand_trim_silver");
+    private static final Identifier TRIM_GOLD_TEXTURE = texture("wand_trim_gold");
     private static final Identifier GLINT_TEXTURE = texture("wand_glint");
     private static final Identifier GLINT_BONDED_TEXTURE = texture("wand_glint_bonded");
     private static final Identifier ELDER_GLINT_TEXTURE = texture("elder_wand_glint");
@@ -146,7 +148,8 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
     }
 
     /**
-     * The trim and the core's light, as sheets and colours for the two overlay layers.
+     * The trim and the core's light, as sheets and colours for the two overlay layers. The trim's sheet
+     * is the wand's metal ({@link at.koopro.wizardsandbeasts.wand.visual.WandMetal}).
      *
      * <p>The light's brightness is the wand's bond with whoever holds it -- in an inventory, the player
      * the game draws it for, so a won or stolen wand looks sullen in a bag it does not answer to
@@ -156,7 +159,11 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                                         @org.jspecify.annotations.Nullable LivingEntity holder,
                                         ItemDisplayContext perspective) {
         if (!look.elder()) {
-            renderState.addGeckolibData(TRIM_SHEET, TRIM_TEXTURE);
+            renderState.addGeckolibData(TRIM_SHEET, switch (look.metal()) {
+                case PEWTER -> TRIM_TEXTURE;
+                case SILVER -> TRIM_SILVER_TEXTURE;
+                case GOLD -> TRIM_GOLD_TEXTURE;
+            });
             renderState.addGeckolibData(TRIM_COLOUR, 0xFFFFFFFF);
         }
         UUID holderId = holder == null ? null : holder.getUUID();
