@@ -118,6 +118,13 @@ public final class SpellVfxClient {
         // Two ticks on: the strike payload arrives while the arm is still in the wind-up, so a flash now would sit
         // where the wand was gathered (above the shoulder), not where it points (seen 2026-11-13).
         CastChargeMotes.flashLater(caster.getId(), spell.getColor(), 2);
+        at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector.release(spell.getId(), caster);
+    }
+
+    /** A stage of a spell's sequence, told by the server; the director gives it the spell's look. */
+    public static void cue(at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload p) {
+        at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector.cue(p.spellId(), p.stage(), p.pos(), p.normal(),
+                p.scale(), p.argb(), p.entity());
     }
 
     /** The small release flash at a caster's current wand tip, now. */

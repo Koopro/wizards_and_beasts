@@ -115,6 +115,10 @@ public final class SpellShowcaseCapture {
         if (!"1".equals(MODE) && !"all".equalsIgnoreCase(MODE)) {
             List<String> ids = new ArrayList<>();
             for (String raw : MODE.split(",")) {
+                if (FX_SCENES.contains(raw.trim())) {
+                    ids.add(raw.trim());
+                    continue;
+                }
                 Spell spell = Spells.byId(raw.trim());
                 if (spell == null) {
                     LOGGER.warn("Spell showcase: no spell '{}'", raw.trim());
@@ -158,6 +162,7 @@ public final class SpellShowcaseCapture {
             SCRIPT.add(new Step("hold_wide", 6, Cam.WIDE, NONE, NOTHING));
             SCRIPT.add(new Step("hold_shoulder", 4, Cam.SHOULDER, NONE, NOTHING));
             SCRIPT.add(new Step("hold_target", 4, Cam.TARGET, NONE, NOTHING));
+            SCRIPT.add(new Step("hold_target_late", 24, Cam.TARGET, NONE, NOTHING));
             SCRIPT.add(new Step("", 1, Cam.WIDE, p -> setUse(false), NOTHING));
             SCRIPT.add(new Step("after_wide", 10, Cam.WIDE, NONE, p -> report(p, spellId)));
             return;
@@ -165,6 +170,15 @@ public final class SpellShowcaseCapture {
         SCRIPT.add(new Step("hold_wide", 1, Cam.WIDE, NONE, NOTHING));
         SCRIPT.add(new Step("hold_caster", 4, Cam.CASTER, NONE, NOTHING));
         SCRIPT.add(new Step("", 1, Cam.CASTER, p -> setUse(false), NOTHING));
+        if (spell != null && spell.getProperties().getCastType() == at.koopro.wizardsandbeasts.spell.core.CastType.SELF) {
+            // A self charm happens on the caster: watch the caster through it (spell VFX renaissance, 2026-11-15).
+            SCRIPT.add(new Step("release_caster", 1, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("self_early", 6, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("self_mid", 8, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("self_late", 10, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("after_wide", 10, Cam.WIDE, NONE, p -> report(p, spellId)));
+            return;
+        }
         SCRIPT.add(new Step("release_caster", 1, Cam.CASTER, NONE, NOTHING));
         SCRIPT.add(new Step("release_shoulder", 2, Cam.SHOULDER, NONE, NOTHING));
         SCRIPT.add(new Step("flight_wide", 1, Cam.WIDE, NONE, NOTHING));
@@ -172,6 +186,8 @@ public final class SpellShowcaseCapture {
         SCRIPT.add(new Step("arrive_wide", 3, Cam.WIDE, NONE, NOTHING));
         SCRIPT.add(new Step("hit_target", 3, Cam.TARGET, NONE, NOTHING));
         SCRIPT.add(new Step("after_wide", 20, Cam.WIDE, NONE, p -> report(p, spellId)));
+        // What a hit leaves behind (a scorch, residue), two seconds on.
+        SCRIPT.add(new Step("linger_target", 40, Cam.TARGET, NONE, NOTHING));
     }
 
     /**
@@ -333,6 +349,9 @@ public final class SpellShowcaseCapture {
     /** Rebuilds the lane, clears it of everything but the caster, stands a fresh dummy and readies the spell. */
     private static void prepare(ServerPlayer p, String spellId) {
         ServerLevel level = p.level();
+        // The Unforgivables draw their beam with the module off but do nothing; the capture needs them to act.
+        at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(
+                at.koopro.wizardsandbeasts.module.Module.DARK_ARTS, at.koopro.wizardsandbeasts.module.ModuleState.ENABLED);
         buildLane(level);
         AABB lane = new AABB(-8, STAGE_Y - 4, -12, WALL_X + 8, STAGE_Y + 16, 12);
         for (Entity e : level.getEntities((Entity) null, lane, e -> !(e instanceof Player))) {

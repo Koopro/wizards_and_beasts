@@ -298,6 +298,11 @@ final class WandBeamSpellHandlers {
             at.koopro.wizardsandbeasts.ministry.trace.MinistryTrace.onUnforgivableUse(
                     caster, spell.getId(), spell.getCategory(), target);
         }
+        // The curse's look on its victim (creep, smoke, wand smoke) is the client's; it is told twice a second.
+        if (s.crucioHoldTicks % 10 == 1 && caster.level() instanceof ServerLevel cueLevel) {
+            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(cueLevel, spell.getId(),
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.CHANNEL, target.position(), Vec3.ZERO, caster.getId());
+        }
         int effectInterval = Math.max(1, (int) (channelEffectInterval / Math.max(0.5f, crucioIntentMultiplier(caster, spell))));
         if (s.beamTicks % effectInterval == 0) {
             float intent = crucioIntentMultiplier(caster, spell);

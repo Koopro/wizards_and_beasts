@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.spell.protego;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload;
 import at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
@@ -129,6 +130,10 @@ public final class ProtegoFeedback {
             ring(level, tint(tier), shield.position().add(0.0, 0.1, 0.0), tier.radius(), 24);
         }
         shell(level, shield, 1.0f);
+        SpellCueS2CPayload.send(level, "protego",
+                SpellCueS2CPayload.Stage.RAISE,
+                shield.isPlanted() ? shield.position() : caster.position(), new Vec3(0, 1, 0),
+                (float) tier.radius(), tier.colour(), caster.getId());
         raisePulse(level, caster, shield);
         announce(caster, Component.translatable(
                 shield.isPlanted() ? "spell.wizards_and_beasts.protego.planted"
@@ -260,6 +265,9 @@ public final class ProtegoFeedback {
         level.sendParticles(ModParticles.PROTEGO_SHATTER.get(), centre.x, centre.y, centre.z,
                 scaled(30 + tier.index() * 12), spread, spread * 0.6, spread, 0.05);
         shell(level, shield, 1.0f);
+        SpellCueS2CPayload.send(level, "protego",
+                SpellCueS2CPayload.Stage.BREAK, centre, new Vec3(0, 1, 0),
+                (float) tier.radius(), tier.colour(), -1);
         level.playSound(null, BlockPos.containing(centre), ModSounds.PROTEGO_SHATTER.get(), SoundSource.PLAYERS,
                 1.2f, 0.9f - tier.index() * 0.07f);
     }

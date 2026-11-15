@@ -159,6 +159,11 @@ public final class SpellClientPayloadHandlers {
         });
     }
 
+    public static void handleSpellCue(
+            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> SpellVfxClient.cue(pkt));
+    }
+
     public static void handleSpellVfxShape(
             at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> SpellVfxClient.spawnShape(pkt));

@@ -80,6 +80,10 @@ public final class ModNetworkSpells {
                 SpellVfxShapeS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleSpellVfxShape);
         registrar.playToClient(
+                SpellCueS2CPayload.TYPE,
+                SpellCueS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleSpellCue);
+        registrar.playToClient(
                 SpellCastAnimationS2CPayload.TYPE,
                 SpellCastAnimationS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleSpellCastAnimation);

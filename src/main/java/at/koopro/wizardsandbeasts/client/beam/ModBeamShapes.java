@@ -52,5 +52,6 @@ public final class ModBeamShapes {
         // Piggy-backs on the one hook the beam package already owns, so wiring up the derived
         // beam pipeline does not need a second call site in the client mod constructor.
         modEventBus.addListener(BeamRenderTypes::registerPipelines);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.vfx.VfxRenderTypes::registerPipelines);
     }
 }
