@@ -86,6 +86,13 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
                 .skin(SKIN);
         actionCycler.setBounds(leftPos + SIDE, topPos + ACTION_ROW_Y, imageWidth - 2 * SIDE, ACTION_ROW_H);
         actionCycler.buttons().forEach(this::addRenderableWidget);
+        // The bench's third role. The wand in the slot comes back to the inventory as the screen changes.
+        addRenderableWidget(at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton.skinned(
+                leftPos + imageWidth - SIDE - 56, topPos + 5, 56, 12,
+                Component.translatable("gui.wizards_and_beasts.wand_restyle.to_restyle"),
+                () -> ClientPacketDistributor.sendToServer(
+                        new at.koopro.wizardsandbeasts.wand.style.SwitchBenchRolePayload(menu.containerId, true)),
+                SKIN));
     }
 
     @Override

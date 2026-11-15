@@ -114,6 +114,11 @@ public class WandRefineMenu extends AbstractContainerMenu {
         refresh();
     }
 
+    /** The bench this menu works at; the restyle role opens on the same one. */
+    public WandmakersBenchBlockEntity bench() {
+        return bench;
+    }
+
     public static WandRefineMenu fromNetwork(int containerId, Inventory inv, RegistryFriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         if (!(inv.player.level().getBlockEntity(pos) instanceof WandmakersBenchBlockEntity be)) {

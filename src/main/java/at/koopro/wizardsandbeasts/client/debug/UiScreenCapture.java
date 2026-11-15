@@ -193,6 +193,10 @@ public final class UiScreenCapture {
                 Step.server("wandmakers_bench", UiScreenCapture::openBench),
                 Step.server("wandmakers_bench_loaded", UiScreenCapture::openBenchLoaded),
                 Step.server("wand_refine", UiScreenCapture::openRefine),
+                Step.server("wand_restyle", p -> openRestyle(p, false, false)),
+                Step.server("wand_restyle_holly", p -> openRestyle(p, true, false)),
+                Step.server("wand_restyle_styled", p -> openRestyle(p, true, true)),
+                Step.server("wand_restyle_pale", UiScreenCapture::openRestylePale),
                 Step.server("hermiones_bag", UiScreenCapture::openHermionesBag),
                 Step.server("niffler_pouch", UiScreenCapture::openNifflerPouch),
                 Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),
@@ -499,6 +503,53 @@ public final class UiScreenCapture {
                     net.minecraft.network.chat.Component.translatable("gui.wizards_and_beasts.wand_refine")),
                     buf -> buf.writeBlockPos(benchPos));
         }
+    }
+
+    /**
+     * The bench's restyling role: empty, with a holly wand in it, or with a new look chosen (the Talon handle,
+     * ebony stain, gold fittings, a storm-blue light) so the preview shows the restyled wand beside the old one.
+     */
+    private static void openRestyle(ServerPlayer player, boolean withWand, boolean styled) {
+        if (benchPos == null || !(player.level().getBlockEntity(benchPos)
+                instanceof at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity bench)) {
+            return;
+        }
+        at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu.open(player, bench);
+        if (!withWand || !(player.containerMenu instanceof at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu menu)) {
+            return;
+        }
+        menu.slots.get(0).set(at.koopro.wizardsandbeasts.item.wand.WandItem.createWand(
+                at.koopro.wizardsandbeasts.wand.stat.WandWood.HOLLY,
+                at.koopro.wizardsandbeasts.wand.stat.WandCore.PHOENIX_FEATHER,
+                at.koopro.wizardsandbeasts.wand.stat.WandLength.values()[2],
+                at.koopro.wizardsandbeasts.wand.stat.WandFlexibility.SUPPLE));
+        if (styled) {
+            int stride = at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu.STRIDE;
+            int talon = 2 + at.koopro.wizardsandbeasts.wand.style.WandRestyle.modules(
+                    at.koopro.wizardsandbeasts.wand.customization.WandSlot.HANDLE).indexOf(
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "talon"));
+            menu.clickMenuButton(player, 0 * stride + talon);
+            menu.clickMenuButton(player, 3 * stride + 2 + 8);
+            menu.clickMenuButton(player, 5 * stride + 2 + 2);
+            menu.clickMenuButton(player, 6 * stride + 2 + 4);
+        }
+    }
+
+    /** A second look: ivory lacquer, a spiral shaft with runes, silver fittings, a rose light. */
+    private static void openRestylePale(ServerPlayer player) {
+        openRestyle(player, true, false);
+        if (!(player.containerMenu instanceof at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu menu)) {
+            return;
+        }
+        int stride = at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu.STRIDE;
+        java.util.function.BiFunction<at.koopro.wizardsandbeasts.wand.customization.WandSlot, String, Integer> idx =
+                (slot, path) -> 2 + at.koopro.wizardsandbeasts.wand.style.WandRestyle.modules(slot).indexOf(
+                        net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", path));
+        menu.clickMenuButton(player, stride + idx.apply(at.koopro.wizardsandbeasts.wand.customization.WandSlot.SHAFT, "spiral"));
+        menu.clickMenuButton(player, 2 * stride + idx.apply(at.koopro.wizardsandbeasts.wand.customization.WandSlot.ORNAMENT, "runes"));
+        menu.clickMenuButton(player, 3 * stride + 2 + 12);
+        menu.clickMenuButton(player, 5 * stride + 2 + 1);
+        menu.clickMenuButton(player, 6 * stride + 2 + 7);
     }
 
     private static void openBench(ServerPlayer player) {

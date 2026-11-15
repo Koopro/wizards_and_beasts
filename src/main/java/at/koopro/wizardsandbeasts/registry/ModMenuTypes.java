@@ -24,6 +24,11 @@ public final class ModMenuTypes {
             MENUS.register("wand_refine", () -> IMenuTypeExtension.create(
                     at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu::fromNetwork));
 
+    /** The bench's third role: restyling a finished wand's looks (WandRestyle). */
+    public static final DeferredHolder<MenuType<?>, MenuType<at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu>> WAND_RESTYLE =
+            MENUS.register("wand_restyle", () -> IMenuTypeExtension.create(
+                    at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu::fromNetwork));
+
     public static final DeferredHolder<MenuType<?>, MenuType<OllivanderTrialMenu>> OLLIVANDER_TRIAL =
             MENUS.register("ollivander_trial", () -> IMenuTypeExtension.create(OllivanderTrialMenu::fromNetwork));
 

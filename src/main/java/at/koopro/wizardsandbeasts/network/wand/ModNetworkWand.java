@@ -18,6 +18,10 @@ public final class ModNetworkWand {
                 at.koopro.wizardsandbeasts.wand.refine.SetRefineActionPayload.STREAM_CODEC,
                 at.koopro.wizardsandbeasts.wand.refine.SetRefineActionPayload::handle);
         registrar.playToServer(
+                at.koopro.wizardsandbeasts.wand.style.SwitchBenchRolePayload.TYPE,
+                at.koopro.wizardsandbeasts.wand.style.SwitchBenchRolePayload.STREAM_CODEC,
+                at.koopro.wizardsandbeasts.wand.style.SwitchBenchRolePayload::handle);
+        registrar.playToServer(
                 SelectTrialWandPayload.TYPE,
                 SelectTrialWandPayload.STREAM_CODEC,
                 SelectTrialWandPayload::handle);
