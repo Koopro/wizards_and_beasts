@@ -47,6 +47,16 @@ class ClothMotionTest {
     }
 
     @Test
+    void aCrouchLeavesTheHipSkirtHangingPlumb() {
+        // Vanilla leans the body 0.5 rad in a crouch; the hip skirt, a child of the body, takes it back in full,
+        // as a lower half over an upright leg does, so neither swings out behind the wearer.
+        float crouch = 0.5f;
+        assertEquals(crouch, ClothMotion.hipSkirt(crouch), EPS);
+        assertEquals(ClothMotion.lowerHalf(0f, crouch), ClothMotion.hipSkirt(crouch), EPS);
+        assertEquals(0f, ClothMotion.hipSkirt(0f), EPS);
+    }
+
+    @Test
     void walkingLeavesTheHipFrontHanging() {
         assertEquals(0f, ClothMotion.hipFront(-SWING, SWING), EPS);
         assertEquals(0f, ClothMotion.hipFront(SWING, -SWING), EPS);

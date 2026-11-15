@@ -40,6 +40,8 @@ public final class ClothMotion {
     public static final String LEG_R = "clothLegR";
     public static final String LEG_L = "clothLegL";
     public static final String HIP_FRONT = "clothHipFront";
+    /** The hip skirt's back and flanks. */
+    public static final String HIP = "clothHip";
 
     public static final String CAPE_ROOT = "capeRoot";
     public static final String CAPE_HEM = "capeHem";
@@ -115,6 +117,15 @@ public final class ClothMotion {
     /** Bone x-rotation of a lower half, from its leg's and the body's {@code ModelPart} x-rotations. */
     public static float lowerHalf(float legXRot, float bodyXRot) {
         return -(legXRot - bodyXRot) * LEG_FOLLOW;
+    }
+
+    /**
+     * Bone x-rotation that lets the hip skirt hang plumb under a leaning body: the body's own pitch, taken back.
+     * Without it a crouch tipped the skirt's back out behind the wearer like a bustle (owner, 2026-11-15: "stands
+     * out on sneaking"). The lower halves already do the same through {@link #lowerHalf}.
+     */
+    public static float hipSkirt(float bodyXRot) {
+        return bodyXRot;
     }
 
     /**

@@ -163,7 +163,9 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
         float left = pose.xRot(ArmorSegment.LEFT_LEG);
         snapshots.ifPresent(ClothMotion.LEG_R, s -> poseHalf(s, pose, ArmorSegment.RIGHT_LEG, -1));
         snapshots.ifPresent(ClothMotion.LEG_L, s -> poseHalf(s, pose, ArmorSegment.LEFT_LEG, 1));
-        snapshots.ifPresent(ClothMotion.HIP_FRONT, s -> s.setRotX(ClothMotion.hipFront(right, left)));
+        snapshots.ifPresent(ClothMotion.HIP, s -> s.setRotX(ClothMotion.hipSkirt(body)));
+        snapshots.ifPresent(ClothMotion.HIP_FRONT, s -> s.setRotX(ClothMotion.hipFront(right, left)
+                + ClothMotion.hipSkirt(body)));
     }
 
     private static void poseHalf(BoneSnapshot s, CapturedBodyPose pose,
