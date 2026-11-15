@@ -65,7 +65,8 @@ public final class WandLookResolver {
         return resolve(WandAppearance.definition(registries, wood), wood,
                 WandAppearance.coreDefinition(registries, core), core,
                 WandComponents.getLength(stack), WandComponents.getFlexibility(stack),
-                stack.get(WandComponents.WAND_CONFIGURATION.get()), ModDataComponents.isElderWand(stack));
+                stack.get(WandComponents.WAND_CONFIGURATION.get()), ModDataComponents.isElderWand(stack))
+                .styled(stack.getOrDefault(WandComponents.WAND_STYLE.get(), WandStyle.NONE));
     }
 
     /**

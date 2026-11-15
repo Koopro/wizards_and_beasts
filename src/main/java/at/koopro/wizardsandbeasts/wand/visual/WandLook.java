@@ -49,6 +49,24 @@ public record WandLook(@Nullable Identifier grain,
     public static final float MODEL_TIP = 4.5f;
     public static final float MODEL_LENGTH = MODEL_HANDLE + MODEL_SHAFT + MODEL_TIP;
 
+    /**
+     * This look with its owner's restyling laid over it ({@link WandStyle}): the chosen colour, grain, metal and core
+     * light. The Elder Wand is one specific wand with its own art and is never restyled.
+     */
+    public WandLook styled(WandStyle style) {
+        if (elder || style.isEmpty()) {
+            return this;
+        }
+        int newTint = style.tint().map(rgb -> 0xFF000000 | rgb).orElse(tint);
+        return new WandLook(style.grain().orElse(grain), newTint, configuration, rareIndex, lengthScale, girth,
+                bowDegrees, twistDegrees, style.glint().orElse(glint), pattern,
+                style.glint().isPresent() ? Math.max(glintStrength, MIN_STYLED_GLINT) : glintStrength,
+                phase, false, style.metal().orElse(metal));
+    }
+
+    /** A chosen core light should show even on a dim core (a troll whisker shines at 0.25). */
+    public static final float MIN_STYLED_GLINT = 0.5f;
+
     /** Model units from butt to point as drawn, before any display scaling. */
     public float drawnLength() {
         return elder ? MODEL_LENGTH : MODEL_HANDLE + MODEL_SHAFT * lengthScale + MODEL_TIP;

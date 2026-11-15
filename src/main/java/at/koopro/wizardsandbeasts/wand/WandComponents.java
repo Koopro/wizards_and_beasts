@@ -85,6 +85,13 @@ public final class WandComponents {
                     .networkSynchronized(ByteBufCodecs.FLOAT)
                     .build());
 
+    /** The looks its owner chose over the wood's and core's ({@code WandStyle}); stats never read it. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<at.koopro.wizardsandbeasts.wand.visual.WandStyle>> WAND_STYLE =
+            DATA_COMPONENTS.register("wand_style", () -> DataComponentType.<at.koopro.wizardsandbeasts.wand.visual.WandStyle>builder()
+                    .persistent(at.koopro.wizardsandbeasts.wand.visual.WandStyle.CODEC)
+                    .networkSynchronized(at.koopro.wizardsandbeasts.wand.visual.WandStyle.STREAM_CODEC)
+                    .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<WandConfiguration>> WAND_CONFIGURATION =
             DATA_COMPONENTS.register("wand_configuration", () -> DataComponentType.<WandConfiguration>builder()
                     .persistent(WandConfiguration.CODEC)

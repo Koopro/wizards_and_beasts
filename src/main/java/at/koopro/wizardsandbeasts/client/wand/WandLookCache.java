@@ -36,7 +36,8 @@ public final class WandLookCache {
     private static final int CAPACITY = 256;
 
     private record Key(@Nullable Identifier wood, @Nullable Identifier core, @Nullable Float length,
-                       @Nullable WandFlexibility flexibility, @Nullable WandConfiguration explicit, boolean elder) {}
+                       @Nullable WandFlexibility flexibility, @Nullable WandConfiguration explicit, boolean elder,
+                       at.koopro.wizardsandbeasts.wand.visual.@Nullable WandStyle style) {}
 
     private static final Map<Key, WandLook> LOOKS = new LinkedHashMap<>(64, 0.75f, true) {
         @Override
@@ -56,7 +57,8 @@ public final class WandLookCache {
         }
         Key key = new Key(WandComponents.getWood(stack), WandComponents.getCore(stack),
                 WandComponents.getLength(stack), WandComponents.getFlexibility(stack),
-                stack.get(WandComponents.WAND_CONFIGURATION.get()), ModDataComponents.isElderWand(stack));
+                stack.get(WandComponents.WAND_CONFIGURATION.get()), ModDataComponents.isElderWand(stack),
+                stack.get(WandComponents.WAND_STYLE.get()));
         WandLook cached = LOOKS.get(key);
         if (cached == null) {
             cached = WandLookResolver.resolve(registries, stack);
