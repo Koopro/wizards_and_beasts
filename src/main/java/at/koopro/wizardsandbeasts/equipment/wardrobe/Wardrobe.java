@@ -58,12 +58,31 @@ public final class Wardrobe {
         if (!livery.get().admits(BuiltInRegistries.ITEM.getKey(item))) {
             return Result.LIVERY_REFUSES_CUT;
         }
-        if (liveryId.equals(item.defaultLivery()) && rank == 0) {
+        // Restamping keeps the wearer's fit: a livery or a rank is not a reason to change trousers for a skirt.
+        Outfit.Fit fit = Outfit.of(stack).fit();
+        if (liveryId.equals(item.defaultLivery()) && rank == 0 && fit == Outfit.Fit.TROUSERS) {
             stack.remove(ModDataComponents.OUTFIT.get());
         } else {
-            stack.set(ModDataComponents.OUTFIT.get(), new Outfit(Optional.of(liveryId), rank));
+            stack.set(ModDataComponents.OUTFIT.get(), new Outfit(Optional.of(liveryId), rank, fit));
         }
         return Result.STAMPED;
+    }
+
+    /**
+     * Switches an outfit between its trousers and its skirt, keeping livery and rank. The caller checks that the
+     * piece has both fits ({@code WizardArmorItem#hasFits}).
+     *
+     * @return the fit the stack has now
+     */
+    public static Outfit.Fit toggleFit(ItemStack stack) {
+        Outfit old = Outfit.of(stack);
+        Outfit now = new Outfit(old.livery(), old.rank(), old.fit().other());
+        if (now.equals(Outfit.DEFAULT)) {
+            stack.remove(ModDataComponents.OUTFIT.get());
+        } else {
+            stack.set(ModDataComponents.OUTFIT.get(), now);
+        }
+        return now.fit();
     }
 
     /**

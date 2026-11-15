@@ -40,7 +40,7 @@ class WardrobeAssetTest {
     /** Cut item → (model name, default livery). Mirrors each item's {@code defaultLivery()}. */
     /** Body cuts worn without a robe over them, so with no skirt: the summer uniform (shirt and vest).
      */
-    private static final java.util.Set<String> SKIRTLESS = java.util.Set.of("summer_uniform_chest");
+    private static final java.util.Set<String> SKIRTLESS = java.util.Set.of();
 
     private static final Map<String, String[]> CUTS = Map.ofEntries(
             Map.entry("leather_belt", new String[]{"leather_belt", "leather_brown"}),

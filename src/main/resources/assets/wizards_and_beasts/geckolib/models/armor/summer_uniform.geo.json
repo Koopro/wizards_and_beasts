@@ -80,10 +80,266 @@
 								1
 							],
 							"uv": [
-								84,
-								16
+								40,
+								30
 							],
 							"inflate": -0.25
+						}
+					]
+				},
+				{
+					"name": "robeSkirt",
+					"parent": "armorBody",
+					"pivot": [
+						0,
+						12,
+						0
+					],
+					"cubes": []
+				},
+				{
+					"name": "clothHipFront",
+					"parent": "robeSkirt",
+					"pivot": [
+						0,
+						12,
+						-2.6
+					],
+					"cubes": []
+				},
+				{
+					"name": "fitSkirtFront",
+					"parent": "clothHipFront",
+					"pivot": [
+						0,
+						12,
+						-2.6
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4.6,
+								10.0,
+								-2.6
+							],
+							"size": [
+								5,
+								2,
+								1
+							],
+							"uv": [
+								46,
+								30
+							],
+							"rotation": [
+								5,
+								0,
+								0
+							],
+							"pivot": [
+								0,
+								12.0,
+								-2.6
+							]
+						},
+						{
+							"origin": [
+								-0.4,
+								10.0,
+								-2.7
+							],
+							"size": [
+								5,
+								2,
+								1
+							],
+							"uv": [
+								58,
+								30
+							],
+							"rotation": [
+								5,
+								0,
+								0
+							],
+							"pivot": [
+								0,
+								12.0,
+								-2.7
+							]
+						}
+					]
+				},
+				{
+					"name": "clothHip",
+					"parent": "robeSkirt",
+					"pivot": [
+						0,
+						12,
+						0
+					],
+					"cubes": []
+				},
+				{
+					"name": "fitSkirtHip",
+					"parent": "clothHip",
+					"pivot": [
+						0,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4.5,
+								10.0,
+								1.6
+							],
+							"size": [
+								9,
+								2,
+								1
+							],
+							"uv": [
+								70,
+								30
+							],
+							"rotation": [
+								-5,
+								0,
+								0
+							],
+							"pivot": [
+								0,
+								12.0,
+								2.6
+							]
+						},
+						{
+							"origin": [
+								-4.55,
+								10.0,
+								-2.4
+							],
+							"size": [
+								1,
+								2,
+								5
+							],
+							"uv": [
+								100,
+								16
+							],
+							"rotation": [
+								0,
+								0,
+								-5
+							],
+							"pivot": [
+								-4.05,
+								12.0,
+								0
+							]
+						},
+						{
+							"origin": [
+								3.55,
+								10.0,
+								-2.4
+							],
+							"size": [
+								1,
+								2,
+								5
+							],
+							"uv": [
+								112,
+								16
+							],
+							"rotation": [
+								0,
+								0,
+								5
+							],
+							"pivot": [
+								4.05,
+								12.0,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "clothLegR",
+					"parent": "robeSkirt",
+					"pivot": [
+						-1.9,
+						12,
+						0
+					],
+					"cubes": []
+				},
+				{
+					"name": "fitSkirtLegR",
+					"parent": "clothLegR",
+					"pivot": [
+						-1.9,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4.4,
+								6.0,
+								-2.5
+							],
+							"size": [
+								5,
+								5,
+								5
+							],
+							"uv": [
+								16,
+								16
+							]
+						}
+					]
+				},
+				{
+					"name": "clothLegL",
+					"parent": "robeSkirt",
+					"pivot": [
+						1.9,
+						12,
+						0
+					],
+					"cubes": []
+				},
+				{
+					"name": "fitSkirtLegL",
+					"parent": "clothLegL",
+					"pivot": [
+						1.9,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-0.6,
+								6.0,
+								-2.6
+							],
+							"size": [
+								5,
+								5,
+								5
+							],
+							"uv": [
+								36,
+								16
+							]
 						}
 					]
 				},
@@ -107,7 +363,7 @@
 								4
 							],
 							"uv": [
-								80,
+								112,
 								0
 							],
 							"inflate": 0.25
@@ -124,8 +380,8 @@
 								5
 							],
 							"uv": [
-								44,
-								16
+								0,
+								30
 							],
 							"inflate": -0.15
 						}
@@ -151,8 +407,8 @@
 								4
 							],
 							"uv": [
-								96,
-								0
+								0,
+								16
 							],
 							"inflate": 0.25
 						},
@@ -168,8 +424,8 @@
 								5
 							],
 							"uv": [
-								64,
-								16
+								20,
+								30
 							],
 							"inflate": -0.15
 						}
@@ -177,6 +433,16 @@
 				},
 				{
 					"name": "armorRightLeg",
+					"pivot": [
+						-1.9,
+						12,
+						0
+					],
+					"cubes": []
+				},
+				{
+					"name": "fitTrousersR",
+					"parent": "armorRightLeg",
 					"pivot": [
 						-1.9,
 						12,
@@ -198,12 +464,50 @@
 								48,
 								0
 							],
+							"inflate": 0.35
+						}
+					]
+				},
+				{
+					"name": "fitSkirtShinR",
+					"parent": "armorRightLeg",
+					"pivot": [
+						-1.9,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-3.9,
+								0,
+								-2
+							],
+							"size": [
+								4,
+								12,
+								4
+							],
+							"uv": [
+								80,
+								0
+							],
 							"inflate": 0.25
 						}
 					]
 				},
 				{
 					"name": "armorLeftLeg",
+					"pivot": [
+						1.9,
+						12,
+						0
+					],
+					"cubes": []
+				},
+				{
+					"name": "fitTrousersL",
+					"parent": "armorLeftLeg",
 					"pivot": [
 						1.9,
 						12,
@@ -223,6 +527,34 @@
 							],
 							"uv": [
 								64,
+								0
+							],
+							"inflate": 0.35
+						}
+					]
+				},
+				{
+					"name": "fitSkirtShinL",
+					"parent": "armorLeftLeg",
+					"pivot": [
+						1.9,
+						12,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-0.1,
+								0,
+								-2
+							],
+							"size": [
+								4,
+								12,
+								4
+							],
+							"uv": [
+								96,
 								0
 							],
 							"inflate": 0.25
@@ -249,7 +581,7 @@
 								6
 							],
 							"uv": [
-								0,
+								56,
 								16
 							]
 						}
@@ -275,7 +607,7 @@
 								6
 							],
 							"uv": [
-								22,
+								78,
 								16
 							]
 						}

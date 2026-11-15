@@ -48,6 +48,23 @@ class OutfitTest {
     }
 
     @Test
+    void aStackFromBeforeFitsReadsAsTrousers() {
+        Outfit outfit = Outfit.CODEC.parse(JsonOps.INSTANCE,
+                JsonParser.parseString("{\"livery\": \"wizards_and_beasts:house_lion\", \"rank\": 1}")).getOrThrow();
+        assertEquals(Outfit.Fit.TROUSERS, outfit.fit());
+        assertEquals(new Outfit(Optional.of(LION), 1), outfit);
+    }
+
+    @Test
+    void theSkirtFitRoundTripsWithLiveryAndRank() {
+        Outfit outfit = new Outfit(Optional.of(LION), 2, Outfit.Fit.SKIRT);
+        var json = Outfit.CODEC.encodeStart(JsonOps.INSTANCE, outfit).getOrThrow();
+        assertTrue(json.toString().contains("\"fit\":\"skirt\""), json.toString());
+        assertEquals(outfit, Outfit.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(Outfit.Fit.TROUSERS, Outfit.Fit.SKIRT.other());
+    }
+
+    @Test
     void theDefaultLiveryDrawsTheBaseSheetAndAnyOtherItsOwn() {
         assertNull(Wardrobe.liveryTexture("student_robe", PLAIN, Optional.empty()));
         assertNull(Wardrobe.liveryTexture("student_robe", PLAIN, Optional.of(PLAIN)));

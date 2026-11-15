@@ -41,6 +41,14 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
      */
     public static final DataTicket<Integer> RANK = DataTicket.create("wardrobe_rank", Integer.class);
 
+    /** Whether the stack being drawn is cut with a skirt ({@code Outfit.Fit}). */
+    public static final DataTicket<Boolean> SKIRT = DataTicket.create("wardrobe_skirt", Boolean.class);
+
+    /** Bone groups of each fit; a cut without fits has none of them and is untouched. */
+    private static final String[] TROUSER_BONES = {"fitTrousersR", "fitTrousersL"};
+    private static final String[] SKIRT_BONES = {"fitSkirt", "fitSkirtHip", "fitSkirtFront", "fitSkirtLegR",
+            "fitSkirtLegL", "fitSkirtShinR", "fitSkirtShinL"};
+
     /**
      * The sheet the stack's livery draws, or {@link #BASE_SHEET} for the model's own. Always set, so a
      * render state reused between frames or pieces can never carry another stack's livery.
@@ -88,6 +96,7 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
 
         Outfit outfit = Outfit.of(renderData.itemStack());
         renderState.addGeckolibData(RANK, outfit.rank());
+        renderState.addGeckolibData(SKIRT, outfit.fit() == at.koopro.wizardsandbeasts.equipment.wardrobe.Outfit.Fit.SKIRT);
         Identifier sheet = null;
         if (assetName != null && animatable instanceof WizardArmorItem item) {
             // The livery in effect: the stamped one, else the item's own default. That default is usually the cut's
@@ -129,6 +138,13 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
             moveCloth(pose, snapshots);
         }
         showRanks(renderState, snapshots);
+        boolean skirt = Boolean.TRUE.equals(renderState.getGeckolibData(SKIRT));
+        for (String bone : TROUSER_BONES) {
+            snapshots.ifPresent(bone, s -> s.skipRender(skirt).skipChildrenRender(skirt));
+        }
+        for (String bone : SKIRT_BONES) {
+            snapshots.ifPresent(bone, s -> s.skipRender(!skirt).skipChildrenRender(!skirt));
+        }
         boolean cowl = !capeWorn(renderState);
         snapshots.ifPresent(COWL_BONE, s -> s.skipRender(!cowl).skipChildrenRender(!cowl));
     }

@@ -387,6 +387,11 @@ public final class EquipmentShowcaseCapture {
                 wear(p, stitched(p, ArmorItemRegistry.DEATH_EATER_ROBE_CHEST.get(), "blighted", 0));
             }),
             new Outfit("w4_moss_blighted", p -> wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "blighted", 0))),
+            // Fits: the skirt cut of each outfit that has one.
+            new Outfit("fit_summer_lion_skirt", p -> wear(p, skirt(stitched(p, ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get(), "house_lion", 1)))),
+            new Outfit("fit_summer_serpent_trousers", p -> wear(p, stitched(p, ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get(), "house_serpent", 0))),
+            new Outfit("fit_shopkeeper_parlour_skirt", p -> wear(p, skirt(stitched(p, ArmorItemRegistry.SHOPKEEPER_CHEST.get(), "apron_parlour", 0)))),
+            new Outfit("fit_dress_periwinkle_gown", p -> wear(p, skirt(stitched(p, ArmorItemRegistry.DRESS_ROBES_CHEST.get(), "dress_periwinkle", 1)))),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
@@ -454,6 +459,11 @@ public final class EquipmentShowcaseCapture {
         p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
         p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
         wear(p, stitched(p, ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), house, rank));
+    }
+
+    private static ItemStack skirt(ItemStack stack) {
+        at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.toggleFit(stack);
+        return stack;
     }
 
     private static void cosmetic(ServerPlayer p, ItemStack stack) {

@@ -22,12 +22,26 @@ public class RobeCutItem extends WizardArmorItem {
         this(properties, assetName, defaultLivery, false);
     }
 
+    private final boolean fits;
+
     /** {@code dressesLegs}: the cut's own trousers and boots are drawn with it ({@link #dressesLegs()}). */
     public RobeCutItem(Properties properties, String assetName, String defaultLivery, boolean dressesLegs) {
+        this(properties, assetName, defaultLivery, dressesLegs, false);
+    }
+
+    /** {@code fits}: the cut is modelled with trousers and with a skirt ({@link #hasFits()}). */
+    public RobeCutItem(Properties properties, String assetName, String defaultLivery, boolean dressesLegs,
+                       boolean fits) {
         super(properties, WizardArmorMaterials.STUDENT_ROBE, ArmorType.CHESTPLATE, Wear.CURIO);
         this.assetName = assetName;
         this.defaultLivery = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, defaultLivery);
         this.dressesLegs = dressesLegs;
+        this.fits = fits;
+    }
+
+    @Override
+    public boolean hasFits() {
+        return fits;
     }
 
     @Override

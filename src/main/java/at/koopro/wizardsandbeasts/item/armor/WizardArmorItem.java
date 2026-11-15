@@ -113,9 +113,25 @@ public abstract class WizardArmorItem extends GeoItemBase {
         return this.wear;
     }
 
-    /** Right-click wears clothing in its Curios slot; armour keeps vanilla's equip-swap. */
+    /** Whether this piece is cut both with trousers and with a skirt ({@code Outfit.Fit}). */
+    public boolean hasFits() {
+        return false;
+    }
+
+    /**
+     * Right-click wears clothing in its Curios slot; armour keeps vanilla's equip-swap. Sneaking, a piece with two
+     * fits switches between them instead (Wardrobe 2.0).
+     */
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (wear == Wear.CURIO && hasFits() && player.isShiftKeyDown()) {
+            if (!level.isClientSide()) {
+                Outfit.Fit fit = at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.toggleFit(player.getItemInHand(hand));
+                player.displayClientMessage(Component.translatable(
+                        "message.wizards_and_beasts.fit." + fit.getSerializedName()), true);
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (wear == Wear.CURIO) {
             return EquipmentAPI.equipFromHand(player, hand, material.equipSound());
         }
@@ -154,6 +170,10 @@ public abstract class WizardArmorItem extends GeoItemBase {
         tooltip.accept(Component.translatableWithFallback(
                 "livery." + livery.getNamespace() + "." + livery.getPath(), livery.getPath())
                 .withStyle(ChatFormatting.GRAY));
+        if (hasFits()) {
+            tooltip.accept(Component.translatable("tooltip.wizards_and_beasts.fit." + outfit.fit().getSerializedName())
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
         if (outfit.rank() > 0) {
             Identifier item = BuiltInRegistries.ITEM.getKey(this);
             tooltip.accept(Component.translatableWithFallback(

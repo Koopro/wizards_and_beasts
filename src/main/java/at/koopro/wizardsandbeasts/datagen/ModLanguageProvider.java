@@ -890,6 +890,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("livery.wizards_and_beasts.ritual_black", "Ritual Black");
         add("livery.wizards_and_beasts.ritual_crimson", "Ritual Crimson");
         add("livery.wizards_and_beasts.ritual_ash", "Ritual Ash");
+        add("message.wizards_and_beasts.fit.trousers", "Cut with trousers.");
+        add("message.wizards_and_beasts.fit.skirt", "Cut with a skirt.");
+        add("tooltip.wizards_and_beasts.fit.trousers", "Trousers (sneak and use to change)");
+        add("tooltip.wizards_and_beasts.fit.skirt", "Skirt (sneak and use to change)");
         add("item.wizards_and_beasts.travel_coat_chest", "Travelling Coat");
         add("item.wizards_and_beasts.travel_coat_chest.desc", "A buttoned canvas duster to the knee under a short shoulder cape.");
         add("item.wizards_and_beasts.healer_coat_chest", "Healer's Coat");

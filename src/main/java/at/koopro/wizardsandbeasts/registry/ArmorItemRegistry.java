@@ -57,15 +57,15 @@ public final class ArmorItemRegistry {
 
     /** Wardrobe 2.0 W2: the warm-term uniform, a shirt and tie under a knit sweater vest, no robe. */
     public static final DeferredItem<RobeCutItem> SUMMER_UNIFORM_CHEST = ModItems.ITEMS.registerItem(
-            "summer_uniform_chest", props -> new RobeCutItem(props, "summer_uniform", "school_plain", true));
+            "summer_uniform_chest", props -> new RobeCutItem(props, "summer_uniform", "school_plain", true, true));
 
     /** Wardrobe 2.0 W2: formal robes for a ball, five colourways. */
     public static final DeferredItem<RobeCutItem> DRESS_ROBES_CHEST = ModItems.ITEMS.registerItem(
-            "dress_robes_chest", props -> new RobeCutItem(props, "dress_robes", "dress_bottle_green"));
+            "dress_robes_chest", props -> new RobeCutItem(props, "dress_robes", "dress_bottle_green", false, true));
 
     // Wardrobe 2.0 W3: working clothes, each drawing its own trousers and boots.
     public static final DeferredItem<RobeCutItem> SHOPKEEPER_CHEST = ModItems.ITEMS.registerItem(
-            "shopkeeper_chest", props -> new RobeCutItem(props, "shopkeeper", "apron_canvas", true));
+            "shopkeeper_chest", props -> new RobeCutItem(props, "shopkeeper", "apron_canvas", true, true));
     public static final DeferredItem<RobeCutItem> FIELD_COAT_CHEST = ModItems.ITEMS.registerItem(
             "field_coat_chest", props -> new RobeCutItem(props, "field_coat", "field_peacock", true));
     public static final DeferredItem<RobeCutItem> POTIONEER_COAT_CHEST = ModItems.ITEMS.registerItem(
