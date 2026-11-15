@@ -45,9 +45,10 @@ public final class WizardCardHandRenderer {
     /**
      * How big the card sits relative to the map that shares its pose. A map fills 0.76 blocks
      * across; a playing card that size would be a poster, so it is brought down to about a
-     * hand's width.
+     * hand's width. (0.55 still drew it a block tall, filling the lower half of the screen:
+     * equipment audit, 2026-11-15.)
      */
-    private static final float CARD_SCALE = 0.55f;
+    private static final float CARD_SCALE = 0.32f;
 
     private WizardCardHandRenderer() {}
 
@@ -101,9 +102,12 @@ public final class WizardCardHandRenderer {
         pose.mulPose(Axis.XP.rotationDegrees(Mth.sin(swingRoot * (float) Math.PI) * 20.0f));
         pose.scale(2.0f, 2.0f, 2.0f);
 
-        // The camera looks down -Z, so the face turned toward it is the model's south face — the
-        // one the portrait is painted on. No flip needed; the card is already the right way round.
+        // The camera looks down -Z, so the face turned toward it must be the model's south face, the
+        // one the portrait is painted on. The FIXED display below is the item frame's, which turns
+        // the model half round (rotation 0 180 0) so a framed card faces out of the wall; undone
+        // here, or the player reads the card's back (equipment audit, 2026-11-15).
         pose.scale(CARD_SCALE, CARD_SCALE, CARD_SCALE);
+        pose.mulPose(Axis.YP.rotationDegrees(180.0f));
         ItemStackRenderState renderState = new ItemStackRenderState();
         mc.getItemModelResolver().updateForTopItem(renderState, stack, ItemDisplayContext.FIXED,
                 player.level(), player, player.getId());

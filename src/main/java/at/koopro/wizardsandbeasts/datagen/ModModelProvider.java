@@ -81,6 +81,33 @@ public class ModModelProvider extends ModelProvider {
             "wildfire_whiz_bangs", "wizarding_wireless", "wizards_chess_set"
     );
 
+    /**
+     * Flat sprites of things that fit in a palm -- a ring, an egg, an amulet, a frog -- whose art fills the
+     * whole 16-pixel canvas. At vanilla's sprite scale they were held as large as a spellbook (equipment
+     * audit, 2026-11-15), so they get about the size the 3D {@code small} hold class gives a stone.
+     */
+    private static final Set<String> SMALL_IN_HAND = Set.of(
+            "chocolate_frog", "golden_egg", "goblet_of_fire", "marvolo_gaunts_ring", "opal_necklace",
+            "warded_amulet", "tomb_medallion", "golden_snitch");
+
+    /** {@code item/generated} at a palm-sized hold; slots, frames and the head keep vanilla's. */
+    private static final ModelTemplate SMALL_FLAT_ITEM = ExtendedModelTemplateBuilder.builder()
+            .parent(Identifier.withDefaultNamespace("item/generated"))
+            .requiredTextureSlot(TextureSlot.LAYER0)
+            .transform(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
+                    t -> t.rotation(0, -90, 25).translation(1.13f, 3.2f, 1.13f).scale(0.4f))
+            .transform(net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                    t -> t.rotation(0, 0, 0).translation(0, 2.5f, 1).scale(0.35f))
+            .transform(net.minecraft.world.item.ItemDisplayContext.GROUND,
+                    t -> t.rotation(0, 0, 0).translation(0, 2, 0).scale(0.35f))
+            .build();
+
+    /** A flat item model, palm-sized in hand when it is one of {@link #SMALL_IN_HAND}. */
+    private static void flat(ItemModelGenerators itemModels, Item item) {
+        String id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
+        itemModels.generateFlatItem(item, SMALL_IN_HAND.contains(id) ? SMALL_FLAT_ITEM : ModelTemplates.FLAT_ITEM);
+    }
+
     public ModModelProvider(PackOutput output) {
         super(output, WizardsAndBeastsMod.MODID);
     }
@@ -110,9 +137,9 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(MiscItemRegistry.BLINDFOLD.get(), ModelTemplates.FLAT_ITEM);
         // Recovered tomb treasure (treasure/): flat sprites from tools/canon_sprites.py.
         itemModels.generateFlatItem(CurrencyItemRegistry.ANCIENT_GOBLET.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(CurrencyItemRegistry.WARDED_AMULET.get(), ModelTemplates.FLAT_ITEM);
+        flat(itemModels, CurrencyItemRegistry.WARDED_AMULET.get());
         itemModels.generateFlatItem(CurrencyItemRegistry.SEALED_CASKET.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(CurrencyItemRegistry.TOMB_MEDALLION.get(), ModelTemplates.FLAT_ITEM);
+        flat(itemModels, CurrencyItemRegistry.TOMB_MEDALLION.get());
         itemModels.generateFlatItem(MiscItemRegistry.DUELLING_DUMMY.get(), ModelTemplates.FLAT_ITEM);
 
         // Worn armour — robes, hats and masks. Flat inventory sprites only; the worn layer is
@@ -193,7 +220,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(TrinketItemRegistry.MINISTRY_LICENSE_SCROLL.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RESURRECTION_STONE.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RIDDLES_DIARY.get());
-        itemModels.generateFlatItem(DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get(), ModelTemplates.FLAT_ITEM);
+        flat(itemModels, DarkArtefactItemRegistry.MARVOLO_GAUNTS_RING.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.SLYTHERINS_LOCKET.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.HUFFLEPUFFS_CUP.get());
         iconInSlotModelInHand(itemModels, DarkArtefactItemRegistry.RAVENCLAWS_DIADEM.get());
@@ -277,6 +304,8 @@ public class ModModelProvider extends ModelProvider {
     private static void flatOrGeo(ItemModelGenerators itemModels, Item item, ModelTemplate template) {
         if (item instanceof AnimatedItem) {
             iconInSlotGeoInHand(itemModels, item, flatIcon(itemModels, item, "", template));
+        } else if (template == ModelTemplates.FLAT_ITEM) {
+            flat(itemModels, item);
         } else {
             itemModels.generateFlatItem(item, template);
         }
@@ -406,7 +435,7 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(ConsumableItemRegistry.EMPTY_BUTTERBEER_MUG.get(),
                 net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.PUMPKIN_JUICE.get());
-        itemModels.generateFlatItem(ConsumableItemRegistry.CHOCOLATE_FROG.get(), ModelTemplates.FLAT_ITEM);
+        flat(itemModels, ConsumableItemRegistry.CHOCOLATE_FROG.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.BERTIE_BOTTS_EVERY_FLAVOUR_BEANS.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.DROOBLES_BEST_BLOWING_GUM.get());
         iconInSlotModelInHand(itemModels, ConsumableItemRegistry.FIREWHISKY.get());
