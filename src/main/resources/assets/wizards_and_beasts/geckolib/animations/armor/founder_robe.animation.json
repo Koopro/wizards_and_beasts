@@ -1,0 +1,7 @@
+{
+	"_comment": [
+		"No clips. Cloth bones are driven from the wearer's pose by the renderer."
+	],
+	"format_version": "1.8.0",
+	"animations": {}
+}

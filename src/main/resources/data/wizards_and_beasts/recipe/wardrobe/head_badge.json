@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:gold_nugget",
+    "minecraft:purple_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:head_badge",
+    "count": 1
+  }
+}

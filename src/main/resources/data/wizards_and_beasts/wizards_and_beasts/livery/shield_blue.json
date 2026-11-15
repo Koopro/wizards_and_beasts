@@ -1,6 +1,10 @@
 {
   "cuts": [
     "wizards_and_beasts:gloves",
-    "wizards_and_beasts:shield_gloves"
+    "wizards_and_beasts:shield_gloves",
+    "wizards_and_beasts:travel_cloak",
+    "wizards_and_beasts:shield_cloak",
+    "wizards_and_beasts:travel_hat",
+    "wizards_and_beasts:shield_hat"
   ]
 }

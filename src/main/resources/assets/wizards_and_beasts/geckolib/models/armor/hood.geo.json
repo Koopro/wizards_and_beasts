@@ -1,0 +1,127 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.hood",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3,
+				"visible_bounds_offset": [
+					0,
+					1.5,
+					0
+				]
+			},
+			"bones": [
+				{
+					"name": "armorHead",
+					"pivot": [
+						0,
+						24,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-5.0,
+								24.0,
+								4.2
+							],
+							"size": [
+								10,
+								8,
+								2
+							],
+							"uv": [
+								38,
+								18
+							]
+						},
+						{
+							"origin": [
+								-5.2,
+								24.0,
+								-4.0
+							],
+							"size": [
+								1,
+								8,
+								10
+							],
+							"uv": [
+								0,
+								0
+							]
+						},
+						{
+							"origin": [
+								4.2,
+								24.0,
+								-4.0
+							],
+							"size": [
+								1,
+								8,
+								10
+							],
+							"uv": [
+								22,
+								0
+							]
+						},
+						{
+							"origin": [
+								-4.5,
+								31.4,
+								-4.2
+							],
+							"size": [
+								9,
+								2,
+								10
+							],
+							"uv": [
+								0,
+								18
+							]
+						},
+						{
+							"origin": [
+								-5.0,
+								29.5,
+								-4.8
+							],
+							"size": [
+								10,
+								2,
+								2
+							],
+							"uv": [
+								36,
+								30
+							]
+						},
+						{
+							"origin": [
+								-5.5,
+								21.0,
+								-3.2
+							],
+							"size": [
+								11,
+								3,
+								7
+							],
+							"uv": [
+								0,
+								30
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

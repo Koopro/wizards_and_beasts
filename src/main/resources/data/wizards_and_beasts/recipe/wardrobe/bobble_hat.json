@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:red_wool",
+    "minecraft:string",
+    "minecraft:white_wool"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:bobble_hat",
+    "count": 1
+  }
+}

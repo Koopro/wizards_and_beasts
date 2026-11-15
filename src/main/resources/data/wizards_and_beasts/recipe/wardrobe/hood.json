@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:gray_wool",
+    "minecraft:gray_wool",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:hood",
+    "count": 1
+  }
+}

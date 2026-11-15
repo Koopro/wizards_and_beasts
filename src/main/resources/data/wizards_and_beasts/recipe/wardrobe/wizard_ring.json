@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:gold_nugget",
+    "minecraft:gold_nugget",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:wizard_ring",
+    "count": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:red_wool",
+    "minecraft:red_wool",
+    "minecraft:red_wool",
+    "minecraft:string",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:knit_jumper_chest",
+    "count": 1
+  }
+}

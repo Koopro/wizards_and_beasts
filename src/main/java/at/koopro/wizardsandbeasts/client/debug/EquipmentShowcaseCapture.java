@@ -392,6 +392,33 @@ public final class EquipmentShowcaseCapture {
             new Outfit("fit_summer_serpent_trousers", p -> wear(p, stitched(p, ArmorItemRegistry.SUMMER_UNIFORM_CHEST.get(), "house_serpent", 0))),
             new Outfit("fit_shopkeeper_parlour_skirt", p -> wear(p, skirt(stitched(p, ArmorItemRegistry.SHOPKEEPER_CHEST.get(), "apron_parlour", 0)))),
             new Outfit("fit_dress_periwinkle_gown", p -> wear(p, skirt(stitched(p, ArmorItemRegistry.DRESS_ROBES_CHEST.get(), "dress_periwinkle", 1)))),
+            // Wardrobe 2.0 W5-W7.
+            new Outfit("w5_suit_plum_skirt_watch", p -> wear(p, skirt(stitched(p, ArmorItemRegistry.WAISTCOAT_SUIT_CHEST.get(), "suit_plum", 1)))),
+            new Outfit("w5_jumper_festive_bobble", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.KNIT_JUMPER_CHEST.get(), "knit_festive", 0));
+                wear(p, stitched(p, ArmorItemRegistry.BOBBLE_HAT.get(), "knit_festive", 0));
+            }),
+            new Outfit("w5_moss_cloak_burgundy", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "robe_midnight", 0));
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_CLOAK.get(), "cloak_burgundy", 0));
+            }),
+            new Outfit("w6_wizengamot_chief", p -> wear(p, stitched(p, ArmorItemRegistry.WIZENGAMOT_ROBE_CHEST.get(), "wizengamot_plum", 1))),
+            new Outfit("w6_founder_serpent_mantle", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.FOUNDER_ROBE_CHEST.get(), "house_serpent", 1));
+                wear(p, stitched(p, ArmorItemRegistry.WIZARD_RING.get(), "ring_silver_sapphire", 0));
+            }),
+            new Outfit("w7_prefect_hood_mantle", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.WINTER_UNIFORM_CHEST.get(), "house_eagle", 0));
+                wear(p, new ItemStack(ArmorItemRegistry.PREFECT_BADGE.get()));
+                wear(p, stitched(p, ArmorItemRegistry.HOOD.get(), "hood_brown", 0));
+                wear(p, stitched(p, ArmorItemRegistry.FUR_MANTLE.get(), "fur_sable", 0));
+            }),
+            new Outfit("w7_shield_hat_cloak", p -> {
+                wear(p, stitched(p, ArmorItemRegistry.TRAVEL_COAT_CHEST.get(), "coat_charcoal", 0));
+                wear(p, new ItemStack(CanonItemRegistry.SHIELD_HAT.get()));
+                wear(p, new ItemStack(CanonItemRegistry.SHIELD_CLOAK.get()));
+                wear(p, new ItemStack(ArmorItemRegistry.SPEW_BADGE.get()));
+            }),
             new Outfit("w0_cosmetic_moss_only_over_netherite", p -> {
                 netherite(p, false, true, true, true);
                 cosmetic(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));

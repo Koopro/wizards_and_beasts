@@ -53,6 +53,20 @@ class WardrobeAssetTest {
 "student_robe_chest", "student_robe", "school_plain"),
             robe("winter_uniform_chest", "winter_uniform", "school_plain"),
             robe("summer_uniform_chest", "summer_uniform", "school_plain"),
+            Map.entry("waistcoat_suit_chest", new String[]{"waistcoat_suit", "suit_tweed"}),
+            Map.entry("knit_jumper_chest", new String[]{"knit_jumper", "knit_maroon"}),
+            Map.entry("wizengamot_robe_chest", new String[]{"wizengamot_robe", "wizengamot_plum"}),
+            Map.entry("founder_robe_chest", new String[]{"founder_robe", "house_lion"}),
+            Map.entry("wizard_ring", new String[]{"ring", "ring_gold_ruby"}),
+            Map.entry("fur_mantle", new String[]{"fur_mantle", "fur_ermine"}),
+            Map.entry("hood", new String[]{"hood", "hood_grey"}),
+            Map.entry("bobble_hat", new String[]{"bobble_hat", "house_lion"}),
+            Map.entry("prefect_badge", new String[]{"badge", "badge_prefect"}),
+            Map.entry("head_badge", new String[]{"badge", "badge_head"}),
+            Map.entry("captain_badge", new String[]{"badge", "badge_captain"}),
+            Map.entry("spew_badge", new String[]{"badge", "badge_spew"}),
+            Map.entry("shield_hat", new String[]{"travel_hat", "shield_blue"}),
+            Map.entry("shield_cloak", new String[]{"travel_cloak", "shield_blue"}),
             robe("ritual_robe_chest", "ritual_robe", "ritual_black"),
             robe("shopkeeper_chest", "shopkeeper", "apron_canvas"),
             robe("field_coat_chest", "field_coat", "field_peacock"),
@@ -75,14 +89,14 @@ class WardrobeAssetTest {
     /** Accessories: neither a skirt nor a cape, so no motion bones to check. */
     private static final java.util.Set<String> ACCESSORIES =
             java.util.Set.of("leather_belt", "duty_belt", "scarf", "gloves", "professor_hat", "travel_hat",
-                    "dragon_hide_gloves", "shield_gloves");
+                    "dragon_hide_gloves", "shield_gloves", "wizard_ring", "fur_mantle", "hood", "bobble_hat", "prefect_badge", "head_badge", "captain_badge", "spew_badge", "shield_hat");
 
     private static Map.Entry<String, String[]> robe(String item, String model, String livery) {
         return Map.entry(item, new String[]{model, livery});
     }
 
     /** Cuts worn on the back: a cape, not a robe, so their bones are the cape's. */
-    private static final java.util.Set<String> CAPES = java.util.Set.of("school_cape", "travel_cloak");
+    private static final java.util.Set<String> CAPES = java.util.Set.of("school_cape", "travel_cloak", "shield_cloak");
 
     private static final Pattern RANK_BONE = Pattern.compile("rank([1-3])(ArmR|ArmL)?");
 

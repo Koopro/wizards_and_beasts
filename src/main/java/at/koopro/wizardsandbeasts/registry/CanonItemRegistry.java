@@ -129,10 +129,14 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("fever_fudge", Item::new);
     public static final DeferredItem<Item> HEADLESS_HAT =
             ModItems.ITEMS.registerItem("headless_hat", Item::new);
-    public static final DeferredItem<Item> SHIELD_HAT =
-            ModItems.ITEMS.registerItem("shield_hat", Item::new);
-    public static final DeferredItem<Item> SHIELD_CLOAK =
-            ModItems.ITEMS.registerItem("shield_cloak", Item::new);
+    /** Worn since Wardrobe 2.0 (W7): the travelling hat in shield blue; was a plain item. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.AccessoryItem> SHIELD_HAT =
+            ModItems.ITEMS.registerItem("shield_hat", props -> new at.koopro.wizardsandbeasts.item.armor.AccessoryItem(
+                    props, "travel_hat", "shield_blue", net.minecraft.world.item.equipment.ArmorType.HELMET));
+    /** Worn since Wardrobe 2.0 (W7): the travelling cloak in shield blue; was a plain item. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.CapeItem> SHIELD_CLOAK =
+            ModItems.ITEMS.registerItem("shield_cloak",
+                    props -> new at.koopro.wizardsandbeasts.item.armor.CapeItem(props, "travel_cloak", "shield_blue"));
     /** Worn since Wardrobe 2.0 (W3): the gloves accessory in its shield_blue livery; was a plain item. */
     public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.AccessoryItem> SHIELD_GLOVES =
             ModItems.ITEMS.registerItem("shield_gloves", props -> new at.koopro.wizardsandbeasts.item.armor.AccessoryItem(

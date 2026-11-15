@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:purple_wool",
+    "minecraft:purple_wool",
+    "minecraft:purple_wool",
+    "minecraft:string",
+    "minecraft:iron_nugget"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:wizengamot_robe_chest",
+    "count": 1
+  }
+}

@@ -445,6 +445,111 @@
           "operation": "add_value"
         }
       ]
+    },
+    "wizards_and_beasts:waistcoat_suit_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 1,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:knit_jumper_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 1,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:wizengamot_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:founder_robe_chest": {
+      "equipment_type": "body_clothing",
+      "hides": [
+        "chest",
+        "legs",
+        "feet"
+      ],
+      "attributes": [
+        {
+          "attribute": "minecraft:armor",
+          "amount": 3,
+          "operation": "add_value"
+        }
+      ]
+    },
+    "wizards_and_beasts:wizard_ring": {
+      "equipment_type": "ring"
+    },
+    "wizards_and_beasts:fur_mantle": {
+      "equipment_type": "cloak"
+    },
+    "wizards_and_beasts:hood": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ]
+    },
+    "wizards_and_beasts:bobble_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ]
+    },
+    "wizards_and_beasts:prefect_badge": {
+      "equipment_type": "trinket"
+    },
+    "wizards_and_beasts:head_badge": {
+      "equipment_type": "trinket"
+    },
+    "wizards_and_beasts:captain_badge": {
+      "equipment_type": "trinket"
+    },
+    "wizards_and_beasts:spew_badge": {
+      "equipment_type": "trinket"
+    },
+    "wizards_and_beasts:shield_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ]
+    },
+    "wizards_and_beasts:shield_cloak": {
+      "equipment_type": "cloak"
+    },
+    "wizards_and_beasts:headless_hat": {
+      "equipment_type": "headwear",
+      "hides": [
+        "head"
+      ]
     }
   }
 }

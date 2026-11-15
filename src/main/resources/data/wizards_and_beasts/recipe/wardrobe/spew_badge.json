@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:iron_nugget",
+    "minecraft:red_dye"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:spew_badge",
+    "count": 1
+  }
+}

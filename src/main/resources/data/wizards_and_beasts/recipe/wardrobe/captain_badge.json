@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:gold_nugget",
+    "minecraft:red_dye",
+    "minecraft:feather"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:captain_badge",
+    "count": 1
+  }
+}

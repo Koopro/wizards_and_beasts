@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "wizards_and_beasts:travel_cloak",
+    "minecraft:blue_dye",
+    "minecraft:lapis_lazuli"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:shield_cloak",
+    "count": 1
+  }
+}

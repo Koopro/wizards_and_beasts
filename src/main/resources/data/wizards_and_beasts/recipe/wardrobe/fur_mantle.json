@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:rabbit_hide",
+    "minecraft:rabbit_hide",
+    "minecraft:rabbit_hide",
+    "minecraft:white_wool"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:fur_mantle",
+    "count": 1
+  }
+}

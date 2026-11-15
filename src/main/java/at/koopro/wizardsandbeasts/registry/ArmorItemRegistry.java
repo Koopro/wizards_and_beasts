@@ -75,6 +75,32 @@ public final class ArmorItemRegistry {
     public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.RitualRobeItem> RITUAL_ROBE_CHEST =
             ModItems.ITEMS.registerItem("ritual_robe_chest", at.koopro.wizardsandbeasts.item.armor.RitualRobeItem::new);
 
+    // Wardrobe 2.0 W5-W7: everyday clothes, special robes, accessories.
+    public static final DeferredItem<RobeCutItem> WAISTCOAT_SUIT_CHEST =
+            ModItems.ITEMS.registerItem("waistcoat_suit_chest", props -> new RobeCutItem(props, "waistcoat_suit", "suit_tweed", true, true));
+    public static final DeferredItem<RobeCutItem> KNIT_JUMPER_CHEST =
+            ModItems.ITEMS.registerItem("knit_jumper_chest", props -> new RobeCutItem(props, "knit_jumper", "knit_maroon", true, true));
+    public static final DeferredItem<RobeCutItem> WIZENGAMOT_ROBE_CHEST =
+            ModItems.ITEMS.registerItem("wizengamot_robe_chest", props -> new RobeCutItem(props, "wizengamot_robe", "wizengamot_plum", true));
+    public static final DeferredItem<RobeCutItem> FOUNDER_ROBE_CHEST =
+            ModItems.ITEMS.registerItem("founder_robe_chest", props -> new RobeCutItem(props, "founder_robe", "house_lion", true));
+    public static final DeferredItem<AccessoryItem> WIZARD_RING =
+            ModItems.ITEMS.registerItem("wizard_ring", props -> new AccessoryItem(props, "ring", "ring_gold_ruby", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> FUR_MANTLE =
+            ModItems.ITEMS.registerItem("fur_mantle", props -> new AccessoryItem(props, "fur_mantle", "fur_ermine", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> HOOD =
+            ModItems.ITEMS.registerItem("hood", props -> new AccessoryItem(props, "hood", "hood_grey", ArmorType.HELMET));
+    public static final DeferredItem<AccessoryItem> BOBBLE_HAT =
+            ModItems.ITEMS.registerItem("bobble_hat", props -> new AccessoryItem(props, "bobble_hat", "house_lion", ArmorType.HELMET));
+    public static final DeferredItem<AccessoryItem> PREFECT_BADGE =
+            ModItems.ITEMS.registerItem("prefect_badge", props -> new AccessoryItem(props, "badge", "badge_prefect", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> HEAD_BADGE =
+            ModItems.ITEMS.registerItem("head_badge", props -> new AccessoryItem(props, "badge", "badge_head", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> CAPTAIN_BADGE =
+            ModItems.ITEMS.registerItem("captain_badge", props -> new AccessoryItem(props, "badge", "badge_captain", ArmorType.CHESTPLATE));
+    public static final DeferredItem<AccessoryItem> SPEW_BADGE =
+            ModItems.ITEMS.registerItem("spew_badge", props -> new AccessoryItem(props, "badge", "badge_spew", ArmorType.CHESTPLATE));
+
     /** Neutral pointed hat — not part of any set, wearable with all of them. */
     public static final DeferredItem<WizardHatItem> WIZARD_HAT =
             ModItems.ITEMS.registerItem("wizard_hat", WizardHatItem::new);
@@ -179,7 +205,8 @@ public final class ArmorItemRegistry {
      */
     public static final List<DeferredItem<? extends WizardArmorItem>> ALL = List.of(
             STUDENT_ROBE_CHEST, STUDENT_ROBE_LEGS, STUDENT_ROBE_BOOTS, WINTER_UNIFORM_CHEST, SUMMER_UNIFORM_CHEST, DRESS_ROBES_CHEST, SHOPKEEPER_CHEST, FIELD_COAT_CHEST,
-            POTIONEER_COAT_CHEST, RITUAL_ROBE_CHEST, WIZARD_HAT,
+            POTIONEER_COAT_CHEST, RITUAL_ROBE_CHEST,
+            WAISTCOAT_SUIT_CHEST, KNIT_JUMPER_CHEST, WIZENGAMOT_ROBE_CHEST, FOUNDER_ROBE_CHEST, WIZARD_RING, FUR_MANTLE, HOOD, BOBBLE_HAT, PREFECT_BADGE, HEAD_BADGE, CAPTAIN_BADGE, SPEW_BADGE, WIZARD_HAT,
             AUROR_ROBE_CHEST, AUROR_ROBE_LEGS, AUROR_ROBE_BOOTS,
             DEATH_EATER_ROBE_CHEST, DEATH_EATER_ROBE_LEGS, DEATH_EATER_ROBE_BOOTS,
             WIZARD_ROBE_CHEST, SCHOLAR_GOWN_CHEST, SCHOOL_CAPE, TRAVEL_CLOAK,
