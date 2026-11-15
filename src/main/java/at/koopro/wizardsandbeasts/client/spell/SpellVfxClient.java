@@ -7,6 +7,9 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
+import at.koopro.wizardsandbeasts.client.vfx.VfxBudget;
+import at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload;
+import at.koopro.wizardsandbeasts.particle.ShapeLayout;
 
 /**
  * The client-side sink for spell VFX, and the map of where to plug a new one in.
@@ -78,12 +81,14 @@ public final class SpellVfxClient {
         }
         RandomSource rand = mc.level.random;
         // A hit gets one flash in the spell's colour first; a tiny burst (a wand-tip puff, a fizzle) does not.
+        // The flash is outside the budget: it is the one particle that says "a hit landed here".
         if (count >= 10) {
             mc.level.addParticle(new at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions(
                     ModParticles.IMPACT_FLASH.get(), argb), pos.x, pos.y, pos.z, 0.0, 0.0, 0.0);
         }
         var opts = ModParticles.tinted(family, argb);
-        for (int i = 0; i < count; i++) {
+        int budgeted = VfxBudget.count(count, Math.min(count, 3), pos);
+        for (int i = 0; i < budgeted; i++) {
             double ox = (rand.nextDouble() - 0.5) * spread * 2.0;
             double oy = (rand.nextDouble() - 0.5) * spread * 2.0;
             double oz = (rand.nextDouble() - 0.5) * spread * 2.0;
@@ -136,7 +141,10 @@ public final class SpellVfxClient {
         if (dist < 0.02) {
             return;
         }
-        int steps = Math.max(10, (int) (dist * 14.0));
+        int steps = VfxBudget.count(Math.max(10, (int) (dist * 14.0)), 10, from.lerp(to, 0.5));
+        if (steps <= 0) {
+            return;
+        }
         RandomSource rand = mc.level.random;
         for (int i = 0; i <= steps; i++) {
             double t = i / (double) steps;
@@ -146,6 +154,39 @@ public final class SpellVfxClient {
             double dy = (rand.nextDouble() - 0.5) * jitter;
             double dz = (rand.nextDouble() - 0.5) * jitter;
             mc.level.addParticle(opts, p.x, p.y, p.z, dx, dy, dz);
+        }
+    }
+
+    /**
+     * Lays out a line, ring or shell the server sent as one packet, at as many points as this client's budget allows.
+     * A shape keeps a minimum of points so its outline still reads when the budget is tight or the shape far off.
+     */
+    public static void spawnShape(SpellVfxShapeS2CPayload p) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        var level = mc.level;
+        RandomSource rand = level.random;
+        int min = Math.min(p.points(), Math.max(4, p.points() / 4));
+        switch (p.shape()) {
+            case LINE -> {
+                int n = VfxBudget.count(p.points(), min, p.a().lerp(p.b(), 0.5));
+                double j = p.jitter();
+                ShapeLayout.line(p.a(), p.b(), n, (x, y, z) -> level.addParticle(p.particle(),
+                        x + rand.nextGaussian() * j, y + rand.nextGaussian() * j, z + rand.nextGaussian() * j,
+                        0.0, 0.0, 0.0));
+            }
+            case RING -> {
+                int n = VfxBudget.count(p.points(), min, p.a());
+                ShapeLayout.ring(p.a(), p.b(), p.radius(), n, p.phase(),
+                        (x, y, z) -> level.addParticle(p.particle(), x, y, z, 0.0, 0.0, 0.0));
+            }
+            case SHELL -> {
+                int n = VfxBudget.count(p.points(), min, p.a());
+                ShapeLayout.shell(p.a(), p.radius(), n, p.phase(),
+                        (x, y, z) -> level.addParticle(p.particle(), x, y, z, 0.0, 0.0, 0.0));
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ package at.koopro.wizardsandbeasts.spell.protego;
 
 import at.koopro.wizardsandbeasts.Config;
 import at.koopro.wizardsandbeasts.entity.spell.ProtegoShieldEntity;
+import at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
@@ -82,14 +83,10 @@ public final class ProtegoFeedback {
             double radius = 0.7 + tier.index() * 0.18;
             double angle = heldTicks * 0.45;
             Vec3 centre = caster.position().add(0.0, 1.1, 0.0);
-            int motes = Math.max(1, Math.round(density() * (1 + tier.index())));
-            for (int i = 0; i < motes; i++) {
-                double a = angle + (i * Math.PI * 2.0 / motes);
-                level.sendParticles(tint(tier),
-                        centre.x + Math.cos(a) * radius, centre.y + Math.sin(angle * 0.5) * 0.15,
-                        centre.z + Math.sin(a) * radius,
-                        1, 0.0, 0.0, 0.0, 0.0);
-            }
+            // One packet for the circling motes; each client thins them to its own budget.
+            int motes = 1 + tier.index();
+            SpellVfxShapeS2CPayload.ring(level, tint(tier), centre.add(0.0, Math.sin(angle * 0.5) * 0.15, 0.0),
+                    UP, radius, motes, (float) angle);
         }
         if (planting && heldTicks % 5 == 0) {
             ring(level, tint(tier), caster.position().add(0.0, 0.1, 0.0), tier.radius(), 16);
@@ -220,19 +217,9 @@ public final class ProtegoFeedback {
             return;
         }
         normal = normal.normalize();
-        Vec3 helper = Math.abs(normal.y) > 0.9 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
-        Vec3 u = normal.cross(helper).normalize();
-        Vec3 v = normal.cross(u).normalize();
         SpellTintParticleOptions options = tint(shield.tier());
-        double[][] rings = {{0.35, 10}, {0.65, 16}};
-        for (double[] ring : rings) {
-            int points = (int) ring[1];
-            for (int i = 0; i < points; i++) {
-                double a = i * Math.PI * 2 / points;
-                Vec3 p = at.add(u.scale(Math.cos(a) * ring[0])).add(v.scale(Math.sin(a) * ring[0]));
-                level.sendParticles(options, p.x, p.y, p.z, 1, 0, 0, 0, 0);
-            }
-        }
+        SpellVfxShapeS2CPayload.ring(level, options, at, normal, 0.35, 10, 0f);
+        SpellVfxShapeS2CPayload.ring(level, options, at, normal, 0.65, 16, 0f);
     }
 
     /**
@@ -302,32 +289,24 @@ public final class ProtegoFeedback {
 
     // ── small shared pieces ─────────────────────────────────────────────────────────────────────
 
-    /** A sparse shell of motes on the ward's surface, so its real size is visible for a moment. */
+    /**
+     * A sparse shell of motes on the ward's surface, so its real size is visible for a moment: a golden-angle spiral
+     * ({@code ShapeLayout.shell}), one packet, thinned by each client's budget.
+     */
     private static void shell(ServerLevel level, ProtegoShieldEntity shield, float intensity) {
         ProtegoTier tier = shield.tier();
-        Vec3 centre = shield.centre();
-        int points = Math.max(4, Math.round(scaled(tier.frontalOnly() ? 10 : 22) * intensity));
-        for (int i = 0; i < points; i++) {
-            // Fibonacci-ish spread over the sphere: even coverage without trigonometric clumping.
-            double y = 1.0 - (i / (double) Math.max(1, points - 1)) * (tier.frontalOnly() ? 1.0 : 1.2);
-            double r = Math.sqrt(Math.max(0.0, 1.0 - y * y));
-            double theta = i * 2.399963;
-            Vec3 p = centre.add(Math.cos(theta) * r * tier.radius(), y * tier.radius(),
-                    Math.sin(theta) * r * tier.radius());
-            level.sendParticles(tint(tier), p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
-        }
+        int points = Math.max(4, Math.round((tier.frontalOnly() ? 10 : 22) * intensity));
+        SpellVfxShapeS2CPayload.shell(level, tint(tier), shield.centre(), tier.radius(), points,
+                tier.frontalOnly() ? 1.0f : 1.2f);
     }
 
+    /** A flat ring of motes, one packet; each client spends its own budget on it. */
     private static void ring(ServerLevel level, ParticleOptions options, Vec3 centre,
                              double radius, int points) {
-        int n = Math.max(4, Math.round(points * density()));
-        for (int i = 0; i < n; i++) {
-            double a = i * Math.PI * 2.0 / n;
-            level.sendParticles(options,
-                    centre.x + Math.cos(a) * radius, centre.y, centre.z + Math.sin(a) * radius,
-                    1, 0.0, 0.0, 0.0, 0.0);
-        }
+        SpellVfxShapeS2CPayload.ring(level, options, centre, radius, Math.max(4, points));
     }
+
+    private static final Vec3 UP = new Vec3(0, 1, 0);
 
     private static SpellTintParticleOptions tint(ProtegoTier tier) {
         return new SpellTintParticleOptions(ModParticles.PROTEGO_DEFLECT.get(), tier.colour());

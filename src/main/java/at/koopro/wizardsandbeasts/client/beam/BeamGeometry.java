@@ -1,9 +1,7 @@
 package at.koopro.wizardsandbeasts.client.beam;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
@@ -14,10 +12,13 @@ import org.joml.Matrix4f;
  *
  * <p>Because {@code SubmitNodeCollector.submitCustomGeometry} hands back an immutable
  * {@link com.mojang.blaze3d.vertex.PoseStack.Pose} rather than a push/poppable {@code PoseStack},
- * orientation is applied to a fresh {@link Matrix4f} copy of the base pose per segment instead of
+ * orientation is applied to a scratch {@link Matrix4f} set from the base pose per segment instead of
  * {@code poseStack.mulPose(...)}. The rotation sequence — and therefore the math — is identical.
  */
 public final class BeamGeometry {
+
+    /** Reused per segment; see {@link #segment}. */
+    private static final Matrix4f SCRATCH = new Matrix4f();
 
     /** One pixel in blocks. Style sizes are authored in pixels to match Blockbench models. */
     private static final float PX = 1f / 16f;
@@ -52,13 +53,16 @@ public final class BeamGeometry {
         // Copy the base pose, translate to the segment origin, then orient. The final +90° about X
         // turns "box grows up (+Y)" into "box grows along the beam direction", which lets the box
         // build stupidly along local +Y below without knowing anything about the aim.
-        Matrix4f m = new Matrix4f(basePose);
+        // One scratch matrix and in-place rotations: this runs per segment per frame (a lightning chain is several
+        // segments, a clash several chains), and the copy plus four quaternions were all garbage. Render thread only,
+        // and segments never nest, so sharing the scratch is safe.
+        Matrix4f m = SCRATCH.set(basePose);
         m.translate((float) from.x, (float) from.y, (float) from.z);
-        m.rotate(Axis.YP.rotationDegrees(-yaw));
-        m.rotate(Axis.XP.rotationDegrees(pitch));
-        m.rotate(Axis.XP.rotationDegrees(90f));
+        m.rotateY((float) Math.toRadians(-yaw));
+        m.rotateX((float) Math.toRadians(pitch));
+        m.rotateX((float) (Math.PI / 2.0));
         if (style.spin() != 0f) {
-            m.rotate(Axis.YP.rotationDegrees(((ticks + partialTick) * style.spin()) % 360f));
+            m.rotateY((float) Math.toRadians(((ticks + partialTick) * style.spin()) % 360f));
         }
 
         // Everything below sits on the texel grid (VISUAL_STYLE_GUIDE §2, §7): whole-pixel sizes,
@@ -69,15 +73,14 @@ public final class BeamGeometry {
         int hPx = Math.max(1, Math.round(style.height()));
         float halfW = wPx * PX * 0.5f;
         float halfH = hPx * PX * 0.5f;
-        AABB box = new AABB(-halfW, 0, -halfH, halfW, length, halfH);
 
         // CORE — the solid rod, plus a one-pixel spine in the lit tone when the rod is wide enough
         // to carry one, so the centre reads as structure and not as a flat bar.
         if (style.coreOpacity() > 0f) {
-            emitBox(m, consumer, box, style.coreColor(), style.coreOpacity());
+            emitBox(m, consumer, -halfW, 0, -halfH, halfW, length, halfH, style.coreColor(), style.coreOpacity());
             if (wPx >= 2 && hPx >= 2) {
-                AABB spine = new AABB(-PX * 0.5f, 0, -PX * 0.5f, PX * 0.5f, length, PX * 0.5f);
-                emitBox(m, consumer, spine, mix(style.coreColor(), 0xFFFFFF, 0.6f), style.coreOpacity());
+                emitBox(m, consumer, -PX * 0.5f, 0, -PX * 0.5f, PX * 0.5f, length, PX * 0.5f,
+                        mix(style.coreColor(), 0xFFFFFF, 0.6f), style.coreOpacity());
             }
         }
 
@@ -87,7 +90,9 @@ public final class BeamGeometry {
         for (int i = 1; i <= shells; i++) {
             float t = shells == 1 ? 1f : (i - 1) / (float) (shells - 1);
             int tone = mix(mix(style.coreColor(), style.glowColor(), 0.5f), style.glowColor(), t);
-            emitBox(m, consumer, box.inflate(i * PX), tone, style.glowOpacity() * SHELL_STEPS[i - 1]);
+            float d = i * PX;
+            emitBox(m, consumer, -halfW - d, -d, -halfH - d, halfW + d, length + d, halfH + d,
+                    tone, style.glowOpacity() * SHELL_STEPS[i - 1]);
         }
 
         // OUTER GLOW — sparse single pixels just outside the shells, on the four faces of the grid,
@@ -111,9 +116,8 @@ public final class BeamGeometry {
                 boolean onX = ((h >>> 13) & 1) == 0;
                 float x = onX ? side : 0f;
                 float z = onX ? 0f : side;
-                AABB spark = new AABB(x - PX * 0.5f, y, z - PX * 0.5f, x + PX * 0.5f, y + PX, z + PX * 0.5f);
-                emitBox(m, consumer, spark, mix(style.glowColor(), 0xFFFFFF, 0.35f),
-                        style.glowOpacity() * SPARK_OPACITY);
+                emitBox(m, consumer, x - PX * 0.5f, y, z - PX * 0.5f, x + PX * 0.5f, y + PX, z + PX * 0.5f,
+                        mix(style.glowColor(), 0xFFFFFF, 0.35f), style.glowOpacity() * SPARK_OPACITY);
             }
         }
     }
@@ -148,7 +152,8 @@ public final class BeamGeometry {
      * middle — visible as a dark notch at every joint of a {@link Lightning} chain and as a blunt,
      * unlit stub at the muzzle and impact point of a {@link Laser}.
      */
-    private static void emitBox(Matrix4f m, VertexConsumer c, AABB b, int rgb, float alpha) {
+    private static void emitBox(Matrix4f m, VertexConsumer c, float x0, float y0, float z0,
+                                float x1, float y1, float z1, int rgb, float alpha) {
         float a = Mth.clamp(alpha, 0f, 1f);
         if (a <= 0f) {
             return;
@@ -156,13 +161,6 @@ public final class BeamGeometry {
         float r = ((rgb >> 16) & 0xFF) / 255f;
         float g = ((rgb >> 8) & 0xFF) / 255f;
         float bl = (rgb & 0xFF) / 255f;
-
-        float x0 = (float) b.minX;
-        float y0 = (float) b.minY;
-        float z0 = (float) b.minZ;
-        float x1 = (float) b.maxX;
-        float y1 = (float) b.maxY;
-        float z1 = (float) b.maxZ;
 
         // Outward-CCW winding. The additive pipeline draws both sides (see BeamRenderTypes), so the
         // far wall of the tube adds light too; the translucent one still culls back faces.

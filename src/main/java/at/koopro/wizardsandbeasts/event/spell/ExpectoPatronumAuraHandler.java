@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.event.spell;
 
+import at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload;
+
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.heritage.data.PlayerHeritageData;
 import at.koopro.wizardsandbeasts.heritage.obscurial.ObscurialRules;
@@ -87,15 +89,16 @@ public final class ExpectoPatronumAuraHandler {
     }
 
     private static void renderAuraParticles(ServerLevel level, ServerPlayer caster) {
-        int rgb = AURA_COLOR & 0x00FFFFFF;
-        double y = caster.getY() + caster.getBbHeight() * 0.8;
-        for (int i = 0; i < 8; i++) {
-            double angle = (level.getGameTime() * 0.25 + i * (Math.PI * 2 / 8));
-            double px = caster.getX() + Math.cos(angle) * (AURA_RADIUS * 0.55);
-            double pz = caster.getZ() + Math.sin(angle) * (AURA_RADIUS * 0.55);
-            level.sendParticles(new DustParticleOptions(rgb, 1.0f),
-                    px, y, pz, 1, 0.03, 0.02, 0.03, 0.0);
+        // One ring packet every other tick, sixteen points, instead of eight single-particle packets every tick
+        // (160 a second per observer, audit 2026-11-15). Same particles a second; the ring still turns.
+        long time = level.getGameTime();
+        if (time % 2 != 0) {
+            return;
         }
+        int rgb = AURA_COLOR & 0x00FFFFFF;
+        Vec3 centre = new Vec3(caster.getX(), caster.getY() + caster.getBbHeight() * 0.8, caster.getZ());
+        SpellVfxShapeS2CPayload.ring(level, new DustParticleOptions(rgb, 1.0f), centre, new Vec3(0, 1, 0),
+                AURA_RADIUS * 0.55, 16, (float) (time * 0.25));
     }
 
     @SubscribeEvent

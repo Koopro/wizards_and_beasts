@@ -35,6 +35,9 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
 
     static final Jet DEFAULT_JET = new Jet(2.0f, 1.6);
 
+    /** Stateless shape, shared rather than built per bolt per frame. */
+    private static final Laser LASER = new Laser();
+
     static final Map<String, Jet> JETS = Map.ofEntries(
             Map.entry("diffindo", new Jet(1.0f, 2.2)),
             Map.entry("confringo", new Jet(3.0f, 1.1)),
@@ -91,7 +94,7 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
         int glow = mixRgb(rgb, 0xFFFFFF, 0.25f);
         float width = state.jet.widthPx();
         BeamStyle style = new BeamStyle(width, width, rgb, glow, 1.0f, 0.6f, 2, 0.0f, false, 0.5f);
-        new Laser().render(style, dir.scale(-length), Vec3.ZERO, 1.0f, 0,
+        LASER.render(style, dir.scale(-length), Vec3.ZERO, 1.0f, 0,
                 poseStack, collector, (int) state.flown, state.flown - (int) state.flown);
     }
 

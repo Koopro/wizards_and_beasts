@@ -234,10 +234,9 @@ public final class DragonBreathGoal extends Goal {
             double spread = 0.08 + 0.10 * s / steps; // cone widens downrange
             level.sendParticles(tint, p.x, p.y, p.z, 5, spread, spread, spread, 0.0);
             level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 3, spread, spread, spread, 0.01);
-            if (s % 4 == 0) {
-                level.sendParticles(ParticleTypes.LAVA, p.x, p.y, p.z, 1, spread, spread, spread, 0.0);
-            }
         }
+        // Spitting lava where the jet lands, in one call rather than a single-particle packet every fourth sample.
+        level.sendParticles(ParticleTypes.LAVA, stop.x, stop.y, stop.z, Math.max(1, steps / 4), 0.18, 0.18, 0.18, 0.0);
     }
 
     // ── cone geometry ──────────────────────────────────────────────────────────

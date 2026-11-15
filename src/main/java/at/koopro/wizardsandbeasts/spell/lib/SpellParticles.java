@@ -5,7 +5,9 @@ import at.koopro.wizardsandbeasts.spell.core.*;
 import at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions;
 import at.koopro.wizardsandbeasts.registry.ModParticles;
 import at.koopro.wizardsandbeasts.spell.def.SpellVfx;
+import at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
@@ -50,69 +52,23 @@ final class SpellParticles {
         beamDust(level, from, to, rgb);
     }
 
-    static void spawnTrail(ServerLevel level, Spell spell, Vec3 position, Vec3 motion, int segments) {
-        SpellTintParticleOptions opts =
-                ModParticles.tinted(spell.vfx().trail().particleFamily(), spell.getColor());
-        trailTinted(level, position, motion, segments, opts);
-    }
-
-    static void spawnTrail(ServerLevel level, Vec3 position, Vec3 motion, int argbColor, int segments) {
-        int rgb = argbColor & 0x00FFFFFF;
-        trailDust(level, position, motion, segments, rgb);
+    /**
+     * A particle line: one packet ({@code SpellVfxShapeS2CPayload}) for the whole line, laid out by each client under
+     * its own budget. It was one {@code sendParticles} per point — 65 to 300 packets per observer per cast (audit
+     * 2026-11-15). Same spacing (ten a block, at least nine) and the same few-hundredths jitter.
+     */
+    private static void line(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions opts) {
+        double distance = from.distanceTo(to);
+        if (distance <= 0.05) return;
+        int points = Math.max(8, (int) (distance * 10)) + 1;
+        SpellVfxShapeS2CPayload.line(level, opts, from, to, points, 0.035f);
     }
 
     private static void beamTinted(ServerLevel level, Vec3 from, Vec3 to, SpellTintParticleOptions opts) {
-        double distance = from.distanceTo(to);
-        if (distance <= 0.05) return;
-        int steps = Math.max(8, (int) (distance * 10));
-        for (int i = 0; i <= steps; i++) {
-            double t = i / (double) steps;
-            Vec3 base = from.lerp(to, t);
-            double jitterScale = 0.02 + level.random.nextDouble() * 0.03;
-            double dx = (level.random.nextDouble() - 0.5) * jitterScale;
-            double dy = (level.random.nextDouble() - 0.5) * jitterScale;
-            double dz = (level.random.nextDouble() - 0.5) * jitterScale;
-            level.sendParticles(opts, base.x, base.y, base.z, 1, dx, dy, dz, 0.0);
-        }
+        line(level, from, to, opts);
     }
 
     private static void beamDust(ServerLevel level, Vec3 from, Vec3 to, int rgb) {
-        double distance = from.distanceTo(to);
-        if (distance <= 0.05) return;
-        int steps = Math.max(8, (int) (distance * 10));
-        for (int i = 0; i <= steps; i++) {
-            double t = i / (double) steps;
-            Vec3 base = from.lerp(to, t);
-            double jitterScale = 0.02 + level.random.nextDouble() * 0.03;
-            double dx = (level.random.nextDouble() - 0.5) * jitterScale;
-            double dy = (level.random.nextDouble() - 0.5) * jitterScale;
-            double dz = (level.random.nextDouble() - 0.5) * jitterScale;
-            level.sendParticles(
-                    new DustParticleOptions(rgb, 1.0f),
-                    base.x, base.y, base.z, 1, dx, dy, dz, 0.0);
-        }
-    }
-
-    private static void trailTinted(ServerLevel level, Vec3 position, Vec3 motion, int segments,
-                                    SpellTintParticleOptions opts) {
-        for (int i = 0; i < segments; i++) {
-            double t = i / (double) segments;
-            double px = position.x - motion.x * t * 0.4;
-            double py = position.y - motion.y * t * 0.4;
-            double pz = position.z - motion.z * t * 0.4;
-            level.sendParticles(opts, px, py, pz, 1, 0.02, 0.02, 0.02, 0.0);
-        }
-    }
-
-    private static void trailDust(ServerLevel level, Vec3 position, Vec3 motion, int segments, int rgb) {
-        for (int i = 0; i < segments; i++) {
-            double t = i / (double) segments;
-            double px = position.x - motion.x * t * 0.4;
-            double py = position.y - motion.y * t * 0.4;
-            double pz = position.z - motion.z * t * 0.4;
-            level.sendParticles(
-                    new DustParticleOptions(rgb, 1.0f),
-                    px, py, pz, 1, 0.02, 0.02, 0.02, 0.0);
-        }
+        line(level, from, to, new DustParticleOptions(rgb, 1.0f));
     }
 }

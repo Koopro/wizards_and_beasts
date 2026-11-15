@@ -70,12 +70,24 @@ final class WandBeamSpellHandlers {
      */
     private static void beamImpact(ServerPlayer anchor, String spellId, Vec3 pos, SpellFamily family, int argb,
                                    int count, float spread) {
+        beamImpact(anchor, spellId, pos, family, argb, count, spread, true);
+    }
+
+    /** @param shake false for the steady sparks of a held channel: a camera kick belongs to a hit, not to a hold */
+    private static void beamImpact(ServerPlayer anchor, String spellId, Vec3 pos, SpellFamily family, int argb,
+                                   int count, float spread, boolean shake) {
         net.minecraft.server.MinecraftServer server = anchor.level().getServer();
         int scaled = server == null ? count : BeamVisualService.impactCount(server, spellId, count);
         if (scaled > 0) {
-            SpellImpactBurstS2CPayload.sendToTracking(anchor, pos, family, argb, scaled, spread);
+            SpellImpactBurstS2CPayload.sendToTracking(anchor, pos, family, argb, scaled, spread, shake);
         }
     }
+
+    /**
+     * Held Leviosa sparks go out every fourth tick, four times the motes each: the same sparks a second on screen,
+     * a quarter of the packets. They went every tick (audit 2026-11-15).
+     */
+    static final int LEVIOSA_SPARK_INTERVAL_TICKS = 4;
 
     static void handleAguamentiChannel(ServerLevel level, ServerPlayer player, Spell spell,
                                        WandBeamSession s, float maxReach) {
@@ -139,7 +151,7 @@ final class WandBeamSpellHandlers {
         }
         if (s.beamTicks % 3 == 0) {
             Vec3 c = waterAim.getCenter();
-            beamImpact(player, spell.getId(), c, SpellFamilies.of(spell), spell.getColor(), 5, 0.12f);
+            beamImpact(player, spell.getId(), c, SpellFamilies.of(spell), spell.getColor(), 5, 0.12f, false);
         }
     }
 
@@ -504,8 +516,10 @@ final class WandBeamSpellHandlers {
         target.fallDistance = 0f;
         s.leviosaLastCommandedSpeed = (float) blendedVelocity.length();
 
-        beamImpact(caster, BeamVisualDefaults.LEVIOSA, target.getBoundingBox().getCenter(),
-                SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6, 0.18f);
+        if (s.beamTicks % LEVIOSA_SPARK_INTERVAL_TICKS == 0) {
+            beamImpact(caster, BeamVisualDefaults.LEVIOSA, target.getBoundingBox().getCenter(),
+                    SpellFamily.ARCANE, LEVIOSA_PARTICLE_COLOR, 6 * LEVIOSA_SPARK_INTERVAL_TICKS, 0.18f, false);
+        }
     }
 
     /** Mirrors {@code BroomImpacts.calculateImpactSeverity}: speed ratio against a wall/ground hit becomes damage. */

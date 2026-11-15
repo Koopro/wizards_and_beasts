@@ -76,6 +76,10 @@ public final class ModNetworkSpells {
                 SpellImpactBurstS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleSpellImpactBurst);
         registrar.playToClient(
+                SpellVfxShapeS2CPayload.TYPE,
+                SpellVfxShapeS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleSpellVfxShape);
+        registrar.playToClient(
                 SpellCastAnimationS2CPayload.TYPE,
                 SpellCastAnimationS2CPayload.STREAM_CODEC,
                 SpellClientPayloadHandlers::handleSpellCastAnimation);

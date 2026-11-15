@@ -391,8 +391,9 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         }
     }
 
+    /** Client-side trail spacing, by this client's spell-VFX quality (not the COMMON perfProfile). */
     private int projectileTrailInterval() {
-        return switch (Config.perfProfile) {
+        return switch (Config.vfxQuality) {
             case LOW -> 3;
             case MEDIUM -> 2;
             case HIGH -> 1;

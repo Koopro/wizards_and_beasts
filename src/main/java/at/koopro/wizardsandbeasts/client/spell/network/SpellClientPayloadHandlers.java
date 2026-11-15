@@ -159,6 +159,11 @@ public final class SpellClientPayloadHandlers {
         });
     }
 
+    public static void handleSpellVfxShape(
+            at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> SpellVfxClient.spawnShape(pkt));
+    }
+
     public static void handleSpellImpactBurst(SpellImpactBurstS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             Vec3 pos = new Vec3(pkt.x(), pkt.y(), pkt.z());
@@ -168,7 +173,9 @@ public final class SpellClientPayloadHandlers {
             // This payload already reaches everyone tracking the impact and already carries where
             // it landed and how big it was, so the camera kick rides along on it — no extra packet,
             // and every existing impact call site gets one without being touched.
-            ScreenShakeHandler.impact(pos, count);
+            if (pkt.shake()) {
+                ScreenShakeHandler.impact(pos, count);
+            }
         });
     }
 
