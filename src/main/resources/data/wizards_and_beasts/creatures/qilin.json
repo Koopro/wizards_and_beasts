@@ -38,6 +38,8 @@
     "death",
     "graze",
     "sniff",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ]
 }

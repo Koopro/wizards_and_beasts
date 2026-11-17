@@ -44,7 +44,9 @@
     "stretch",
     "hit",
     "death",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "idle": {

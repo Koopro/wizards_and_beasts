@@ -50,7 +50,9 @@
     "hit",
     "death",
     "drift",
-    "roll"
+    "roll",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "sounds": {

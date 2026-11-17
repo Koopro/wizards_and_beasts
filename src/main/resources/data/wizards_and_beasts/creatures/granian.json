@@ -24,6 +24,8 @@
     "death",
     "stretch",
     "shake",
-    "graze"
+    "graze",
+    "lie_down",
+    "wake"
   ]
 }
