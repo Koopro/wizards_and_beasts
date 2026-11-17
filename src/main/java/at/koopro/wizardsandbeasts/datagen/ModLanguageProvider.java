@@ -16,6 +16,9 @@ public class ModLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         creativeTabs();
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.NAMES.forEach((id, name) ->
+                add("block." + WizardsAndBeastsMod.MODID + "." + id, name));
+        add("entity." + WizardsAndBeastsMod.MODID + ".seat", "Seat");
         debugTools();
         elder();
         yew();

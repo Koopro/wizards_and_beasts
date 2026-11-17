@@ -3,6 +3,7 @@ package at.koopro.wizardsandbeasts.datagen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import at.koopro.wizardsandbeasts.registry.FurnitureBlocks;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
@@ -24,6 +25,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider lookupProvider) {
+        furnitureTags();
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
             addWoodSetTags(woodSet);
         }
@@ -158,5 +160,33 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
         tag(BlockTags.MINEABLE_WITH_AXE).add(log, strippedLog, woodBlock, strippedWood, planks, slab, stairs);
         tag(BlockTags.MINEABLE_WITH_HOE).add(leaves);
+    }
+
+    /** World-decoration collections: tools, climbing, fences and the enchanting table's shelves. */
+    private void furnitureTags() {
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                FurnitureBlocks.HOGWARTS_GOTHIC_ARCH.get(),
+                FurnitureBlocks.HOGWARTS_STONE_COLUMN.get(),
+                FurnitureBlocks.HOGWARTS_STONE_BALUSTRADE.get(),
+                FurnitureBlocks.IRON_WALL_SCONCE.get(),
+                FurnitureBlocks.MAGICAL_LANTERN.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(
+                FurnitureBlocks.ACADEMY_DESK.get(),
+                FurnitureBlocks.ACADEMY_CHAIR.get(),
+                FurnitureBlocks.REFECTORY_TABLE.get(),
+                FurnitureBlocks.REFECTORY_BENCH.get(),
+                FurnitureBlocks.MAGICAL_WALL_CLOCK.get(),
+                FurnitureBlocks.LIBRARY_BOOKSHELF.get(),
+                FurnitureBlocks.LIBRARY_BOOKSHELF_SPARSE.get(),
+                FurnitureBlocks.LIBRARY_LADDER.get(),
+                FurnitureBlocks.READING_ARMCHAIR.get(),
+                FurnitureBlocks.DESK_GLOBE.get(),
+                FurnitureBlocks.FLOATING_BOOK.get());
+        // Balustrades join like fences (FenceBlock only joins blocks in #fences); stone, so not #wooden_fences.
+        tag(BlockTags.FENCES).add(FurnitureBlocks.HOGWARTS_STONE_BALUSTRADE.get());
+        tag(BlockTags.CLIMBABLE).add(FurnitureBlocks.LIBRARY_LADDER.get());
+        tag(BlockTags.ENCHANTMENT_POWER_PROVIDER).add(FurnitureBlocks.LIBRARY_BOOKSHELF.get(),
+                FurnitureBlocks.LIBRARY_BOOKSHELF_SPARSE.get());
+        tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.ACADEMY_CARPET.get(), FurnitureBlocks.LIBRARY_CARPET.get());
     }
 }

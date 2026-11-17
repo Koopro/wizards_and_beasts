@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/iron_wall_sconce"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/iron_wall_sconce",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/iron_wall_sconce",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/iron_wall_sconce",
+      "y": 270
+    }
+  }
+}

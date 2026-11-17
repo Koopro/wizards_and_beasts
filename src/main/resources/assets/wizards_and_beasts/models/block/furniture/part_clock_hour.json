@@ -1,0 +1,41 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/furniture/iron",
+    "particle": "wizards_and_beasts:block/furniture/iron"
+  },
+  "elements": [
+    {
+      "from": [
+        7.5,
+        7.5,
+        13.2
+      ],
+      "to": [
+        8.5,
+        10.5,
+        13.4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0"
+        },
+        "west": {
+          "texture": "#m0"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    }
+  ]
+}

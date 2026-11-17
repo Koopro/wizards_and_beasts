@@ -57,7 +57,9 @@ class VisualStyleConformanceTest {
     @Test
     void buildingBlocksHaveMaterialNotAWash() throws IOException {
         List<String> failures = new ArrayList<>();
-        try (Stream<Path> files = Files.list(ASSETS.resolve("textures/block"))) {
+        // The block folder and the decoration materials (furniture/), whose tiles sit on the same texel grid.
+        try (Stream<Path> files = Stream.concat(Files.list(ASSETS.resolve("textures/block")),
+                Files.list(ASSETS.resolve("textures/block/furniture")))) {
             for (Path png : files.filter(p -> p.toString().endsWith(".png")).sorted().toList()) {
                 BufferedImage img = ImageIO.read(png.toFile());
                 if (img.getWidth() < 16 || img.getHeight() < 16 || !opaqueTile(img)) {

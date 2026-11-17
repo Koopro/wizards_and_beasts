@@ -115,6 +115,7 @@ public final class WizardsAndBeastsGameTests {
         VampireBloodTests.contribute(registrar);
         ChoranaptyxisTests.contribute(registrar);
         PlacementFacingTests.contribute(registrar);
+        FurnitureTests.contribute(registrar);
         SpellLearningTests.contribute(registrar);
         SpellTraceTests.contribute(registrar);
         SpellAcquisitionTests.contribute(registrar);

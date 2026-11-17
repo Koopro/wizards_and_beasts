@@ -120,6 +120,7 @@ public class ModModelProvider extends ModelProvider {
     static Set<Block> handAuthoredBlocks() {
         Set<Block> blocks = new java.util.HashSet<>();
         at.koopro.wizardsandbeasts.registry.DecoBlocks.ALL.forEach(block -> blocks.add(block.get()));
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.ALL.forEach(block -> blocks.add(block.get()));
         blocks.add(ModBlocks.LEAKY_CAULDRON_DOOR.get());
         blocks.add(ModBlocks.DIAGON_ARCHWAY.get());
         blocks.add(ModBlocks.DIAGON_ARCHWAY_MOVING.get());

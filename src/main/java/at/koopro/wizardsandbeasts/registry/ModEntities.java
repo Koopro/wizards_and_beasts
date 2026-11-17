@@ -101,6 +101,11 @@ public class ModEntities {
             EntityHelper.register(ENTITY_TYPES, "form_mannequin", FormMannequinEntity::new, MobCategory.MISC, 0.6f, 1.8f);
     static { EntityAttributeBindings.queue(FORM_MANNEQUIN, FormMannequinEntity::createAttributes); }
 
+    /** What a player rides while sitting on a chair, bench or armchair (furniture). Invisible, never saved. */
+    public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.block.furniture.SeatEntity>> SEAT =
+            EntityHelper.register(ENTITY_TYPES, "seat", at.koopro.wizardsandbeasts.block.furniture.SeatEntity::new,
+                    MobCategory.MISC, 0.2f, 0.2f, 10, 20);
+
     /**
      * Duelling dummy. Player-sized on purpose - it wears the same armour on the same bones, so the
      * damage it reports is the damage a wizard in that robe would take. See {@link DuellingDummyEntity}.

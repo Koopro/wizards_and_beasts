@@ -1,5 +1,16 @@
 {
   "values": [
+    "wizards_and_beasts:academy_desk",
+    "wizards_and_beasts:academy_chair",
+    "wizards_and_beasts:refectory_table",
+    "wizards_and_beasts:refectory_bench",
+    "wizards_and_beasts:magical_wall_clock",
+    "wizards_and_beasts:library_bookshelf",
+    "wizards_and_beasts:library_bookshelf_sparse",
+    "wizards_and_beasts:library_ladder",
+    "wizards_and_beasts:reading_armchair",
+    "wizards_and_beasts:desk_globe",
+    "wizards_and_beasts:floating_book",
     "wizards_and_beasts:elder_log",
     "wizards_and_beasts:stripped_elder_log",
     "wizards_and_beasts:elder_wood",

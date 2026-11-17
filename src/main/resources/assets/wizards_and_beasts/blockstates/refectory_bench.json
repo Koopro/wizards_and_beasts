@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,run=single": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_single"
+    },
+    "facing=north,run=start": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_start"
+    },
+    "facing=north,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_middle"
+    },
+    "facing=north,run=end": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_end"
+    },
+    "facing=east,run=single": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_single",
+      "y": 90
+    },
+    "facing=east,run=start": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_start",
+      "y": 90
+    },
+    "facing=east,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_middle",
+      "y": 90
+    },
+    "facing=east,run=end": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_end",
+      "y": 90
+    },
+    "facing=south,run=single": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_single",
+      "y": 180
+    },
+    "facing=south,run=start": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_start",
+      "y": 180
+    },
+    "facing=south,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_middle",
+      "y": 180
+    },
+    "facing=south,run=end": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_end",
+      "y": 180
+    },
+    "facing=west,run=single": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_single",
+      "y": 270
+    },
+    "facing=west,run=start": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_start",
+      "y": 270
+    },
+    "facing=west,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_middle",
+      "y": 270
+    },
+    "facing=west,run=end": {
+      "model": "wizards_and_beasts:block/furniture/refectory_bench_end",
+      "y": 270
+    }
+  }
+}

@@ -80,6 +80,7 @@ public class WizardsAndBeastsMod {
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         at.koopro.wizardsandbeasts.registry.DecoBlocks.init();
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.init();
         WandItemRegistry.init();
         BroomItemRegistry.init();
         at.koopro.wizardsandbeasts.travel.TravelItems.init();
