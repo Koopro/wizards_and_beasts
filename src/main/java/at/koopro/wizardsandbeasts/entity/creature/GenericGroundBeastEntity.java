@@ -32,6 +32,7 @@ public class GenericGroundBeastEntity extends GenericBeastEntity {
                 state.setControllerSpeed(1.0f);
                 return state.setAndContinue(state.isMoving() ? guise.moving() : guise.idle());
             }
+            AnimHelper.observe(this, name);
             at.koopro.wizardsandbeasts.creature.profile.CreatureActivity.Loop loop =
                     activity().loop(state.isMoving(), clip -> AnimHelper.rigHas(name, clip), "walk");
             state.setControllerSpeed((float) loop.speed());

@@ -66,6 +66,21 @@ public enum CreatureActivity {
         return id >= 0 && id < BY_ID.length ? BY_ID[id] : IDLE;
     }
 
+    /**
+     * The one-shot that bridges two activities, or {@code null}: {@code lie_down} on falling asleep, {@code wake} on
+     * getting up. The loops alone would snap a standing creature to the ground in the controller's five-tick blend.
+     * Played only when the rig has the clip; a rig without one keeps the blend.
+     */
+    public static @org.jspecify.annotations.Nullable String bridge(CreatureActivity from, CreatureActivity to) {
+        if (from == to) {
+            return null;
+        }
+        if (to == SLEEP) {
+            return "lie_down";
+        }
+        return from == SLEEP ? "wake" : null;
+    }
+
     /** A clip to loop and the speed to play it at. */
     public record Loop(String clip, double speed) {}
 

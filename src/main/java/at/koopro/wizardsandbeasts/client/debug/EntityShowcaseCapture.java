@@ -89,7 +89,9 @@ import java.util.Set;
  * never moves); {@code vanish}/{@code appear} add and remove invisibility (the fade); {@code look} turns the creature's synced head away from its body (the life pass's head turn);
  * {@code @clip} fires a declared one-shot through {@code GenericBeastEntity.triggerDeclared}, {@code @controller/clip}
  * any triggerable clip of any GeckoLib creature; {@code pace}, {@code fly} and {@code glide} move the client copy so
- * a creature that reads its own movement (the Phoenix) plays those loops.
+ * a creature that reads its own movement (the Phoenix) plays those loops. A trailing {@code +} ({@code sleep+})
+ * shoots the first frame two ticks after the change instead of thirty, so the bridging one-shot ({@code lie_down},
+ * {@code wake}) is on film.
  * {@code WB_ENTITY_SHOWCASE_STRIP} is {@code frames:interval} (default {@code 4:5}): how many shots per action and
  * how many ticks apart; {@code name*frames:interval} overrides it for one action. Files are {@code <stem>__<action>_f<n>.png}.
  */
@@ -421,7 +423,7 @@ public final class EntityShowcaseCapture {
                 villager.snapTo(-(size * 0.5 + 1.0), shown ? STAGE_Y : STAGE_Y - 40, 0.5, 0.0F, 0.0F);
             }
             if (action != null && current.frame() == 0 && subject instanceof GenericBeastEntity beast) {
-                act(beast, action);
+                act(beast, action.endsWith("+") ? action.substring(0, action.length() - 1) : action);
             } else if (action != null && current.frame() == 0 && action.startsWith("@") && action.contains("/")
                     && subject instanceof software.bernie.geckolib.animatable.GeoEntity geo) {
                 // `@controller/clip`: any triggerable clip, for creatures with their own controllers (the Phoenix).
@@ -465,7 +467,9 @@ public final class EntityShowcaseCapture {
         if (action != null) {
             // The first frame waits for the controller to blend in (and lids or a sit to settle).
             boolean quick = action.startsWith("@") || action.equals("vanish") || action.equals("appear")
-                    || action.equals("fight") || action.equals("struck");
+                    || action.equals("fight") || action.equals("struck")
+                    // `sleep+`: shoot from the change on, to see the bridging one-shot (lie_down, wake) play.
+                    || action.endsWith("+");
             wait = current.frame() == 0 ? (quick ? 2 : 30) : current.interval();
             return;
         }

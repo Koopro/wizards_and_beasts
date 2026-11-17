@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /** The activity loop's fallback chain: the best clip the rig has, else a stand-in from idle and walk. */
 class CreatureActivityTest {
@@ -49,5 +50,30 @@ class CreatureActivityTest {
         }
         assertEquals(CreatureActivity.IDLE, CreatureActivity.byId((byte) 120));
         assertEquals(CreatureActivity.IDLE, CreatureActivity.byId((byte) -1));
+    }
+
+    @Test
+    void fallingAsleepLiesDownAndGettingUpWakes() {
+        assertEquals("lie_down", CreatureActivity.bridge(CreatureActivity.IDLE, CreatureActivity.SLEEP));
+        assertEquals("lie_down", CreatureActivity.bridge(CreatureActivity.REST, CreatureActivity.SLEEP));
+        assertEquals("wake", CreatureActivity.bridge(CreatureActivity.SLEEP, CreatureActivity.IDLE));
+        assertEquals("wake", CreatureActivity.bridge(CreatureActivity.SLEEP, CreatureActivity.FLEE));
+    }
+
+    @Test
+    void noOtherChangeHasABridge() {
+        for (CreatureActivity a : CreatureActivity.values()) {
+            for (CreatureActivity b : CreatureActivity.values()) {
+                if (a != CreatureActivity.SLEEP && b != CreatureActivity.SLEEP || a == b) {
+                    assertNull(CreatureActivity.bridge(a, b), a + " -> " + b);
+                }
+            }
+        }
+    }
+
+    @Test
+    void theBridgeFiresOnTheControllerGenericCreaturesRegister() {
+        assertEquals(at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity.BEAST_ACTION_CONTROLLER,
+                at.koopro.wizardsandbeasts.util.AnimHelper.ACTION_CONTROLLER);
     }
 }

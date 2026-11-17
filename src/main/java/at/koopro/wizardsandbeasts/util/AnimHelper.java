@@ -78,6 +78,30 @@ public final class AnimHelper {
         return rigHasClip.test(asset, clip);
     }
 
+    /** The activity each creature showed last frame, client side. Weak: a creature that leaves drops out. */
+    private static final Map<Object, CreatureActivity> LAST_SEEN =
+            java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
+    /** The one-shot controller every generic creature registers its declared clips on. */
+    public static final String ACTION_CONTROLLER = "beast_action";
+
+    /**
+     * Called by a movement controller every frame: when the creature's activity changed since the last frame, fire
+     * the bridging one-shot ({@link CreatureActivity#bridge}) if the rig has it. The first sighting only records, so
+     * a creature that loads in asleep does not lie down again. Unregistered triggers are a silent no-op in GeckoLib.
+     */
+    public static <T extends GeoEntity & HasActivity> void observe(T animatable, String asset) {
+        CreatureActivity now = animatable.activity();
+        CreatureActivity before = LAST_SEEN.put(animatable, now);
+        if (before == null) {
+            return;
+        }
+        String clip = CreatureActivity.bridge(before, now);
+        if (clip != null && rigHas(asset, clip)) {
+            animatable.triggerAnim(ACTION_CONTROLLER, clip);
+        }
+    }
+
     /** Looping clips by full name, made once each: the controller runs every frame. */
     private static final Map<String, RawAnimation> LOOPS = new ConcurrentHashMap<>();
 
@@ -95,6 +119,7 @@ public final class AnimHelper {
     public static <T extends GeoEntity & HasActivity> AnimationController<T> activityController(
             String asset, int transitionTicks, String base) {
         return new AnimationController<>(asset + "_movement", transitionTicks, state -> {
+            observe(state.animatable(), asset);
             CreatureActivity.Loop loop = state.animatable().activity()
                     .loop(state.isMoving(), clip -> rigHas(asset, clip), base);
             state.setControllerSpeed((float) loop.speed());
