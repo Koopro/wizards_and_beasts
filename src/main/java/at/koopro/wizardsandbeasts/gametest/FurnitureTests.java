@@ -176,6 +176,16 @@ public final class FurnitureTests {
             expectArch(helper, scene.at(2, 1, 1), ArchBlock.Part.END);
             scene.close();
 
+            // Over a window the arch's curve takes the pane's glass; with the pane gone it is open again.
+            scene.set(scene.at(0, 0, 1), Blocks.STONE);
+            scene.place(player, (BlockItem) FurnitureBlocks.CRIMSON_LEADED_GLASS_PANE.asItem(), scene.at(0, 0, 1),
+                    Direction.UP, Direction.SOUTH);
+            scene.place(player, arch, scene.at(0, 1, 1), Direction.UP, Direction.SOUTH);
+            expectGlass(helper, scene.at(0, 2, 1), ArchBlock.Glass.CRIMSON);
+            helper.setBlock(scene.at(0, 1, 1), Blocks.AIR);
+            expectGlass(helper, scene.at(0, 2, 1), ArchBlock.Glass.NONE);
+            scene.close();
+
             // A column three high: base, shaft, capital; one alone is a pedestal.
             scene.set(scene.at(0, 0, 1), Blocks.STONE);
             BlockItem column = (BlockItem) FurnitureBlocks.HOGWARTS_STONE_COLUMN.asItem();
@@ -202,6 +212,12 @@ public final class FurnitureTests {
         BlockState state = helper.getBlockState(pos);
         WizardTestSupport.check(helper, state.hasProperty(ArchBlock.PART) && state.getValue(ArchBlock.PART) == part,
                 () -> pos + " is " + state + ", expected " + part);
+    }
+
+    private static void expectGlass(GameTestHelper helper, BlockPos pos, ArchBlock.Glass glass) {
+        BlockState state = helper.getBlockState(pos);
+        WizardTestSupport.check(helper, state.hasProperty(ArchBlock.GLASS) && state.getValue(ArchBlock.GLASS) == glass,
+                () -> pos + " is " + state + ", expected glass " + glass);
     }
 
     private static void expectColumn(GameTestHelper helper, BlockPos pos, ColumnBlock.Part part) {

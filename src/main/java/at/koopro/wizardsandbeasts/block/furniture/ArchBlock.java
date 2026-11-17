@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import at.koopro.wizardsandbeasts.registry.FurnitureBlocks;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -30,6 +31,10 @@ import org.jspecify.annotations.Nullable;
  * lancet; two side by side meet in a point over the joint; three spring at the ends and rise to a crown in the middle
  * block. Wider runs repeat the middle (flatter, like a Tudor arch). The part follows the neighbours, so a builder
  * only lays the row. Curves and outlines come from {@code tools/furniture_models.py}.
+ *
+ * <p>Over a window the curve is glazed: when a leaded pane stands under the arch, the space under its curve takes the
+ * same glass, so the light runs up into the point instead of ending flat under an empty arch. Over a door it stays
+ * open.
  */
 @NullMarked
 public class ArchBlock extends HorizontalDirectionalBlock {
@@ -45,13 +50,36 @@ public class ArchBlock extends HorizontalDirectionalBlock {
 
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
 
+    /** The glass filling the curve, taken from the pane under the arch. */
+    public enum Glass implements StringRepresentable {
+        NONE, CLEAR, CRIMSON, AZURE;
+
+        @Override
+        public String getSerializedName() {
+            return name().toLowerCase(java.util.Locale.ROOT);
+        }
+
+        static Glass under(BlockState below) {
+            if (below.is(FurnitureBlocks.LEADED_GLASS_PANE.get())) {
+                return CLEAR;
+            }
+            if (below.is(FurnitureBlocks.CRIMSON_LEADED_GLASS_PANE.get())) {
+                return CRIMSON;
+            }
+            return below.is(FurnitureBlocks.AZURE_LEADED_GLASS_PANE.get()) ? AZURE : NONE;
+        }
+    }
+
+    public static final EnumProperty<Glass> GLASS = EnumProperty.create("glass", Glass.class);
+
     private final String shapeKey;
     private final Map<BlockState, VoxelShape> shapes = new HashMap<>();
 
     public ArchBlock(BlockBehaviour.Properties properties, String shapeKey) {
         super(properties);
         this.shapeKey = shapeKey;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, Part.SINGLE));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, Part.SINGLE)
+                .setValue(GLASS, Glass.NONE));
         for (BlockState state : stateDefinition.getPossibleStates()) {
             shapes.put(state, FurnitureBlock.rotated(
                     FurnitureShapes.boxes(shapeKey + "_" + state.getValue(PART).getSerializedName()),
@@ -66,7 +94,7 @@ public class ArchBlock extends HorizontalDirectionalBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, PART);
+        builder.add(FACING, PART, GLASS);
     }
 
     @Override
@@ -81,12 +109,16 @@ public class ArchBlock extends HorizontalDirectionalBlock {
                 break;
             }
         }
-        return part(state, context.getLevel(), context.getClickedPos());
+        BlockPos pos = context.getClickedPos();
+        return part(state, context.getLevel(), pos).setValue(GLASS, Glass.under(context.getLevel().getBlockState(pos.below())));
     }
 
     @Override
     protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
                                      Direction direction, BlockPos neighborPos, BlockState neighbor, RandomSource random) {
+        if (direction == Direction.DOWN) {
+            return state.setValue(GLASS, Glass.under(neighbor));
+        }
         return direction.getAxis().isHorizontal() ? part(state, level, pos) : state;
     }
 
