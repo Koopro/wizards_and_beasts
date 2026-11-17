@@ -28,10 +28,10 @@ public final class FurnitureShapes {
         put("hogwarts_stone_column_shaft", box(4, 0, 4, 12, 16, 12));
         put("hogwarts_stone_column_single", box(2, 0, 2, 14, 2, 14), box(3, 2, 3, 13, 3, 13), box(4, 3, 4, 12, 12, 12), box(3, 12, 3, 13, 14, 13), box(2, 14, 2, 14, 16, 14));
         put("iron_wall_sconce", box(6, 5, 8, 10, 13, 16));
-        put("library_bookshelf_end", box(0, 0, 1, 16, 16, 16));
-        put("library_bookshelf_middle", box(0, 0, 1, 16, 16, 16));
-        put("library_bookshelf_single", box(0, 0, 1, 16, 16, 16));
-        put("library_bookshelf_start", box(0, 0, 1, 16, 16, 16));
+        put("library_bookshelf_end", box(0, 0, 0, 16, 16, 16));
+        put("library_bookshelf_middle", box(0, 0, 0, 16, 16, 16));
+        put("library_bookshelf_single", box(0, 0, 0, 16, 16, 16));
+        put("library_bookshelf_start", box(0, 0, 0, 16, 16, 16));
         put("magical_wall_clock", box(2, 2, 13, 14, 14, 16));
         put("reading_armchair", box(1, 0, 1, 15, 8, 15), box(1, 8, 2, 3, 11, 12), box(13, 8, 2, 15, 11, 12), box(1, 8, 12, 15, 22, 15));
         put("refectory_bench_end", box(0, 6, 4, 16, 8, 12), box(12.5, 0, 5, 14.5, 6, 11));

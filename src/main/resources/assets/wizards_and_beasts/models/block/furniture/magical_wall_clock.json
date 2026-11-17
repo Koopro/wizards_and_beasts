@@ -2,8 +2,8 @@
   "parent": "minecraft:block/block",
   "textures": {
     "m0": "wizards_and_beasts:block/furniture/walnut",
-    "m1": "wizards_and_beasts:block/furniture/brass",
-    "m2": "wizards_and_beasts:block/furniture/clock_face",
+    "m1": "wizards_and_beasts:block/furniture/clock_face",
+    "m2": "wizards_and_beasts:block/furniture/brass",
     "particle": "wizards_and_beasts:block/furniture/walnut"
   },
   "elements": [
@@ -108,79 +108,50 @@
     },
     {
       "from": [
-        3.5,
-        3.5,
-        13.6
+        3,
+        3,
+        13.9
       ],
       "to": [
-        12.5,
-        12.5,
+        13,
+        13,
         14
       ],
       "faces": {
         "north": {
           "texture": "#m1"
-        },
-        "east": {
-          "texture": "#m1"
-        },
-        "west": {
-          "texture": "#m1"
-        },
-        "up": {
-          "texture": "#m1"
-        },
-        "down": {
-          "texture": "#m1"
         }
       }
     },
     {
       "from": [
-        4,
-        4,
-        13.5
+        7.5,
+        7.5,
+        13.2
       ],
       "to": [
-        12,
-        12,
-        13.6
+        8.5,
+        8.5,
+        13.9
       ],
       "faces": {
         "north": {
           "texture": "#m2"
-        }
-      }
-    },
-    {
-      "from": [
-        7.5,
-        7.5,
-        13
-      ],
-      "to": [
-        8.5,
-        8.5,
-        13.5
-      ],
-      "faces": {
-        "north": {
-          "texture": "#m1"
         },
         "south": {
-          "texture": "#m1"
+          "texture": "#m2"
         },
         "east": {
-          "texture": "#m1"
+          "texture": "#m2"
         },
         "west": {
-          "texture": "#m1"
+          "texture": "#m2"
         },
         "up": {
-          "texture": "#m1"
+          "texture": "#m2"
         },
         "down": {
-          "texture": "#m1"
+          "texture": "#m2"
         }
       }
     }
