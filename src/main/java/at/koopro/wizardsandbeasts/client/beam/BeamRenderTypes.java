@@ -61,14 +61,14 @@ public final class BeamRenderTypes {
     /**
      * Normal alpha blend ({@code DEBUG_FILLED_BOX} pipeline: {@code BlendFunction.TRANSLUCENT},
      * depth-write off). Needed for dark magic — additive blending can never draw darker than the
-     * background, so a black/purple beam would be invisible against a bright sky. Sorted on
-     * upload so overlapping translucent faces composite in a stable order.
+     * background, so a black/purple beam would be invisible against a bright sky. Not sorted on upload:
+     * {@code BeamGeometry} emits shells outermost first and the core last, and with back faces culled that
+     * order is the correct one; sorting by distance put the shells' front faces over the core.
      */
     public static final RenderType BEAM_TRANSLUCENT = RenderType.create(
             "wab_beam_translucent",
             RenderSetup.builder(RenderPipelines.DEBUG_FILLED_BOX)
                     .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                    .sortOnUpload()
                     .createRenderSetup());
 
     /** The render type a style renders with: additive by default, translucent for dark magic. */

@@ -74,6 +74,20 @@ public final class BeamGeometry {
         float halfW = wPx * PX * 0.5f;
         float halfH = hPx * PX * 0.5f;
 
+        // INNER GLOW — shells one whole pixel apart, each a flat step of a ramp that runs from the
+        // core tone out to the glow tone, with stepped (not halving) opacity. Emitted outermost first and the
+        // core last: the translucent type keeps emission order and culls back faces, so each nested box lays its
+        // front over the one outside it and the core stays its own colour. Drawn the other way round, the shells'
+        // front faces covered the core and a white-cored jet came out pastel (capture, 2026-11-17).
+        int shells = Math.min(style.bloomLayers(), SHELL_STEPS.length);
+        for (int i = shells; i >= 1; i--) {
+            float t = shells == 1 ? 1f : (i - 1) / (float) (shells - 1);
+            int tone = mix(mix(style.coreColor(), style.glowColor(), 0.5f), style.glowColor(), t);
+            float d = i * PX;
+            emitBox(m, consumer, -halfW - d, -d, -halfH - d, halfW + d, length + d, halfH + d,
+                    tone, style.glowOpacity() * SHELL_STEPS[i - 1]);
+        }
+
         // CORE — the solid rod, plus a one-pixel spine in the lit tone when the rod is wide enough
         // to carry one, so the centre reads as structure and not as a flat bar.
         if (style.coreOpacity() > 0f) {
@@ -82,17 +96,6 @@ public final class BeamGeometry {
                 emitBox(m, consumer, -PX * 0.5f, 0, -PX * 0.5f, PX * 0.5f, length, PX * 0.5f,
                         mix(style.coreColor(), 0xFFFFFF, 0.6f), style.coreOpacity());
             }
-        }
-
-        // INNER GLOW — shells one whole pixel apart, each a flat step of a ramp that runs from the
-        // core tone out to the glow tone, with stepped (not halving) opacity.
-        int shells = Math.min(style.bloomLayers(), SHELL_STEPS.length);
-        for (int i = 1; i <= shells; i++) {
-            float t = shells == 1 ? 1f : (i - 1) / (float) (shells - 1);
-            int tone = mix(mix(style.coreColor(), style.glowColor(), 0.5f), style.glowColor(), t);
-            float d = i * PX;
-            emitBox(m, consumer, -halfW - d, -d, -halfH - d, halfW + d, length + d, halfH + d,
-                    tone, style.glowOpacity() * SHELL_STEPS[i - 1]);
         }
 
         // OUTER GLOW — sparse single pixels just outside the shells, on the four faces of the grid,
