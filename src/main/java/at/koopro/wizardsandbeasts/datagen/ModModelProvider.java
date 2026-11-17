@@ -112,6 +112,33 @@ public class ModModelProvider extends ModelProvider {
         super(output, WizardsAndBeastsMod.MODID);
     }
 
+    /**
+     * Blocks whose blockstate, models and item model are hand-written in {@code src/main/resources}
+     * (the deco tools and the Diagon passage blocks). The provider validates that every known block
+     * has a blockstate it generated, so these are left out of that check, or {@code runData} fails.
+     */
+    static Set<Block> handAuthoredBlocks() {
+        Set<Block> blocks = new java.util.HashSet<>();
+        at.koopro.wizardsandbeasts.registry.DecoBlocks.ALL.forEach(block -> blocks.add(block.get()));
+        blocks.add(ModBlocks.LEAKY_CAULDRON_DOOR.get());
+        blocks.add(ModBlocks.DIAGON_ARCHWAY.get());
+        blocks.add(ModBlocks.DIAGON_ARCHWAY_MOVING.get());
+        return blocks;
+    }
+
+    @Override
+    protected java.util.stream.Stream<? extends net.minecraft.core.Holder<Block>> getKnownBlocks() {
+        Set<Block> skip = handAuthoredBlocks();
+        return super.getKnownBlocks().filter(holder -> !skip.contains(holder.value()));
+    }
+
+    @Override
+    protected java.util.stream.Stream<? extends net.minecraft.core.Holder<Item>> getKnownItems() {
+        Set<Block> skip = handAuthoredBlocks();
+        return super.getKnownItems().filter(holder -> !(holder.value() instanceof net.minecraft.world.item.BlockItem item
+                && skip.contains(item.getBlock())));
+    }
+
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         itemModels.generateFlatItem(WandItemRegistry.DEBUG_WAND.get(), ModelTemplates.FLAT_ITEM);
