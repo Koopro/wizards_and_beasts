@@ -92,6 +92,8 @@ import java.util.Set;
  * a creature that reads its own movement (the Phoenix) plays those loops. A trailing {@code +} ({@code sleep+})
  * shoots the first frame two ticks after the change instead of thirty, so the bridging one-shot ({@code lie_down},
  * {@code wake}) is on film.
+ * An entry line carrying {@code visible=1} keeps its creature's invisibility stripped every tick, so camouflage
+ * does not hide it from the strips.
  * {@code WB_ENTITY_SHOWCASE_STRIP} is {@code frames:interval} (default {@code 4:5}): how many shots per action and
  * how many ticks apart; {@code name*frames:interval} overrides it for one action. Files are {@code <stem>__<action>_f<n>.png}.
  */
@@ -331,6 +333,22 @@ public final class EntityShowcaseCapture {
         boolean airborne = SHOTS.get(shot).view() == View.AIR || "fly".equals(action) || "glide".equals(action);
         if (shown == null || "fight".equals(action) || "struck".equals(action)) {
             return;   // nothing, or a creature moving by its own goals: leave the client copy alone
+        }
+        // `visible` on the entry line: camouflage (a Moke, a Dugbog) cannot hide the subject from the strips.
+        if (REQUEST.entities().get(SHOTS.get(shot).entry()).props().containsKey("visible")
+                && mc.getSingleplayerServer() != null) {
+            mc.getSingleplayerServer().execute(() -> {
+                var server = mc.getSingleplayerServer();
+                if (server == null || server.getPlayerList().getPlayers().isEmpty()) {
+                    return;
+                }
+                if (subject(server.getPlayerList().getPlayers().getFirst().level()) instanceof LivingEntity e) {
+                    if (e.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY)) {
+                        e.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+                    }
+                    e.setInvisible(false);
+                }
+            });
         }
         shown.setOnGround(!airborne);
         if ("walk".equals(action) && shown instanceof LivingEntity living) {
