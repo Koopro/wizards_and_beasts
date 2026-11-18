@@ -52,6 +52,9 @@ public final class FurnitureTests {
         tests.add("furniture_wood_fittings_place_drop_and_signs_hold_text",
                 "furniture: every wand-wood fitting and location door places and drops itself; signs get a sign entity",
                 FurnitureTests::woodFittings);
+        tests.add("furniture_wood_boats_spawn_and_give_back_their_item",
+                "furniture: every wand-wood boat and chest boat spawns and is picked as its own item",
+                FurnitureTests::woodBoats);
         tests.add("furniture_chair_seats_a_player_and_lets_go",
                 "furniture: using a chair seats the player; breaking it stands them up and the seat goes",
                 FurnitureTests::chairSeats);
@@ -185,6 +188,21 @@ public final class FurnitureTests {
         } finally {
             WizardTestSupport.retire(helper, player);
         }
+    }
+
+    private static void woodBoats(GameTestHelper helper) {
+        BlockPos spot = new BlockPos(1, HEIGHT + 1, 1);
+        for (var boats : at.koopro.wizardsandbeasts.registry.WoodBoats.ALL) {
+            for (var pair : List.of(java.util.Map.entry(boats.boat().get(), boats.boatItem().get()),
+                    java.util.Map.entry(boats.chestBoat().get(), boats.chestBoatItem().get()))) {
+                var boat = helper.spawn(pair.getKey(), spot);
+                ItemStack picked = boat.getPickResult();
+                boat.discard();
+                WizardTestSupport.check(helper, picked != null && picked.is(pair.getValue()),
+                        () -> pair.getKey() + " is picked as " + picked + ", not " + pair.getValue());
+            }
+        }
+        helper.succeed();
     }
 
     private static void runsAndStacks(GameTestHelper helper) {

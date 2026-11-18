@@ -83,6 +83,7 @@ public class WizardsAndBeastsMod {
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.init();
         at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.init();
         at.koopro.wizardsandbeasts.registry.WoodFittings.init();
+        at.koopro.wizardsandbeasts.registry.WoodBoats.init();
         modEventBus.addListener(at.koopro.wizardsandbeasts.registry.WoodFittings::addToSignTypes);
         WandItemRegistry.init();
         BroomItemRegistry.init();

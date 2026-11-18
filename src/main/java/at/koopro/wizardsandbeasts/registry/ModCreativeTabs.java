@@ -459,6 +459,10 @@ public class ModCreativeTabs {
                         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.ITEMS.forEach(item -> output.accept(item.get()));
                         at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.TAB.forEach(block -> output.accept(block.get()));
                         at.koopro.wizardsandbeasts.registry.WoodFittings.TAB.forEach(item -> output.accept(item.get()));
+                        at.koopro.wizardsandbeasts.registry.WoodBoats.ALL.forEach(boats -> {
+                            output.accept(boats.boatItem().get());
+                            output.accept(boats.chestBoatItem().get());
+                        });
                         // Ministry of Magic
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.baseItem().get());
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.slabItem().get());

@@ -554,6 +554,10 @@ public class ModModelProvider extends ModelProvider {
             itemModels.generateFlatItem(f.signItem().get(), ModelTemplates.FLAT_ITEM);
             blockModels.createHangingSign(f.wood().strippedLog().get(), f.hangingSign().get(), f.wallHangingSign().get());
         }
+        for (var b : at.koopro.wizardsandbeasts.registry.WoodBoats.ALL) {
+            itemModels.generateFlatItem(b.boatItem().get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(b.chestBoatItem().get(), ModelTemplates.FLAT_ITEM);
+        }
         for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
             cutout(blockModels).createDoor(d.door().get());
             cutout(blockModels).createOrientableTrapdoor(d.trapdoor().get());

@@ -33,6 +33,12 @@ public class ModLanguageProvider extends LanguageProvider {
             add(f.hangingSign().get(), w + " Hanging Sign");
             add(f.wallHangingSign().get(), w + " Wall Hanging Sign");
         }
+        for (var b : at.koopro.wizardsandbeasts.registry.WoodBoats.ALL) {
+            add(b.boatItem().get(), b.displayName() + " Boat");
+            add(b.chestBoatItem().get(), b.displayName() + " Boat with Chest");
+            add(b.boat().get(), b.displayName() + " Boat");
+            add(b.chestBoat().get(), b.displayName() + " Boat with Chest");
+        }
         for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
             add(d.door().get(), d.name() + " Door");
             add(d.trapdoor().get(), d.name() + " Trapdoor");
