@@ -56,5 +56,16 @@
     "taste_air",
     "lie_down",
     "wake"
-  ]
+  ],
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "gilded",
+        "weight": 2,
+        "origin": "design",
+        "note": "gold plumage; canon Occamy eggshells are pure silver"
+      }
+    ]
+  }
 }

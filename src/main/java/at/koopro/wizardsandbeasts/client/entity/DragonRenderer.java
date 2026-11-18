@@ -25,7 +25,7 @@ public class DragonRenderer<R extends EntityRenderState & GeoRenderState>
         extends GeoEntityRenderer<DragonEntity, R> {
 
     public DragonRenderer(EntityRendererProvider.Context context, String modelName) {
-        super(context, new DefaultedEntityGeoModel<>(
+        super(context, new CoatedBeastGeoModel<>(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
     }
 

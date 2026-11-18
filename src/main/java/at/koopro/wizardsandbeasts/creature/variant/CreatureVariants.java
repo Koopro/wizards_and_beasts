@@ -35,7 +35,9 @@ public final class CreatureVariants {
 
     /** This creature's variants in their saved order, or an empty list when it has none. */
     public static List<CreatureVariant> of(String creatureId) {
-        return BY_CREATURE.getOrDefault(creatureId, List.of());
+        List<CreatureVariant> coded = BY_CREATURE.get(creatureId);
+        // Creatures without a Java coat enum may declare coats in their definition JSON (Coats).
+        return coded != null ? coded : List.copyOf(Coats.of(creatureId));
     }
 
     public static @Nullable CreatureVariant byId(String creatureId, String variantId) {

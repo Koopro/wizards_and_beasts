@@ -164,7 +164,8 @@ public final class EntityShowcaseCapture {
 
         /** The file name's stem: the id, and who the person is when the line says. */
         String stem() {
-            String stem = id.getPath().replace('/', '_') + (props.containsKey("age") ? "_age" + props.get("age") : "");
+            String stem = id.getPath().replace('/', '_') + (props.containsKey("age") ? "_age" + props.get("age") : "")
+                    + (props.containsKey("coat") ? "_" + props.get("coat") : "");
             if (props.containsKey("form")) {
                 stem += "_" + Identifier.parse(props.get("form")).getPath();
             }
@@ -571,6 +572,10 @@ public final class EntityShowcaseCapture {
         if (entity instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity basilisk
                 && entry.props().containsKey("age")) {
             basilisk.setAgeTicks(Long.parseLong(entry.props().get("age")));   // hatchling, adult or full grown
+        }
+        if (entity instanceof at.koopro.wizardsandbeasts.creature.variant.VariantHolder holder
+                && entry.props().containsKey("coat") && !holder.applyVariant(entry.props().get("coat"))) {
+            LOGGER.warn("Entity showcase: {} has no coat {}", entry.id(), entry.props().get("coat"));   // coat=smoke
         }
         if (entity instanceof at.koopro.wizardsandbeasts.entity.spell.PatronusEntity patronus
                 && entry.props().containsKey("form")) {

@@ -38,5 +38,22 @@
     "shake",
     "lie_down",
     "wake"
-  ]
+  ],
+  "coats": {
+    "base_weight": 80,
+    "variants": [
+      {
+        "id": "blue",
+        "weight": 12,
+        "origin": "canon",
+        "note": "Fantastic Beasts: white, blue or scarlet depending on the heat of the fire"
+      },
+      {
+        "id": "white",
+        "weight": 8,
+        "origin": "canon",
+        "note": "Fantastic Beasts: white, the hottest fire"
+      }
+    ]
+  }
 }

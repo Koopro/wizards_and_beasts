@@ -44,5 +44,28 @@
       "hurt": "minecraft:entity.parrot.hurt",
       "death": "minecraft:entity.parrot.death"
     }
+  },
+  "coats": {
+    "base_weight": 25,
+    "variants": [
+      {
+        "id": "orange",
+        "weight": 25,
+        "origin": "canon",
+        "note": "Fantastic Beasts: Fwoopers may be orange, pink, lime green or yellow"
+      },
+      {
+        "id": "lime",
+        "weight": 25,
+        "origin": "canon",
+        "note": "Fantastic Beasts: lime green"
+      },
+      {
+        "id": "yellow",
+        "weight": 25,
+        "origin": "canon",
+        "note": "Fantastic Beasts: yellow"
+      }
+    ]
   }
 }

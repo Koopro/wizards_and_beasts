@@ -41,5 +41,16 @@
     "shake",
     "lie_down",
     "wake"
-  ]
+  ],
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "pale",
+        "weight": 2,
+        "origin": "design",
+        "note": "a pale Qilin"
+      }
+    ]
+  }
 }

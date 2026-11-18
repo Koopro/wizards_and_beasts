@@ -39,5 +39,16 @@
     "skitter",
     "lie_down",
     "wake"
-  ]
+  ],
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "sapphire",
+        "weight": 2,
+        "origin": "design",
+        "note": "a sapphire shell; canon says the shell is jewel-encrusted"
+      }
+    ]
+  }
 }

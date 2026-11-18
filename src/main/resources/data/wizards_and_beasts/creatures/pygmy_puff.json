@@ -30,5 +30,16 @@
     "settle",
     "lie_down",
     "wake"
-  ]
+  ],
+  "coats": {
+    "base_weight": 60,
+    "variants": [
+      {
+        "id": "purple",
+        "weight": 40,
+        "origin": "canon",
+        "note": "Half-Blood Prince: Pygmy Puffs in pink and purple"
+      }
+    ]
+  }
 }

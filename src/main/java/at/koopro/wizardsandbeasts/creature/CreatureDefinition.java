@@ -45,7 +45,8 @@ public record CreatureDefinition(
         List<CreatureAbility> abilities,
         List<String> clips,
         float scale,
-        CreatureBehaviour behaviour) {
+        CreatureBehaviour behaviour,
+        at.koopro.wizardsandbeasts.creature.variant.Coats coats) {
 
     private static <E extends Enum<E>> Codec<E> enumCodec(Class<E> type) {
         return Codec.STRING.xmap(s -> Enum.valueOf(type, s), Enum::name);
@@ -79,7 +80,8 @@ public record CreatureDefinition(
     /** Second flat half: trait vocabulary, asset ids, the dragon sub-block, abilities, and clips. */
     private record AssetBlock(
             List<Trait> traits, Identifier model, Identifier texture, Identifier animation,
-            Optional<DragonTraits> dragon, List<CreatureAbility> abilities, List<String> clips, CreatureBehaviour behaviour) {
+            Optional<DragonTraits> dragon, List<CreatureAbility> abilities, List<String> clips, CreatureBehaviour behaviour,
+            at.koopro.wizardsandbeasts.creature.variant.Coats coats) {
 
         static final MapCodec<AssetBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 enumCodec(Trait.class).listOf().optionalFieldOf("traits", List.of()).forGetter(AssetBlock::traits),
@@ -99,7 +101,11 @@ public record CreatureDefinition(
                 // than four more flat fields because this half is already near the sixteen-argument
                 // ceiling that forced the two-MapCodec split in the first place.
                 CreatureBehaviour.CODEC.optionalFieldOf("behaviour", CreatureBehaviour.EMPTY)
-                        .forGetter(AssetBlock::behaviour)
+                        .forGetter(AssetBlock::behaviour),
+                // Rare and canon coats, cosmetic only (Coats). Default none.
+                at.koopro.wizardsandbeasts.creature.variant.Coats.CODEC
+                        .optionalFieldOf("coats", at.koopro.wizardsandbeasts.creature.variant.Coats.NONE)
+                        .forGetter(AssetBlock::coats)
         ).apply(instance, AssetBlock::new));
     }
 
@@ -111,12 +117,12 @@ public record CreatureDefinition(
                         s.id(), s.bodyPlan(), s.locomotion(), s.temperament(), s.width(), s.height(),
                         s.maxHealth(), s.movementSpeed(), s.flyingSpeed(), s.followRange(), s.attackDamage(),
                         a.traits(), a.model(), a.texture(), a.animation(), a.dragon(), a.abilities(),
-                        a.clips(), s.scale(), a.behaviour());
+                        a.clips(), s.scale(), a.behaviour(), a.coats());
             },
             def -> Pair.of(
                     new StatBlock(def.id(), def.bodyPlan(), def.locomotion(), def.temperament(), def.width(),
                             def.height(), def.maxHealth(), def.movementSpeed(), def.flyingSpeed(),
                             def.followRange(), def.attackDamage(), def.scale()),
                     new AssetBlock(def.traits(), def.model(), def.texture(), def.animation(), def.dragon(),
-                            def.abilities(), def.clips(), def.behaviour())));
+                            def.abilities(), def.clips(), def.behaviour(), def.coats())));
 }

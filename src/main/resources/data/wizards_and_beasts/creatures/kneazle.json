@@ -53,5 +53,16 @@
       "retreatAtHealth": 0.4
     }
   },
-  "_combat_note": "[canon FB] aggressive to the untrustworthy, but a cat: scratches and springs away [design]."
+  "_combat_note": "[canon FB] aggressive to the untrustworthy, but a cat: scratches and springs away [design].",
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "smoke",
+        "weight": 2,
+        "origin": "design",
+        "note": "a smoke-grey coat; canon Kneazles are speckled, spotted or mottled"
+      }
+    ]
+  }
 }
