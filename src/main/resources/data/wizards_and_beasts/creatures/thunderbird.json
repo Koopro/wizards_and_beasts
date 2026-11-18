@@ -51,6 +51,8 @@
     "ruffle",
     "stretch",
     "takeoff",
-    "land"
+    "land",
+    "lie_down",
+    "wake"
   ]
 }

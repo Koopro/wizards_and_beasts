@@ -28,6 +28,8 @@
     "hit",
     "death",
     "coil",
-    "taste_air"
+    "taste_air",
+    "lie_down",
+    "wake"
   ]
 }
