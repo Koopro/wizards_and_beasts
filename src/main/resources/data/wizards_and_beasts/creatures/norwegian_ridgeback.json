@@ -64,6 +64,8 @@
     "hit",
     "death",
     "stretch",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ]
 }
