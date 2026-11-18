@@ -33,8 +33,8 @@ import org.jspecify.annotations.Nullable;
  * only lays the row. Curves and outlines come from {@code tools/furniture_models.py}.
  *
  * <p>Over a window the curve is glazed: when a leaded pane stands under the arch, the space under its curve takes the
- * same glass, so the light runs up into the point instead of ending flat under an empty arch. Over a door it stays
- * open.
+ * same glass, so the light runs up into the point instead of ending flat under an empty arch. Over a door the curve
+ * takes an oak tympanum, so the doorway is closed to its point; over an open passage it stays open.
  */
 @NullMarked
 public class ArchBlock extends HorizontalDirectionalBlock {
@@ -52,7 +52,7 @@ public class ArchBlock extends HorizontalDirectionalBlock {
 
     /** The glass filling the curve, taken from the pane under the arch. */
     public enum Glass implements StringRepresentable {
-        NONE, CLEAR, CRIMSON, AZURE, EMERALD, AMBER, VIOLET;
+        NONE, CLEAR, CRIMSON, AZURE, EMERALD, AMBER, VIOLET, TIMBER;
 
         @Override
         public String getSerializedName() {
@@ -60,6 +60,9 @@ public class ArchBlock extends HorizontalDirectionalBlock {
         }
 
         static Glass under(BlockState below) {
+            if (below.getBlock() instanceof net.minecraft.world.level.block.DoorBlock) {
+                return TIMBER;
+            }
             if (below.is(FurnitureBlocks.LEADED_GLASS_PANE.get())) {
                 return CLEAR;
             }

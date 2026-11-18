@@ -73,6 +73,16 @@
     {
       "when": {
         "facing": "north",
+        "part": "single",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_timber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
         "part": "pair_start"
       },
       "apply": {
@@ -138,6 +148,16 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_timber"
       }
     },
     {
@@ -213,6 +233,16 @@
     {
       "when": {
         "facing": "north",
+        "part": "pair_end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_timber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
         "part": "start"
       },
       "apply": {
@@ -278,6 +308,16 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_timber"
       }
     },
     {
@@ -353,6 +393,16 @@
     {
       "when": {
         "facing": "north",
+        "part": "middle",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_timber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
         "part": "end"
       },
       "apply": {
@@ -422,6 +472,16 @@
     },
     {
       "when": {
+        "facing": "north",
+        "part": "end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_timber"
+      }
+    },
+    {
+      "when": {
         "facing": "east",
         "part": "single"
       },
@@ -494,6 +554,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_single_glass_violet",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "single",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_timber",
         "y": 90
       }
     },
@@ -577,6 +648,17 @@
     {
       "when": {
         "facing": "east",
+        "part": "pair_start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_timber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
         "part": "pair_end"
       },
       "apply": {
@@ -648,6 +730,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_violet",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_timber",
         "y": 90
       }
     },
@@ -731,6 +824,17 @@
     {
       "when": {
         "facing": "east",
+        "part": "start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_timber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
         "part": "middle"
       },
       "apply": {
@@ -808,6 +912,17 @@
     {
       "when": {
         "facing": "east",
+        "part": "middle",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_timber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
         "part": "end"
       },
       "apply": {
@@ -879,6 +994,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_timber",
         "y": 90
       }
     },
@@ -962,6 +1088,17 @@
     {
       "when": {
         "facing": "south",
+        "part": "single",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_timber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
         "part": "pair_start"
       },
       "apply": {
@@ -1033,6 +1170,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_timber",
         "y": 180
       }
     },
@@ -1116,6 +1264,17 @@
     {
       "when": {
         "facing": "south",
+        "part": "pair_end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_timber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
         "part": "start"
       },
       "apply": {
@@ -1187,6 +1346,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_timber",
         "y": 180
       }
     },
@@ -1270,6 +1440,17 @@
     {
       "when": {
         "facing": "south",
+        "part": "middle",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_timber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
         "part": "end"
       },
       "apply": {
@@ -1341,6 +1522,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_timber",
         "y": 180
       }
     },
@@ -1424,6 +1616,17 @@
     {
       "when": {
         "facing": "west",
+        "part": "single",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_timber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
         "part": "pair_start"
       },
       "apply": {
@@ -1495,6 +1698,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_timber",
         "y": 270
       }
     },
@@ -1578,6 +1792,17 @@
     {
       "when": {
         "facing": "west",
+        "part": "pair_end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_timber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
         "part": "start"
       },
       "apply": {
@@ -1649,6 +1874,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "start",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_timber",
         "y": 270
       }
     },
@@ -1732,6 +1968,17 @@
     {
       "when": {
         "facing": "west",
+        "part": "middle",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_timber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
         "part": "end"
       },
       "apply": {
@@ -1803,6 +2050,17 @@
       },
       "apply": {
         "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "end",
+        "glass": "timber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_timber",
         "y": 270
       }
     }

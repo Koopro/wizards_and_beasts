@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -231,6 +232,13 @@ public final class FurnitureTests {
             expectGlass(helper, scene.at(0, 2, 1), ArchBlock.Glass.NONE);
             scene.close();
 
+            // Over a door the curve is closed with timber, not left open to the sky.
+            scene.set(scene.at(0, 0, 1), Blocks.STONE);
+            scene.place(player, (BlockItem) Items.OAK_DOOR, scene.at(0, 0, 1), Direction.UP, Direction.SOUTH);
+            scene.place(player, arch, scene.at(0, 2, 1), Direction.UP, Direction.SOUTH);
+            expectGlass(helper, scene.at(0, 3, 1), ArchBlock.Glass.TIMBER);
+            scene.close();
+
             // A column three high: base, shaft, capital; one alone is a pedestal.
             scene.set(scene.at(0, 0, 1), Blocks.STONE);
             BlockItem column = (BlockItem) FurnitureBlocks.HOGWARTS_STONE_COLUMN.asItem();
@@ -275,6 +283,8 @@ public final class FurnitureTests {
         ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "Sitter");
         Scene scene = new Scene(helper);
         BlockPos floor = scene.at(1, 0, 1);
+        // The seat must tick to let go: an unforced test chunk is not always entity-ticking (it failed once so).
+        WizardTestSupport.forceChunks(helper, floor, floor);
         scene.set(floor, Blocks.STONE);
         BlockState chair = scene.place(player, (BlockItem) FurnitureBlocks.ACADEMY_CHAIR.asItem(), floor, Direction.UP,
                 Direction.SOUTH);
