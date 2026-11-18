@@ -50,7 +50,9 @@
     "hit",
     "death",
     "stretch",
-    "grunt"
+    "grunt",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "combat": {
