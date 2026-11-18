@@ -81,6 +81,15 @@ public enum CreatureActivity {
         return from == SLEEP ? "wake" : null;
     }
 
+    /**
+     * Whether the clip for this activity aims the head itself (at a flank, a paw, the water, the grass), so the
+     * life pass must not turn it toward whoever is watching. Without this a grooming dog scratched with its nose
+     * to the sky, looking at the camera.
+     */
+    public boolean headBusy() {
+        return this == GROOM || this == DRINK || this == EAT;
+    }
+
     /** A clip to loop and the speed to play it at. */
     public record Loop(String clip, double speed) {}
 

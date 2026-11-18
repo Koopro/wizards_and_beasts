@@ -104,7 +104,7 @@ public final class CreatureLifePass {
         boolean dying = !((Mob) entity).isAlive() || ((Mob) entity).deathTime > 0;
         boolean oneShot = playingOneShot(event.getAnimatable(), entity.getId());
 
-        float lookTarget = asleep || dying || oneShot ? 0f : 1f;
+        float lookTarget = asleep || dying || oneShot || activity.headBusy() ? 0f : 1f;
         float lidTarget = asleep || dying ? 1f : 0f;
         float[] eased = EASED.computeIfAbsent(entity, e -> new float[] {lookTarget, lidTarget, age});
         float dt = Mth.clamp(age - eased[2], 0f, 5f);

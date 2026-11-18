@@ -76,4 +76,11 @@ class CreatureActivityTest {
         assertEquals(at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity.BEAST_ACTION_CONTROLLER,
                 at.koopro.wizardsandbeasts.util.AnimHelper.ACTION_CONTROLLER);
     }
+
+    @Test
+    void theHeadIsLeftToTheClipOnlyWhileItIsBusy() {
+        assertEquals(java.util.EnumSet.of(CreatureActivity.GROOM, CreatureActivity.DRINK, CreatureActivity.EAT),
+                java.util.Arrays.stream(CreatureActivity.values()).filter(CreatureActivity::headBusy)
+                        .collect(java.util.stream.Collectors.toCollection(() -> java.util.EnumSet.noneOf(CreatureActivity.class))));
+    }
 }
