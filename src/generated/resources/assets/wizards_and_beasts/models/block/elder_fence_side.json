@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_side",
+  "textures": {
+    "texture": "wizards_and_beasts:block/elder_planks"
+  }
+}

@@ -48,6 +48,9 @@ public final class FurnitureTests {
         tests.add("furniture_runs_and_stacks_pick_their_parts",
                 "furniture: tables, arches and columns choose their part from their neighbours",
                 FurnitureTests::runsAndStacks);
+        tests.add("furniture_wood_fittings_place_drop_and_signs_hold_text",
+                "furniture: every wand-wood fitting and location door places and drops itself; signs get a sign entity",
+                FurnitureTests::woodFittings);
         tests.add("furniture_chair_seats_a_player_and_lets_go",
                 "furniture: using a chair seats the player; breaking it stands them up and the seat goes",
                 FurnitureTests::chairSeats);
@@ -134,6 +137,48 @@ public final class FurnitureTests {
                             () -> block + " drops " + drops + ", not itself");
                     scene.close();
                 }
+            }
+            helper.succeed();
+        } finally {
+            WizardTestSupport.retire(helper, player);
+        }
+    }
+
+    private static void woodFittings(GameTestHelper helper) {
+        ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "Joiner");
+        try (Scene scene = new Scene(helper)) {
+            BlockPos floor = scene.at(1, 0, 1);
+            for (var entry : at.koopro.wizardsandbeasts.registry.WoodFittings.TAB) {
+                net.minecraft.world.item.Item item = entry.get();
+                scene.set(floor, Blocks.STONE);
+                scene.set(floor.above(2), Blocks.AIR);
+                BlockState state;
+                if (item instanceof net.minecraft.world.item.HangingSignItem hanging) {
+                    scene.set(floor.above(2), Blocks.STONE);            // a hanging sign hangs from a ceiling
+                    state = scene.place(player, hanging, floor.above(2), Direction.DOWN, Direction.SOUTH);
+                } else if (item instanceof BlockItem blockItem) {
+                    state = scene.place(player, blockItem, floor, Direction.UP, Direction.SOUTH);
+                } else {
+                    helper.fail(item + " is not a block item");
+                    return;
+                }
+                BlockPos placed = helper.absolutePos(floor.above());
+                WizardTestSupport.check(helper, !state.isAir(), () -> item + " placed nothing");
+                if (state.getBlock() instanceof net.minecraft.world.level.block.SignBlock) {
+                    var be = helper.getLevel().getBlockEntity(placed);
+                    WizardTestSupport.check(helper, be instanceof net.minecraft.world.level.block.entity.SignBlockEntity,
+                            () -> item + " placed a sign without a sign block entity (" + be + "): its text cannot be set");
+                }
+                if (state.getBlock() instanceof net.minecraft.world.level.block.DoorBlock) {
+                    // a door stands two high: its upper half is at floor + 2
+                    WizardTestSupport.check(helper, helper.getBlockState(floor.above(2)).is(state.getBlock()),
+                            () -> item + " placed only the lower half of its door");
+                    scene.set(floor.above(2), Blocks.AIR);
+                }
+                List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), placed, null);
+                WizardTestSupport.check(helper, drops.stream().anyMatch(stack -> stack.is(item)),
+                        () -> state + " drops " + drops + ", not " + item);
+                scene.close();
             }
             helper.succeed();
         } finally {
@@ -243,17 +288,20 @@ public final class FurnitureTests {
         WizardTestSupport.check(helper, Math.abs(hips - 0.69) < 0.01,
                 () -> "the seat is " + hips + " above the floor, expected the chair's seat height 0.69");
         helper.setBlock(floor.above(), Blocks.AIR);
-        helper.runAfterDelay(3, () -> {
-            try {
-                WizardTestSupport.check(helper, !player.isPassenger(),
-                        () -> "the chair is gone but the player still rides " + player.getVehicle());
-                WizardTestSupport.check(helper, helper.getLevel().getEntitiesOfClass(SeatEntity.class,
-                                new net.minecraft.world.phys.AABB(seat).inflate(2)).isEmpty(),
-                        () -> "a seat outlived its chair");
-                helper.succeed();
-            } finally {
+        // The seat lets go on its own next tick; wait for it rather than for a fixed number of ticks, which a busy
+        // batch overran once (its entity had not ticked yet).
+        long start = WizardTestSupport.gameTime(helper);
+        helper.onEachTick(() -> {
+            boolean gone = !player.isPassenger() && helper.getLevel().getEntitiesOfClass(SeatEntity.class,
+                    new net.minecraft.world.phys.AABB(seat).inflate(2)).isEmpty();
+            if (gone) {
                 scene.close();
                 WizardTestSupport.retire(helper, player);
+                helper.succeed();
+            } else if (WizardTestSupport.gameTime(helper) - start > 40) {
+                scene.close();
+                WizardTestSupport.retire(helper, player);
+                helper.fail("two seconds after the chair was broken the player still rides " + player.getVehicle());
             }
         });
     }

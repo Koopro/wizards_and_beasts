@@ -194,6 +194,27 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ACADEMY_NOTICE_BOARD.get());
         ArchitectureBlocks.FAMILY_PIECES.forEach(b -> tag(BlockTags.MINEABLE_WITH_PICKAXE).add(b.get()));
         ArchitectureBlocks.BALUSTRADES.forEach(b -> tag(BlockTags.FENCES).add(b.get()));
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            tag(BlockTags.MINEABLE_WITH_AXE).add(f.door().get(), f.trapdoor().get(), f.fence().get(), f.gate().get(),
+                    f.button().get(), f.plate().get(), f.sign().get(), f.wallSign().get(), f.hangingSign().get(),
+                    f.wallHangingSign().get());
+            tag(BlockTags.WOODEN_DOORS).add(f.door().get());
+            tag(BlockTags.WOODEN_TRAPDOORS).add(f.trapdoor().get());
+            tag(BlockTags.WOODEN_FENCES).add(f.fence().get());
+            tag(BlockTags.FENCE_GATES).add(f.gate().get());
+            tag(BlockTags.WOODEN_BUTTONS).add(f.button().get());
+            tag(BlockTags.WOODEN_PRESSURE_PLATES).add(f.plate().get());
+            tag(BlockTags.STANDING_SIGNS).add(f.sign().get());
+            tag(BlockTags.WALL_SIGNS).add(f.wallSign().get());
+            tag(BlockTags.CEILING_HANGING_SIGNS).add(f.hangingSign().get());
+            tag(BlockTags.WALL_HANGING_SIGNS).add(f.wallHangingSign().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            tag(d.metal() ? BlockTags.MINEABLE_WITH_PICKAXE : BlockTags.MINEABLE_WITH_AXE)
+                    .add(d.door().get(), d.trapdoor().get());
+            tag(BlockTags.DOORS).add(d.door().get());
+            tag(BlockTags.TRAPDOORS).add(d.trapdoor().get());
+        }
         for (var piece : ArchitectureBlocks.PIECES) {
             Block block = piece.block().get();
             tag(piece.wood() ? BlockTags.MINEABLE_WITH_AXE : BlockTags.MINEABLE_WITH_PICKAXE).add(block);

@@ -273,6 +273,7 @@ public class ModModelProvider extends ModelProvider {
         generateWizardingWorld(blockModels, itemModels);
         generateLocationBlocks(blockModels);
         generateArchitecture(blockModels);
+        generateWoodFittings(blockModels, itemModels);
     }
 
     /**
@@ -536,6 +537,26 @@ public class ModModelProvider extends ModelProvider {
                 case STAIRS -> blockModels.familyWithExistingFullBlock(base).stairs(block);
                 case WALL -> blockModels.familyWithExistingFullBlock(base).wall(block);
             }
+        }
+    }
+
+    // --- Wood fittings and location doors (WoodFittings) ---
+
+    private void generateWoodFittings(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            Block planks = f.wood().planks().get();
+            blockModels.familyWithExistingFullBlock(planks).fence(f.fence().get()).fenceGate(f.gate().get())
+                    .button(f.button().get()).pressurePlate(f.plate().get());
+            cutout(blockModels).createDoor(f.door().get());
+            cutout(blockModels).createOrientableTrapdoor(f.trapdoor().get());
+            blockModels.createParticleOnlyBlock(f.sign().get(), planks);
+            blockModels.createParticleOnlyBlock(f.wallSign().get(), planks);
+            itemModels.generateFlatItem(f.signItem().get(), ModelTemplates.FLAT_ITEM);
+            blockModels.createHangingSign(f.wood().strippedLog().get(), f.hangingSign().get(), f.wallHangingSign().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            cutout(blockModels).createDoor(d.door().get());
+            cutout(blockModels).createOrientableTrapdoor(d.trapdoor().get());
         }
     }
 

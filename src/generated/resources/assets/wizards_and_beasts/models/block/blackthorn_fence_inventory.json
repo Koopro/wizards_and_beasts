@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_inventory",
+  "textures": {
+    "texture": "wizards_and_beasts:block/blackthorn_planks"
+  }
+}

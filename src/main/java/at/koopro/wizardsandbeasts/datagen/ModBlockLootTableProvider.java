@@ -81,6 +81,22 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier
                         .fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, id))));
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.DROPS_SELF.forEach(block -> dropSelf(block.get()));
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            add(f.door().get(), createDoorTable(f.door().get()));
+            dropSelf(f.trapdoor().get());
+            dropSelf(f.fence().get());
+            dropSelf(f.gate().get());
+            dropSelf(f.button().get());
+            dropSelf(f.plate().get());
+            dropSelf(f.sign().get());
+            dropOther(f.wallSign().get(), f.signItem().get());
+            dropSelf(f.hangingSign().get());
+            dropOther(f.wallHangingSign().get(), f.hangingSignItem().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            add(d.door().get(), createDoorTable(d.door().get()));
+            dropSelf(d.trapdoor().get());
+        }
         for (var piece : at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES) {
             Block block = piece.block().get();
             if (piece.shape() == at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.Shape.SLAB) {
