@@ -65,5 +65,9 @@
     "shake",
     "lie_down",
     "wake"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.4,
+    "emitters": []
+  }
 }

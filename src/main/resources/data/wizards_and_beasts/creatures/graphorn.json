@@ -69,5 +69,9 @@
         "note": "a pale Graphorn; canon gives it a purplish-grey hide"
       }
     ]
+  },
+  "fx": {
+    "footfall": 0.7,
+    "emitters": []
   }
 }

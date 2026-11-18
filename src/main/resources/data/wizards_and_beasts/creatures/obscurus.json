@@ -59,5 +59,18 @@
     "attack",
     "squirm",
     "settle"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:dark_wisp",
+        "color": "#2A1A2E",
+        "rate": 0.2,
+        "where": "body",
+        "when": "always"
+      }
+    ],
+    "_note": "a dark, roiling mass (Fantastic Beasts film)"
+  }
 }

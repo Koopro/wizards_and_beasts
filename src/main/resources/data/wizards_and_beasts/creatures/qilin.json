@@ -52,5 +52,9 @@
         "note": "a pale Qilin"
       }
     ]
+  },
+  "fx": {
+    "footfall": 0.25,
+    "emitters": []
   }
 }

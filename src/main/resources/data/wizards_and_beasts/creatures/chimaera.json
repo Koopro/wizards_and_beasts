@@ -55,5 +55,9 @@
       "recoveryTicks": 16
     }
   },
-  "_combat_note": "[canon FB] vicious and bloodthirsty; a heavy shown blow [design timing]."
+  "_combat_note": "[canon FB] vicious and bloodthirsty; a heavy shown blow [design timing].",
+  "fx": {
+    "footfall": 0.4,
+    "emitters": []
+  }
 }

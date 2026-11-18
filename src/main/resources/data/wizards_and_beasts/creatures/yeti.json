@@ -60,5 +60,9 @@
       "recoveryTicks": 20
     }
   },
-  "_combat_note": "[canon FB] devours anything in its path, and fears fire: a flame lit or a torch set down within twelve blocks, or being burned, sends it running."
+  "_combat_note": "[canon FB] devours anything in its path, and fears fire: a flame lit or a torch set down within twelve blocks, or being burned, sends it running.",
+  "fx": {
+    "footfall": 0.5,
+    "emitters": []
+  }
 }

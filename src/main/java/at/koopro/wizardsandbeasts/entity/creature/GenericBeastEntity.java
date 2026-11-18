@@ -199,6 +199,9 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
      * What it is visibly doing ({@link at.koopro.wizardsandbeasts.creature.profile.CreatureActivity}), written by the
      * ecology goal on the server and read by the movement controller on the client. Not saved.
      */
+    /** Client only: ticks since the last footfall (CreatureFx). */
+    private int fxStrideClock;
+
     /** Which of its definition's coats (Coats) this creature wears; 0 = the base coat. Rolled once, at spawn. */
     private static final EntityDataAccessor<Integer> DATA_COAT =
             SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.INT);
@@ -884,6 +887,12 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     @Override
     public void tick() {
         super.tick();
+        if (level().isClientSide()) {
+            CreatureDefinition def = definition();
+            if (def != null && !def.fx().isEmpty()) {
+                fxStrideClock = def.fx().tick(this, activity(), fxStrideClock);   // footfall dust, embers, smoke
+            }
+        }
         tickBond();
         if (!level().isClientSide() && has(Trait.REGEN) && AiCadence.every(this, 40)
                 && getHealth() < getMaxHealth() && isAlive()) {

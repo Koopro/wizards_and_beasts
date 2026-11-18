@@ -40,5 +40,9 @@
     "graze",
     "takeoff",
     "land"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.5,
+    "emitters": []
+  }
 }

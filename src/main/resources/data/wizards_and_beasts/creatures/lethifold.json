@@ -30,5 +30,18 @@
     "squirm",
     "settle",
     "death"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:dark_wisp",
+        "color": "#141414",
+        "rate": 0.06,
+        "where": "feet",
+        "when": "moving"
+      }
+    ],
+    "_note": "design: a shadow sliding over the floor"
+  }
 }

@@ -79,5 +79,9 @@
         "note": "black like a melanistic leopard; the Nundu is a giant leopard in canon"
       }
     ]
+  },
+  "fx": {
+    "footfall": 0.5,
+    "emitters": []
   }
 }

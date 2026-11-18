@@ -59,5 +59,18 @@
       "hurt": "minecraft:entity.horse.hurt",
       "death": "minecraft:entity.horse.death"
     }
+  },
+  "fx": {
+    "footfall": 0.3,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:water_droplet",
+        "color": "#9FD0E0",
+        "rate": 0.08,
+        "where": "body",
+        "when": "always"
+      }
+    ],
+    "_note": "a water horse, always dripping (design)"
   }
 }

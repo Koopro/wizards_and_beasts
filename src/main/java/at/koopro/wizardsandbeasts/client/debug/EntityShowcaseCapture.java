@@ -89,7 +89,8 @@ import java.util.Set;
  * never moves); {@code vanish}/{@code appear} add and remove invisibility (the fade); {@code look} turns the creature's synced head away from its body (the life pass's head turn);
  * {@code @clip} fires a declared one-shot through {@code GenericBeastEntity.triggerDeclared}, {@code @controller/clip}
  * any triggerable clip of any GeckoLib creature; {@code pace}, {@code fly} and {@code glide} move the client copy so
- * a creature that reads its own movement (the Phoenix) plays those loops. A trailing {@code +} ({@code sleep+})
+ * a creature that reads its own movement (the Phoenix) plays those loops; {@code stroll} walks the server copy
+ * back and forth so movement-driven effects (footfall) fire as in play. A trailing {@code +} ({@code sleep+})
  * shoots the first frame two ticks after the change instead of thirty, so the bridging one-shot ({@code lie_down},
  * {@code wake}) is on film.
  * An entry line carrying {@code visible=1} keeps its creature's invisibility stripped every tick, so camouflage
@@ -358,7 +359,33 @@ public final class EntityShowcaseCapture {
         // A creature whose controller reads its own movement (the Phoenix) only walks, flies or glides when the
         // client copy moves. Move the copy, never the server one: a few hundredths a tick, back and forth, so it
         // stays in frame. `glide` also sinks, and goes back up every second.
-        if (action != null && (action.equals("pace") || airborne)) {
+        if ("stroll".equals(action)) {
+            // `stroll`: the SERVER copy walks back and forth along x, so the client interpolates real movement inside
+            // its own tick, as in play (species footfall reads that; `pace` moves only the client copy, between ticks).
+            if (mc.getSingleplayerServer() != null) {
+                int t = shown.tickCount;
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer();
+                    if (server == null || server.getPlayerList().getPlayers().isEmpty()) {
+                        return;
+                    }
+                    Entity subject = subject(server.getPlayerList().getPlayers().getFirst().level());
+                    if (subject != null) {
+                        double phase = t * 0.05;
+                        subject.setPos(0.5 + Math.sin(phase) * 2.5, STAGE_Y, 0.5);
+                        // an AI-off mob never runs move(), so its synced onGround stays false and every position
+                        // packet overwrites the client's: a walking creature is on the ground
+                        subject.setOnGround(true);
+                        subject.setYRot(Math.cos(phase) >= 0 ? -90.0F : 90.0F);
+                        subject.setYBodyRot(subject.getYRot());
+                        subject.setYHeadRot(subject.getYRot());
+                    }
+                });
+            }
+            if (shown instanceof LivingEntity living) {
+                living.walkAnimation.setSpeed(0.9F);
+            }
+        } else if (action != null && (action.equals("pace") || airborne)) {
             double baseY = STAGE_Y + (airborne ? 0.8 : 0.0);
             double wiggle = (shown.tickCount % 2 == 0 ? 0.04 : -0.04);
             double y = action.equals("glide") ? baseY + 0.6 - (shown.tickCount % 20) * 0.05 : baseY;

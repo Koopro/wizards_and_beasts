@@ -66,5 +66,32 @@
     "shake",
     "lie_down",
     "wake"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.7,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:smoke_puff",
+        "color": "#7A7570",
+        "rate": 0.1,
+        "where": "head",
+        "when": "resting"
+      },
+      {
+        "particle": "wizards_and_beasts:smoke_puff",
+        "color": "#5A5450",
+        "rate": 0.35,
+        "where": "head",
+        "when": "threaten"
+      },
+      {
+        "particle": "wizards_and_beasts:fire_ember",
+        "color": "#FF8A2A",
+        "rate": 0.25,
+        "where": "head",
+        "when": "threaten"
+      }
+    ],
+    "_note": "dragons smoke at the nostrils at rest and when roused (Goblet of Fire, First Task)"
+  }
 }

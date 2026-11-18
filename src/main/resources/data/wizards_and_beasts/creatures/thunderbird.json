@@ -54,5 +54,25 @@
     "land",
     "lie_down",
     "wake"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.4,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:electric_arc",
+        "color": "#BFE3FF",
+        "rate": 0.05,
+        "where": "back",
+        "when": "moving"
+      },
+      {
+        "particle": "wizards_and_beasts:electric_arc",
+        "color": "#E6F4FF",
+        "rate": 0.35,
+        "where": "back",
+        "when": "threaten"
+      }
+    ],
+    "_note": "it creates storms as it flies (Fantastic Beasts film)"
+  }
 }

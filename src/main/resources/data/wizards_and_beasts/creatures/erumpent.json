@@ -65,5 +65,9 @@
         "note": "a white Erumpent"
       }
     ]
+  },
+  "fx": {
+    "footfall": 0.9,
+    "emitters": []
   }
 }

@@ -61,5 +61,9 @@
       "preferredRange": 10.0
     }
   },
-  "_combat_note": "[canon OotP ch.33] bows and arrows; keeps its distance and kicks only when closed with [design]."
+  "_combat_note": "[canon OotP ch.33] bows and arrows; keeps its distance and kicks only when closed with [design].",
+  "fx": {
+    "footfall": 0.3,
+    "emitters": []
+  }
 }

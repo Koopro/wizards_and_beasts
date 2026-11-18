@@ -67,5 +67,18 @@
         "note": "gold plumage; canon Occamy eggshells are pure silver"
       }
     ]
+  },
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:glint",
+        "color": "#B7D3FF",
+        "rate": 0.05,
+        "where": "back",
+        "when": "moving"
+      }
+    ],
+    "_note": "design: light catching its plumage"
   }
 }
