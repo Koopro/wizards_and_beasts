@@ -192,6 +192,17 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.MINISTRY_GILT_PLAQUE.get(),
                 FurnitureBlocks.SPIRE_FINIAL.get());
         tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ACADEMY_NOTICE_BOARD.get());
+        FurnitureBlocks.BEDS.forEach(b -> tag(BlockTags.BEDS).add(b.get()));
+        FurnitureBlocks.BEDS.forEach(b -> tag(BlockTags.MINEABLE_WITH_AXE).add(b.get()));
+        tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.WALNUT_WARDROBE.get(), FurnitureBlocks.CHEST_OF_DRAWERS.get(),
+                FurnitureBlocks.DISPLAY_CASE_BLOCK.get(), FurnitureBlocks.ROUND_TABLE.get(), FurnitureBlocks.SIDE_TABLE.get(),
+                FurnitureBlocks.WINGBACK_ARMCHAIR_CRIMSON.get(), FurnitureBlocks.WINGBACK_ARMCHAIR_AZURE.get(),
+                FurnitureBlocks.WINGBACK_ARMCHAIR_PLUM.get(), FurnitureBlocks.POTION_WORKBENCH.get(),
+                FurnitureBlocks.APOTHECARY_CABINET.get(), FurnitureBlocks.POTION_RACK.get(), FurnitureBlocks.STORAGE_CRATE.get(),
+                FurnitureBlocks.MINISTRY_LEATHER_CHAIR.get(), FurnitureBlocks.KNOCKTURN_THRONE.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.MINISTRY_FILING_CABINET.get());
+        tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.DORMITORY_CARPET.get(), FurnitureBlocks.MINISTRY_CARPET.get(),
+                FurnitureBlocks.GRINGOTTS_CARPET.get(), FurnitureBlocks.KNOCKTURN_CARPET.get());
         ArchitectureBlocks.FAMILY_PIECES.forEach(b -> tag(BlockTags.MINEABLE_WITH_PICKAXE).add(b.get()));
         ArchitectureBlocks.BALUSTRADES.forEach(b -> tag(BlockTags.FENCES).add(b.get()));
         for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {

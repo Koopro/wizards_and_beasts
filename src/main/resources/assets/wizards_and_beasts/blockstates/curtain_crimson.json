@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=north,open=false,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single"
+    },
+    "facing=north,open=true,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single_open"
+    },
+    "facing=north,open=false,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start"
+    },
+    "facing=north,open=true,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start_open"
+    },
+    "facing=north,open=false,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle"
+    },
+    "facing=north,open=true,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle_open"
+    },
+    "facing=north,open=false,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end"
+    },
+    "facing=north,open=true,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end_open"
+    },
+    "facing=east,open=false,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single",
+      "y": 90
+    },
+    "facing=east,open=true,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single_open",
+      "y": 90
+    },
+    "facing=east,open=false,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start",
+      "y": 90
+    },
+    "facing=east,open=true,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start_open",
+      "y": 90
+    },
+    "facing=east,open=false,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle",
+      "y": 90
+    },
+    "facing=east,open=true,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle_open",
+      "y": 90
+    },
+    "facing=east,open=false,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end",
+      "y": 90
+    },
+    "facing=east,open=true,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end_open",
+      "y": 90
+    },
+    "facing=south,open=false,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single",
+      "y": 180
+    },
+    "facing=south,open=true,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single_open",
+      "y": 180
+    },
+    "facing=south,open=false,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start",
+      "y": 180
+    },
+    "facing=south,open=true,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start_open",
+      "y": 180
+    },
+    "facing=south,open=false,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle",
+      "y": 180
+    },
+    "facing=south,open=true,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle_open",
+      "y": 180
+    },
+    "facing=south,open=false,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end",
+      "y": 180
+    },
+    "facing=south,open=true,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end_open",
+      "y": 180
+    },
+    "facing=west,open=false,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single",
+      "y": 270
+    },
+    "facing=west,open=true,run=single": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_single_open",
+      "y": 270
+    },
+    "facing=west,open=false,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start",
+      "y": 270
+    },
+    "facing=west,open=true,run=start": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_start_open",
+      "y": 270
+    },
+    "facing=west,open=false,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle",
+      "y": 270
+    },
+    "facing=west,open=true,run=middle": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_middle_open",
+      "y": 270
+    },
+    "facing=west,open=false,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end",
+      "y": 270
+    },
+    "facing=west,open=true,run=end": {
+      "model": "wizards_and_beasts:block/furniture/curtain_crimson_end_open",
+      "y": 270
+    }
+  }
+}

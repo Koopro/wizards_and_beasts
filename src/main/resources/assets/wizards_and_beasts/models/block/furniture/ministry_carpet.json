@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/carpet",
+  "textures": {
+    "wool": "wizards_and_beasts:block/furniture/ministry_carpet"
+  }
+}

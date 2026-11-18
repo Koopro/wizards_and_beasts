@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/knockturn_throne"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/knockturn_throne",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/knockturn_throne",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/knockturn_throne",
+      "y": 270
+    }
+  }
+}

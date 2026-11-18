@@ -55,6 +55,10 @@ public final class FurnitureTests {
         tests.add("furniture_wood_boats_spawn_and_give_back_their_item",
                 "furniture: every wand-wood boat and chest boat spawns and is picked as its own item",
                 FurnitureTests::woodBoats);
+        tests.add("furniture_storage_display_and_curtains_work",
+                "furniture: storage holds and spills, a wardrobe opens from either half, a case shows and gives back, "
+                        + "a curtain run draws together",
+                FurnitureTests::behaviours);
         tests.add("furniture_chair_seats_a_player_and_lets_go",
                 "furniture: using a chair seats the player; breaking it stands them up and the seat goes",
                 FurnitureTests::chairSeats);
@@ -128,7 +132,9 @@ public final class FurnitureTests {
                     WizardTestSupport.check(helper, state.is(block),
                             () -> block + " did not place looking " + look + "; found " + state);
                     if (state.hasProperty(HorizontalDirectionalBlock.FACING)) {
-                        Direction expected = onWall ? face : look.getOpposite();
+                        // A bed lies along the look (vanilla's rule: its head away from the placer); the rest face back.
+                        boolean bed = block instanceof net.minecraft.world.level.block.BedBlock;
+                        Direction expected = onWall ? face : bed ? look : look.getOpposite();
                         Direction facing = state.getValue(HorizontalDirectionalBlock.FACING);
                         WizardTestSupport.check(helper, facing == expected,
                                 () -> block + " placed looking " + look + " faces " + facing + ", expected " + expected);
@@ -136,7 +142,13 @@ public final class FurnitureTests {
                     BlockPos placed = helper.absolutePos((onWall ? wall : floor).relative(face));
                     WizardTestSupport.check(helper, !state.getShape(helper.getLevel(), placed).isEmpty(),
                             () -> block + " has no outline facing " + look + ", so it cannot be picked or broken");
-                    List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), placed, null);
+                    BlockState dropping = state;
+                    BlockPos dropAt = placed;
+                    if (state.hasProperty(net.minecraft.world.level.block.BedBlock.PART)) {        // a bed drops from its head
+                        dropAt = placed.relative(state.getValue(net.minecraft.world.level.block.BedBlock.FACING));
+                        dropping = helper.getLevel().getBlockState(dropAt);
+                    }
+                    List<ItemStack> drops = Block.getDrops(dropping, helper.getLevel(), dropAt, null);
                     WizardTestSupport.check(helper, drops.size() == 1 && drops.getFirst().is(blockItem),
                             () -> block + " drops " + drops + ", not itself");
                     scene.close();
@@ -183,6 +195,80 @@ public final class FurnitureTests {
                 WizardTestSupport.check(helper, drops.stream().anyMatch(stack -> stack.is(item)),
                         () -> state + " drops " + drops + ", not " + item);
                 scene.close();
+            }
+            helper.succeed();
+        } finally {
+            WizardTestSupport.retire(helper, player);
+        }
+    }
+
+    private static void behaviours(GameTestHelper helper) {
+        ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "Housekeeper");
+        try (Scene scene = new Scene(helper)) {
+            for (int x = 0; x < 4; x++) {
+                scene.set(scene.at(x, 0, 1), Blocks.STONE);
+            }
+            // Storage keeps what is put in it and spills it when broken.
+            scene.place(player, (BlockItem) FurnitureBlocks.CHEST_OF_DRAWERS.asItem(), scene.at(0, 0, 1), Direction.UP,
+                    Direction.SOUTH);
+            BlockPos drawers = helper.absolutePos(scene.at(0, 1, 1));
+            var storage = (at.koopro.wizardsandbeasts.block.furniture.FurnitureStorageBlockEntity)
+                    helper.getLevel().getBlockEntity(drawers);
+            WizardTestSupport.check(helper, storage != null && storage.getContainerSize() == 18,
+                    () -> "a chest of drawers holds " + (storage == null ? "nothing" : storage.getContainerSize()) + ", not 18");
+            storage.setItem(4, new ItemStack(Items.BOOK, 3));
+            helper.getLevel().destroyBlock(drawers, false);
+            WizardTestSupport.check(helper, !helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                            new net.minecraft.world.phys.AABB(drawers).inflate(1.5), e -> e.getItem().is(Items.BOOK)).isEmpty(),
+                    () -> "breaking the drawers lost the books in them");
+            helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                    new net.minecraft.world.phys.AABB(drawers).inflate(2)).forEach(net.minecraft.world.entity.Entity::discard);
+
+            // A wardrobe stands two high and its upper half opens the lower half's store.
+            scene.place(player, (BlockItem) FurnitureBlocks.WALNUT_WARDROBE.asItem(), scene.at(1, 0, 1), Direction.UP,
+                    Direction.SOUTH);
+            BlockState upper = helper.getBlockState(scene.at(1, 2, 1));
+            WizardTestSupport.check(helper, upper.is(FurnitureBlocks.WALNUT_WARDROBE.get())
+                            && upper.getValue(at.koopro.wizardsandbeasts.block.furniture.TallStorageBlock.HALF)
+                            == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER,
+                    () -> "the wardrobe has no upper half: " + upper);
+            helper.setBlock(scene.at(1, 2, 1), Blocks.AIR);
+            WizardTestSupport.check(helper, helper.getBlockState(scene.at(1, 1, 1)).isAir(),
+                    () -> "breaking the wardrobe's top left its bottom standing");
+
+            // A display case takes one item and gives it back.
+            scene.place(player, (BlockItem) FurnitureBlocks.DISPLAY_CASE_BLOCK.asItem(), scene.at(2, 0, 1), Direction.UP,
+                    Direction.SOUTH);
+            BlockPos casePos = helper.absolutePos(scene.at(2, 1, 1));
+            BlockState caseState = helper.getLevel().getBlockState(casePos);
+            ItemStack gem = new ItemStack(Items.DIAMOND, 5);
+            player.setItemInHand(InteractionHand.MAIN_HAND, gem);
+            caseState.useItemOn(gem, helper.getLevel(), player, InteractionHand.MAIN_HAND,
+                    new BlockHitResult(Vec3.atCenterOf(casePos), Direction.NORTH, casePos, false));
+            var display = (at.koopro.wizardsandbeasts.block.furniture.DisplayCaseBlockEntity) helper.getLevel().getBlockEntity(casePos);
+            WizardTestSupport.check(helper, display != null && display.shown().is(Items.DIAMOND) && display.shown().getCount() == 1
+                    && gem.getCount() == (player.hasInfiniteMaterials() ? 5 : 4), () -> "the case shows " + (display == null ? "nothing" : display.shown())
+                    + " and the hand holds " + gem);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            caseState.useWithoutItem(helper.getLevel(), player,
+                    new BlockHitResult(Vec3.atCenterOf(casePos), Direction.NORTH, casePos, false));
+            WizardTestSupport.check(helper, display.shown().isEmpty() && player.getInventory().countItem(Items.DIAMOND) >= 1,
+                    () -> "taking from the case left " + display.shown());
+            scene.close();
+
+            // Using one curtain of a run of three draws all three open.
+            for (int x = 0; x < 3; x++) {
+                scene.set(scene.at(x, 0, 1), Blocks.STONE);
+                scene.place(player, (BlockItem) FurnitureBlocks.CURTAIN_CRIMSON.asItem(), scene.at(x, 0, 1), Direction.UP,
+                        Direction.SOUTH);
+            }
+            BlockPos middle = helper.absolutePos(scene.at(1, 1, 1));
+            helper.getLevel().getBlockState(middle).useWithoutItem(helper.getLevel(), player,
+                    new BlockHitResult(Vec3.atCenterOf(middle), Direction.NORTH, middle, false));
+            for (int x = 0; x < 3; x++) {
+                BlockState curtain = helper.getBlockState(scene.at(x, 1, 1));
+                WizardTestSupport.check(helper, curtain.getValue(at.koopro.wizardsandbeasts.block.furniture.CurtainBlock.OPEN),
+                        () -> "a curtain of the run stayed shut: " + curtain);
             }
             helper.succeed();
         } finally {

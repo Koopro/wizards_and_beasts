@@ -47,6 +47,8 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.SEAT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.FurnitureBlocks.MOVING_PROP.get(),
                 context -> new at.koopro.wizardsandbeasts.client.furniture.MovingPropRenderer());
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.FurnitureBlocks.DISPLAY_CASE.get(),
+                context -> new at.koopro.wizardsandbeasts.client.furniture.DisplayCaseRenderer());
         event.registerEntityRenderer(ModEntities.DUELLING_DUMMY.get(), DuellingDummyRenderer::new);
         event.registerEntityRenderer(ModEntities.SETTLEMENT_NPC.get(),
                 at.koopro.wizardsandbeasts.client.settlement.SettlementNpcRenderer::new);
