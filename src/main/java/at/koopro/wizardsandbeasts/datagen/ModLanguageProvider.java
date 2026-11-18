@@ -19,6 +19,12 @@ public class ModLanguageProvider extends LanguageProvider {
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.NAMES.forEach((id, name) ->
                 add("block." + WizardsAndBeastsMod.MODID + "." + id, name));
         add("entity." + WizardsAndBeastsMod.MODID + ".seat", "Seat");
+        for (int i = 0; i < at.koopro.wizardsandbeasts.registry.FurnitureBlocks.PORTRAITS.size(); i++) {
+            String id = at.koopro.wizardsandbeasts.registry.FurnitureBlocks.PORTRAITS.get(i);
+            add("painting." + WizardsAndBeastsMod.MODID + "." + id + ".title",
+                    at.koopro.wizardsandbeasts.registry.FurnitureBlocks.PORTRAIT_TITLES.get(i));
+            add("painting." + WizardsAndBeastsMod.MODID + "." + id + ".author", "A Hogwarts portraitist");
+        }
         at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES.forEach(piece -> add(piece.block().get(), piece.name()));
         for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
             String w = f.displayName();

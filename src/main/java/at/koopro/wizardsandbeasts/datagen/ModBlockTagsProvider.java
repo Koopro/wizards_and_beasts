@@ -211,7 +211,6 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 FurnitureBlocks.GLOWING_RUNESTONE.get());
         tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ENCHANTED_MIRROR.get(), FurnitureBlocks.DARK_MIRROR.get(),
                 FurnitureBlocks.GRANDFATHER_CLOCK.get(), FurnitureBlocks.HERALDIC_SHIELD.get());
-        FurnitureBlocks.PORTRAITS.forEach(b -> tag(BlockTags.MINEABLE_WITH_AXE).add(b.get()));
         tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.DORMITORY_CARPET.get(), FurnitureBlocks.MINISTRY_CARPET.get(),
                 FurnitureBlocks.GRINGOTTS_CARPET.get(), FurnitureBlocks.KNOCKTURN_CARPET.get());
         ArchitectureBlocks.FAMILY_PIECES.forEach(b -> tag(BlockTags.MINEABLE_WITH_PICKAXE).add(b.get()));

@@ -5,6 +5,14 @@
       "bonus_rolls": 0.0,
       "conditions": [
         {
+          "block": "wizards_and_beasts:ministry_fireplace",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "col": "2",
+            "row": "0"
+          }
+        },
+        {
           "condition": "minecraft:survives_explosion"
         }
       ],

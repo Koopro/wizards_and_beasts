@@ -457,6 +457,16 @@ public class ModCreativeTabs {
                         DecoBlocks.items().forEach(item -> output.accept(item.get()));
                         // Architecture, furniture and magical decoration, by collection
                         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.ITEMS.forEach(item -> output.accept(item.get()));
+                        // The portraits: vanilla paintings of our variants, one stack each
+                        parameters.holders().lookup(net.minecraft.core.registries.Registries.PAINTING_VARIANT).ifPresent(
+                                variants -> variants.listElements()
+                                        .filter(h -> h.key().identifier().getNamespace().equals(WizardsAndBeastsMod.MODID))
+                                        .forEach(h -> {
+                                            net.minecraft.world.item.ItemStack painting =
+                                                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.PAINTING);
+                                            painting.set(net.minecraft.core.component.DataComponents.PAINTING_VARIANT, h);
+                                            output.accept(painting);
+                                        }));
                         at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.TAB.forEach(block -> output.accept(block.get()));
                         at.koopro.wizardsandbeasts.registry.WoodFittings.TAB.forEach(item -> output.accept(item.get()));
                         at.koopro.wizardsandbeasts.registry.WoodBoats.ALL.forEach(boats -> {

@@ -1,0 +1,214 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/hogwarts_flagstone",
+    "m1": "wizards_and_beasts:block/hogwarts_stone_bricks",
+    "m2": "wizards_and_beasts:block/hogwarts_dark_stone",
+    "m3": "wizards_and_beasts:block/hogwarts_chiseled_stone_bricks",
+    "m4": "wizards_and_beasts:block/furniture/heraldic_shield",
+    "m5": "wizards_and_beasts:block/furniture/brass",
+    "m6": "wizards_and_beasts:block/furniture/iron",
+    "m7": "wizards_and_beasts:block/furniture/castle_oak",
+    "particle": "wizards_and_beasts:block/hogwarts_stone_bricks"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        4
+      ],
+      "to": [
+        14,
+        8,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m1"
+        },
+        "south": {
+          "texture": "#m1",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m1"
+        },
+        "west": {
+          "texture": "#m1"
+        },
+        "up": {
+          "texture": "#m1"
+        },
+        "down": {
+          "texture": "#m1"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        0,
+        14
+      ],
+      "to": [
+        16,
+        4,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m2"
+        },
+        "south": {
+          "texture": "#m2",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m2"
+        },
+        "west": {
+          "texture": "#m2"
+        },
+        "up": {
+          "texture": "#m2"
+        },
+        "down": {
+          "texture": "#m2"
+        }
+      }
+    },
+    {
+      "from": [
+        14,
+        0,
+        4
+      ],
+      "to": [
+        16,
+        8,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m1"
+        },
+        "south": {
+          "texture": "#m1",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m1"
+        },
+        "west": {
+          "texture": "#m1"
+        },
+        "up": {
+          "texture": "#m1"
+        },
+        "down": {
+          "texture": "#m1"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        8,
+        2
+      ],
+      "to": [
+        16,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m3"
+        },
+        "south": {
+          "texture": "#m3",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m3"
+        },
+        "west": {
+          "texture": "#m3"
+        },
+        "up": {
+          "texture": "#m3"
+        },
+        "down": {
+          "texture": "#m3"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        12,
+        3
+      ],
+      "to": [
+        16,
+        14,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m3"
+        },
+        "south": {
+          "texture": "#m3",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m3"
+        },
+        "west": {
+          "texture": "#m3"
+        },
+        "up": {
+          "texture": "#m3"
+        },
+        "down": {
+          "texture": "#m3"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        14,
+        6
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m1"
+        },
+        "south": {
+          "texture": "#m1",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m1"
+        },
+        "west": {
+          "texture": "#m1"
+        },
+        "up": {
+          "texture": "#m1"
+        },
+        "down": {
+          "texture": "#m1"
+        }
+      }
+    }
+  ]
+}

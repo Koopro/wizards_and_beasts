@@ -20,6 +20,8 @@ import at.koopro.wizardsandbeasts.block.furniture.TallStorageBlock;
 import at.koopro.wizardsandbeasts.block.furniture.TallFurnitureBlock;
 import at.koopro.wizardsandbeasts.block.furniture.GrandfatherClockBlock;
 import at.koopro.wizardsandbeasts.block.furniture.GlowingDecoBlock;
+import at.koopro.wizardsandbeasts.block.furniture.FireplaceBlock;
+import at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock;
 import net.minecraft.world.item.DyeColor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -324,17 +326,16 @@ public final class FurnitureBlocks {
     public static final DeferredBlock<GrandfatherClockBlock> GRANDFATHER_CLOCK = tall("grandfather_clock",
             "Grandfather Clock", p -> new GrandfatherClockBlock(p, Spec.of("grandfather_clock")),
             () -> wood(MapColor.COLOR_BROWN));
-    public static final List<DeferredBlock<FurnitureBlock>> PORTRAITS = new ArrayList<>();
-    static {
-        for (String[] sitter : new String[][]{{"bearded_headmaster", "Portrait of a Bearded Headmaster"},
-                {"stern_witch", "Portrait of a Stern Witch"}, {"goblin_banker", "Portrait of a Goblin Banker"},
-                {"armoured_knight", "Portrait of an Armoured Knight"}, {"lady_in_a_ruff", "Portrait of a Lady in a Ruff"},
-                {"spectacled_scholar", "Portrait of a Spectacled Scholar"}, {"hooded_dark_wizard", "Portrait of a Hooded Dark Wizard"},
-                {"jolly_friar", "Portrait of a Jolly Friar"}}) {
-            PORTRAITS.add(block("portrait_" + sitter[0], sitter[1], p -> new FurnitureBlock(p, Spec.wall("portrait")),
-                    () -> wood(MapColor.GOLD).pushReaction(PushReaction.DESTROY)));
-        }
-    }
+    /**
+     * The portraits are vanilla paintings (data/wizards_and_beasts/painting_variant, tools/portrait_paintings.py):
+     * owner 2026-11-18, the one-block portraits were far smaller than the films' "larger than life" ones.
+     */
+    public static final List<String> PORTRAITS = List.of("portrait_bearded_headmaster", "portrait_stern_witch",
+            "portrait_goblin_banker", "portrait_portly_knight", "portrait_lady_in_rose", "portrait_spectacled_scholar",
+            "portrait_hooded_dark_wizard", "portrait_jolly_friar");
+    public static final List<String> PORTRAIT_TITLES = List.of("A Bearded Headmaster", "A Stern Witch",
+            "A Goblin Banker", "A Portly Knight", "A Lady in Rose Silk", "A Spectacled Scholar", "A Hooded Dark Wizard",
+            "A Jolly Friar");
     public static final DeferredBlock<FurnitureBlock> GOLDEN_TROPHY_CUP = block("golden_trophy_cup", "Golden Trophy Cup",
             p -> new FurnitureBlock(p, Spec.of("trophy_cup")), () -> metal(0).pushReaction(PushReaction.DESTROY));
     public static final DeferredBlock<FurnitureBlock> SILVER_TROPHY_CUP = block("silver_trophy_cup", "Silver Trophy Cup",
@@ -348,14 +349,30 @@ public final class FurnitureBlocks {
             p -> new FurnitureBlock(p, Spec.of("gargoyle_statue")), () -> stone(MapColor.COLOR_GRAY));
     public static final DeferredBlock<TallFurnitureBlock> WIZARD_STATUE = tall("wizard_statue", "Wizard Statue",
             p -> new TallFurnitureBlock(p, Spec.of("wizard_statue")), () -> stone(MapColor.COLOR_GRAY));
-    public static final DeferredBlock<GlowingDecoBlock> HOGWARTS_FIREPLACE = glowing("hogwarts_fireplace",
-            "Hogwarts Fireplace", Spec.of("fireplace"), GlowingDecoBlock.Emission.HEARTH, 0, 8, 3, 10, () -> stoneDeco(13));
-    public static final DeferredBlock<GlowingDecoBlock> MINISTRY_FIREPLACE = glowing("ministry_fireplace",
-            "Ministry Fireplace", Spec.of("fireplace"), GlowingDecoBlock.Emission.GREEN_HEARTH, 0xFF6EE87A, 8, 3, 10,
-            () -> stoneDeco(13));
-    public static final DeferredBlock<GlowingDecoBlock> KNOCKTURN_FIREPLACE = glowing("knockturn_fireplace",
-            "Knockturn Fireplace", Spec.of("fireplace"), GlowingDecoBlock.Emission.SOUL_HEARTH, 0, 8, 3, 10,
-            () -> stoneDeco(10));
+    /** Pieces bigger than a block: they drop from their bottom-middle cell only. */
+    public static final List<DeferredBlock<? extends MultiblockFurnitureBlock>> MULTIBLOCK = new ArrayList<>();
+
+    private static <T extends MultiblockFurnitureBlock> DeferredBlock<T> multi(String id, String name,
+            java.util.function.Function<BlockBehaviour.Properties, T> factory, Supplier<BlockBehaviour.Properties> properties) {
+        DeferredBlock<T> block = ModBlocks.BLOCKS.registerBlock(id, factory, properties);
+        ALL.add(block);
+        MULTIBLOCK.add(block);
+        ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        NAMES.put(id, name);
+        return block;
+    }
+
+    // Sized from the films (owner 11-18): the common room's "massive fire-place"; the Atrium's gilded fireplaces,
+    // each over 30 feet in the films (here 7 blocks, so one fits a hall); a mean Knockturn hearth.
+    public static final DeferredBlock<FireplaceBlock> HOGWARTS_FIREPLACE = multi("hogwarts_fireplace",
+            "Hogwarts Common Room Fireplace", p -> new FireplaceBlock(p, Spec.multi("hogwarts_fireplace", 4, 4),
+                    FireplaceBlock.Flame.WARM, 1, 2, 2), () -> stoneDeco(15));
+    public static final DeferredBlock<FireplaceBlock> MINISTRY_FIREPLACE = multi("ministry_fireplace",
+            "Ministry Atrium Fireplace", p -> new FireplaceBlock(p, Spec.multi("ministry_fireplace", 5, 7),
+                    FireplaceBlock.Flame.GREEN, 1, 3, 5), () -> stoneDeco(13));
+    public static final DeferredBlock<FireplaceBlock> KNOCKTURN_FIREPLACE = multi("knockturn_fireplace",
+            "Knockturn Fireplace", p -> new FireplaceBlock(p, Spec.multi("knockturn_fireplace", 3, 3),
+                    FireplaceBlock.Flame.SOUL, 1, 1, 2), () -> stoneDeco(10));
     public static final DeferredBlock<Block> GLOWING_RUNESTONE = block("glowing_runestone", "Glowing Runestone",
             Block::new, () -> stoneDeco(7));
 

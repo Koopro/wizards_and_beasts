@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "wizards_and_beasts:portrait_bearded_headmaster",
+    "wizards_and_beasts:portrait_stern_witch",
+    "wizards_and_beasts:portrait_goblin_banker",
+    "wizards_and_beasts:portrait_portly_knight",
+    "wizards_and_beasts:portrait_lady_in_rose",
+    "wizards_and_beasts:portrait_spectacled_scholar",
+    "wizards_and_beasts:portrait_hooded_dark_wizard",
+    "wizards_and_beasts:portrait_jolly_friar"
+  ]
+}

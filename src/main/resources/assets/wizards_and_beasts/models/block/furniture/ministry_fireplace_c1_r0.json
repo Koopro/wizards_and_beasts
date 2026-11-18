@@ -1,0 +1,148 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/ministry_floor_tile",
+    "m1": "wizards_and_beasts:block/ministry_black_marble_tiles",
+    "m2": "wizards_and_beasts:block/furniture/brass",
+    "m3": "wizards_and_beasts:block/knockturn_slate",
+    "m4": "wizards_and_beasts:block/ministry_gilded_black_marble",
+    "m5": "wizards_and_beasts:block/furniture/green_fire",
+    "particle": "wizards_and_beasts:block/ministry_black_marble_tiles"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#m0",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m0"
+        },
+        "west": {
+          "texture": "#m0"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        2,
+        14
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m3"
+        },
+        "south": {
+          "texture": "#m3",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m3"
+        },
+        "west": {
+          "texture": "#m3"
+        },
+        "up": {
+          "texture": "#m3"
+        },
+        "down": {
+          "texture": "#m3"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        2,
+        9.5
+      ],
+      "to": [
+        16,
+        16,
+        9.5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#m5",
+          "uv": [
+            10.6667,
+            8.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#m5",
+          "uv": [
+            0.0,
+            8.0,
+            5.3333,
+            16.0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        2,
+        12.5
+      ],
+      "to": [
+        16,
+        16,
+        12.5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#m5",
+          "uv": [
+            0.0,
+            8.0,
+            5.3333,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#m5",
+          "uv": [
+            10.6667,
+            8.0,
+            16.0,
+            16.0
+          ]
+        }
+      }
+    }
+  ],
+  "render_type": "minecraft:cutout"
+}

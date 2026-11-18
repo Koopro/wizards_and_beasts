@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_stern_witch",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_stern_witch.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_stern_witch.author",
+    "color": "gray"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "animation": {
+    "height": 32,
+    "width": 32,
+    "frames": [
+      {
+        "index": 0,
+        "time": 81
+      },
+      {
+        "index": 1,
+        "time": 3
+      },
+      {
+        "index": 0,
+        "time": 79
+      },
+      {
+        "index": 2,
+        "time": 22
+      },
+      {
+        "index": 0,
+        "time": 40
+      },
+      {
+        "index": 3,
+        "time": 22
+      }
+    ]
+  }
+}

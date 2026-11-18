@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "wizards_and_beasts:block/furniture/hogwarts_fireplace"
+    "model": "wizards_and_beasts:block/furniture/hogwarts_fireplace_item"
   }
 }

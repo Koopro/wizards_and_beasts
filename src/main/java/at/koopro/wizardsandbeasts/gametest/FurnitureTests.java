@@ -256,6 +256,27 @@ public final class FurnitureTests {
                     () -> "taking from the case left " + display.shown());
             scene.close();
 
+            // A fireplace 4 x 4 stands all its cells from one item, and falls as one when a corner is broken.
+            scene.set(scene.at(2, 0, 3), Blocks.STONE);
+            scene.place(player, (BlockItem) FurnitureBlocks.HOGWARTS_FIREPLACE.asItem(), scene.at(2, 0, 3), Direction.UP,
+                    Direction.SOUTH);
+            var hearth = FurnitureBlocks.HOGWARTS_FIREPLACE.get();
+            BlockPos origin = helper.absolutePos(scene.at(2, 1, 3));
+            Direction hearthFacing = helper.getLevel().getBlockState(origin).getValue(FurnitureBlock.FACING);
+            int cells = 0;
+            for (int col = 0; col < 4; col++) {
+                for (int row = 0; row < 4; row++) {
+                    if (helper.getLevel().getBlockState(hearth.cell(origin, hearthFacing, col, row)).is(hearth)) {
+                        cells++;
+                    }
+                }
+            }
+            int stood = cells;
+            WizardTestSupport.check(helper, stood == 16, () -> "the fireplace stood " + stood + " of its 16 cells");
+            helper.getLevel().setBlock(hearth.cell(origin, hearthFacing, 3, 3), Blocks.AIR.defaultBlockState(), 3);
+            WizardTestSupport.check(helper, !helper.getLevel().getBlockState(origin).is(hearth),
+                    () -> "breaking the fireplace's top corner left its hearth standing");
+
             // Using one curtain of a run of three draws all three open.
             for (int x = 0; x < 3; x++) {
                 scene.set(scene.at(x, 0, 1), Blocks.STONE);

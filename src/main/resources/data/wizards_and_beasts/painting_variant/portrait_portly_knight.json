@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_portly_knight",
+  "width": 2,
+  "height": 3,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_portly_knight.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_portly_knight.author",
+    "color": "gray"
+  }
+}
