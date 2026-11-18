@@ -77,6 +77,8 @@ public final class EquipmentShowcaseCapture {
     private static final boolean ENABLED =
             System.getenv("WB_EQUIPMENT_SHOWCASE") != null && !FMLEnvironment.isProduction();
     private static final boolean CAST = "cast".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
+    /** {@code WB_EQUIPMENT_SHOWCASE=anim}: the Player Animation Renaissance look sheet. */
+    private static final boolean ANIM = "anim".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     /** Wardrobe Renaissance Phase D: the five prototype cuts standing, walking, sprinting, sneaking, seated. */
     private static final boolean WARDROBE = "wardrobe".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     /** Wearable icons pass (2026-11-05): every wearable's inventory icon, then the Curios screen's empty slots. */
@@ -445,7 +447,7 @@ public final class EquipmentShowcaseCapture {
     private static final String ONLY = System.getenv().getOrDefault("WB_EQUIPMENT_SHOWCASE_ONLY", "");
 
     private static List<Outfit> outfits() {
-        List<Outfit> all = ICONS ? ICON_OUTFITS : CAST ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
+        List<Outfit> all = ICONS ? ICON_OUTFITS : CAST || ANIM ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
         if (ONLY.isEmpty()) {
             return all;
         }
@@ -518,6 +520,10 @@ public final class EquipmentShowcaseCapture {
 
     private static void buildScript(Outfit current) {
         SCRIPT.clear();
+        if (ANIM) {
+            buildAnimScript(current);
+            return;
+        }
         if (CAST) {
             buildCastScript(current);
             return;
@@ -729,6 +735,120 @@ public final class EquipmentShowcaseCapture {
         }));
         SCRIPT.add(new Step("real_settle_wait", 4, false, Cam.SIDE, NONE, NOTHING));
         SCRIPT.add(new Step("real_settle_side", 1, true, Cam.SIDE, NONE, NOTHING));
+    }
+
+    /** A cast parked on a held phase under a real spell id, so its category or override set plays. */
+    private static Consumer<ServerPlayer> heldCast(String spell, int phase) {
+        return p -> at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload.send(p,
+                new at.koopro.wizardsandbeasts.network.spell.SpellCastAnimationS2CPayload(p.getId(),
+                        WizardsAndBeastsMod.MODID + ":" + spell, phase < 0 ? 0 : 1, 0.35f, 0.6f, phase));
+    }
+
+    private static void shots(String name, boolean firstPerson, Cam... cams) {
+        for (Cam cam : cams) {
+            SCRIPT.add(new Step(name + "_" + cam.name().toLowerCase(java.util.Locale.ROOT), 3, true, cam, NONE, NOTHING));
+        }
+        if (firstPerson) {
+            SCRIPT.add(new Step(name + "_first_person", 5, true, Cam.SELF, NONE, NOTHING));
+        }
+    }
+
+    /**
+     * Player Animation Renaissance look sheet: the ready hold, the draw, each category's gather and strike, the
+     * four overrides, the charged Shield Charm, the inspect, a cast from a broom, and two transitions shot frame by
+     * frame (a hold rising, an interrupted hold letting go) so a snap would show as a jump between frames.
+     */
+    private static void buildAnimScript(Outfit current) {
+        SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
+            p.getAbilities().invulnerable = true;
+            p.onUpdateAbilities();
+            p.setHealth(p.getMaxHealth());
+            p.removeAllEffects();
+            undress(p);
+            p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+            current.dress().accept(p);
+        }));
+        shots("ready", true, Cam.QUARTER, Cam.SIDE, Cam.FRONT);
+
+        // The draw: wand away, then back; shot at the top of the overshoot and settled.
+        SCRIPT.add(new Step("sheathe", 10, false, Cam.SIDE, NONE, p -> {
+            ItemStack wand = p.getMainHandItem().copy();
+            p.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+            p.getPersistentData().put("wb_anim_wand", net.minecraft.world.item.ItemStack.CODEC
+                    .encodeStart(p.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), wand)
+                    .getOrThrow());
+        }));
+        SCRIPT.add(new Step("draw_set", 4, false, Cam.SIDE, NONE, p -> net.minecraft.world.item.ItemStack.CODEC
+                .parse(p.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                        p.getPersistentData().get("wb_anim_wand"))
+                .result().ifPresent(w -> p.setItemSlot(EquipmentSlot.MAINHAND, w))));
+        SCRIPT.add(new Step("draw_top_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("draw_settle", 8, false, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_set", 8, false, Cam.SIDE, p -> moves(true, false), NOTHING));
+        SCRIPT.add(new Step("walk_ready_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("walk_stop", 8, false, Cam.SIDE, p -> moves(false, false), NOTHING));
+
+        // A hold rising, frame by frame from the side: no frame may jump.
+        SCRIPT.add(new Step("rise_set", 1, false, Cam.SIDE, NONE, heldCast("stupefy", 0)));
+        for (int i = 0; i < 6; i++) {
+            SCRIPT.add(new Step("rise_" + i + "_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        }
+        SCRIPT.add(new Step("rise_settle", 4, false, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("letgo_set", 1, false, Cam.SIDE, NONE, heldCast("stupefy", -1)));
+        for (int i = 0; i < 6; i++) {
+            SCRIPT.add(new Step("letgo_" + i + "_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        }
+        SCRIPT.add(new Step("letgo_settle", 6, false, Cam.SIDE, NONE, NOTHING));
+
+        // Each category's gather and strike, then the overrides.
+        String[][] sets = {
+                {"combat", "stupefy"}, {"utility", "reparo"}, {"defense", "fianto_duri"}, {"dark", "crucio"},
+                {"expelliarmus", "expelliarmus"}, {"patronus", "expecto_patronum"},
+                {"avada", "avada_kedavra"}, {"protego", "protego"}};
+        for (String[] set : sets) {
+            SCRIPT.add(new Step(set[0] + "_gather_set", 8, false, Cam.QUARTER, NONE, heldCast(set[1], 0)));
+            shots(set[0] + "_gather", false, Cam.QUARTER, Cam.SIDE);
+            SCRIPT.add(new Step(set[0] + "_strike_set", 8, false, Cam.QUARTER, NONE, heldCast(set[1], 1)));
+            shots(set[0] + "_strike", set[0].equals("combat"), Cam.QUARTER, Cam.SIDE, Cam.FRONT);
+            SCRIPT.add(new Step(set[0] + "_off", 8, false, Cam.QUARTER, NONE, heldCast(set[1], -1)));
+        }
+        // The Shield Charm held long: the charge's rise and tremor.
+        SCRIPT.add(new Step("protego_charged_set", 45, false, Cam.QUARTER, NONE, heldCast("protego", 0)));
+        shots("protego_charged", false, Cam.QUARTER);
+        SCRIPT.add(new Step("protego_charged_off", 8, false, Cam.QUARTER, NONE, heldCast("protego", -1)));
+
+        // The inspect, at the raise, mid-turn and late in the turn.
+        SCRIPT.add(new Step("inspect_set", 10, false, Cam.QUARTER, NONE, p ->
+                at.koopro.wizardsandbeasts.pose.PlayerGestures.play(p,
+                        at.koopro.wizardsandbeasts.pose.PlayerGesture.WAND_INSPECT)));
+        SCRIPT.add(new Step("inspect_up_quarter", 1, true, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("inspect_wait", 10, false, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("inspect_turn_front", 1, true, Cam.FRONT, NONE, NOTHING));
+        SCRIPT.add(new Step("inspect_turn_first_person", 2, true, Cam.SELF, NONE, NOTHING));
+        SCRIPT.add(new Step("inspect_wait2", 6, false, Cam.QUARTER, NONE, NOTHING));
+        SCRIPT.add(new Step("inspect_late_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("inspect_end", 30, false, Cam.QUARTER, NONE, NOTHING));
+
+        // A cast from a broom: the free hand stays on the shaft.
+        SCRIPT.add(new Step("broom_set", 14, false, Cam.QUARTER, NONE, p -> {
+            var broom = new at.koopro.wizardsandbeasts.entity.broom.BroomEntity(
+                    at.koopro.wizardsandbeasts.registry.ModEntities.BROOM.get(), p.level());
+            broom.setPos(p.getX(), p.getY() + 1.0, p.getZ());
+            broom.setYRot(-90.0F);
+            broom.setDefinitionId(net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "broom"));
+            p.level().addFreshEntity(broom);
+            p.startRiding(broom, true, true);
+            seat = broom;
+        }));
+        shots("broom_ride", false, Cam.SIDE);
+        SCRIPT.add(new Step("broom_cast_set", 8, false, Cam.QUARTER, NONE, heldCast("stupefy", 1)));
+        shots("broom_cast", false, Cam.QUARTER, Cam.SIDE);
+        SCRIPT.add(new Step("broom_cast_off", 6, false, Cam.QUARTER, NONE, heldCast("stupefy", -1)));
+        SCRIPT.add(new Step("unbroom", 2, false, Cam.SIDE, NONE, EquipmentShowcaseCapture::dismount));
+        for (int i = 0; i < 3; i++) {
+            SCRIPT.add(new Step("dismount_" + i + "_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        }
+        SCRIPT.add(new Step("dismount_settle", 8, false, Cam.SIDE, NONE, NOTHING));
     }
 
     private static void logClientCast(LocalPlayer player) {
@@ -945,13 +1065,20 @@ public final class EquipmentShowcaseCapture {
         camera.setXRot(Mth.clamp(pitch, -89.0F, 89.0F));
         camera.setYHeadRot(yaw);
         mc.options.setCameraType(CameraType.FIRST_PERSON);
-        if (mc.getCameraEntity() != camera) {
+        if (mc.getCameraEntity() != camera || cam != lastCam) {
+            // A change of angle cuts rather than glides: a shot one tick after a switch otherwise frames the camera
+            // halfway between two angles (seen in the animation sheet, a front shot of empty sky).
             mc.setCameraEntity(camera);
             camera.xo = camX;
             camera.yo = camY - camera.getEyeHeight();
             camera.zo = camZ;
+            camera.yRotO = yaw;
+            camera.xRotO = camera.getXRot();
         }
+        lastCam = cam;
     }
+
+    private static Cam lastCam;
 
     /** A stone platform in clear sky, noon, survival. */
     private static void buildStage(MinecraftServer server) {

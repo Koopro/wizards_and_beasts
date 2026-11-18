@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.pose;
 
+import at.koopro.wizardsandbeasts.client.broom.BroomRiderRenderer;
 import net.minecraft.world.entity.HumanoidArm;
 import org.jspecify.annotations.NullMarked;
 
@@ -47,18 +48,45 @@ public final class CastPosePass extends ProceduralPosePass {
             return;
         }
 
+        // D7: on a broom the free hand keeps the shaft and the torso twists less, or the rider lets go of the broom
+        // to throw a spell with their whole body.
+        if (BroomRiderRenderer.getRide(context.state()) != null) {
+            pose = pose.mounted(CastPoseConstants.MOUNTED_CHEST_SHARE);
+        }
+
         PlayerModelPart armPart = arm == HumanoidArm.RIGHT
                 ? PlayerModelPart.RIGHT_ARM : PlayerModelPart.LEFT_ARM;
         // The table is written for a right-handed cast; a left-hander mirrors yaw and roll.
         float side = arm == HumanoidArm.RIGHT ? 1f : -1f;
 
+        double time = now + context.partialTicks();
+        float charge = charge(resolved.cast(), time);
+        // The charge: a held gather keeps rising a little and starts to tremble, so holding reads as building up.
+        float tremor = charge * CastPoseConstants.CHARGE_TREMOR_DEG;
+        float raise = charge * CastPoseConstants.CHARGE_RAISE_DEG;
+        float shakeX = (float) Math.sin(time * 2.3) * tremor;
+        float shakeZ = (float) Math.cos(time * 3.1) * tremor * 0.7f;
+
         // The look pitch rides on the arm by the pose's aim share, so a strike points where the caster looks
         // (positive pitch looks down, and a larger xRot swings the arm down: the same sign vanilla's bow uses).
         builder.get(armPart)
                 .multiplier(weight)
-                .setRotDeg(PoseTarget.X_ROT, pose.castingArm().xRot() + pose.aim() * context.state().xRot)
+                .setRotDeg(PoseTarget.X_ROT,
+                        pose.castingArm().xRot() + pose.aim() * context.state().xRot - raise + shakeX)
                 .setRotDeg(PoseTarget.Y_ROT, pose.castingArm().yRot() * side)
-                .setRotDeg(PoseTarget.Z_ROT, pose.castingArm().zRot() * side);
+                .setRotDeg(PoseTarget.Z_ROT, (pose.castingArm().zRot() + shakeZ) * side);
+
+        // The free arm, for the two-handed sets (guard, Patronus). Its own share, so it can join late and leave
+        // early inside one cast.
+        if (pose.offShare() > 0f) {
+            PlayerModelPart offPart = arm == HumanoidArm.RIGHT
+                    ? PlayerModelPart.LEFT_ARM : PlayerModelPart.RIGHT_ARM;
+            builder.get(offPart)
+                    .multiplier(weight * pose.offShare())
+                    .setRotDeg(PoseTarget.X_ROT, pose.offArm().xRot())
+                    .setRotDeg(PoseTarget.Y_ROT, pose.offArm().yRot() * side)
+                    .setRotDeg(PoseTarget.Z_ROT, pose.offArm().zRot() * side);
+        }
 
         // Added, not set: the torso twist rides on whatever vanilla and the flight pass already did,
         // so a cast while gliding twists the glide rather than replacing it.
@@ -70,6 +98,18 @@ public final class CastPosePass extends ProceduralPosePass {
         builder.get(PlayerModelPart.HEAD)
                 .multiplier(weight)
                 .addRotDeg(PoseTarget.X_ROT, pose.headPitch());
+    }
+
+    /**
+     * 0..1 how long a gather has been held, toward {@link CastPoseConstants#CHARGE_TICKS}. Zero for anything but a
+     * held gather: a beam already holds its strike, and a timed cast has its own timeline.
+     */
+    static float charge(ClientCastAnimationState.@org.jspecify.annotations.Nullable ActiveCast cast, double time) {
+        if (cast == null || cast.holdPhase() != 0) {
+            return 0f;
+        }
+        float held = (float) (time - cast.startTick());
+        return Math.max(0f, Math.min(1f, held / CastPoseConstants.CHARGE_TICKS));
     }
 
     /**

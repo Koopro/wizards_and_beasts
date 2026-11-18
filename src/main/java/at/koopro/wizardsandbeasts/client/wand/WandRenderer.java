@@ -71,6 +71,8 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
      * strike or a channel the wand is turned onto the arm's line instead. Third-person hands only.
      */
     private static final DataTicket<Float> CAST_TILT = DataTicket.create("wand_cast_tilt", Float.class);
+    /** Degrees the wand is turned about its length by an inspect (GesturePosePass.wandRoll). */
+    private static final DataTicket<Float> INSPECT_ROLL = DataTicket.create("wand_inspect_roll", Float.class);
 
     /** The wand's resolved look; absent only for a draw that was never captured, which gets the base wand. */
     public static final DataTicket<WandLook> WAND_LOOK = DataTicket.create("wand_look", WandLook.class);
@@ -140,9 +142,19 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
                 long now = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.clientTick();
                 var cast = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState
                         .resolve(holder.getId(), now, now + partialTick);
-                if (cast != null) {
-                    // Scaled by the blend, so the wand's tilt rises and lets go with the arm instead of snapping.
-                    renderState.addGeckolibData(CAST_TILT, cast.pose().aim() * cast.weight());
+                // Scaled by the blend, so the wand's tilt rises and lets go with the arm instead of snapping. At rest the
+                // ready hold asks for a little tilt, so the point lies level instead of jutting at the sky.
+                float castTilt = cast == null ? 0f : cast.pose().aim() * cast.weight();
+                float readyTilt = at.koopro.wizardsandbeasts.client.pose.WandReadyPass.READY_WAND_TILT
+                        * at.koopro.wizardsandbeasts.client.pose.WandReadyPass.shown(holder.getId());
+                float tilt = Math.max(castTilt, readyTilt);
+                if (tilt > 0f) {
+                    renderState.addGeckolibData(CAST_TILT, tilt);
+                }
+                float roll = at.koopro.wizardsandbeasts.client.pose.GesturePosePass.wandRoll(holder.getId(), now,
+                        now + partialTick);
+                if (roll != 0f) {
+                    renderState.addGeckolibData(INSPECT_ROLL, roll);
                 }
             }
         }
@@ -257,8 +269,15 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
             applyProportions(bones, look, Boolean.TRUE.equals(info.getGeckolibData(CENTRED)));
         }
         Float tilt = info.getGeckolibData(CAST_TILT);
-        if (tilt != null && tilt > 0f) {
-            bones.ifPresent("wand_root", root -> root.setRotZ(CAST_TILT_DEGREES * tilt * Mth.DEG_TO_RAD));
+        Float roll = info.getGeckolibData(INSPECT_ROLL);
+        if ((tilt != null && tilt > 0f) || (roll != null && roll != 0f)) {
+            float z = tilt == null ? 0f : CAST_TILT_DEGREES * tilt * Mth.DEG_TO_RAD;
+            float y = roll == null ? 0f : roll * Mth.DEG_TO_RAD;
+            bones.ifPresent("wand_root", root -> {
+                root.setRotZ(z);
+                // The inspect turns the wand about its own length; the shaft runs along the bone's Y.
+                root.setRotY(y);
+            });
         }
     }
 

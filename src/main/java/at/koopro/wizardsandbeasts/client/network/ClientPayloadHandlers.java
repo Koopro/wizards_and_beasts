@@ -371,6 +371,13 @@ public final class ClientPayloadHandlers {
         });
     }
 
+    /** A player gesture started or stopped; see {@code PlayerGestures}. */
+    public static void handlePlayerGesture(
+            at.koopro.wizardsandbeasts.network.pose.PlayerGestureS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> at.koopro.wizardsandbeasts.client.pose.ClientGestureState.handle(
+                pkt, at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.clientTick()));
+    }
+
     /**
      * A player's flight attitude changed: store it, then recompute their collision box.
      *

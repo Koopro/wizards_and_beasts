@@ -100,6 +100,7 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTickPre);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeInputHandler::onClientTick);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.pose.WandInspectInput::onClientTick);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
