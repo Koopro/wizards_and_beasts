@@ -56,7 +56,9 @@
     "hit",
     "death",
     "shake",
-    "graze"
+    "graze",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "combat": {
