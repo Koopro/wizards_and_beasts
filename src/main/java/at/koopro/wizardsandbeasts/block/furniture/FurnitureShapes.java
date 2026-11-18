@@ -15,6 +15,7 @@ public final class FurnitureShapes {
     static {
         put("academy_chair", box(2, 0, 2, 14, 11, 14), box(3, 11, 12, 13, 22, 14));
         put("academy_desk", box(1, 0, 2, 3, 12, 4), box(13, 0, 2, 15, 12, 4), box(1, 0, 12, 3, 12, 14), box(13, 0, 12, 15, 12, 14), box(0, 12, 1, 16, 14, 15), box(0, 14, 12, 16, 15, 15));
+        put("academy_notice_board", box(1, 3, 14, 15, 14, 16));
         put("desk_globe", box(4, 0, 4, 12, 15, 12));
         put("floating_book", box(3, 5, 3, 13, 13, 13));
         put("hogwarts_gothic_arch_end", box(0, 10, 0, 2, 16, 16), box(2, 9, 0, 4, 16, 16), box(4, 8, 0, 6, 16, 16), box(6, 7, 0, 8, 16, 16), box(8, 6, 0, 10, 16, 16), box(10, 4, 0, 12, 16, 16), box(12, 3, 0, 14, 16, 16), box(14, 2, 0, 16, 16, 16));
@@ -33,6 +34,7 @@ public final class FurnitureShapes {
         put("library_bookshelf_single", box(0, 0, 0, 16, 16, 16));
         put("library_bookshelf_start", box(0, 0, 0, 16, 16, 16));
         put("magical_wall_clock", box(2, 2, 13, 14, 14, 16));
+        put("ministry_gilt_plaque", box(2, 5, 14, 14, 11, 16));
         put("reading_armchair", box(1, 0, 1, 15, 8, 15), box(1, 8, 2, 3, 11, 12), box(13, 8, 2, 15, 11, 12), box(1, 8, 12, 15, 22, 15));
         put("refectory_bench_end", box(0, 6, 4, 16, 8, 12), box(12.5, 0, 5, 14.5, 6, 11));
         put("refectory_bench_middle", box(0, 6, 4, 16, 8, 12));
@@ -42,6 +44,7 @@ public final class FurnitureShapes {
         put("refectory_table_middle", box(0, 14, 1, 16, 16, 15));
         put("refectory_table_single", box(0, 14, 1, 16, 16, 15), box(1, 0, 2, 4, 2, 14), box(1.5, 2, 6, 3.5, 12, 10), box(1, 12, 3, 4, 14, 13), box(12, 0, 2, 15, 2, 14), box(12.5, 2, 6, 14.5, 12, 10), box(12, 12, 3, 15, 14, 13));
         put("refectory_table_start", box(0, 14, 1, 16, 16, 15), box(1, 0, 2, 4, 2, 14), box(1.5, 2, 6, 3.5, 12, 10), box(1, 12, 3, 4, 14, 13));
+        put("spire_finial", box(5, 0, 5, 11, 16, 11));
     }
 
     private FurnitureShapes() {}

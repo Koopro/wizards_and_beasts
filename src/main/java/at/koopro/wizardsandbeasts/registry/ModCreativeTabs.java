@@ -457,6 +457,7 @@ public class ModCreativeTabs {
                         DecoBlocks.items().forEach(item -> output.accept(item.get()));
                         // Architecture, furniture and magical decoration, by collection
                         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.ITEMS.forEach(item -> output.accept(item.get()));
+                        at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.TAB.forEach(block -> output.accept(block.get()));
                         // Ministry of Magic
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.baseItem().get());
                         output.accept(MinistryBlocks.MINISTRY_BLACK_MARBLE.slabItem().get());

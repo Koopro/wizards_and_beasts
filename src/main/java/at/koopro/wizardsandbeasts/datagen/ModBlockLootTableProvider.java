@@ -81,6 +81,14 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier
                         .fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, id))));
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.DROPS_SELF.forEach(block -> dropSelf(block.get()));
+        for (var piece : at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES) {
+            Block block = piece.block().get();
+            if (piece.shape() == at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.Shape.SLAB) {
+                add(block, createSlabItemTable(block));
+            } else {
+                dropSelf(block);
+            }
+        }
         dropSelf(ModBlocks.MALLOWSWEET.get());
         // Acromantula silk has no item of its own; it breaks to string, like the hand-written
         // table it replaces (every hand, no shears or silk touch needed; lost to explosions).

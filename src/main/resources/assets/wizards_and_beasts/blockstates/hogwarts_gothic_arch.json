@@ -17,7 +17,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_clear"
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_clear"
       }
     },
     {
@@ -27,7 +27,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_crimson"
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_crimson"
       }
     },
     {
@@ -37,7 +37,37 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_azure"
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_azure"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "single",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_emerald"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "single",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_amber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "single",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_violet"
       }
     },
     {
@@ -57,7 +87,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_clear"
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_clear"
       }
     },
     {
@@ -67,7 +97,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_crimson"
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_crimson"
       }
     },
     {
@@ -77,7 +107,37 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_azure"
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_azure"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_emerald"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_amber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet"
       }
     },
     {
@@ -97,7 +157,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_clear"
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_clear"
       }
     },
     {
@@ -107,7 +167,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_crimson"
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_crimson"
       }
     },
     {
@@ -117,7 +177,37 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_azure"
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_azure"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_emerald"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_amber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "pair_end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_violet"
       }
     },
     {
@@ -137,7 +227,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_clear"
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_clear"
       }
     },
     {
@@ -147,7 +237,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_crimson"
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_crimson"
       }
     },
     {
@@ -157,7 +247,37 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_azure"
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_azure"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_emerald"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_amber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet"
       }
     },
     {
@@ -177,7 +297,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_clear"
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_clear"
       }
     },
     {
@@ -187,7 +307,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_crimson"
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_crimson"
       }
     },
     {
@@ -197,7 +317,37 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_azure"
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_azure"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "middle",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_emerald"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "middle",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_amber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "middle",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_violet"
       }
     },
     {
@@ -217,7 +367,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_clear"
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_clear"
       }
     },
     {
@@ -227,7 +377,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_crimson"
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_crimson"
       }
     },
     {
@@ -237,7 +387,37 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_azure"
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_azure"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_emerald"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_amber"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet"
       }
     },
     {
@@ -258,7 +438,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_clear",
         "y": 90
       }
     },
@@ -269,7 +449,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_crimson",
         "y": 90
       }
     },
@@ -280,7 +460,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_azure",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "single",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_emerald",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "single",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_amber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "single",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_violet",
         "y": 90
       }
     },
@@ -302,7 +515,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_clear",
         "y": 90
       }
     },
@@ -313,7 +526,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_crimson",
         "y": 90
       }
     },
@@ -324,7 +537,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_azure",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_emerald",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_amber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet",
         "y": 90
       }
     },
@@ -346,7 +592,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_clear",
         "y": 90
       }
     },
@@ -357,7 +603,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_crimson",
         "y": 90
       }
     },
@@ -368,7 +614,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_azure",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_emerald",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_amber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "pair_end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_violet",
         "y": 90
       }
     },
@@ -390,7 +669,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_clear",
         "y": 90
       }
     },
@@ -401,7 +680,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_crimson",
         "y": 90
       }
     },
@@ -412,7 +691,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_azure",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_emerald",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_amber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet",
         "y": 90
       }
     },
@@ -434,7 +746,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_clear",
         "y": 90
       }
     },
@@ -445,7 +757,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_crimson",
         "y": 90
       }
     },
@@ -456,7 +768,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_azure",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "middle",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_emerald",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "middle",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_amber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "middle",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_violet",
         "y": 90
       }
     },
@@ -478,7 +823,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_clear",
         "y": 90
       }
     },
@@ -489,7 +834,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_crimson",
         "y": 90
       }
     },
@@ -500,7 +845,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_azure",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_emerald",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_amber",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet",
         "y": 90
       }
     },
@@ -522,7 +900,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_clear",
         "y": 180
       }
     },
@@ -533,7 +911,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_crimson",
         "y": 180
       }
     },
@@ -544,7 +922,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_azure",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "single",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_emerald",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "single",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_amber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "single",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_violet",
         "y": 180
       }
     },
@@ -566,7 +977,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_clear",
         "y": 180
       }
     },
@@ -577,7 +988,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_crimson",
         "y": 180
       }
     },
@@ -588,7 +999,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_azure",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_emerald",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_amber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet",
         "y": 180
       }
     },
@@ -610,7 +1054,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_clear",
         "y": 180
       }
     },
@@ -621,7 +1065,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_crimson",
         "y": 180
       }
     },
@@ -632,7 +1076,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_azure",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_emerald",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_amber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "pair_end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_violet",
         "y": 180
       }
     },
@@ -654,7 +1131,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_clear",
         "y": 180
       }
     },
@@ -665,7 +1142,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_crimson",
         "y": 180
       }
     },
@@ -676,7 +1153,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_azure",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_emerald",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_amber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet",
         "y": 180
       }
     },
@@ -698,7 +1208,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_clear",
         "y": 180
       }
     },
@@ -709,7 +1219,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_crimson",
         "y": 180
       }
     },
@@ -720,7 +1230,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_azure",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "middle",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_emerald",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "middle",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_amber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "middle",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_violet",
         "y": 180
       }
     },
@@ -742,7 +1285,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_clear",
         "y": 180
       }
     },
@@ -753,7 +1296,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_crimson",
         "y": 180
       }
     },
@@ -764,7 +1307,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_azure",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_emerald",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_amber",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet",
         "y": 180
       }
     },
@@ -786,7 +1362,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_clear",
         "y": 270
       }
     },
@@ -797,7 +1373,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_crimson",
         "y": 270
       }
     },
@@ -808,7 +1384,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_single_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_azure",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "single",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_emerald",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "single",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_amber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "single",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_single_glass_violet",
         "y": 270
       }
     },
@@ -830,7 +1439,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_clear",
         "y": 270
       }
     },
@@ -841,7 +1450,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_crimson",
         "y": 270
       }
     },
@@ -852,7 +1461,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_start_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_azure",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_emerald",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_amber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_start_glass_violet",
         "y": 270
       }
     },
@@ -874,7 +1516,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_clear",
         "y": 270
       }
     },
@@ -885,7 +1527,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_crimson",
         "y": 270
       }
     },
@@ -896,7 +1538,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_pair_end_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_azure",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_emerald",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_amber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "pair_end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_pair_end_glass_violet",
         "y": 270
       }
     },
@@ -918,7 +1593,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_clear",
         "y": 270
       }
     },
@@ -929,7 +1604,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_crimson",
         "y": 270
       }
     },
@@ -940,7 +1615,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_start_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_azure",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "start",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_emerald",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "start",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_amber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "start",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_start_glass_violet",
         "y": 270
       }
     },
@@ -962,7 +1670,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_clear",
         "y": 270
       }
     },
@@ -973,7 +1681,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_crimson",
         "y": 270
       }
     },
@@ -984,7 +1692,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_middle_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_azure",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "middle",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_emerald",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "middle",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_amber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "middle",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_middle_glass_violet",
         "y": 270
       }
     },
@@ -1006,7 +1747,7 @@
         "glass": "clear"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_clear",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_clear",
         "y": 270
       }
     },
@@ -1017,7 +1758,7 @@
         "glass": "crimson"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_crimson",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_crimson",
         "y": 270
       }
     },
@@ -1028,7 +1769,40 @@
         "glass": "azure"
       },
       "apply": {
-        "model": "wizards_and_beasts:block/furniture/hogwarts_gothic_arch_end_glass_azure",
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_azure",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "end",
+        "glass": "emerald"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_emerald",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "end",
+        "glass": "amber"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_amber",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "end",
+        "glass": "violet"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/arch_end_glass_violet",
         "y": 270
       }
     }

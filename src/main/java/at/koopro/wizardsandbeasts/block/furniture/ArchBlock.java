@@ -52,7 +52,7 @@ public class ArchBlock extends HorizontalDirectionalBlock {
 
     /** The glass filling the curve, taken from the pane under the arch. */
     public enum Glass implements StringRepresentable {
-        NONE, CLEAR, CRIMSON, AZURE;
+        NONE, CLEAR, CRIMSON, AZURE, EMERALD, AMBER, VIOLET;
 
         @Override
         public String getSerializedName() {
@@ -66,7 +66,16 @@ public class ArchBlock extends HorizontalDirectionalBlock {
             if (below.is(FurnitureBlocks.CRIMSON_LEADED_GLASS_PANE.get())) {
                 return CRIMSON;
             }
-            return below.is(FurnitureBlocks.AZURE_LEADED_GLASS_PANE.get()) ? AZURE : NONE;
+            if (below.is(FurnitureBlocks.AZURE_LEADED_GLASS_PANE.get())) {
+                return AZURE;
+            }
+            if (below.is(FurnitureBlocks.EMERALD_LEADED_GLASS_PANE.get())) {
+                return EMERALD;
+            }
+            if (below.is(FurnitureBlocks.AMBER_LEADED_GLASS_PANE.get())) {
+                return AMBER;
+            }
+            return below.is(FurnitureBlocks.VIOLET_LEADED_GLASS_PANE.get()) ? VIOLET : NONE;
         }
     }
 

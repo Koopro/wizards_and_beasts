@@ -4,6 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import at.koopro.wizardsandbeasts.registry.FurnitureBlocks;
+import at.koopro.wizardsandbeasts.registry.ArchitectureBlocks;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
@@ -188,5 +189,20 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.ENCHANTMENT_POWER_PROVIDER).add(FurnitureBlocks.LIBRARY_BOOKSHELF.get(),
                 FurnitureBlocks.LIBRARY_BOOKSHELF_SPARSE.get());
         tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.ACADEMY_CARPET.get(), FurnitureBlocks.LIBRARY_CARPET.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.MINISTRY_GILT_PLAQUE.get(),
+                FurnitureBlocks.SPIRE_FINIAL.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ACADEMY_NOTICE_BOARD.get());
+        ArchitectureBlocks.FAMILY_PIECES.forEach(b -> tag(BlockTags.MINEABLE_WITH_PICKAXE).add(b.get()));
+        ArchitectureBlocks.BALUSTRADES.forEach(b -> tag(BlockTags.FENCES).add(b.get()));
+        for (var piece : ArchitectureBlocks.PIECES) {
+            Block block = piece.block().get();
+            tag(piece.wood() ? BlockTags.MINEABLE_WITH_AXE : BlockTags.MINEABLE_WITH_PICKAXE).add(block);
+            switch (piece.shape()) {
+                case WALL -> tag(BlockTags.WALLS).add(block);
+                case STAIRS -> tag(BlockTags.STAIRS).add(block);
+                case SLAB -> tag(BlockTags.SLABS).add(block);
+                default -> { }
+            }
+        }
     }
 }

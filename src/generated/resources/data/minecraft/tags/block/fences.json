@@ -1,5 +1,11 @@
 {
   "values": [
-    "wizards_and_beasts:hogwarts_stone_balustrade"
+    "wizards_and_beasts:hogwarts_stone_balustrade",
+    "wizards_and_beasts:ministry_marble_balustrade",
+    "wizards_and_beasts:gringotts_marble_balustrade",
+    "wizards_and_beasts:diagon_brick_balustrade",
+    "wizards_and_beasts:hogsmeade_stone_balustrade",
+    "wizards_and_beasts:ancient_runestone_balustrade",
+    "wizards_and_beasts:knockturn_slate_balustrade"
   ]
 }

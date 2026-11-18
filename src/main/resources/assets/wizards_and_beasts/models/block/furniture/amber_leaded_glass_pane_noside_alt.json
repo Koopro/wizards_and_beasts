@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/template_glass_pane_noside_alt",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "pane": "wizards_and_beasts:block/furniture/amber_leaded_glass",
+    "edge": "wizards_and_beasts:block/furniture/lead_came"
+  }
+}

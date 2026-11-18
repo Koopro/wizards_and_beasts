@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "wizards_and_beasts:block/knockturn_polished_slate",
+    "side": "wizards_and_beasts:block/knockturn_polished_slate",
+    "top": "wizards_and_beasts:block/knockturn_polished_slate"
+  }
+}

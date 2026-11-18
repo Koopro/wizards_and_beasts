@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "wizards_and_beasts:block/walnut_parquet_slab"
+    },
+    "type=double": {
+      "model": "wizards_and_beasts:block/walnut_parquet"
+    },
+    "type=top": {
+      "model": "wizards_and_beasts:block/walnut_parquet_slab_top"
+    }
+  }
+}

@@ -19,6 +19,7 @@ public class ModLanguageProvider extends LanguageProvider {
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.NAMES.forEach((id, name) ->
                 add("block." + WizardsAndBeastsMod.MODID + "." + id, name));
         add("entity." + WizardsAndBeastsMod.MODID + ".seat", "Seat");
+        at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES.forEach(piece -> add(piece.block().get(), piece.name()));
         debugTools();
         elder();
         yew();

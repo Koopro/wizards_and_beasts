@@ -272,6 +272,7 @@ public class ModModelProvider extends ModelProvider {
 
         generateWizardingWorld(blockModels, itemModels);
         generateLocationBlocks(blockModels);
+        generateArchitecture(blockModels);
     }
 
     /**
@@ -520,6 +521,22 @@ public class ModModelProvider extends ModelProvider {
                         .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_paper"))
                         .put(TextureSlot.BACK, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_ink")),
                 false);
+    }
+
+    // --- Architecture (ArchitectureBlocks: each piece says what it is) ---
+
+    private void generateArchitecture(BlockModelGenerators blockModels) {
+        for (var piece : at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES) {
+            Block block = piece.block().get();
+            Block base = piece.base().get();
+            switch (piece.shape()) {
+                case CUBE -> blockModels.createTrivialCube(block);
+                case PILLAR -> blockModels.woodProvider(block).log(block);
+                case SLAB -> blockModels.familyWithExistingFullBlock(base).slab(block);
+                case STAIRS -> blockModels.familyWithExistingFullBlock(base).stairs(block);
+                case WALL -> blockModels.familyWithExistingFullBlock(base).wall(block);
+            }
+        }
     }
 
     // --- Location decorative block datagen ---

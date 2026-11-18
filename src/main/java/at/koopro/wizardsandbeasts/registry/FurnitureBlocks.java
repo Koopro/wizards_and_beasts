@@ -54,7 +54,7 @@ public final class FurnitureBlocks {
     /** English names, for the language provider. */
     public static final Map<String, String> NAMES = new LinkedHashMap<>();
 
-    private static <T extends Block> DeferredBlock<T> block(String id, String name, Function<BlockBehaviour.Properties, T> factory,
+    static <T extends Block> DeferredBlock<T> block(String id, String name, Function<BlockBehaviour.Properties, T> factory,
                                                              Supplier<BlockBehaviour.Properties> properties) {
         DeferredBlock<T> block = ModBlocks.BLOCKS.registerBlock(id, factory, properties);
         ALL.add(block);
@@ -99,6 +99,20 @@ public final class FurnitureBlocks {
             "Crimson Stained Glass Window", IronBarsBlock::new, FurnitureBlocks::glass);
     public static final DeferredBlock<IronBarsBlock> AZURE_LEADED_GLASS_PANE = block("azure_leaded_glass_pane",
             "Azure Stained Glass Window", IronBarsBlock::new, FurnitureBlocks::glass);
+    public static final DeferredBlock<IronBarsBlock> EMERALD_LEADED_GLASS_PANE = block("emerald_leaded_glass_pane",
+            "Emerald Stained Glass Window", IronBarsBlock::new, FurnitureBlocks::glass);
+    public static final DeferredBlock<IronBarsBlock> AMBER_LEADED_GLASS_PANE = block("amber_leaded_glass_pane",
+            "Amber Stained Glass Window", IronBarsBlock::new, FurnitureBlocks::glass);
+    public static final DeferredBlock<IronBarsBlock> VIOLET_LEADED_GLASS_PANE = block("violet_leaded_glass_pane",
+            "Violet Stained Glass Window", IronBarsBlock::new, FurnitureBlocks::glass);
+    public static final DeferredBlock<FurnitureBlock> ACADEMY_NOTICE_BOARD = block("academy_notice_board",
+            "Academy Notice Board", p -> new FurnitureBlock(p, Spec.wall("academy_notice_board")),
+            () -> wood(MapColor.COLOR_BROWN).pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<FurnitureBlock> MINISTRY_GILT_PLAQUE = block("ministry_gilt_plaque",
+            "Ministry Gilt Plaque", p -> new FurnitureBlock(p, Spec.wall("ministry_gilt_plaque")),
+            () -> metal(0).pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<FurnitureBlock> SPIRE_FINIAL = block("spire_finial", "Gilt Spire Finial",
+            p -> new FurnitureBlock(p, Spec.of("spire_finial")), () -> metal(0));
     public static final DeferredBlock<FurnitureBlock> ACADEMY_DESK = block("academy_desk", "Academy Desk",
             p -> new FurnitureBlock(p, Spec.of("academy_desk")), () -> wood(MapColor.COLOR_BROWN));
     public static final DeferredBlock<FurnitureBlock> ACADEMY_CHAIR = block("academy_chair", "Academy Chair",
