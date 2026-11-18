@@ -17,7 +17,7 @@ import org.jspecify.annotations.NullMarked;
 public class PropPartBlock extends Block {
 
     public enum Part implements StringRepresentable {
-        CLOCK_HOUR, CLOCK_MINUTE, GLOBE, BOOK, BOOK_PAGE;
+        CLOCK_HOUR, CLOCK_MINUTE, GLOBE, BOOK, BOOK_PAGE, PENDULUM;
 
         @Override
         public String getSerializedName() {

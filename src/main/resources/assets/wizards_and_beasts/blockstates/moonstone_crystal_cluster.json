@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/moonstone_crystal_cluster"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/moonstone_crystal_cluster",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/moonstone_crystal_cluster",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/moonstone_crystal_cluster",
+      "y": 270
+    }
+  }
+}

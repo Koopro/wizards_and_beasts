@@ -17,6 +17,9 @@ import at.koopro.wizardsandbeasts.block.furniture.FourPosterBedBlock;
 import at.koopro.wizardsandbeasts.block.furniture.FurnitureStorageBlockEntity;
 import at.koopro.wizardsandbeasts.block.furniture.StorageFurnitureBlock;
 import at.koopro.wizardsandbeasts.block.furniture.TallStorageBlock;
+import at.koopro.wizardsandbeasts.block.furniture.TallFurnitureBlock;
+import at.koopro.wizardsandbeasts.block.furniture.GrandfatherClockBlock;
+import at.koopro.wizardsandbeasts.block.furniture.GlowingDecoBlock;
 import net.minecraft.world.item.DyeColor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -282,6 +285,85 @@ public final class FurnitureBlocks {
             ModBlockEntities.BLOCK_ENTITY_TYPES.register("display_case", () -> new BlockEntityType<>(
                     DisplayCaseBlockEntity::new, Set.<Block>of(DISPLAY_CASE_BLOCK.get())));
 
+    // -- W4: magical decoration ------------------------------------------------------------------------------------
+
+    private static BlockBehaviour.Properties stoneDeco(int light) {
+        return stone(MapColor.COLOR_GRAY).lightLevel(state -> light);
+    }
+
+    private static DeferredBlock<GlowingDecoBlock> glowing(String id, String name, Spec spec, GlowingDecoBlock.Emission emission,
+                                                           int argb, double x, double y, double z,
+                                                           Supplier<BlockBehaviour.Properties> properties) {
+        return block(id, name, p -> new GlowingDecoBlock(p, spec, emission, argb, x, y, z), properties);
+    }
+
+    public static final DeferredBlock<MagicalLanternBlock> WARM_LANTERN = block("warm_lantern", "Warm Lantern",
+            p -> new MagicalLanternBlock(p, 0xFFFFC870), () -> metal(15));
+    public static final DeferredBlock<MagicalLanternBlock> GREEN_FLAME_LANTERN = block("green_flame_lantern",
+            "Green-Flame Lantern", p -> new MagicalLanternBlock(p, 0xFF9FE07A), () -> metal(13));
+    public static final DeferredBlock<GlowingDecoBlock> CANDELABRA = glowing("candelabra", "Candelabra",
+            Spec.of("candelabra"), GlowingDecoBlock.Emission.SMOKE, 0, 8, 16, 8, () -> metal(14));
+    public static final DeferredBlock<GlowingDecoBlock> RUBY_CRYSTAL_CLUSTER = glowing("ruby_crystal_cluster",
+            "Ruby Crystal Cluster", Spec.of("crystal_cluster"), GlowingDecoBlock.Emission.MOTES, 0xFFFF5A6E, 8, 10, 8,
+            () -> crystal(MapColor.COLOR_RED));
+    public static final DeferredBlock<GlowingDecoBlock> EMERALD_CRYSTAL_CLUSTER = glowing("emerald_crystal_cluster",
+            "Emerald Crystal Cluster", Spec.of("crystal_cluster"), GlowingDecoBlock.Emission.MOTES, 0xFF6EE89A, 8, 10, 8,
+            () -> crystal(MapColor.EMERALD));
+    public static final DeferredBlock<GlowingDecoBlock> SAPPHIRE_CRYSTAL_CLUSTER = glowing("sapphire_crystal_cluster",
+            "Sapphire Crystal Cluster", Spec.of("crystal_cluster"), GlowingDecoBlock.Emission.MOTES, 0xFF6E9CFF, 8, 10, 8,
+            () -> crystal(MapColor.COLOR_BLUE));
+    public static final DeferredBlock<GlowingDecoBlock> MOONSTONE_CRYSTAL_CLUSTER = glowing("moonstone_crystal_cluster",
+            "Moonstone Crystal Cluster", Spec.of("crystal_cluster"), GlowingDecoBlock.Emission.MOTES, 0xFFDDEEFF, 8, 10, 8,
+            () -> crystal(MapColor.SNOW));
+    public static final DeferredBlock<FurnitureBlock> ENCHANTED_MIRROR = block("enchanted_mirror", "Enchanted Mirror",
+            p -> new FurnitureBlock(p, Spec.wall("wall_mirror")), () -> wood(MapColor.GOLD).sound(SoundType.GLASS)
+                    .lightLevel(state -> 3).pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<FurnitureBlock> DARK_MIRROR = block("dark_mirror", "Dark Mirror",
+            p -> new FurnitureBlock(p, Spec.wall("wall_mirror")), () -> wood(MapColor.COLOR_BLACK).sound(SoundType.GLASS)
+                    .pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<GrandfatherClockBlock> GRANDFATHER_CLOCK = tall("grandfather_clock",
+            "Grandfather Clock", p -> new GrandfatherClockBlock(p, Spec.of("grandfather_clock")),
+            () -> wood(MapColor.COLOR_BROWN));
+    public static final List<DeferredBlock<FurnitureBlock>> PORTRAITS = new ArrayList<>();
+    static {
+        for (String[] sitter : new String[][]{{"bearded_headmaster", "Portrait of a Bearded Headmaster"},
+                {"stern_witch", "Portrait of a Stern Witch"}, {"goblin_banker", "Portrait of a Goblin Banker"},
+                {"armoured_knight", "Portrait of an Armoured Knight"}, {"lady_in_a_ruff", "Portrait of a Lady in a Ruff"},
+                {"spectacled_scholar", "Portrait of a Spectacled Scholar"}, {"hooded_dark_wizard", "Portrait of a Hooded Dark Wizard"},
+                {"jolly_friar", "Portrait of a Jolly Friar"}}) {
+            PORTRAITS.add(block("portrait_" + sitter[0], sitter[1], p -> new FurnitureBlock(p, Spec.wall("portrait")),
+                    () -> wood(MapColor.GOLD).pushReaction(PushReaction.DESTROY)));
+        }
+    }
+    public static final DeferredBlock<FurnitureBlock> GOLDEN_TROPHY_CUP = block("golden_trophy_cup", "Golden Trophy Cup",
+            p -> new FurnitureBlock(p, Spec.of("trophy_cup")), () -> metal(0).pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<FurnitureBlock> SILVER_TROPHY_CUP = block("silver_trophy_cup", "Silver Trophy Cup",
+            p -> new FurnitureBlock(p, Spec.of("trophy_cup")), () -> metal(0).pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<FurnitureBlock> HERALDIC_SHIELD = block("heraldic_shield", "Heraldic Shield",
+            p -> new FurnitureBlock(p, Spec.wall("heraldic_shield")), () -> wood(MapColor.COLOR_RED)
+                    .pushReaction(PushReaction.DESTROY));
+    public static final DeferredBlock<FurnitureBlock> OWL_STATUE = block("owl_statue", "Owl Statue",
+            p -> new FurnitureBlock(p, Spec.of("owl_statue")), () -> stone(MapColor.COLOR_GRAY));
+    public static final DeferredBlock<FurnitureBlock> GARGOYLE_STATUE = block("gargoyle_statue", "Gargoyle Statue",
+            p -> new FurnitureBlock(p, Spec.of("gargoyle_statue")), () -> stone(MapColor.COLOR_GRAY));
+    public static final DeferredBlock<TallFurnitureBlock> WIZARD_STATUE = tall("wizard_statue", "Wizard Statue",
+            p -> new TallFurnitureBlock(p, Spec.of("wizard_statue")), () -> stone(MapColor.COLOR_GRAY));
+    public static final DeferredBlock<GlowingDecoBlock> HOGWARTS_FIREPLACE = glowing("hogwarts_fireplace",
+            "Hogwarts Fireplace", Spec.of("fireplace"), GlowingDecoBlock.Emission.HEARTH, 0, 8, 3, 10, () -> stoneDeco(13));
+    public static final DeferredBlock<GlowingDecoBlock> MINISTRY_FIREPLACE = glowing("ministry_fireplace",
+            "Ministry Fireplace", Spec.of("fireplace"), GlowingDecoBlock.Emission.GREEN_HEARTH, 0xFF6EE87A, 8, 3, 10,
+            () -> stoneDeco(13));
+    public static final DeferredBlock<GlowingDecoBlock> KNOCKTURN_FIREPLACE = glowing("knockturn_fireplace",
+            "Knockturn Fireplace", Spec.of("fireplace"), GlowingDecoBlock.Emission.SOUL_HEARTH, 0, 8, 3, 10,
+            () -> stoneDeco(10));
+    public static final DeferredBlock<Block> GLOWING_RUNESTONE = block("glowing_runestone", "Glowing Runestone",
+            Block::new, () -> stoneDeco(7));
+
+    private static BlockBehaviour.Properties crystal(MapColor color) {
+        return BlockBehaviour.Properties.of().mapColor(color).strength(1.5f).sound(SoundType.AMETHYST_CLUSTER)
+                .lightLevel(state -> 8).noOcclusion().requiresCorrectToolForDrops().pushReaction(PushReaction.DESTROY);
+    }
+
     // -- Internal --------------------------------------------------------------------------------------------------
 
     /** The moving parts' models; never placed, no item, no loot. */
@@ -297,7 +379,7 @@ public final class FurnitureBlocks {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MovingPropBlockEntity>> MOVING_PROP =
             ModBlockEntities.BLOCK_ENTITY_TYPES.register("moving_prop", () -> new BlockEntityType<>(
                     MovingPropBlockEntity::new, Set.<Block>of(MAGICAL_WALL_CLOCK.get(), DESK_GLOBE.get(),
-                    FLOATING_BOOK.get())));
+                    FLOATING_BOOK.get(), GRANDFATHER_CLOCK.get())));
 
     public static void init() { /* force class load, triggering static field registration */ }
 }

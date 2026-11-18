@@ -39,6 +39,8 @@ public final class MovingPropRenderer implements BlockEntityRenderer<MovingPropB
     private static final float GLOBE_X = 8f, GLOBE_Y = 9.5f, GLOBE_Z = 8f, GLOBE_TILT = 23.5f;
     /** Seconds per turn of the globe; seconds between two page turns of a floating book. */
     private static final float GLOBE_TURN = 24f, PAGE_EVERY = 5f, PAGE_TURN = 1.4f;
+    /** The longcase clock's dial is this much nearer the front than the wall clock's; its pendulum's pivot and swing. */
+    private static final float GRANDFATHER_DIAL_FORWARD = 11f, PENDULUM_PIVOT_Y = 15f, PENDULUM_SWING = 9f;
     /** Height of the book's spine hinge (block units): a turning page swings about the line x = 8 at this height. */
     private static final float PAGE_HINGE_Y = 9f;
 
@@ -60,7 +62,9 @@ public final class MovingPropRenderer implements BlockEntityRenderer<MovingPropB
                                    @NonNull Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(prop, state, partialTick, cameraPos, breakProgress);
         BlockState block = prop.getBlockState();
-        state.kind = block.getBlock() instanceof MovingPropBlock moving ? moving.kind() : null;
+        state.kind = block.getBlock() instanceof MovingPropBlock moving ? moving.kind()
+                : block.getBlock() instanceof at.koopro.wizardsandbeasts.block.furniture.GrandfatherClockBlock
+                ? MovingPropBlock.Kind.GRANDFATHER : null;
         Direction facing = block.getValueOrElse(FurnitureBlock.FACING, Direction.NORTH);
         state.facingDegrees = (facing.toYRot() + 180f) % 360f;   // the blockstate's y for this facing
         Level level = prop.getLevel();
@@ -83,6 +87,7 @@ public final class MovingPropRenderer implements BlockEntityRenderer<MovingPropB
             case CLOCK -> clock(state, pose, collector);
             case GLOBE -> globe(state, pose, collector);
             case BOOK -> book(state, pose, collector);
+            case GRANDFATHER -> grandfather(state, pose, collector);
         }
         pose.popPose();
     }
@@ -105,6 +110,23 @@ public final class MovingPropRenderer implements BlockEntityRenderer<MovingPropB
         pose.translate(-CLOCK_X / 16f, -CLOCK_Y / 16f, 0f);
         part(state, pose, collector, part);
         pose.popPose();
+    }
+
+    /**
+     * The longcase clock: its dial sits in the hood (the upper block) with its face at z 2.9, where the wall clock's
+     * is at 13.9, so the wall clock's hands are moved up a block and forward eleven texels; the pendulum hangs from
+     * (8, 15) in the trunk and swings once a second each way.
+     */
+    private static void grandfather(State state, PoseStack pose, SubmitNodeCollector collector) {
+        pose.pushPose();
+        pose.translate(0f, 1f, -GRANDFATHER_DIAL_FORWARD / 16f);
+        clock(state, pose, collector);
+        pose.popPose();
+        float swing = Mth.sin(state.seconds * Mth.PI) * PENDULUM_SWING;
+        pose.translate(8f / 16f, PENDULUM_PIVOT_Y / 16f, 0f);
+        pose.mulPose(Axis.ZP.rotationDegrees(swing));
+        pose.translate(-8f / 16f, -PENDULUM_PIVOT_Y / 16f, 0f);
+        part(state, pose, collector, PropPartBlock.Part.PENDULUM);
     }
 
     private static void globe(State state, PoseStack pose, SubmitNodeCollector collector) {

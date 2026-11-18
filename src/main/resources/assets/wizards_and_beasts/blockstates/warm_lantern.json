@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/warm_lantern"
+    },
+    "hanging=false,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/warm_lantern"
+    },
+    "hanging=true,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/warm_lantern_hanging"
+    },
+    "hanging=true,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/warm_lantern_hanging"
+    }
+  }
+}

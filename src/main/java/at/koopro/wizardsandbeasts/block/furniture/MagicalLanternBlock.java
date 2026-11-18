@@ -18,23 +18,28 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public class MagicalLanternBlock extends LanternBlock {
 
-    /** The pale blue of the lantern's flame. */
-    private static final int MOTE_ARGB = 0xFF9FD8FF;
+    /** The colour of the motes off the lantern's flame (pale blue for the first lantern). */
+    private final int moteArgb;
 
     public MagicalLanternBlock(Properties properties) {
+        this(properties, 0xFF9FD8FF);
+    }
+
+    public MagicalLanternBlock(Properties properties, int moteArgb) {
         super(properties);
+        this.moteArgb = moteArgb;
     }
 
     @Override
     public MapCodec<MagicalLanternBlock> codec() {
-        return simpleCodec(MagicalLanternBlock::new);
+        return simpleCodec(properties -> new MagicalLanternBlock(properties, moteArgb));
     }
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         if (random.nextInt(6) == 0) {
             double top = state.getValue(HANGING) ? 0.70 : 0.62;
-            level.addParticle(new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), MOTE_ARGB),
+            level.addParticle(new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), moteArgb),
                     pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2, pos.getY() + top, pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2, 0, 0.04, 0);
         }
     }

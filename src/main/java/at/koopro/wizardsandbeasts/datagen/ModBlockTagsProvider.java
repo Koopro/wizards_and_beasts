@@ -201,6 +201,17 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 FurnitureBlocks.APOTHECARY_CABINET.get(), FurnitureBlocks.POTION_RACK.get(), FurnitureBlocks.STORAGE_CRATE.get(),
                 FurnitureBlocks.MINISTRY_LEATHER_CHAIR.get(), FurnitureBlocks.KNOCKTURN_THRONE.get());
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.MINISTRY_FILING_CABINET.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.WARM_LANTERN.get(), FurnitureBlocks.GREEN_FLAME_LANTERN.get(),
+                FurnitureBlocks.CANDELABRA.get(), FurnitureBlocks.RUBY_CRYSTAL_CLUSTER.get(),
+                FurnitureBlocks.EMERALD_CRYSTAL_CLUSTER.get(), FurnitureBlocks.SAPPHIRE_CRYSTAL_CLUSTER.get(),
+                FurnitureBlocks.MOONSTONE_CRYSTAL_CLUSTER.get(), FurnitureBlocks.GOLDEN_TROPHY_CUP.get(),
+                FurnitureBlocks.SILVER_TROPHY_CUP.get(), FurnitureBlocks.OWL_STATUE.get(), FurnitureBlocks.GARGOYLE_STATUE.get(),
+                FurnitureBlocks.WIZARD_STATUE.get(), FurnitureBlocks.HOGWARTS_FIREPLACE.get(),
+                FurnitureBlocks.MINISTRY_FIREPLACE.get(), FurnitureBlocks.KNOCKTURN_FIREPLACE.get(),
+                FurnitureBlocks.GLOWING_RUNESTONE.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ENCHANTED_MIRROR.get(), FurnitureBlocks.DARK_MIRROR.get(),
+                FurnitureBlocks.GRANDFATHER_CLOCK.get(), FurnitureBlocks.HERALDIC_SHIELD.get());
+        FurnitureBlocks.PORTRAITS.forEach(b -> tag(BlockTags.MINEABLE_WITH_AXE).add(b.get()));
         tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.DORMITORY_CARPET.get(), FurnitureBlocks.MINISTRY_CARPET.get(),
                 FurnitureBlocks.GRINGOTTS_CARPET.get(), FurnitureBlocks.KNOCKTURN_CARPET.get());
         ArchitectureBlocks.FAMILY_PIECES.forEach(b -> tag(BlockTags.MINEABLE_WITH_PICKAXE).add(b.get()));

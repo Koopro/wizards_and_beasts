@@ -25,7 +25,9 @@ public class MovingPropBlock extends FurnitureBlock implements EntityBlock {
         /** A sphere turning on a tilted axis. */
         GLOBE,
         /** An open book bobbing in the air, turning slowly, a page lifting and falling. */
-        BOOK
+        BOOK,
+        /** A longcase clock: hands on the dial in its hood, a pendulum swinging in its trunk. */
+        GRANDFATHER
     }
 
     /** Motes of gilt light off a floating book's pages. */
