@@ -20,6 +20,8 @@
     "flinch",
     "death",
     "squirm",
-    "settle"
+    "settle",
+    "lie_down",
+    "wake"
   ]
 }

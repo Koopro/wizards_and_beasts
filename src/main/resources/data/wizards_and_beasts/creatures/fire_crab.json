@@ -36,6 +36,8 @@
     "groom",
     "hit",
     "death",
-    "skitter"
+    "skitter",
+    "lie_down",
+    "wake"
   ]
 }
