@@ -179,6 +179,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
         if (stack.is(Items.GLASS_BOTTLE)) {
             return bottleOrStart(level, pos, be, sp, stack);
         }
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.play(sp, at.koopro.wizardsandbeasts.pose.PlayerGesture.TOSS);
         return addIngredient(level, pos, be, sp, stack);
     }
 
@@ -199,6 +200,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
 
         return switch (be.phase()) {
             case BREWING -> {
+                at.koopro.wizardsandbeasts.pose.PlayerGestures.play(sp, at.koopro.wizardsandbeasts.pose.PlayerGesture.STIR);
                 say(sp, "brew.wizards_and_beasts.cauldron.mid_brew");
                 yield InteractionResult.SUCCESS;
             }
@@ -209,7 +211,7 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             case SPOILED -> pourAway(level, pos, be, sp, ItemStack.EMPTY);
             case IDLE -> sp.isShiftKeyDown()
                     ? scoop(level, pos, be, sp)
-                    : start(level, pos, be, sp);
+                    : stirAndStart(level, pos, be, sp);
         };
     }
 
@@ -230,6 +232,12 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
         level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
         say(player, "brew.wizards_and_beasts.cauldron.filled");
         return InteractionResult.SUCCESS;
+    }
+
+    /** Starting a brew is the first stir. */
+    private InteractionResult stirAndStart(Level level, BlockPos pos, CauldronBlockEntity be, ServerPlayer sp) {
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.play(sp, at.koopro.wizardsandbeasts.pose.PlayerGesture.STIR);
+        return start(level, pos, be, sp);
     }
 
     private InteractionResult addIngredient(Level level, BlockPos pos, CauldronBlockEntity be,

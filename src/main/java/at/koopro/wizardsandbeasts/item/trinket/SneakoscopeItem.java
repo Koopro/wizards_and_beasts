@@ -132,6 +132,9 @@ public class SneakoscopeItem extends Item implements AnimatedItem {
         stack.set(ModDataComponents.SNEAKOSCOPE_FOCUS.get(),
                 new SneakoscopeFocus(nowFocused, SneakoscopeTuning.NO_BEARING));
 
+        if (nowFocused) {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.HOLD_UP);
+        }
         if (!nowFocused) {
             // The whole cost of the item, charged on release rather than on use so that focusing is
             // a commitment instead of a free peek.

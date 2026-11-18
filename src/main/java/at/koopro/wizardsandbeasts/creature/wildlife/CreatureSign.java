@@ -89,6 +89,7 @@ public final class CreatureSign {
         }
         EntityType<?> species = speciesOf(event.getItemEntity());
         if (species != null) {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.STOOP);
             BestiaryDiscoveryHandler.studied(player, species,
                     at.koopro.wizardsandbeasts.bestiary.CreatureProfile.StudyAct.HARVEST);
             int picked = event.getOriginalStack().getCount() - event.getCurrentStack().getCount();

@@ -19,6 +19,13 @@ public final class PlayerGestures {
 
     private PlayerGestures() {}
 
+    /** For hooks that hold a plain {@code Player}: plays only on the server side, a no-op on the client. */
+    public static void play(net.minecraft.world.entity.player.Player player, PlayerGesture gesture) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            play(serverPlayer, gesture);
+        }
+    }
+
     public static void play(ServerPlayer player, PlayerGesture gesture) {
         play(player, gesture, gesture.ticks());
     }

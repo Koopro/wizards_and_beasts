@@ -40,6 +40,7 @@ public class PensieveItem extends Item implements AnimatedItem {
         }
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             at.koopro.wizardsandbeasts.network.trinket.PensieveOpenS2CPayload.open(serverPlayer);
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(serverPlayer, at.koopro.wizardsandbeasts.pose.PlayerGesture.PEER);
         }
         return InteractionResult.SUCCESS;
     }

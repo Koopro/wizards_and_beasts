@@ -66,17 +66,86 @@ public final class GesturePosePass extends ProceduralPosePass {
      * does not need to be told — the gesture is presentation, and every client sees the same render state.
      */
     private static boolean stillValid(AvatarRenderState state, PlayerGesture gesture, long now) {
-        return switch (gesture) {
-            case WAND_INSPECT -> state.getMainHandItemStack().getItem() instanceof WandItem
+        if (gesture == PlayerGesture.WAND_INSPECT) {
+            return state.getMainHandItemStack().getItem() instanceof WandItem
                     && !state.isUsingItem
                     && ClientCastAnimationState.get(state.id, now) == null;
-        };
+        }
+        // Every other gesture is a moment the server already committed to; only sleep and swimming end it early.
+        return state.bedOrientation == null && !state.isVisuallySwimming;
     }
 
     private static void emit(PoseBuilder builder, PoseContext context, PlayerGesture gesture, float progress) {
-        switch (gesture) {
-            case WAND_INSPECT -> inspect(builder, context.state(), progress);
+        if (gesture == PlayerGesture.WAND_INSPECT) {
+            inspect(builder, context.state(), progress);
+            return;
         }
+        GesturePoseConstants.Clip clip = GesturePoseConstants.clip(gesture);
+        if (clip != null) {
+            play(builder, context.state(), clip, progress);
+        }
+    }
+
+    /**
+     * One keyframed gesture: both arms by their own shares, the head, the lean, then the circling and the tremor.
+     *
+     * <p>The lean is laid out as vanilla lays out its crouch — the torso pitched and every part above the hips
+     * dropped, the legs moved back — so the figure bends at the waist instead of the torso pivoting off the
+     * shoulders. Worn robes follow, because they copy the posed parts after the layer has run.
+     */
+    static void play(PoseBuilder builder, AvatarRenderState state, GesturePoseConstants.Clip clip, float progress) {
+        GesturePoseConstants.Key key = clip.at(progress);
+        HumanoidArm arm = state.mainArm;
+        float side = arm == HumanoidArm.RIGHT ? 1f : -1f;
+        PlayerModelPart mainArm = arm == HumanoidArm.RIGHT ? PlayerModelPart.RIGHT_ARM : PlayerModelPart.LEFT_ARM;
+        PlayerModelPart freeArm = arm == HumanoidArm.RIGHT ? PlayerModelPart.LEFT_ARM : PlayerModelPart.RIGHT_ARM;
+        float outer = builder.opWeight();
+        double clock = state.ageInTicks;
+
+        float circleX = 0f;
+        float circleY = 0f;
+        if (clip.circleDeg() > 0f) {
+            double phase = progress * clip.circleTurns() * Math.PI * 2.0;
+            circleY = (float) Math.sin(phase) * clip.circleDeg();
+            circleX = (float) Math.cos(phase) * clip.circleDeg() * 0.5f;
+        }
+        float tremor = clip.tremorDeg() * Math.min(1f, progress * 2f);
+        float shakeZ = tremor * (float) Math.sin(clock * 2.9);
+        float shakeX = tremor * 0.6f * (float) Math.cos(clock * 3.7);
+
+        if (key.mainShare() > 0f) {
+            builder.opWeight(outer * key.mainShare());
+            builder.get(mainArm)
+                    .setRotDeg(PoseTarget.X_ROT, key.main().xRot() + circleX + shakeX)
+                    .setRotDeg(PoseTarget.Y_ROT, (key.main().yRot() + circleY) * side)
+                    .setRotDeg(PoseTarget.Z_ROT, (key.main().zRot() + shakeZ) * side);
+        }
+        if (key.freeShare() > 0f) {
+            builder.opWeight(outer * key.freeShare());
+            builder.get(freeArm)
+                    .setRotDeg(PoseTarget.X_ROT, key.free().xRot() + shakeX)
+                    .setRotDeg(PoseTarget.Y_ROT, key.free().yRot() * side)
+                    .setRotDeg(PoseTarget.Z_ROT, (key.free().zRot() - shakeZ) * side);
+        }
+        builder.opWeight(outer);
+        builder.get(PlayerModelPart.HEAD).addRotDeg(PoseTarget.X_ROT, key.head());
+        if (key.lean() != 0f) {
+            lean(builder, key.lean());
+        }
+        if (tremor > 0f) {
+            builder.get(PlayerModelPart.CHEST).addRotDeg(PoseTarget.Z_ROT, shakeZ * 0.4f);
+        }
+    }
+
+    /** A whole-upper-body bend at the waist, vanilla-crouch style. Radians; positive leans forward. */
+    static void lean(PoseBuilder builder, float rad) {
+        float body = GesturePoseConstants.LEAN_BODY_DROP * rad;
+        builder.get(PlayerModelPart.CHEST).add(PoseTarget.X_ROT, rad).add(PoseTarget.Y, body);
+        builder.get(PlayerModelPart.HEAD).add(PoseTarget.Y, GesturePoseConstants.LEAN_HEAD_DROP * rad);
+        builder.get(PlayerModelPart.RIGHT_ARM).add(PoseTarget.Y, body);
+        builder.get(PlayerModelPart.LEFT_ARM).add(PoseTarget.Y, body);
+        builder.get(PlayerModelPart.RIGHT_LEG).add(PoseTarget.Z, GesturePoseConstants.LEAN_LEG_BACK * rad);
+        builder.get(PlayerModelPart.LEFT_LEG).add(PoseTarget.Z, GesturePoseConstants.LEAN_LEG_BACK * rad);
     }
 
     /**

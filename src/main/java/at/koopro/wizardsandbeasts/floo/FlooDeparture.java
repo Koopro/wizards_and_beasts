@@ -103,6 +103,7 @@ public final class FlooDeparture {
             return;
         }
         PENDING.put(player.getUUID(), new Pending(originPos, actualAddress, intended, windup));
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.FLOO_THROW, windup);
         player.level().playSound(null, originPos, ModSounds.FLOO_IGNITE.get(),
                 SoundSource.BLOCKS, 0.8f, 1.3f);
         // The traveller says where they are going, not where they are actually about to end up. A
@@ -123,6 +124,7 @@ public final class FlooDeparture {
 
     /** Abandon a pending departure without travelling, telling the player why. */
     public static void cancel(ServerPlayer player, @Nullable Component reason) {
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.stop(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.FLOO_THROW);
         if (PENDING.remove(player.getUUID()) == null) {
             return;
         }

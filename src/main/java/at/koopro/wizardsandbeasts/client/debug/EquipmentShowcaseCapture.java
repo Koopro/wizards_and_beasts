@@ -79,6 +79,8 @@ public final class EquipmentShowcaseCapture {
     private static final boolean CAST = "cast".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     /** {@code WB_EQUIPMENT_SHOWCASE=anim}: the Player Animation Renaissance look sheet. */
     private static final boolean ANIM = "anim".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
+    /** {@code WB_EQUIPMENT_SHOWCASE=anim2}: the interactions and movement sheet. */
+    private static final boolean ANIM2 = "anim2".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     /** Wardrobe Renaissance Phase D: the five prototype cuts standing, walking, sprinting, sneaking, seated. */
     private static final boolean WARDROBE = "wardrobe".equals(System.getenv("WB_EQUIPMENT_SHOWCASE"));
     /** Wearable icons pass (2026-11-05): every wearable's inventory icon, then the Curios screen's empty slots. */
@@ -447,7 +449,7 @@ public final class EquipmentShowcaseCapture {
     private static final String ONLY = System.getenv().getOrDefault("WB_EQUIPMENT_SHOWCASE_ONLY", "");
 
     private static List<Outfit> outfits() {
-        List<Outfit> all = ICONS ? ICON_OUTFITS : CAST || ANIM ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
+        List<Outfit> all = ICONS ? ICON_OUTFITS : CAST || ANIM || ANIM2 ? CAST_OUTFITS : WARDROBE ? WARDROBE_OUTFITS : OUTFITS;
         if (ONLY.isEmpty()) {
             return all;
         }
@@ -522,6 +524,10 @@ public final class EquipmentShowcaseCapture {
         SCRIPT.clear();
         if (ANIM) {
             buildAnimScript(current);
+            return;
+        }
+        if (ANIM2) {
+            buildAnim2Script(current);
             return;
         }
         if (CAST) {
@@ -849,6 +855,106 @@ public final class EquipmentShowcaseCapture {
             SCRIPT.add(new Step("dismount_" + i + "_side", 1, true, Cam.SIDE, NONE, NOTHING));
         }
         SCRIPT.add(new Step("dismount_settle", 8, false, Cam.SIDE, NONE, NOTHING));
+    }
+
+    /**
+     * Player Animation Renaissance P2/P3 look sheet: drinking and eating held on the real use key, every server
+     * gesture played through its real channel, and a fall with its landing shot every other tick.
+     */
+    private static void buildAnim2Script(Outfit current) {
+        SCRIPT.add(new Step("dress", 30, false, Cam.QUARTER, p -> moves(false, false), p -> {
+            p.getAbilities().invulnerable = true;
+            p.onUpdateAbilities();
+            p.setHealth(p.getMaxHealth());
+            p.removeAllEffects();
+            undress(p);
+            p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+            current.dress().accept(p);
+        }));
+
+        // Drink and eat on the real use key, so vanilla's own use flag drives the pose.
+        Object[][] uses = {{"drink", Items.POTION}, {"eat", Items.GOLDEN_APPLE}};
+        for (Object[] use : uses) {
+            String name = (String) use[0];
+            net.minecraft.world.item.Item item = (net.minecraft.world.item.Item) use[1];
+            SCRIPT.add(new Step(name + "_give", 6, false, Cam.QUARTER, NONE,
+                    p -> p.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(item))));
+            SCRIPT.add(new Step(name + "_hold", 4, false, Cam.QUARTER,
+                    p -> Minecraft.getInstance().options.keyUse.setDown(true), NOTHING));
+            SCRIPT.add(new Step(name + "_early_quarter", 1, true, Cam.QUARTER, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_wait", 10, false, Cam.SIDE, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_late_side", 1, true, Cam.SIDE, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_late_front", 1, true, Cam.FRONT, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_let_go", 10, false, Cam.QUARTER,
+                    p -> Minecraft.getInstance().options.keyUse.setDown(false), NOTHING));
+        }
+        SCRIPT.add(new Step("empty_hands", 8, false, Cam.QUARTER, NONE,
+                p -> p.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY)));
+
+        // The real item path: the use key on a Sneakoscope and a Deluminator, so the gesture comes from their use().
+        Object[][] realUses = {
+                {"real_sneakoscope", at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.SNEAKOSCOPE},
+                {"real_deluminator", at.koopro.wizardsandbeasts.registry.MiscItemRegistry.DELUMINATOR}};
+        for (Object[] use : realUses) {
+            String name = (String) use[0];
+            @SuppressWarnings("unchecked")
+            java.util.function.Supplier<net.minecraft.world.item.Item> item =
+                    (java.util.function.Supplier<net.minecraft.world.item.Item>) use[1];
+            SCRIPT.add(new Step(name + "_give", 6, false, Cam.QUARTER, NONE,
+                    p -> p.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(item.get()))));
+            SCRIPT.add(new Step(name + "_press", 2, false, Cam.QUARTER,
+                    p -> Minecraft.getInstance().options.keyUse.setDown(true), NOTHING));
+            SCRIPT.add(new Step(name + "_release", 6, false, Cam.QUARTER,
+                    p -> Minecraft.getInstance().options.keyUse.setDown(false), NOTHING));
+            SCRIPT.add(new Step(name + "_quarter", 1, true, Cam.QUARTER, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_rest", 40, false, Cam.QUARTER, NONE,
+                    p -> p.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY)));
+        }
+
+        // Running with a wand, then a cast thrown on the run, then stopping: the ready hold gives way to the run,
+        // the cast reads over it, and the hold comes back when the run stops.
+        SCRIPT.add(new Step("run_dress", 10, false, Cam.SIDE, NONE, p -> current.dress().accept(p)));
+        SCRIPT.add(new Step("run_set", 10, false, Cam.SIDE, p -> {
+            sprint = true;
+            moves(true, false);
+        }, p -> p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true)));
+        SCRIPT.add(new Step("run_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("run_cast_set", 4, false, Cam.SIDE, NONE, heldCast("stupefy", 1)));
+        SCRIPT.add(new Step("run_cast_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("run_cast_off", 3, false, Cam.SIDE, NONE, heldCast("stupefy", -1)));
+        SCRIPT.add(new Step("run_stop", 12, false, Cam.SIDE, p -> {
+            sprint = false;
+            moves(false, false);
+        }, NOTHING));
+        SCRIPT.add(new Step("run_stopped_side", 1, true, Cam.SIDE, NONE, NOTHING));
+        SCRIPT.add(new Step("run_back", 4, false, Cam.QUARTER, NONE, p -> {
+            p.teleportTo(p.level(), START_X, STAGE_Y, 0.5, Set.of(), -90.0F, 0.0F, true);
+            p.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        }));
+
+        // Every server gesture, shot early and in its middle.
+        for (at.koopro.wizardsandbeasts.pose.PlayerGesture gesture : at.koopro.wizardsandbeasts.pose.PlayerGesture.values()) {
+            if (gesture == at.koopro.wizardsandbeasts.pose.PlayerGesture.WAND_INSPECT) {
+                continue;
+            }
+            String name = gesture.id();
+            int first = Math.max(2, Math.round(gesture.ticks() * 0.3f));
+            int second = Math.max(2, Math.round(gesture.ticks() * 0.6f)) - first;
+            SCRIPT.add(new Step(name + "_set", first, false, Cam.QUARTER, NONE,
+                    p -> at.koopro.wizardsandbeasts.pose.PlayerGestures.play(p, gesture)));
+            SCRIPT.add(new Step(name + "_a_quarter", 1, true, Cam.QUARTER, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_wait", Math.max(1, second - 1), false, Cam.SIDE, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_b_side", 1, true, Cam.SIDE, NONE, NOTHING));
+            SCRIPT.add(new Step(name + "_rest", gesture.ticks() / 2 + 8, false, Cam.QUARTER, NONE, NOTHING));
+        }
+
+        // A fall from ten blocks and its landing, every other tick from the side.
+        SCRIPT.add(new Step("fall_lift", 2, false, Cam.SIDE, NONE, p ->
+                p.teleportTo(p.level(), START_X, STAGE_Y + 10, 0.5, Set.of(), -90.0F, 0.0F, true)));
+        for (int i = 0; i < 18; i++) {
+            SCRIPT.add(new Step("fall_" + (i < 10 ? "0" : "") + i + "_side", 2, true, Cam.SIDE, NONE, NOTHING));
+        }
+        SCRIPT.add(new Step("fall_settle", 10, false, Cam.SIDE, NONE, NOTHING));
     }
 
     private static void logClientCast(LocalPlayer player) {

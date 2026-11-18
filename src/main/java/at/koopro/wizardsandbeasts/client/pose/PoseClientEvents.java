@@ -28,6 +28,7 @@ public final class PoseClientEvents {
     private static final CastPosePass CAST = new CastPosePass();
     private static final WandReadyPass WAND_READY = new WandReadyPass();
     private static final GesturePosePass GESTURE = new GesturePosePass();
+    private static final MovementPosePass MOVEMENT = new MovementPosePass();
     private static final ApparitionPosePass APPARITION = new ApparitionPosePass();
     private static final at.koopro.wizardsandbeasts.client.heritage.appearance.HeritageProportionPass
             HERITAGE_PROPORTION =
@@ -46,6 +47,7 @@ public final class PoseClientEvents {
             PlayerPoseLayer.get().register(CAST);
             PlayerPoseLayer.get().register(WAND_READY);
             PlayerPoseLayer.get().register(GESTURE);
+            PlayerPoseLayer.get().register(MOVEMENT);
             PlayerPoseLayer.get().register(APPARITION);
             PlayerPoseLayer.get().register(HERITAGE_PROPORTION);
         });
@@ -69,6 +71,7 @@ public final class PoseClientEvents {
         ITEM_USE.sweep(now);
         WAND_READY.sweep(now);
         GESTURE.sweep(now);
+        MOVEMENT.sweep(now);
         ClientGestureState.tick(now);
         at.koopro.wizardsandbeasts.client.broom.BroomRiderPoseHandler.sweep(now);
     }
@@ -86,6 +89,7 @@ public final class PoseClientEvents {
         ClientCastAnimationState.clear();
         ClientGestureState.clear();
         WandReadyPass.clear();
+        MOVEMENT.clear();
         at.koopro.wizardsandbeasts.client.broom.BroomRiderPoseHandler.clear();
         at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageIdentityState.clear();
     }

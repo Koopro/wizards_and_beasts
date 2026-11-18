@@ -121,6 +121,8 @@ public class DeluminatorItem extends Item implements AnimatedItem {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        // Every click of the lighter is seen, whatever it does to the lights.
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.CLICK_UP);
 
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide() && isOpen(stack) && getStoredLights(stack) > 0 && player instanceof ServerPlayer) {

@@ -80,6 +80,8 @@ public final class MinistryHandbookItem extends Item implements AnimatedItem {
         }
         if (level.isClientSide()) {
             ClientScreenHooksInvoker.invoke("openHandbookScreen");
+        } else {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.OPEN_BOOK);
         }
         return InteractionResult.SUCCESS;
     }

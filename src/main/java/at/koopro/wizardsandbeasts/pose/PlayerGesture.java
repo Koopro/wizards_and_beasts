@@ -17,7 +17,35 @@ import org.jspecify.annotations.Nullable;
 public enum PlayerGesture {
 
     /** The wand brought up before the eyes, turned along its length and lowered again. */
-    WAND_INSPECT("wand_inspect", 50);
+    WAND_INSPECT("wand_inspect", 50),
+    /** Both hands bring a book to the chest and open it: Bestiary, handbook. */
+    OPEN_BOOK("open_book", 24),
+    /** Both hands spread a folded sheet wide: the Marauder's Map. */
+    UNFOLD("unfold", 28),
+    /** One hand holds a small thing up to the face and keeps it there: Two-Way Mirror, Sneakoscope. */
+    HOLD_UP("hold_up", 40),
+    /** The hand raised overhead and a thumb's click: the Deluminator. */
+    CLICK_UP("click_up", 18),
+    /** Leaning in to look down into something: the Pensieve, the Mirror of Erised. */
+    PEER("peer", 40),
+    /** Both hands raise a blade and drive it down: the Sword of Gryffindor into a Horcrux. */
+    STAB("stab", 16),
+    /** Leaning over a cauldron, the hand going round. */
+    STIR("stir", 32),
+    /** A pinch dropped in: an ingredient added to a cauldron. */
+    TOSS("toss", 12),
+    /** A hand put out to a magical fitting: bench, cabinet, desk, hearth. */
+    REACH("reach", 12),
+    /** Floo Powder thrown into the green fire, then the arms tucked in for the whirl. */
+    FLOO_THROW("floo_throw", 40),
+    /** Two hands grip low and yank up: a Mandrake pulled. */
+    PULL("pull", 16),
+    /** A hand stroking a creature's coat: grooming. */
+    STROKE("stroke", 30),
+    /** A stoop to pick something off the ground: a creature's sign. */
+    STOOP("stoop", 14),
+    /** Doubled over, arms clutched to the chest, shaking: the werewolf change coming on. */
+    HUNCH("hunch", 50);
 
     private final String id;
     private final int ticks;

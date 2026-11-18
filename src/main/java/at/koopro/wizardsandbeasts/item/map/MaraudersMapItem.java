@@ -130,6 +130,7 @@ public class MaraudersMapItem extends Item implements AnimatedItem {
                     atlas.palette()));
 
             unfold(serverPlayer, stack, serverLevel);
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(serverPlayer, at.koopro.wizardsandbeasts.pose.PlayerGesture.UNFOLD);
         }
 
         return InteractionResult.SUCCESS;

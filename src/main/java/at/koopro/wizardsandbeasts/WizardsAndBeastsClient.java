@@ -66,6 +66,7 @@ public class WizardsAndBeastsClient {
                         at.koopro.wizardsandbeasts.client.wand.gui.WandPreviewRenderer::new));
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.brew.BrewTintSource::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.pose.MovementPosePass::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(EntityOutlines::registerModifiers);
         // Disguise before petrify, and the order is load-bearing. Both write AvatarRenderState.skin,

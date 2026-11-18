@@ -67,6 +67,7 @@ public class MirrorOfErisedBlock extends TwoTallBlock {
                                                         @NonNull BlockHitResult hit) {
         if (player instanceof ServerPlayer sp) {
             ErisedService.gaze(sp, lowerOf(state, pos));
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(sp, at.koopro.wizardsandbeasts.pose.PlayerGesture.PEER);
             return InteractionResult.SUCCESS_SERVER;
         }
         return InteractionResult.SUCCESS;

@@ -155,4 +155,28 @@ public final class ItemUsePoseConstants {
 
     /** Shoulder pitch clamp, vanilla's {@code 3.3F}. */
     public static final float OPTIC_PITCH_MAX = 3.3f;
+
+    /**
+     * One hand brought up to the face, degrees. {@code armYRot} is a magnitude toward the midline, as everywhere in
+     * this file.
+     *
+     * @param armXPerMotion  added to the shoulder pitch per unit of the gesture's motion (a drink's tip, a chew's bob)
+     * @param headPerMotion  added to the head pitch per unit of motion; negative tips the head back
+     */
+    public record MouthPose(float armXRot, float armYRot, float headXRot, float armXPerMotion, float headPerMotion) {}
+
+    /** A cup or flask to the lips, the head tipping back as it is drained. */
+    public static final MouthPose DRINK = new MouthPose(-90f, 36f, -4f, -8f, -16f);
+    /** A bite, chewed. */
+    public static final MouthPose EAT = new MouthPose(-96f, 34f, 4f, 4f, 2f);
+    /** A page held close in one hand while the other is busy. */
+    public static final MouthPose READ_ONE_HAND = new MouthPose(-70f, 26f, 14f, 0f, 0f);
+
+    /** Ticks a drink takes to tip the head fully back. */
+    public static final float DRINK_TIP_TICKS = 14f;
+    /** Radians of chew per tick of eating. */
+    public static final float CHEW_RATE = 1.4f;
+    /** Ticks per page while reading a spell book or a recipe, and how far the free hand sweeps to turn one. */
+    public static final float PAGE_TICKS = 20f;
+    public static final float PAGE_FLICK_DEG = 22f;
 }
