@@ -56,12 +56,13 @@ public final class FirstPersonCast {
             return;
         }
         long now = ClientCastAnimationState.clientTick();
-        ClientCastAnimationState.ActiveCast cast = ClientCastAnimationState.get(player.getId(), now);
-        if (cast == null) {
+        ClientCastAnimationState.Resolved resolved =
+                ClientCastAnimationState.resolve(player.getId(), now, now + event.getPartialTick());
+        if (resolved == null || resolved.weight() <= 0f) {
             return;
         }
-        float progress = cast.progress(now, event.getPartialTick());
-        CastPoseConstants.FirstPersonPose fp = CastPoseConstants.firstPersonAt(cast, progress);
+        // The neutral offset is zero, so scaling by the share is the blend toward the vanilla hold.
+        CastPoseConstants.FirstPersonPose fp = CastPoseConstants.FP_NEUTRAL.lerp(resolved.fp(), resolved.weight());
         float side = player.getMainArm() == HumanoidArm.RIGHT ? 1f : -1f;
         float[] t = {side * HAND_X, HAND_Y, HAND_Z, fp.up(), -fp.forward(), fp.pitch()};
         apply(pose, t);

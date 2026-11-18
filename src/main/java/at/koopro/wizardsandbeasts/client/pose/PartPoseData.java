@@ -20,11 +20,31 @@ import java.util.List;
 @NullMarked
 public final class PartPoseData {
 
-    /** One queued operation. Radians for rotations; see {@link PoseTarget}. */
-    public record Op(PoseTarget target, PoseOpType type, float value) {}
+    /**
+     * One queued operation. Radians for rotations; see {@link PoseTarget}.
+     *
+     * @param weight this op's own share, multiplied with the part's {@link #multiplier()}. One unless the pass was
+     *               crossfading two poses — see {@link PoseBuilder#opWeight(float)}.
+     */
+    public record Op(PoseTarget target, PoseOpType type, float value, float weight) {
+
+        public Op(PoseTarget target, PoseOpType type, float value) {
+            this(target, type, value, 1.0f);
+        }
+    }
 
     private final List<Op> ops = new ArrayList<>(4);
     private float multiplier = 1.0f;
+    /** The builder this part belongs to, which carries the op weight; null for a part built on its own. */
+    private final @org.jspecify.annotations.Nullable PoseBuilder owner;
+
+    public PartPoseData() {
+        this(null);
+    }
+
+    PartPoseData(@org.jspecify.annotations.Nullable PoseBuilder owner) {
+        this.owner = owner;
+    }
 
     /** Blend weight for every op queued on this part. Clamped to 0..1. */
     public PartPoseData multiplier(float multiplier) {
@@ -48,7 +68,7 @@ public final class PartPoseData {
     }
 
     public PartPoseData op(PoseTarget target, PoseOpType type, float value) {
-        ops.add(new Op(target, type, value));
+        ops.add(new Op(target, type, value, owner == null ? 1.0f : owner.opWeight()));
         return this;
     }
 

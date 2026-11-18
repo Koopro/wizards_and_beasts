@@ -138,10 +138,11 @@ public class WandRenderer extends GeoItemRenderer<WandItem> {
             if (perspective == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
                     || perspective == ItemDisplayContext.THIRD_PERSON_LEFT_HAND) {
                 long now = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.clientTick();
-                var cast = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState.get(holder.getId(), now);
+                var cast = at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState
+                        .resolve(holder.getId(), now, now + partialTick);
                 if (cast != null) {
-                    renderState.addGeckolibData(CAST_TILT, at.koopro.wizardsandbeasts.client.pose.CastPoseConstants
-                            .at(cast, cast.progress(now, partialTick)).aim());
+                    // Scaled by the blend, so the wand's tilt rises and lets go with the arm instead of snapping.
+                    renderState.addGeckolibData(CAST_TILT, cast.pose().aim() * cast.weight());
                 }
             }
         }

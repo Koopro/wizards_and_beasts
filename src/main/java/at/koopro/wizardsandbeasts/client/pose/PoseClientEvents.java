@@ -60,7 +60,10 @@ public final class PoseClientEvents {
         FLIGHT.tick();
         // The cast pass keeps no timers, but finished casts still have to be dropped: an entity that
         // casts and then leaves render distance is never read again and would sit in the map.
-        ClientCastAnimationState.tick(ClientCastAnimationState.clientTick());
+        long now = ClientCastAnimationState.clientTick();
+        ClientCastAnimationState.tick(now);
+        ITEM_USE.sweep(now);
+        at.koopro.wizardsandbeasts.client.broom.BroomRiderPoseHandler.sweep(now);
     }
 
     /**
@@ -74,6 +77,7 @@ public final class PoseClientEvents {
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientPoseState.clear();
         ClientCastAnimationState.clear();
+        at.koopro.wizardsandbeasts.client.broom.BroomRiderPoseHandler.clear();
         at.koopro.wizardsandbeasts.client.heritage.state.ClientHeritageIdentityState.clear();
     }
 }

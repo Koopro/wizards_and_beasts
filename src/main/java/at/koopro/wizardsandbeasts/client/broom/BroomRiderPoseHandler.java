@@ -2,11 +2,18 @@ package at.koopro.wizardsandbeasts.client.broom;
 
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
+import at.koopro.wizardsandbeasts.client.pose.ClientCastAnimationState;
+import at.koopro.wizardsandbeasts.client.pose.KindFade;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NullMarked;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Poses a broom rider. Vanilla puts any passenger in the boat pose — legs folded 81° forward at the
@@ -21,8 +28,9 @@ import org.jspecify.annotations.NullMarked;
  * the entity at render time.
  *
  * <p>Nothing has to undo this. The render state is rebuilt from scratch each frame and only carries
- * the ride data while {@code getVehicle()} is a broom, so dismounting, dying, or switching the
- * module off restores the vanilla pose on the very next frame.
+ * the ride data while {@code getVehicle()} is a broom. Mounting eases the crouch in and dismounting
+ * lets it go over a few ticks ({@link #MOUNT_TICKS}, {@link #DISMOUNT_TICKS}); switching the module
+ * off restores the vanilla pose on the very next frame.
  */
 @NullMarked
 public final class BroomRiderPoseHandler {
@@ -68,42 +76,75 @@ public final class BroomRiderPoseHandler {
 
     private BroomRiderPoseHandler() {}
 
+    /** Ticks the crouch takes to settle on mounting, and to let go on dismounting. */
+    static final int MOUNT_TICKS = 6;
+    static final int DISMOUNT_TICKS = 5;
+
+    private enum Seat { RIDING }
+
+    /**
+     * Mounting used to cut from the vanilla stance to the jockey crouch in one frame, and dismounting back. The ride
+     * flag arrives on the render state only while the player is a passenger, so this remembers it per entity and eases
+     * the crouch in and out; the lean is remembered too, so a dismount lets go of the crouch the rider actually had.
+     */
+    private static final KindFade<Seat> FADE = new KindFade<>(MOUNT_TICKS, DISMOUNT_TICKS);
+    private static final Map<Integer, Float> LAST_LEAN = new HashMap<>();
+
     public static void applyRidingPose(PlayerModel model, AvatarRenderState state) {
         if (!ModuleManager.isEnabled(Module.BROOM_FLIGHT)) {
             return;
         }
         BroomRiderRenderer.BroomRideData ride = BroomRiderRenderer.getRide(state);
-        if (ride == null) {
+        double time = ClientCastAnimationState.clientTick()
+                + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        KindFade.Shares<Seat> shares = FADE.observe(state.id, ride == null ? null : Seat.RIDING, time);
+        float weight = shares.current() == Seat.RIDING ? shares.weight() : shares.fall();
+        if (weight <= 0f) {
+            LAST_LEAN.remove(state.id);
             return;
         }
 
+        float lean;
+        if (ride != null) {
+            // forwardLean is negative for a nose-down tuck; a humanoid torso leans forward for a positive xRot.
+            float broomLean = Mth.clamp(-ride.forwardLean() * TORSO_LEAN_SHARE, -MAX_TORSO_LEAN_DEG, MAX_TORSO_LEAN_DEG)
+                    * Mth.DEG_TO_RAD;
+            lean = Math.max(0.0F, BASE_LEAN + broomLean);
+            LAST_LEAN.put(state.id, lean);
+        } else {
+            lean = LAST_LEAN.getOrDefault(state.id, BASE_LEAN);
+        }
+
         HumanoidModel<?> humanoid = model;
+        float drop = lean * weight;
+        humanoid.body.xRot = Mth.lerp(weight, humanoid.body.xRot, lean);
+        humanoid.body.y += BODY_DROP_PER_RAD * drop;
+        humanoid.head.y += HEAD_DROP_PER_RAD * drop;
+        humanoid.rightArm.y += BODY_DROP_PER_RAD * drop;
+        humanoid.leftArm.y += BODY_DROP_PER_RAD * drop;
+        humanoid.rightLeg.z += LEG_BACK_PER_RAD * drop;
+        humanoid.leftLeg.z += LEG_BACK_PER_RAD * drop;
 
-        // forwardLean is negative for a nose-down tuck; a humanoid torso leans forward for a positive xRot.
-        float broomLean = Mth.clamp(-ride.forwardLean() * TORSO_LEAN_SHARE, -MAX_TORSO_LEAN_DEG, MAX_TORSO_LEAN_DEG)
-                * Mth.DEG_TO_RAD;
-        float lean = Math.max(0.0F, BASE_LEAN + broomLean);
+        blend(humanoid.rightLeg, weight, LEG_X_ROT, 0.0F, LEG_Z_ROT);
+        blend(humanoid.leftLeg, weight, LEG_X_ROT, 0.0F, -LEG_Z_ROT);
+        blend(humanoid.rightArm, weight, RIGHT_ARM_X_ROT, RIGHT_ARM_Y_ROT, 0.0F);
+        blend(humanoid.leftArm, weight, LEFT_ARM_X_ROT, LEFT_ARM_Y_ROT, 0.0F);
+    }
 
-        humanoid.body.xRot = lean;
-        humanoid.body.y += BODY_DROP_PER_RAD * lean;
-        humanoid.head.y += HEAD_DROP_PER_RAD * lean;
-        humanoid.rightArm.y += BODY_DROP_PER_RAD * lean;
-        humanoid.leftArm.y += BODY_DROP_PER_RAD * lean;
-        humanoid.rightLeg.z += LEG_BACK_PER_RAD * lean;
-        humanoid.leftLeg.z += LEG_BACK_PER_RAD * lean;
+    /** Called from the client tick: forgets riders nobody has rendered for a while. */
+    public static void sweep(double time) {
+        FADE.sweep(time);
+    }
 
-        humanoid.rightLeg.xRot = LEG_X_ROT;
-        humanoid.leftLeg.xRot = LEG_X_ROT;
-        humanoid.rightLeg.yRot = 0.0F;
-        humanoid.leftLeg.yRot = 0.0F;
-        humanoid.rightLeg.zRot = LEG_Z_ROT;
-        humanoid.leftLeg.zRot = -LEG_Z_ROT;
+    public static void clear() {
+        FADE.clear();
+        LAST_LEAN.clear();
+    }
 
-        humanoid.rightArm.xRot = RIGHT_ARM_X_ROT;
-        humanoid.leftArm.xRot = LEFT_ARM_X_ROT;
-        humanoid.rightArm.yRot = RIGHT_ARM_Y_ROT;
-        humanoid.leftArm.yRot = LEFT_ARM_Y_ROT;
-        humanoid.rightArm.zRot = 0.0F;
-        humanoid.leftArm.zRot = 0.0F;
+    /** Moves a limb {@code weight} of the way from whatever vanilla left toward the riding rotation. */
+    private static void blend(ModelPart part, float weight, float x, float y, float z) {
+        part.xRot = Mth.lerp(weight, part.xRot, x);
+        part.yRot = Mth.lerp(weight, part.yRot, y);
+        part.zRot = Mth.lerp(weight, part.zRot, z);
     }
 }

@@ -176,7 +176,7 @@ public final class PlayerPoseLayer {
             float current = read(target, op.target());
             float captured = capturedValue(part, op.target());
             write(target, op.target(),
-                    op.type().apply(op.target(), current, op.value(), captured, multiplier));
+                    op.type().apply(op.target(), current, op.value(), captured, multiplier * op.weight()));
         }
     }
 
@@ -186,7 +186,7 @@ public final class PlayerPoseLayer {
         for (PartPoseData.Op op : data.ops()) {
             float current = result.get(op.target());
             result.set(op.target(),
-                    op.type().apply(op.target(), current, op.value(), op.target().identity(), multiplier));
+                    op.type().apply(op.target(), current, op.value(), op.target().identity(), multiplier * op.weight()));
         }
     }
 

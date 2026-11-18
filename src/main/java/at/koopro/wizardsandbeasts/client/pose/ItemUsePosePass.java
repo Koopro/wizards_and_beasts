@@ -71,13 +71,50 @@ public final class ItemUsePosePass extends ProceduralPosePass {
         super("item_use", PRIORITY);
     }
 
+    /** The gestures this pass can show. One at a time, crossfaded by {@link #FADE}. */
+    enum Kind { CARVE, POLISH, WIND, BRAND, OPTIC, BOOK }
+
+    /** Holds rise over a few ticks and let go a little faster — releasing should feel quicker than committing. */
+    static final int RISE_TICKS = 4;
+    static final int FALL_TICKS = 3;
+
+    /**
+     * Every hold here used to cut in and out on the frame the use started or stopped. The pass still decides from
+     * the render state alone (vanilla syncs the use flag and the held stacks, so there is nothing to send); this
+     * remembers the decision per entity and eases between decisions.
+     */
+    private final KindFade<Kind> fade = new KindFade<>(RISE_TICKS, FALL_TICKS);
+
     @Override
     public void pose(PoseBuilder builder, PoseContext context) {
         if (context.firstPerson().firstPerson()) {
             return;
         }
-
         AvatarRenderState state = context.state();
+        double time = ClientCastAnimationState.clientTick() + context.partialTicks();
+        KindFade.Shares<Kind> shares = fade.observe(state.id, classify(state), time);
+        if (shares.idle()) {
+            return;
+        }
+        // Outgoing first at its falling share, incoming over it at its rising share: see PoseBuilder.opWeight.
+        if (shares.previous() != null && shares.fall() > 0f) {
+            builder.opWeight(shares.fall());
+            emit(builder, context, shares.previous());
+        }
+        if (shares.current() != null && shares.weight() > 0f) {
+            builder.opWeight(shares.weight());
+            emit(builder, context, shares.current());
+        }
+        builder.opWeight(1f);
+    }
+
+    /** Drops tracking for players gone from view. */
+    public void sweep(double time) {
+        fade.sweep(time);
+    }
+
+    /** Which gesture the player is making this frame, or null. The branch order is the arbitration. */
+    static @Nullable Kind classify(AvatarRenderState state) {
         HumanoidArm holding = state.mainArm;
         ItemStack held = state.getMainHandItemStack();
         boolean using = usingArm(state) == holding;
@@ -86,39 +123,45 @@ public final class ItemUsePosePass extends ProceduralPosePass {
         // rather than a hold: the off arm steadies the work whatever it happens to be carrying, and
         // vanilla does the same for a crossbow.
         if (using && held.getItem() instanceof WandBlankItem) {
-            poseWork(builder, state, holding, ItemUsePoseConstants.CARVE);
-            return;
+            return Kind.CARVE;
         }
         if (using && held.getItem() instanceof BroomPolishItem) {
-            poseWork(builder, state, holding, ItemUsePoseConstants.POLISH);
-            return;
+            return Kind.POLISH;
         }
         if (using && held.getItem() instanceof TimeTurnerItem) {
-            poseWind(builder, state, holding, ItemUsePoseConstants.WIND);
-            return;
+            return Kind.WIND;
         }
         if (using && held.getItem() instanceof DarkMarkItem) {
-            poseReach(builder, holding, ItemUsePoseConstants.BRAND);
-            return;
+            return Kind.BRAND;
         }
 
         // Two-handed holds from here down, and they all need the other hand free — see the class
         // note. A wizard with a wand in the off hand keeps the wand and the vanilla one-armed pose.
         if (!offHand(state, holding).isEmpty()) {
-            return;
+            return null;
         }
         if (held.getItem() instanceof OmniocularsItem || held.getItem() instanceof FoeGlassItem) {
-            if (using) {
-                poseOptic(builder, context, state);
-            }
-            return;
+            return using ? Kind.OPTIC : null;
         }
         if (using && held.getItem() instanceof LoreTomeItem) {
-            poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
-            return;
+            return Kind.BOOK;
         }
         if (held.getItem() instanceof FamousWizardCardItem) {
-            poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
+            return Kind.BOOK;
+        }
+        return null;
+    }
+
+    private void emit(PoseBuilder builder, PoseContext context, Kind kind) {
+        AvatarRenderState state = context.state();
+        HumanoidArm holding = state.mainArm;
+        switch (kind) {
+            case CARVE -> poseWork(builder, state, holding, ItemUsePoseConstants.CARVE);
+            case POLISH -> poseWork(builder, state, holding, ItemUsePoseConstants.POLISH);
+            case WIND -> poseWind(builder, state, holding, ItemUsePoseConstants.WIND);
+            case BRAND -> poseReach(builder, holding, ItemUsePoseConstants.BRAND);
+            case OPTIC -> poseOptic(builder, context, state);
+            case BOOK -> poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
         }
     }
 

@@ -33,19 +33,13 @@ public final class CastPosePass extends ProceduralPosePass {
     @Override
     public void pose(PoseBuilder builder, PoseContext context) {
         long now = ClientCastAnimationState.clientTick();
-        ClientCastAnimationState.ActiveCast cast =
-                ClientCastAnimationState.get(context.state().id, now);
-        if (cast == null) {
+        ClientCastAnimationState.Resolved resolved =
+                ClientCastAnimationState.resolve(context.state().id, now, now + context.partialTicks());
+        if (resolved == null || resolved.weight() <= 0f) {
             return;
         }
-
-        float progress = cast.progress(now, context.partialTicks());
-        float weight = fade(cast, progress);
-        if (weight <= 0f) {
-            return;
-        }
-
-        CastPoseConstants.CastPose pose = CastPoseConstants.at(cast, progress);
+        float weight = resolved.weight();
+        CastPoseConstants.CastPose pose = resolved.pose();
         HumanoidArm arm = context.state().mainArm;
 
         if (context.firstPerson().firstPerson()) {
@@ -104,22 +98,4 @@ public final class CastPosePass extends ProceduralPosePass {
 
     /** How much of the third-person arm rotation a bare first-person arm keeps, so the hand stays on screen. */
     private static final float FIRST_PERSON_SHARE = 0.4f;
-
-    /**
-     * Eases the whole pose in at the start of a cast and out at the end.
-     *
-     * <p>Derived from progress rather than from a timer, because progress already carries the
-     * duration. A held cast sits at full weight: it exists to be looked at, and fading it would make
-     * the thing being inspected depend on how it was reached.
-     */
-    private static float fade(ClientCastAnimationState.ActiveCast cast, float progress) {
-        if (cast.held()) {
-            return 1f;
-        }
-        float inFrac = Math.min(0.5f, CastPoseConstants.FADE_IN_TICKS / (float) cast.ticks());
-        float outFrac = Math.min(0.5f, CastPoseConstants.FADE_OUT_TICKS / (float) cast.ticks());
-        float in = PhaseTimer.between(progress, 0f, inFrac);
-        float out = 1f - PhaseTimer.between(progress, 1f - outFrac, 1f);
-        return Math.min(in, out);
-    }
 }

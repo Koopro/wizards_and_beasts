@@ -124,11 +124,11 @@ class CastPoseTest {
     void aZeroTickPayloadClearsRatherThanStoringADegenerateCast() {
         ClientCastAnimationState.clear();
         ClientCastAnimationState.handle(new SpellCastAnimationS2CPayload(
-                7, "test", 20, 0.35f, 0.6f, SpellCastAnimationS2CPayload.NO_HOLD), 0L);
+                7, "test", 20, 0.35f, 0.6f, SpellCastAnimationS2CPayload.NO_HOLD), 0L, 0.0);
         assertEquals(1, ClientCastAnimationState.size());
 
         ClientCastAnimationState.handle(new SpellCastAnimationS2CPayload(
-                7, "test", 0, 0f, 0f, SpellCastAnimationS2CPayload.NO_HOLD), 0L);
+                7, "test", 0, 0f, 0f, SpellCastAnimationS2CPayload.NO_HOLD), 0L, 0.0);
         assertEquals(0, ClientCastAnimationState.size(), "zero ticks must clear the entry");
     }
 
@@ -137,7 +137,7 @@ class CastPoseTest {
     void finishedCastsAreSweptEvenIfNeverRead() {
         ClientCastAnimationState.clear();
         ClientCastAnimationState.handle(new SpellCastAnimationS2CPayload(
-                9, "test", 10, 0.35f, 0.6f, SpellCastAnimationS2CPayload.NO_HOLD), 0L);
+                9, "test", 10, 0.35f, 0.6f, SpellCastAnimationS2CPayload.NO_HOLD), 0L, 0.0);
         ClientCastAnimationState.tick(5L);
         assertEquals(1, ClientCastAnimationState.size(), "still running at tick 5");
         ClientCastAnimationState.tick(10L);

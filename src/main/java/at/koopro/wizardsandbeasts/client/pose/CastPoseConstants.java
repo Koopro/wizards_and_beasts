@@ -180,12 +180,11 @@ public final class CastPoseConstants {
     // ── tuning ───────────────────────────────────────────────────────────────
 
     /**
-     * Ticks the whole cast pose eases in over at its start, and out over at its end.
+     * Ticks a timed cast eases out over at its end. The start is the crossfade in {@link ClientCastAnimationState}.
      *
-     * <p>Short: a cast is a sharp action, and easing it in over the same eight ticks the flight pose
-     * uses would eat most of a thirty-tick cast before the arm had moved.
+     * <p>Short: a cast is a sharp action, and easing it over the same eight ticks the flight pose uses would eat
+     * most of a thirty-tick cast.
      */
-    public static final int FADE_IN_TICKS = 2;
     public static final int FADE_OUT_TICKS = 3;
 
     /** Default duration for {@code /wandb debug pose cast play} when none is given. */
