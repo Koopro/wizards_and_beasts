@@ -107,6 +107,15 @@ public final class PlaceSense {
         public int anchorCount() {
             return anchorCount;
         }
+
+        /** Whether its gates held last tick, and whether the camera stood in its biome (for readouts). */
+        public boolean gated() {
+            return gated;
+        }
+
+        public boolean inBiome() {
+            return inBiome;
+        }
     }
 
     private static List<Place> places = List.of();

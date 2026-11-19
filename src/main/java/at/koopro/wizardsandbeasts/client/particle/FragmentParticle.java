@@ -35,7 +35,7 @@ public final class FragmentParticle extends SingleQuadParticle {
         MOTE(0xFFFFFFFF, 0.1f, 80, 0.0f),
         /** Light catching gold: a still four-point star that swells and shrinks in half a second. */
         GLINT(0xFFFFFFFF, 0.2f, 9, 0.0f),
-        /** Dust in lit air: smaller than a mote, hangs and wanders on the room's draughts, seven to ten seconds. */
+        /** Dust in lit air: smaller than a mote, lit by the world, wanders on the room's draughts, seven to ten seconds. */
         DUST(0xFFFFFFFF, 0.06f, 140, 0.0f);
 
         final int argb;
@@ -161,7 +161,8 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     @Override
     protected int getLightColor(float partialTick) {
-        return 0xF000F0;
+        // Dust has no light of its own: lit by the room, it shows in a sunbeam and is gone in the shade.
+        return style == Style.DUST ? super.getLightColor(partialTick) : 0xF000F0;
     }
 
     public static ParticleProvider<SimpleParticleType> provider(SpriteSet sprites, Style style) {

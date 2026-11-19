@@ -164,6 +164,10 @@ public final class AtmosphereDirector {
                     pos.set(camera.getBlockX() + random.nextInt(reach * 2 + 1) - reach,
                             camera.getBlockY() + random.nextInt(reach + 1) - reach / 2 + 1,
                             camera.getBlockZ() + random.nextInt(reach * 2 + 1) - reach);
+                    // Not right at the camera: a speck a hand from the eye is drawn as a blot.
+                    if (pos.distToCenterSqr(camera.getEyePosition()) < 4.0) {
+                        continue;
+                    }
                     if (level.isLoaded(pos) && level.getBlockState(pos).isAir() && lit(level, pos, emitter)) {
                         return new Vec3(pos.getX() + random.nextDouble(), pos.getY() + random.nextDouble(),
                                 pos.getZ() + random.nextDouble());
@@ -182,6 +186,11 @@ public final class AtmosphereDirector {
                     }
                     pos.set(x, top, z);
                     if (!lit(level, pos, emitter)) {
+                        continue;
+                    }
+                    // Big soft things (mist) only at a distance: one sheet close to the eye reads as a card.
+                    if (emitter.particle().getPath().equals("mist")
+                            && pos.distToCenterSqr(camera.getEyePosition()) < 16.0) {
                         continue;
                     }
                     return new Vec3(x + random.nextDouble(), top + emitter.height().pick(random),
