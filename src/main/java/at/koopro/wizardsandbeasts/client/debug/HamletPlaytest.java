@@ -690,6 +690,11 @@ public final class HamletPlaytest {
         lookFrom(middle.add(9, 0.0, 9), middle.add(0, 5, 0));
         shot("plaza_night", false);
         for (Person person : people()) {
+            BlockPos door = nearest(doors, person.pos());
+            lookFrom(towardPlaza(door, 9.0).add(0, 1.2, 0), Vec3.atCenterOf(door).add(0, 2.5, 0));
+            shot("night_exterior_" + person.role(), false);
+        }
+        for (Person person : people()) {
             Vec3 inside = towardCentreless(nearest(doors, person.pos()), person.pos());
             lookFrom(inside, person.pos().add(0, 1.4, 0));
             shot("night_interior_" + person.role(), false);
