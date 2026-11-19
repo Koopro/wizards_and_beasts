@@ -43,6 +43,43 @@ public final class CanonDepthTests {
                 "canon: a Remembrall stays clear for a wizard with nothing owed, glows while a Ministry fine is "
                         + "outstanding, and clears once it is paid",
                 CanonDepthTests::remembrall);
+        tests.add("canon_depth_revealing_spells",
+                "canon: Revelio strips a disguise from a wizard in front of the caster; Homenum Revelio counts the "
+                        + "people about and not the caster; Sectumsempra, Vulnera Sanentur, Homenum Revelio and Lumos "
+                        + "Maxima are live",
+                CanonDepthTests::revealing);
+    }
+
+    private static void revealing(GameTestHelper helper) {
+        ServerPlayer auror = WizardTestSupport.placeMockPlayer(helper, "RevelioAuror", GameType.SURVIVAL);
+        ServerPlayer graves = WizardTestSupport.placeMockPlayer(helper, "FalseGraves", GameType.SURVIVAL);
+        try {
+            var level = helper.getLevel();
+            net.minecraft.world.phys.Vec3 spot = auror.position();
+            graves.teleportTo(spot.x + 3, spot.y, spot.z);
+            auror.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, graves.getEyePosition());
+            at.koopro.wizardsandbeasts.disguise.DisguiseSystemAPI.applyIndefinite(graves,
+                    java.util.UUID.randomUUID(), "Percival Graves");
+            check(helper, at.koopro.wizardsandbeasts.disguise.DisguiseSystemAPI.isDisguised(graves),
+                    () -> "the disguise did not take");
+            int unmasked = at.koopro.wizardsandbeasts.spell.revelio.Revelio.unmask(level, auror, 12);
+            check(helper, unmasked == 1 && !at.koopro.wizardsandbeasts.disguise.DisguiseSystemAPI.isDisguised(graves),
+                    () -> "Revelio did not unmask the disguised wizard in front of the caster");
+
+            var people = at.koopro.wizardsandbeasts.spell.revelio.HomenumRevelio.people(level, auror, 24);
+            check(helper, people.contains(graves), () -> "Homenum Revelio missed a person three blocks away");
+            check(helper, !people.contains(auror), () -> "Homenum Revelio counted the caster");
+
+            for (String id : java.util.List.of("sectumsempra", "vulnera_sanentur", "homenum_revelio", "lumos_maxima")) {
+                var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(id);
+                check(helper, spell != null && spell.isImplemented(),
+                        () -> id + " is not a live spell");
+            }
+            helper.succeed();
+        } finally {
+            retire(helper, auror);
+            retire(helper, graves);
+        }
     }
 
     private static void remembrall(GameTestHelper helper) {

@@ -1,10 +1,38 @@
 {
   "displayName": "spell.wizards_and_beasts.sectumsempra.name",
-  "category": "dark_arts",
-  "cooldownTicks": 20,
-  "color": -13755833,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "dark_arts",
+  "cooldownTicks": 100,
+  "baseDamage": 4.0,
+  "color": -13755833,
+  "projectileSpeed": 2.2,
+  "projectileSpread": 0.02,
+  "castType": "projectile",
+  "sound": {
+    "id": "minecraft:entity.player.attack.sweep",
+    "volume": 0.9,
+    "pitch": 1.4
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "diffindo",
+    "minProficiency": "proficient"
+  },
+  "effects": [
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:sectumsempra_bleed",
+      "duration": 240,
+      "amplifier": 0,
+      "target": true,
+      "darkArts": true
+    }
+  ],
+  "vfx": {
+    "trail": "dark_wisp",
+    "impact": "dark_wisp",
+    "trailDensity": 1,
+    "impactCount": 14
+  },
   "relation": "base"
 }

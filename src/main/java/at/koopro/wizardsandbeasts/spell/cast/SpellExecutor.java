@@ -223,7 +223,9 @@ public final class SpellExecutor {
             new SelfUtilityRule("claustra_reverto", (level, caster, spell) -> SpellCastHandlers.handlePocketEgress(caster)),
             // Bespoke: a line-of-sight scan with no component to express it. Returns false when nothing was
             // found, so an empty cast earns no proficiency.
-            new SelfUtilityRule("revelio", at.koopro.wizardsandbeasts.spell.revelio.Revelio::cast)
+            new SelfUtilityRule("revelio", at.koopro.wizardsandbeasts.spell.revelio.Revelio::cast),
+            // Bespoke: a count of the people about, through walls; no component expresses it.
+            new SelfUtilityRule("homenum_revelio", at.koopro.wizardsandbeasts.spell.revelio.HomenumRevelio::cast)
     };
 
     private static boolean handleSelfUtilitySpell(ServerLevel level, ServerPlayer caster, Spell spell) {

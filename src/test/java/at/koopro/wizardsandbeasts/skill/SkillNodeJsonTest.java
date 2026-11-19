@@ -82,10 +82,11 @@ class SkillNodeJsonTest {
 
     @Test
     void nodeCountsMatchGeneratedLayout() {
-        assertEquals(90, BY_ID.size(),
+        assertEquals(91, BY_ID.size(),
                 "the 2026-09-17 education rework left 84 nodes that each do something nameable; the 2026-10-14"
                         + " builds pass added six capstones (Duelist, Wandmaster, Beastmaster, Scholar, Healer,"
-                        + " Explorer) — Dark Arts' capstone is the existing Avada Kedavra node");
+                        + " Explorer) — Dark Arts' capstone is the existing Avada Kedavra node; the 2026-11-19 canon"
+                        + " depth pass added Sectumsempra to Dark Arts");
         // Zero, and it should stay zero. The 34 pathway nodes the webs used to be padded with each printed the
         // same sentence as several siblings; the rework replaced them with fewer, named nodes. A SMALL node is
         // still legal — pathwaysFollowTheContentRule and noSmallNodeGrantsARawAttribute constrain what one may

@@ -1,11 +1,27 @@
 {
   "displayName": "spell.wizards_and_beasts.homenum_revelio.name",
+  "canonTier": "books",
   "category": "utility",
-  "cooldownTicks": 20,
+  "cooldownTicks": 200,
   "color": -10900158,
   "castType": "self",
-  "canonTier": "books",
-  "implementationState": "coming_soon",
+  "range": 24.0,
+  "sound": {
+    "id": "minecraft:block.beacon.ambient",
+    "volume": 0.7,
+    "pitch": 1.6
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "revelio",
+    "minProficiency": "proficient"
+  },
   "relation": "narrow_of",
-  "relatedSpell": "wizards_and_beasts:revelio"
+  "relatedSpell": "wizards_and_beasts:revelio",
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 12
+  }
 }

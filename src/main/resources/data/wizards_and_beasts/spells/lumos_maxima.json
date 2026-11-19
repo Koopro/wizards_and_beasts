@@ -1,16 +1,56 @@
 {
   "displayName": "spell.wizards_and_beasts.lumos_maxima.name",
-  "category": "utility",
-  "cooldownTicks": 20,
-  "color": -11096679,
-  "castType": "self",
   "canonTier": "film",
-  "implementationState": "coming_soon",
-  "relation": "rank_of",
-  "relatedSpell": "wizards_and_beasts:lumos",
+  "category": "utility",
+  "cooldownTicks": 300,
+  "color": -11096679,
+  "baseEffectDurationTicks": 200,
+  "castType": "self",
+  "sound": {
+    "id": "minecraft:block.beacon.activate",
+    "volume": 0.7,
+    "pitch": 1.8
+  },
   "requirement": {
     "type": "proficiency",
     "prerequisiteId": "lumos",
     "minProficiency": "proficient"
+  },
+  "relation": "rank_of",
+  "relatedSpell": "wizards_and_beasts:lumos",
+  "effects": [
+    {
+      "type": "aoe_apply",
+      "radius": 8.0,
+      "filter": "monsters",
+      "effects": [
+        {
+          "type": "apply_effect",
+          "effect": "minecraft:blindness",
+          "duration": 80,
+          "amplifier": 0,
+          "target": true
+        },
+        {
+          "type": "apply_effect",
+          "effect": "minecraft:glowing",
+          "duration": 120,
+          "amplifier": 0,
+          "target": true
+        }
+      ]
+    },
+    {
+      "type": "particle_burst",
+      "color": -120,
+      "count": 40,
+      "spread": 3.0
+    }
+  ],
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "light_glow",
+    "trailDensity": 1,
+    "impactCount": 30
   }
 }

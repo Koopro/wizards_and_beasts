@@ -1,16 +1,50 @@
 {
   "displayName": "spell.wizards_and_beasts.vulnera_sanentur.name",
-  "category": "utility",
-  "cooldownTicks": 20,
-  "color": -12538493,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
-  "relation": "rank_of",
-  "relatedSpell": "wizards_and_beasts:episkey",
+  "category": "defense",
+  "cooldownTicks": 160,
+  "color": -12538493,
+  "castType": "targeted",
+  "range": 6.0,
+  "sound": {
+    "id": "minecraft:block.amethyst_block.chime",
+    "volume": 0.8,
+    "pitch": 0.8
+  },
   "requirement": {
     "type": "proficiency",
     "prerequisiteId": "episkey",
     "minProficiency": "proficient"
+  },
+  "relation": "rank_of",
+  "relatedSpell": "wizards_and_beasts:episkey",
+  "effects": [
+    {
+      "type": "dispel",
+      "scope": "specific",
+      "effects": [
+        "wizards_and_beasts:sectumsempra_bleed",
+        "wizards_and_beasts:sundered",
+        "wizards_and_beasts:splinched"
+      ],
+      "respect_immunity": false
+    },
+    {
+      "type": "heal",
+      "amount": 6.0
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:regeneration",
+      "duration": 100,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "light_glow",
+    "trailDensity": 1,
+    "impactCount": 12
   }
 }

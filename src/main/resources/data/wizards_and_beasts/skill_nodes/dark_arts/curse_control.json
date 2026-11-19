@@ -24,7 +24,8 @@
   "y": 130.7,
   "edges": [
     "quiet_casting",
-    "crucio_unlock"
+    "crucio_unlock",
+    "sectumsempra_unlock"
   ],
   "maxLevel": 2
 }

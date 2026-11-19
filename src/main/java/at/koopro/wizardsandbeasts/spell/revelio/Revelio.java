@@ -58,8 +58,13 @@ public final class Revelio {
         // An Auror casting it at the scene of a case they hold reads the magic left there.
         int evidence = at.koopro.wizardsandbeasts.ministry.trace.MinistryCasework.examine(caster);
         RevelioScan.Result found = RevelioScan.scan(level, caster, settings.radius());
+        int unmasked = unmask(level, caster, settings.radius());
+        if (unmasked > 0) {
+            PlayerFeedback.actionBar(caster,
+                    Component.translatable("spell.wizards_and_beasts.revelio.unmasked", unmasked));
+        }
         if (found.isEmpty()) {
-            if (evidence > 0) {
+            if (evidence > 0 || unmasked > 0) {
                 return true;
             }
             PlayerFeedback.actionBar(caster, Component.translatable("spell.wizards_and_beasts.revelio.nothing"));
@@ -72,6 +77,30 @@ public final class Revelio {
         PlayerFeedback.actionBar(caster,
                 Component.translatable("spell.wizards_and_beasts.revelio.revealed", found.total()));
         return true;
+    }
+
+    /**
+     * Ends every Polyjuice or other disguise on a player the caster can see within {@code radius}: the face
+     * ripples back to its own (Fantastic Beasts: "Graves" turned back into Grindelwald). Returns how many.
+     */
+    public static int unmask(ServerLevel level, ServerPlayer caster, double radius) {
+        int count = 0;
+        net.minecraft.world.phys.Vec3 eye = caster.getEyePosition();
+        net.minecraft.world.phys.Vec3 look = caster.getLookAngle();
+        for (ServerPlayer other : level.getPlayers(p -> p != caster && p.distanceTo(caster) <= radius)) {
+            if (!at.koopro.wizardsandbeasts.disguise.DisguiseSystemAPI.isDisguised(other)) {
+                continue;
+            }
+            net.minecraft.world.phys.Vec3 to = other.getEyePosition().subtract(eye).normalize();
+            if (to.dot(look) < 0.5 || !caster.hasLineOfSight(other)) {
+                continue;
+            }
+            at.koopro.wizardsandbeasts.polyjuice.PolyjuiceService.revert(other, false);
+            PlayerFeedback.actionBar(other,
+                    Component.translatable("spell.wizards_and_beasts.revelio.you_are_unmasked", caster.getDisplayName()));
+            count++;
+        }
+        return count;
     }
 
     /**

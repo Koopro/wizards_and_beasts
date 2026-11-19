@@ -1,0 +1,25 @@
+{
+  "id": "sectumsempra_unlock",
+  "displayName": "skill.wizards_and_beasts.node.sectumsempra_unlock.name",
+  "description": "skill.wizards_and_beasts.node.sectumsempra_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.sectumsempra_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.sectumsempra_unlock.practice",
+  "tree": "dark_arts",
+  "pointCost": 3,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "sectumsempra"
+    },
+    {
+      "type": "dark_study",
+      "corruption": 3.0
+    }
+  ],
+  "x": 32.0,
+  "y": 160.0,
+  "edges": []
+}
