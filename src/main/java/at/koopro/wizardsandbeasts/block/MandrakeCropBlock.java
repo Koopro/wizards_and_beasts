@@ -55,6 +55,7 @@ public class MandrakeCropBlock extends CropBlock {
     @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack stack, boolean willHarvest, FluidState fluid) {
         if (!level.isClientSide()) {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.PULL);
             if (isMaxAge(state)) {
                 // Full grown. The cry reaches everything within earshot, the puller included — see
                 // MandrakeScream, which owns the radius, the effects and who earmuffs spare.

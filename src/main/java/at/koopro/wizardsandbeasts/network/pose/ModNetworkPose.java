@@ -14,5 +14,13 @@ public final class ModNetworkPose {
                 PoseOverrideSyncS2CPayload.TYPE,
                 PoseOverrideSyncS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handlePoseOverrideSync);
+        registrar.playToClient(
+                PlayerGestureS2CPayload.TYPE,
+                PlayerGestureS2CPayload.STREAM_CODEC,
+                ClientPayloadHandlers::handlePlayerGesture);
+        registrar.playToServer(
+                WandInspectC2SPayload.TYPE,
+                WandInspectC2SPayload.STREAM_CODEC,
+                WandInspectC2SPayload::handle);
     }
 }

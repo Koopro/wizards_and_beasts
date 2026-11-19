@@ -69,6 +69,8 @@ public class TwoWayMirrorItem extends Item {
         if (level.isClientSide()) {
             at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker.invoke(
                     "openMirrorCallScreen", UUID.class, pairId.get());
+        } else {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.HOLD_UP);
         }
         return InteractionResult.SUCCESS;
     }

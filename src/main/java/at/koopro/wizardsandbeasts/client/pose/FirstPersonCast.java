@@ -56,31 +56,60 @@ public final class FirstPersonCast {
             return;
         }
         long now = ClientCastAnimationState.clientTick();
-        ClientCastAnimationState.ActiveCast cast = ClientCastAnimationState.get(player.getId(), now);
-        if (cast == null) {
+        double time = now + event.getPartialTick();
+        float side = player.getMainArm() == HumanoidArm.RIGHT ? 1f : -1f;
+        // {hand x, y, z, shift across, up, back, pitch, yaw, roll}
+        float[] t = {side * HAND_X, HAND_Y, HAND_Z, 0f, 0f, 0f, 0f, 0f, 0f};
+        boolean any = false;
+
+        ClientCastAnimationState.Resolved resolved = ClientCastAnimationState.resolve(player.getId(), now, time);
+        if (resolved != null && resolved.weight() > 0f) {
+            // The neutral offset is zero, so scaling by the share is the blend toward the vanilla hold.
+            CastPoseConstants.FirstPersonPose fp = CastPoseConstants.FP_NEUTRAL.lerp(resolved.fp(), resolved.weight());
+            t[4] += fp.up();
+            t[5] -= fp.forward();
+            t[6] += fp.pitch();
+            any = true;
+        }
+
+        // The inspect: the wand comes in toward the middle of the view, turns to lie across it, and rolls along its
+        // length, on the same synced start the third-person arm and the wand's own turn read.
+        ClientGestureState.Active inspect = GesturePosePass.inspecting(player.getId(), now);
+        if (inspect != null && !player.isUsingItem()) {
+            float p = inspect.progress(time);
+            float look = GesturePoseConstants.inspectAt(p).headPitch() / 16f;
+            t[3] += -0.22f * side * look;
+            t[4] += 0.12f * look;
+            t[6] += -12f * look;
+            t[7] += 38f * side * look;
+            t[8] += GesturePoseConstants.inspectRoll(p) * 0.35f * side;
+            any = true;
+        }
+
+        if (!any) {
             return;
         }
-        float progress = cast.progress(now, event.getPartialTick());
-        CastPoseConstants.FirstPersonPose fp = CastPoseConstants.firstPersonAt(cast, progress);
-        float side = player.getMainArm() == HumanoidArm.RIGHT ? 1f : -1f;
-        float[] t = {side * HAND_X, HAND_Y, HAND_Z, fp.up(), -fp.forward(), fp.pitch()};
         apply(pose, t);
         applied = t;
     }
 
-    /** offset, then the pitch about the hand: T(offset) · T(hand) · R · T(-hand). */
+    /** Offset, then the turn about the hand: T(offset) · T(hand) · Rx · Ry · Rz · T(-hand). */
     private static void apply(PoseStack pose, float[] t) {
-        pose.translate(0f, t[3], t[4]);
+        pose.translate(t[3], t[4], t[5]);
         pose.translate(t[0], t[1], t[2]);
-        pose.mulPose(Axis.XP.rotationDegrees(t[5]));
+        pose.mulPose(Axis.XP.rotationDegrees(t[6]));
+        pose.mulPose(Axis.YP.rotationDegrees(t[7]));
+        pose.mulPose(Axis.ZP.rotationDegrees(t[8]));
         pose.translate(-t[0], -t[1], -t[2]);
     }
 
-    /** The exact inverse of {@link #apply}: T(hand) · R⁻¹ · T(-hand) · T(-offset). */
+    /** The exact inverse of {@link #apply}: T(hand) · Rz⁻¹ · Ry⁻¹ · Rx⁻¹ · T(-hand) · T(-offset). */
     private static void undo(PoseStack pose, float[] t) {
         pose.translate(t[0], t[1], t[2]);
-        pose.mulPose(Axis.XP.rotationDegrees(-t[5]));
+        pose.mulPose(Axis.ZP.rotationDegrees(-t[8]));
+        pose.mulPose(Axis.YP.rotationDegrees(-t[7]));
+        pose.mulPose(Axis.XP.rotationDegrees(-t[6]));
         pose.translate(-t[0], -t[1], -t[2]);
-        pose.translate(0f, -t[3], -t[4]);
+        pose.translate(-t[3], -t[4], -t[5]);
     }
 }

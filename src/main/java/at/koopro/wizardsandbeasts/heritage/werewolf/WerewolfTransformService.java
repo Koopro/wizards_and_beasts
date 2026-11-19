@@ -100,6 +100,7 @@ public final class WerewolfTransformService {
 
         data.setTransformationState(TransformationState.TRANSITIONING);
         WerewolfState.setTransformAtTick(data, level.getGameTime() + WerewolfConfig.transformDelayTicks);
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.HUNCH, WerewolfConfig.transformDelayTicks);
         WerewolfState.clearExposure(data);
         // Control goes at the onset, not at the landing. The throes are the one window in which a player
         // could otherwise drink, cast or eat their way out of a change that has already started, and
@@ -194,6 +195,7 @@ public final class WerewolfTransformService {
      * rather than the change re-firing on the very next scan.
      */
     private static void abortPendingTransform(ServerPlayer player, ServerLevel level, PlayerHeritageData data) {
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.stop(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.HUNCH);
         WerewolfState.clearPendingTransform(data);
         WerewolfState.clearExposure(data);
         setLossOfControl(player, data, false);

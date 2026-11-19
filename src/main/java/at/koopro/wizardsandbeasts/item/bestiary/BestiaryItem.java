@@ -20,6 +20,8 @@ public final class BestiaryItem extends Item {
         }
         if (level.isClientSide()) {
             ClientScreenHooksInvoker.invoke("openBestiaryScreen");
+        } else {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.OPEN_BOOK);
         }
         return InteractionResult.SUCCESS;
     }

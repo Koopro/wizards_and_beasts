@@ -58,6 +58,7 @@ public class SwordOfGryffindorItem extends Item {
             return InteractionResult.FAIL;
         }
         if (level instanceof ServerLevel server) {
+            at.koopro.wizardsandbeasts.pose.PlayerGestures.play(player, at.koopro.wizardsandbeasts.pose.PlayerGesture.STAB);
             HorcruxDestruction.destroy(server, player, other);
         }
         return InteractionResult.SUCCESS;

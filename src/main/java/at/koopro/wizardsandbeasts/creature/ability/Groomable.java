@@ -72,6 +72,7 @@ public record Groomable(Identifier item, int count, int cooldownTicks, boolean r
         ItemStack gift = new ItemStack(resolved,
                 count + at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.extraFor(serverPlayer, count));
         at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(serverPlayer, gift);
+        at.koopro.wizardsandbeasts.pose.PlayerGestures.play(serverPlayer, at.koopro.wizardsandbeasts.pose.PlayerGesture.STROKE);
         entity.setCooldown(COOLDOWN, at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.cooldown(cooldownTicks,
                 at.koopro.wizardsandbeasts.bestiary.harvest.GentleHarvest.researched(serverPlayer, entity.getType())));
         level.sendParticles(ParticleTypes.HEART, entity.getX(), entity.getY() + entity.getBbHeight(), entity.getZ(),

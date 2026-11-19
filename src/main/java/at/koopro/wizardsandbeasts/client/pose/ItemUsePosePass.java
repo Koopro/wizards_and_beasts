@@ -14,6 +14,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import at.koopro.wizardsandbeasts.brew.knowledge.PotionRecipeItem;
+import at.koopro.wizardsandbeasts.item.spell.SpellSourceItem;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -71,13 +74,50 @@ public final class ItemUsePosePass extends ProceduralPosePass {
         super("item_use", PRIORITY);
     }
 
+    /** The gestures this pass can show. One at a time, crossfaded by {@link #FADE}. */
+    enum Kind { CARVE, POLISH, WIND, BRAND, OPTIC, BOOK, READ, READ_ONE_HAND, DRINK, DRINK_OFF, EAT, EAT_OFF }
+
+    /** Holds rise over a few ticks and let go a little faster — releasing should feel quicker than committing. */
+    static final int RISE_TICKS = 4;
+    static final int FALL_TICKS = 3;
+
+    /**
+     * Every hold here used to cut in and out on the frame the use started or stopped. The pass still decides from
+     * the render state alone (vanilla syncs the use flag and the held stacks, so there is nothing to send); this
+     * remembers the decision per entity and eases between decisions.
+     */
+    private final KindFade<Kind> fade = new KindFade<>(RISE_TICKS, FALL_TICKS);
+
     @Override
     public void pose(PoseBuilder builder, PoseContext context) {
         if (context.firstPerson().firstPerson()) {
             return;
         }
-
         AvatarRenderState state = context.state();
+        double time = ClientCastAnimationState.clientTick() + context.partialTicks();
+        KindFade.Shares<Kind> shares = fade.observe(state.id, classify(state), time);
+        if (shares.idle()) {
+            return;
+        }
+        // Outgoing first at its falling share, incoming over it at its rising share: see PoseBuilder.opWeight.
+        if (shares.previous() != null && shares.fall() > 0f) {
+            builder.opWeight(shares.fall());
+            emit(builder, context, shares.previous());
+        }
+        if (shares.current() != null && shares.weight() > 0f) {
+            builder.opWeight(shares.weight());
+            emit(builder, context, shares.current());
+        }
+        builder.opWeight(1f);
+    }
+
+    /** Drops tracking for players gone from view. */
+    public void sweep(double time) {
+        fade.sweep(time);
+    }
+
+    /** Which gesture the player is making this frame, or null. The branch order is the arbitration. */
+    static @Nullable Kind classify(AvatarRenderState state) {
         HumanoidArm holding = state.mainArm;
         ItemStack held = state.getMainHandItemStack();
         boolean using = usingArm(state) == holding;
@@ -86,40 +126,119 @@ public final class ItemUsePosePass extends ProceduralPosePass {
         // rather than a hold: the off arm steadies the work whatever it happens to be carrying, and
         // vanilla does the same for a crossbow.
         if (using && held.getItem() instanceof WandBlankItem) {
-            poseWork(builder, state, holding, ItemUsePoseConstants.CARVE);
-            return;
+            return Kind.CARVE;
         }
         if (using && held.getItem() instanceof BroomPolishItem) {
-            poseWork(builder, state, holding, ItemUsePoseConstants.POLISH);
-            return;
+            return Kind.POLISH;
         }
         if (using && held.getItem() instanceof TimeTurnerItem) {
-            poseWind(builder, state, holding, ItemUsePoseConstants.WIND);
-            return;
+            return Kind.WIND;
         }
         if (using && held.getItem() instanceof DarkMarkItem) {
-            poseReach(builder, holding, ItemUsePoseConstants.BRAND);
-            return;
+            return Kind.BRAND;
+        }
+
+        // Drinking and eating, from either hand: vanilla has no third-person pose for either, so a potion went down
+        // with the arm hanging at the side. Keyed on the item's own use animation, so every potion, brew and food
+        // in the game (vanilla's included) gets it without a list here.
+        HumanoidArm user = usingArm(state);
+        if (user != null) {
+            ItemStack used = user == holding ? held : offHand(state, holding);
+            ItemUseAnimation animation = used.getUseAnimation();
+            boolean off = user != holding;
+            if (animation == ItemUseAnimation.DRINK) {
+                return off ? Kind.DRINK_OFF : Kind.DRINK;
+            }
+            if (animation == ItemUseAnimation.EAT) {
+                return off ? Kind.EAT_OFF : Kind.EAT;
+            }
+        }
+
+        // Reading a spell book or a recipe is a channel; it reads in both hands when the other is free.
+        if (using && (held.getItem() instanceof SpellSourceItem || held.getItem() instanceof PotionRecipeItem)) {
+            return offHand(state, holding).isEmpty() ? Kind.READ : Kind.READ_ONE_HAND;
         }
 
         // Two-handed holds from here down, and they all need the other hand free — see the class
         // note. A wizard with a wand in the off hand keeps the wand and the vanilla one-armed pose.
         if (!offHand(state, holding).isEmpty()) {
-            return;
+            return null;
         }
         if (held.getItem() instanceof OmniocularsItem || held.getItem() instanceof FoeGlassItem) {
-            if (using) {
-                poseOptic(builder, context, state);
-            }
-            return;
+            return using ? Kind.OPTIC : null;
         }
         if (using && held.getItem() instanceof LoreTomeItem) {
-            poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
-            return;
+            return Kind.BOOK;
         }
         if (held.getItem() instanceof FamousWizardCardItem) {
-            poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
+            return Kind.BOOK;
         }
+        return null;
+    }
+
+    private void emit(PoseBuilder builder, PoseContext context, Kind kind) {
+        AvatarRenderState state = context.state();
+        HumanoidArm holding = state.mainArm;
+        switch (kind) {
+            case CARVE -> poseWork(builder, state, holding, ItemUsePoseConstants.CARVE);
+            case POLISH -> poseWork(builder, state, holding, ItemUsePoseConstants.POLISH);
+            case WIND -> poseWind(builder, state, holding, ItemUsePoseConstants.WIND);
+            case BRAND -> poseReach(builder, holding, ItemUsePoseConstants.BRAND);
+            case OPTIC -> poseOptic(builder, context, state);
+            case BOOK -> poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
+            case READ -> {
+                poseTwoHanded(builder, ItemUsePoseConstants.BOOK);
+                posePageTurn(builder, state, holding.getOpposite());
+            }
+            case READ_ONE_HAND -> poseMouth(builder, holding, ItemUsePoseConstants.READ_ONE_HAND, 0f);
+            case DRINK -> poseMouth(builder, holding, ItemUsePoseConstants.DRINK, tilt(state, holding));
+            case DRINK_OFF -> poseMouth(builder, holding.getOpposite(), ItemUsePoseConstants.DRINK,
+                    tilt(state, holding.getOpposite()));
+            case EAT -> poseMouth(builder, holding, ItemUsePoseConstants.EAT, chew(state, holding));
+            case EAT_OFF -> poseMouth(builder, holding.getOpposite(), ItemUsePoseConstants.EAT,
+                    chew(state, holding.getOpposite()));
+        }
+    }
+
+    /**
+     * One hand brought up to the face: a cup to the lips, a bite, a page held close.
+     *
+     * @param motion 0..1 for a drink (how far back the head has tipped), -1..1 for a chew (the bob), 0 for none
+     */
+    private void poseMouth(PoseBuilder builder, HumanoidArm arm, ItemUsePoseConstants.MouthPose pose, float motion) {
+        builder.get(part(arm))
+                .setRotDeg(PoseTarget.X_ROT, pose.armXRot() + pose.armXPerMotion() * motion)
+                .setRotDeg(PoseTarget.Y_ROT, pose.armYRot() * mirror(arm))
+                .setRotDeg(PoseTarget.Z_ROT, 0f);
+        builder.get(PlayerModelPart.HEAD).addRotDeg(PoseTarget.X_ROT, pose.headXRot() + pose.headPerMotion() * motion);
+    }
+
+    /** How far a drink has tipped: the head goes back over the first part of the swallow and stays there. */
+    static float tilt(AvatarRenderState state, HumanoidArm arm) {
+        return Math.min(1f, state.ticksUsingItem(arm) / ItemUsePoseConstants.DRINK_TIP_TICKS);
+    }
+
+    /** The chew: a small bob of hand and head on vanilla's own eating rhythm. */
+    static float chew(AvatarRenderState state, HumanoidArm arm) {
+        return Mth.sin(state.ticksUsingItem(arm) * ItemUsePoseConstants.CHEW_RATE);
+    }
+
+    /**
+     * The page turn: every {@link ItemUsePoseConstants#PAGE_TICKS} of reading, the free hand flicks across the
+     * page and back.
+     */
+    private void posePageTurn(PoseBuilder builder, AvatarRenderState state, HumanoidArm free) {
+        float flick = pageFlick(state.ticksUsingItem(free.getOpposite()));
+        if (flick > 0f) {
+            builder.get(part(free)).addRotDeg(PoseTarget.Y_ROT,
+                    ItemUsePoseConstants.PAGE_FLICK_DEG * flick * mirror(free));
+        }
+    }
+
+    /** 0..1..0 over the first quarter of each page period, zero for the rest. */
+    static float pageFlick(float ticks) {
+        float f = (ticks % ItemUsePoseConstants.PAGE_TICKS) / ItemUsePoseConstants.PAGE_TICKS;
+        return f < 0.25f ? Mth.sin(f / 0.25f * Mth.PI) : 0f;
     }
 
     /**

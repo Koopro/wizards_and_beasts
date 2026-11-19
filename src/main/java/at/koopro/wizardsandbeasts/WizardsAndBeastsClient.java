@@ -66,6 +66,7 @@ public class WizardsAndBeastsClient {
                         at.koopro.wizardsandbeasts.client.wand.gui.WandPreviewRenderer::new));
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.brew.BrewTintSource::register);
         modEventBus.addListener(BroomRiderRenderer::registerModifiers);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.pose.MovementPosePass::registerModifiers);
         modEventBus.addListener(FormRenderStateModifier::registerModifiers);
         modEventBus.addListener(EntityOutlines::registerModifiers);
         // Disguise before petrify, and the order is load-bearing. Both write AvatarRenderState.skin,
@@ -100,6 +101,7 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTickPre);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeInputHandler::onClientTick);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.pose.WandInspectInput::onClientTick);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);

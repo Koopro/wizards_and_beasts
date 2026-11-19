@@ -38,6 +38,9 @@ public final class PlayerPoseHandler {
 
     /** Called at the tail of {@code PlayerModel.setupAnim}, once vanilla has finished posing. */
     public static void applyPose(PlayerModel model, AvatarRenderState state) {
+        if (posesFrozen(state)) {
+            return;
+        }
         PoseStackResult body = PlayerPoseLayer.get()
                 .run(model, state, FirstPersonContext.NONE, partialTicks());
         if (body != null && !body.isIdentity()) {
@@ -66,12 +69,26 @@ public final class PlayerPoseHandler {
      * {@code ModelPart} uses, because this is the pose stack rather than the model.
      */
     public static void applyBodyTransform(AvatarRenderState state, PoseStack stack, PlayerModel model) {
+        if (posesFrozen(state)) {
+            return;
+        }
         PoseStackResult body = PlayerPoseLayer.get().runBody(model, state, partialTicks());
         if (body == null || body.isIdentity()) {
             return;
         }
         body.applyTo(stack);
         state.setRenderData(BODY_TRANSFORM, body);
+    }
+
+    /**
+     * A petrified player is a statue: nothing in the layer may move it.
+     *
+     * <p>{@code PetrifyRenderHandler} zeroes every rotation before the layer runs, and its contract (see
+     * {@code PlayerModelMixin}) is that petrification wins outright. Without this gate a statue still raised its wand
+     * on a synced cast, kept a held book open and spun through an Apparition, because every pass ran on top of it.
+     */
+    static boolean posesFrozen(AvatarRenderState state) {
+        return at.koopro.wizardsandbeasts.client.petrify.PetrifyRenderHandler.isPetrified(state);
     }
 
     /**

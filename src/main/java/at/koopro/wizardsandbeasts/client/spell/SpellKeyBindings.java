@@ -63,7 +63,16 @@ public class SpellKeyBindings {
             "key." + WizardsAndBeastsMod.MODID + ".skill_menu",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY);
 
+    /**
+     * Default: I. Brings the wand up to look along it (a {@code PlayerGesture}, seen by everyone nearby). Free in
+     * vanilla and in this mod.
+     */
+    public static final KeyMapping WAND_INSPECT = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".wand_inspect",
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_I, CATEGORY);
+
     public static void register(RegisterKeyMappingsEvent event) {
+        event.register(WAND_INSPECT);
         event.register(CHARACTER_SHEET);
         event.register(TOGGLE_STAT_HUD);
         event.register(SPELL_UP);
