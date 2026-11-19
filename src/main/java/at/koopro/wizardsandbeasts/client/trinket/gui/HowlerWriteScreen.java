@@ -24,7 +24,7 @@ public class HowlerWriteScreen extends Screen {
 
     private static final int PANEL_W = 240;
     private static final int PANEL_H = 120;
-    private static final GuiSkin SKIN = GuiSkin.FIELD_NOTEBOOK;
+    private static final GuiSkin SKIN = GuiSkin.HOWLER;
     private static final int MIN_SKINNED = 2 * WizardsMetrics.PANEL_SPRITE_BORDER + 2;
     private static final String KEY = "gui.wizards_and_beasts.howler.";
 

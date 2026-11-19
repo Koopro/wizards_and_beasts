@@ -49,21 +49,21 @@ public final class HogsmeadeLookCapture {
 
     private static final List<Step> SCRIPT = List.of(
             new Step("", 100, HogsmeadeLookCapture::stage),
-            new Step("", 60, p -> look(p, 50.5, 2, 20.5, 90f, 4f)),
+            new Step("", 60, p -> look(p, 51.5, 2, 17.5, 90f, 4f)),
             new Step("street_from_east", 10, p -> {}),
-            new Step("", 40, p -> look(p, 1.5, 2, 20.5, -90f, 4f)),
+            new Step("", 40, p -> look(p, 0.5, 2, 17.5, -90f, 4f)),
             new Step("street_from_west", 10, p -> {}),
-            new Step("", 40, p -> look(p, 7.5, 2, 23.5, 180f, -14f)),
+            new Step("", 40, p -> look(p, 7.5, 2, 21.0, 180f, -18f)),
             new Step("honeydukes", 10, p -> {}),
-            new Step("", 40, p -> look(p, 19.5, 2, 23.5, 180f, -14f)),
+            new Step("", 40, p -> look(p, 19.5, 2, 21.0, 180f, -18f)),
             new Step("three_broomsticks", 10, p -> {}),
-            new Step("", 40, p -> look(p, 31.5, 2, 17.5, 0f, -14f)),
+            new Step("", 40, p -> look(p, 31.5, 2, 14.0, 0f, -18f)),
             new Step("south_side", 10, p -> {}),
-            new Step("", 60, p -> look(p, 26.5, 30, 62.5, 180f, 32f)),
+            new Step("", 60, p -> look(p, 26.5, 30, 60.5, 180f, 30f)),
             new Step("overview", 10, p -> {}),
             new Step("", 60, p -> {
                 p.level().setDayTime(12900);
-                look(p, 50.5, 2, 20.5, 90f, 4f);
+                look(p, 51.5, 2, 17.5, 90f, 4f);
             }),
             new Step("street_at_dusk", 10, p -> {}));
 

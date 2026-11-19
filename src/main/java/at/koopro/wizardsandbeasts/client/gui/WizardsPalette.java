@@ -169,7 +169,11 @@ public final class WizardsPalette {
          * the tie is deliberate: on the Floo screen the green is the one colour carrying meaning
          * rather than theme, so the material is built around it instead of beside it.
          */
-        HEARTH("hearth", 0xFFC6B99C, 0xFF1E1A18, 0xFF1E1A18, 0xFF21B342, 0xFF3E3830);
+        HEARTH("hearth", 0xFFC6B99C, 0xFF1E1A18, 0xFF1E1A18, 0xFF21B342, 0xFF3E3830),
+        /** The Howler's red envelope, a black-red wax seal (the films' scarlet letter). */
+        HOWLER("howler", 0xFFD25A48, 0xFF1C0606, 0xFF1C0606, 0xFFC9973A, 0xFF3E100C),
+        /** Godric's hat: old tan leather, patched, frayed and stitched. */
+        SORTING_HAT("sorting_hat", 0xFFB48E64, 0xFF24160A, 0xFF24160A, 0xFFC9973A, 0xFF4A3220);
 
         private final String folder;
         private final int base;

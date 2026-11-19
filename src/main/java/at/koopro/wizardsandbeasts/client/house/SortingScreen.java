@@ -24,8 +24,8 @@ import java.util.List;
 public class SortingScreen extends Screen {
 
     private static final int PANEL_W = 260;
-    private static final int PANEL_H = 150;
-    private static final GuiSkin SKIN = GuiSkin.WORKBENCH;
+    private static final int PANEL_H = 112;
+    private static final GuiSkin SKIN = GuiSkin.SORTING_HAT;
     private static final int MIN_SKINNED = 2 * WizardsMetrics.PANEL_SPRITE_BORDER + 2;
     private static final String KEY = "gui.wizards_and_beasts.sorting.";
 
