@@ -89,6 +89,14 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
                     woodSet.planksItem().get(), woodSet.slabItem().get(), woodSet.stairsItem().get(),
                     woodSet.leavesItem().get(), woodSet.saplingItem().get());
         }
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            add(Module.WANDWOOD, f.door().get().asItem(), f.trapdoor().get().asItem(), f.fence().get().asItem(),
+                    f.gate().get().asItem(), f.button().get().asItem(), f.plate().get().asItem(),
+                    f.signItem().get(), f.hangingSignItem().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            add(Module.STRUCTURES, d.door().get().asItem(), d.trapdoor().get().asItem());
+        }
 
         // Every generic-roster spawn egg, plus the nine bespoke beasts and the Goblin teller.
         module(Module.CREATURES).add(ModCreatures.SPAWN_EGGS.values().stream()

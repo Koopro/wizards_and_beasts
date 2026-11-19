@@ -59,9 +59,7 @@ public class DisplayCaseBlock extends FurnitureBlock implements EntityBlock {
         }
         if (!level.isClientSide()) {
             ItemStack taken = display.show(ItemStack.EMPTY);
-            if (!player.getInventory().add(taken)) {
-                player.drop(taken, false);
-            }
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, taken);
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1f, 1f);
         }
         return InteractionResult.SUCCESS;

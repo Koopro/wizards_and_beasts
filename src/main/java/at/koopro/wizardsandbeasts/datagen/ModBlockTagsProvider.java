@@ -100,6 +100,16 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                     woodSet.planks().get(), woodSet.slab().get(), woodSet.stairs().get(),
                     woodSet.leaves().get(), woodSet.sapling().get());
         }
+        // Doors, fences, signs and the rest cut from the same woods belong to the same module;
+        // the location families' doors are build-set decoration, like the marble.
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            tag(ModuleTags.blocks(Module.WANDWOOD)).add(f.door().get(), f.trapdoor().get(), f.fence().get(),
+                    f.gate().get(), f.button().get(), f.plate().get(), f.sign().get(), f.wallSign().get(),
+                    f.hangingSign().get(), f.wallHangingSign().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            tag(ModuleTags.blocks(Module.STRUCTURES)).add(d.door().get(), d.trapdoor().get());
+        }
 
         tag(ModuleTags.blocks(Module.FURNISHINGS)).add(
                 ModBlocks.WARDING_STONE.get(), ModBlocks.DEVILS_SNARE.get(), ModBlocks.MALLOWSWEET.get(),

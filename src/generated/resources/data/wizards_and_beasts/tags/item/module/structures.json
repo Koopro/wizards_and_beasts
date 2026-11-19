@@ -191,6 +191,18 @@
     "wizards_and_beasts:slate_roof_tiles_stairs",
     "wizards_and_beasts:verdigris_roof_tiles",
     "wizards_and_beasts:verdigris_roof_tiles_slab",
-    "wizards_and_beasts:verdigris_roof_tiles_stairs"
+    "wizards_and_beasts:verdigris_roof_tiles_stairs",
+    "wizards_and_beasts:hogwarts_oak_door",
+    "wizards_and_beasts:hogwarts_oak_trapdoor",
+    "wizards_and_beasts:ministry_gilt_door",
+    "wizards_and_beasts:ministry_gilt_trapdoor",
+    "wizards_and_beasts:gringotts_bronze_door",
+    "wizards_and_beasts:gringotts_bronze_trapdoor",
+    "wizards_and_beasts:diagon_green_door",
+    "wizards_and_beasts:diagon_green_trapdoor",
+    "wizards_and_beasts:diagon_purple_door",
+    "wizards_and_beasts:diagon_purple_trapdoor",
+    "wizards_and_beasts:knockturn_iron_door",
+    "wizards_and_beasts:knockturn_iron_trapdoor"
   ]
 }
