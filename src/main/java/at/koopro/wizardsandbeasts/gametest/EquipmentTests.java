@@ -205,7 +205,14 @@ final class EquipmentTests {
                     .filter(id -> id.getNamespace().equals(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID)
                             && id.getPath().startsWith("wardrobe/"))
                     .count();
-            check(helper, loaded == 51, () -> "the server holds " + loaded + " wardrobe recipes, not 51");
+            // Against the files actually shipped, not a hand-kept number: the pin said 51 from the first
+            // wardrobe pass and went stale when Wardrobe 2.0 grew it to 141.
+            long shipped = helper.getLevel().getServer().getResourceManager()
+                    .listResources("recipe/wardrobe", file -> file.getPath().endsWith(".json")).keySet().stream()
+                    .filter(id -> id.getNamespace().equals(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID))
+                    .count();
+            check(helper, shipped > 0 && loaded == shipped,
+                    () -> "the server holds " + loaded + " wardrobe recipes of the " + shipped + " shipped");
 
             check(helper, CuriosEquipment.equip(player, "necklace", new ItemStack(ArmorItemRegistry.SCARF.get())),
                     () -> "a scarf did not enter the necklace slot");
