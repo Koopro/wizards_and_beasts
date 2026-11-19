@@ -218,7 +218,8 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
 
         // Generated rather than hand-authored: membership here is "does eating this mend a splinch", which
         // is a property of the item's own behaviour, not a judgement call a human makes per entry.
-        tag(SplinchTags.CURES_SPLINCH).add(ConsumableItemRegistry.DITTANY.get());
+        tag(SplinchTags.CURES_SPLINCH).add(ConsumableItemRegistry.DITTANY.get(),
+                at.koopro.wizardsandbeasts.registry.CanonItemRegistry.ESSENCE_OF_DITTANY.get());
     }
 
     private void add(Module module, ItemLike... contents) {

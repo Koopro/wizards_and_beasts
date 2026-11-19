@@ -64,7 +64,7 @@ public class ModModelProvider extends ModelProvider {
             "acromantula_venom", "advanced_potion_making", "auto_answer_quill", "beaters_bat",
             "beginners_guide_to_transfiguration", "blood_replenishing_potion", "brass_scales",
             "broomstick_servicing_kit", "chocolate_bar", "collapsible_cauldron", "da_galleon",
-            "daily_prophet", "dragon_hide_gloves", "draught_of_peace", "dungbomb",
+            "daily_prophet", "dragon_hide_gloves", "dungbomb",
             "elixir_of_life", "essence_of_dittany", "exploding_snap", "fainting_fancies",
             "fantastic_beasts_and_where_to_find_them", "fever_fudge", "filibusters_fireworks",
             "flesh_eating_slug_repellent", "gubraithian_fire", "headless_hat",

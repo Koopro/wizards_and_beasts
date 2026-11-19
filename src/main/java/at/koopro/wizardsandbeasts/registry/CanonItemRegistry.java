@@ -46,8 +46,9 @@ public final class CanonItemRegistry {
     public static final DeferredItem<at.koopro.wizardsandbeasts.artefact.erised.MirrorOfErisedItem> MIRROR_OF_ERISED =
             ModItems.ITEMS.registerItem("mirror_of_erised", props -> new at.koopro.wizardsandbeasts.artefact.erised
                     .MirrorOfErisedItem(ModBlocks.MIRROR_OF_ERISED.get(), props.stacksTo(1)));
-    public static final DeferredItem<Item> ELIXIR_OF_LIFE =
-            ModItems.ITEMS.registerItem("elixir_of_life", Item::new);
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.ElixirBottleItem> ELIXIR_OF_LIFE =
+            ModItems.ITEMS.registerItem("elixir_of_life", props -> new at.koopro.wizardsandbeasts.item.consumable
+                    .ElixirBottleItem(props.stacksTo(4)));
     public static final DeferredItem<Item> GOBLET_OF_FIRE =
             ModItems.ITEMS.registerItem("goblet_of_fire", Item::new);
     public static final DeferredItem<Item> TRIWIZARD_CUP =
@@ -234,16 +235,31 @@ public final class CanonItemRegistry {
     // this file, so the only cost is that a creative-mode stack of the old item disappears -- which is
     // the honest outcome for an item that never did anything.
     //
+    // The Draught of Peace item went the same way on 2026-11-19: the brew is the real one.
+    //
     // The remedies below stay items on purpose: they are ingredients and consumables with their own
-    // behaviour, not brews with recipes.
-    public static final DeferredItem<Item> ESSENCE_OF_DITTANY =
-            ModItems.ITEMS.registerItem("essence_of_dittany", Item::new);
-    public static final DeferredItem<Item> MURTLAP_ESSENCE =
-            ModItems.ITEMS.registerItem("murtlap_essence", Item::new);
-    public static final DeferredItem<Item> DRAUGHT_OF_PEACE =
-            ModItems.ITEMS.registerItem("draught_of_peace", Item::new);
-    public static final DeferredItem<Item> BLOOD_REPLENISHING_POTION =
-            ModItems.ITEMS.registerItem("blood_replenishing_potion", Item::new);
+    // behaviour, not brews with recipes. Each is drunk, or poured on a patient with a right-click.
+
+    /** Distilled Dittany: the herb's wound-closing, half again as strong (Hermione on Ron's splinched arm). */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.DittanyItem> ESSENCE_OF_DITTANY =
+            ModItems.ITEMS.registerItem("essence_of_dittany", props -> new at.koopro.wizardsandbeasts.item.consumable
+                    .DittanyItem(props.stacksTo(16), 1.5f));
+    /** Soothes cuts and boils (Harry's hand after Umbridge's quill). */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.RemedyItem> MURTLAP_ESSENCE =
+            ModItems.ITEMS.registerItem("murtlap_essence", props -> new at.koopro.wizardsandbeasts.item.consumable
+                    .RemedyItem(props.stacksTo(16), 3.0f,
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.REGENERATION, 100, 0)),
+                    List.of(at.koopro.wizardsandbeasts.effect.ModEffects.FURNUNCULUS), 100));
+    /** Puts back lost blood: slow, long regeneration (Arthur Weasley after Nagini). */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.RemedyItem> BLOOD_REPLENISHING_POTION =
+            ModItems.ITEMS.registerItem("blood_replenishing_potion", props -> new at.koopro.wizardsandbeasts.item.consumable
+                    .RemedyItem(props.stacksTo(16), 2.0f,
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.REGENERATION, 900, 0),
+                            () -> new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.HEALTH_BOOST, 1200, 0)),
+                    List.of(net.minecraft.world.effect.MobEffects.WEAKNESS), 600));
 
     // --- Other notable objects ---------------------------------------------
     public static final DeferredItem<Item> CHOCOLATE_BAR =
@@ -293,7 +309,7 @@ public final class CanonItemRegistry {
             GOBSTONES, EXPLODING_SNAP, GOLDEN_SNITCH,
             QUAFFLE, BLUDGER, BEATERS_BAT,
             QUIDDITCH_ROBES,
-            ESSENCE_OF_DITTANY, MURTLAP_ESSENCE, DRAUGHT_OF_PEACE,
+            ESSENCE_OF_DITTANY, MURTLAP_ESSENCE,
             BLOOD_REPLENISHING_POTION, CHOCOLATE_BAR, MEMORY_VIAL,
             GUBRAITHIAN_FIRE, SPELLOTAPE, MRS_SKOWERS_MESS_REMOVER,
             FLESH_EATING_SLUG_REPELLENT, SELF_STIRRING_CAULDRON, COLLAPSIBLE_CAULDRON);

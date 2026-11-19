@@ -43,13 +43,21 @@ public class DittanyItem extends ConsumedItem {
 
     private static final int APPLY_TICKS = 24;
 
+    /** Healing multiplier: 1 for the herb, more for the distilled Essence of Dittany. */
+    private final float strength;
+
     public DittanyItem(Properties properties) {
+        this(properties, 1.0f);
+    }
+
+    public DittanyItem(Properties properties, float strength) {
         super(properties, APPLY_TICKS, ItemUseAnimation.DRINK);
+        this.strength = strength;
     }
 
     @Override
     protected void onConsumed(ItemStack stack, Level level, Player player) {
-        treat(player, player);
+        treat(player, player, strength);
         stack.consume(1, player);
         player.getCooldowns().addCooldown(stack, Dittany.COOLDOWN_TICKS);
         player.awardStat(Stats.ITEM_USED.get(this));
@@ -74,7 +82,7 @@ public class DittanyItem extends ConsumedItem {
             return InteractionResult.SUCCESS;
         }
 
-        treat(player, target);
+        treat(player, target, strength);
         stack.consume(1, player);
         player.getCooldowns().addCooldown(stack, Dittany.COOLDOWN_TICKS);
         player.awardStat(Stats.ITEM_USED.get(this));
@@ -82,10 +90,10 @@ public class DittanyItem extends ConsumedItem {
     }
 
     /** One dose, on whoever it lands on. Healing is decided before the wound is closed. */
-    private static void treat(Player healer, LivingEntity patient) {
+    private static void treat(Player healer, LivingEntity patient, float strength) {
         // Read first: mending the wound would otherwise erase the reason for the bonus before it is
         // applied, and a wounded patient would quietly heal the ordinary four.
-        float healing = Dittany.healingFor(patient);
+        float healing = Dittany.healingFor(patient) * strength;
         int mended = Dittany.mend(patient);
         patient.heal(healing);
 
@@ -109,8 +117,8 @@ public class DittanyItem extends ConsumedItem {
         tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.dittany.drops")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.dittany.heals",
-                        (int) Dittany.BASE_HEAL / 2,
-                        (int) (Dittany.BASE_HEAL + Dittany.WOUND_BONUS) / 2)
+                        (int) (Dittany.BASE_HEAL * strength) / 2,
+                        (int) ((Dittany.BASE_HEAL + Dittany.WOUND_BONUS) * strength) / 2)
                 .withStyle(ChatFormatting.GREEN));
     }
 }
