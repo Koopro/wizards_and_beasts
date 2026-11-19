@@ -61,8 +61,13 @@ public final class ApparitionClientController {
     /** Once the window is open the motes brighten, so the moment to let go is legible from behind. */
     private static final int COLOUR_MOTE_OPEN = 0xD8C8FF;
 
-    /** Motes spawned per frame per charging wizard. See {@link #drawChargeMotes}. */
-    private static final int MOTES_PER_FRAME = 2;
+    /**
+     * Motes spawned per game tick per charging wizard. See {@link #drawChargeMotes}. It was two a <em>frame</em>, so a
+     * 240 fps client drew four times the swirl of a 60 fps one; six a tick is what 60 fps drew.
+     */
+    private static final int MOTES_PER_TICK = 6;
+    /** Last game tick the ring and motes were spawned; the render event fires every frame. */
+    private static long lastSpawnTick = Long.MIN_VALUE;
     private static final double MOTE_RADIUS_MAX = 1.5;
     private static final double MOTE_RADIUS_MIN = 0.35;
     private static final double MOTE_COLUMN_HEIGHT = 1.9;
@@ -83,6 +88,12 @@ public final class ApparitionClientController {
         // Everyone's motes, not just the local player's. The charge packets are already addressed to
         // everyone tracking the caster precisely so a wind-up is something bystanders can see coming and
         // interrupt; until this drew them, that audience received the telegraph and was shown nothing.
+        // Particles live for ticks, so spawning once a tick keeps the swirl and ring continuous at any frame rate.
+        long tick = mc.level.getGameTime();
+        if (tick == lastSpawnTick) {
+            return;
+        }
+        lastSpawnTick = tick;
         drawChargeMotes(mc);
 
         ClientApparitionPresentationState.Charge charge =
@@ -122,10 +133,9 @@ public final class ApparitionClientController {
     /**
      * The gathering: motes drawn inward toward every wizard currently holding a charge.
      *
-     * <p>Deliberately per-frame and few. A handful of motes a frame accumulates into a continuous swirl at
-     * any frame rate, where a full ring per frame -- what the destination ring below does, for one player,
-     * because it has to be a readable shape -- would be a wall of particles once several people are
-     * charging in the same room.
+     * <p>Deliberately few, and once a game tick (since 2026-11-15; it was per frame, so the swirl's density
+     * followed the frame rate). A handful a tick accumulates into a continuous swirl, where a full ring per
+     * caster would be a wall of particles once several people are charging in the same room.
      */
     private static void drawChargeMotes(Minecraft mc) {
         if (mc.level == null) {
@@ -147,7 +157,7 @@ public final class ApparitionClientController {
             double radius = MOTE_RADIUS_MAX - (MOTE_RADIUS_MAX - MOTE_RADIUS_MIN) * progress;
             boolean open = charge.isWindowOpen();
 
-            for (int i = 0; i < MOTES_PER_FRAME; i++) {
+            for (int i = 0; i < MOTES_PER_TICK; i++) {
                 double angle = mc.level.random.nextDouble() * Math.PI * 2.0;
                 double height = mc.level.random.nextDouble() * MOTE_COLUMN_HEIGHT;
                 double x = caster.getX() + Math.cos(angle) * radius;
@@ -161,7 +171,7 @@ public final class ApparitionClientController {
                         x, caster.getY() + height, z, pullX, MOTE_RISE, pullZ);
                 // Ash threaded through it, on the same inward path. Dust alone washes out against a bright
                 // sky, and the ash is what makes the swirl read as soot rather than as a spell effect.
-                if (!open && i == 0) {
+                if (!open && i % 3 == 0) {
                     mc.level.addParticle(ParticleTypes.ASH,
                             x, caster.getY() + height, z, pullX, MOTE_RISE, pullZ);
                 }

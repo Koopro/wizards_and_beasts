@@ -322,6 +322,12 @@ public class Config {
                     "a glint on gilt fittings) or FULL (about three times as often). Client-side and purely cosmetic;",
                     "the light drawn on the wand itself and the spell's own gathering while casting are unaffected.")
             .defineEnum("wandEffects", WandEffects.SUBTLE);
+    private static final ModConfigSpec.EnumValue<VfxQuality> VFX_QUALITY = BUILDER
+            .comment("How much spell effects draw on this client: LOW (fewer motes, one glow shell on beams, no",
+                    "sparks), MEDIUM (the designed look) or HIGH (denser motes and bursts). Effects further than",
+                    "16 blocks thin out on every setting, and the vanilla Particles option still applies on top.",
+                    "Client-side and purely cosmetic: what a spell does never changes.")
+            .defineEnum("vfxQuality", VfxQuality.MEDIUM);
     private static final ModConfigSpec.BooleanValue LEGENDARY_GROUND_SHIMMER = BUILDER
             .comment("If true, a legendary item lying on the ground (a Hallow, a founder's relic, a gilt wand) catches",
                     "the light now and then, so it is not lost in the grass. Client-side and purely cosmetic.")
@@ -595,6 +601,7 @@ public class Config {
     public static float ambientMagicDensity = 1.0f;
     public static WandEffects wandEffects = WandEffects.SUBTLE;
     public static boolean legendaryGroundShimmer = true;
+    public static VfxQuality vfxQuality = VfxQuality.MEDIUM;
     public static boolean broomSpeedParticles = true;
     public static float spellPowerSoftCapKnee = 1.5f;
     public static float spellPowerMaxMultiplier = 3.0f;
@@ -648,6 +655,13 @@ public class Config {
         OFF,
         SUBTLE,
         FULL
+    }
+
+    /** How much spell VFX this client draws ({@code client.vfx.VfxBudget}). */
+    public enum VfxQuality {
+        LOW,
+        MEDIUM,
+        HIGH
     }
 
     public enum PerfProfile {
@@ -742,6 +756,7 @@ public class Config {
         ambientMagicDensity = AMBIENT_MAGIC_DENSITY.get().floatValue();
         wandEffects = WAND_EFFECTS.get();
         legendaryGroundShimmer = LEGENDARY_GROUND_SHIMMER.get();
+        vfxQuality = VFX_QUALITY.get();
         broomSpeedParticles = BROOM_SPEED_PARTICLES.get();
         spellPowerSoftCapKnee = SPELL_POWER_SOFT_CAP_KNEE.get().floatValue();
         spellPowerMaxMultiplier = SPELL_POWER_MAX_MULTIPLIER.get().floatValue();

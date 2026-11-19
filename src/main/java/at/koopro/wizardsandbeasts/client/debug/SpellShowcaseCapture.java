@@ -106,7 +106,7 @@ public final class SpellShowcaseCapture {
     private SpellShowcaseCapture() {}
 
     /** The particle scenes a lone caster cannot cause by casting at a dummy (WB_SPELL_SHOWCASE=fx). */
-    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel", "fx:surfaces");
+    private static final List<String> FX_SCENES = List.of("fx:breach", "fx:flash", "fx:clash", "fx:ward", "fx:duel", "fx:surfaces", "fx:obscurus");
 
     private static List<String> chooseSpells() {
         if ("fx".equalsIgnoreCase(MODE)) {
@@ -115,6 +115,10 @@ public final class SpellShowcaseCapture {
         if (!"1".equals(MODE) && !"all".equalsIgnoreCase(MODE)) {
             List<String> ids = new ArrayList<>();
             for (String raw : MODE.split(",")) {
+                if (FX_SCENES.contains(raw.trim())) {
+                    ids.add(raw.trim());
+                    continue;
+                }
                 Spell spell = Spells.byId(raw.trim());
                 if (spell == null) {
                     LOGGER.warn("Spell showcase: no spell '{}'", raw.trim());
@@ -150,14 +154,17 @@ public final class SpellShowcaseCapture {
         boolean beam = spell != null && spell.getProperties().getCastType().name().startsWith("BEAM");
         SCRIPT.add(new Step("", 24, Cam.WIDE, p -> {
             setUse(false);
-            // Embers and smoke of the spell before must not stand in this one's shots.
+            // Embers and smoke of the spell before must not stand in this one's shots; nor its scorch or frost.
             Minecraft.getInstance().particleEngine.clearParticles();
+            at.koopro.wizardsandbeasts.client.vfx.VfxQuads.clear();
+            at.koopro.wizardsandbeasts.client.vfx.VfxEmitters.clear();
         }, p -> prepare(p, spellId)));
         SCRIPT.add(new Step("", 6, Cam.WIDE, p -> setUse(true), NOTHING));
         if (beam) {
             SCRIPT.add(new Step("hold_wide", 6, Cam.WIDE, NONE, NOTHING));
             SCRIPT.add(new Step("hold_shoulder", 4, Cam.SHOULDER, NONE, NOTHING));
             SCRIPT.add(new Step("hold_target", 4, Cam.TARGET, NONE, NOTHING));
+            SCRIPT.add(new Step("hold_target_late", 24, Cam.TARGET, NONE, NOTHING));
             SCRIPT.add(new Step("", 1, Cam.WIDE, p -> setUse(false), NOTHING));
             SCRIPT.add(new Step("after_wide", 10, Cam.WIDE, NONE, p -> report(p, spellId)));
             return;
@@ -165,6 +172,15 @@ public final class SpellShowcaseCapture {
         SCRIPT.add(new Step("hold_wide", 1, Cam.WIDE, NONE, NOTHING));
         SCRIPT.add(new Step("hold_caster", 4, Cam.CASTER, NONE, NOTHING));
         SCRIPT.add(new Step("", 1, Cam.CASTER, p -> setUse(false), NOTHING));
+        if (spell != null && spell.getProperties().getCastType() == at.koopro.wizardsandbeasts.spell.core.CastType.SELF) {
+            // A self charm happens on the caster: watch the caster through it (spell VFX renaissance, 2026-11-15).
+            SCRIPT.add(new Step("release_caster", 1, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("self_early", 6, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("self_mid", 8, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("self_late", 10, Cam.CASTER, NONE, NOTHING));
+            SCRIPT.add(new Step("after_wide", 10, Cam.WIDE, NONE, p -> report(p, spellId)));
+            return;
+        }
         SCRIPT.add(new Step("release_caster", 1, Cam.CASTER, NONE, NOTHING));
         SCRIPT.add(new Step("release_shoulder", 2, Cam.SHOULDER, NONE, NOTHING));
         SCRIPT.add(new Step("flight_wide", 1, Cam.WIDE, NONE, NOTHING));
@@ -172,6 +188,8 @@ public final class SpellShowcaseCapture {
         SCRIPT.add(new Step("arrive_wide", 3, Cam.WIDE, NONE, NOTHING));
         SCRIPT.add(new Step("hit_target", 3, Cam.TARGET, NONE, NOTHING));
         SCRIPT.add(new Step("after_wide", 20, Cam.WIDE, NONE, p -> report(p, spellId)));
+        // What a hit leaves behind (a scorch, residue), two seconds on.
+        SCRIPT.add(new Step("linger_target", 40, Cam.TARGET, NONE, NOTHING));
     }
 
     /**
@@ -256,6 +274,27 @@ public final class SpellShowcaseCapture {
                     SCRIPT.add(new Step("surface_" + names[i] + "_late", 6, Cam.WALL, NONE, NOTHING));
                 }
             }
+            case "fx:obscurus" -> {
+                // The Obscurus spells need the Obscurial condition to cast; their look is the client's alone, so it
+                // is played straight through the director (spell VFX renaissance, 2026-11-15).
+                SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(),
+                        NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.CASTER, p -> at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector
+                        .release("obscurus_surge", p), NOTHING));
+                SCRIPT.add(new Step("surge_1", 4, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("surge_2", 14, Cam.CASTER, NONE, NOTHING));
+                SCRIPT.add(new Step("", 30, Cam.WIDE, p -> Minecraft.getInstance().particleEngine.clearParticles(),
+                        NOTHING));
+                SCRIPT.add(new Step("", 1, Cam.WIDE, p -> {
+                    var eye = p.getEyePosition();
+                    var far = new net.minecraft.world.phys.Vec3(DUMMY_X, STAGE_Y + 1.0, 0.5);
+                    at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector.cue("obscurus_grasp",
+                            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.LINE, eye,
+                            far.subtract(eye), 1f, 0, -1);
+                }, NOTHING));
+                SCRIPT.add(new Step("grasp_1", 4, Cam.WIDE, NONE, NOTHING));
+                SCRIPT.add(new Step("grasp_2", 8, Cam.TARGET, NONE, NOTHING));
+            }
             case "fx:flash" -> {
                 SCRIPT.add(new Step("", 10, Cam.CASTER, p -> Minecraft.getInstance().particleEngine.clearParticles(), NOTHING));
                 SCRIPT.add(new Step("", 1, Cam.CASTER, NONE, p -> p.level().sendParticles(
@@ -333,6 +372,9 @@ public final class SpellShowcaseCapture {
     /** Rebuilds the lane, clears it of everything but the caster, stands a fresh dummy and readies the spell. */
     private static void prepare(ServerPlayer p, String spellId) {
         ServerLevel level = p.level();
+        // The Unforgivables draw their beam with the module off but do nothing; the capture needs them to act.
+        at.koopro.wizardsandbeasts.module.ModuleManager.overrideCached(
+                at.koopro.wizardsandbeasts.module.Module.DARK_ARTS, at.koopro.wizardsandbeasts.module.ModuleState.ENABLED);
         buildLane(level);
         AABB lane = new AABB(-8, STAGE_Y - 4, -12, WALL_X + 8, STAGE_Y + 16, 12);
         for (Entity e : level.getEntities((Entity) null, lane, e -> !(e instanceof Player))) {
@@ -431,7 +473,13 @@ public final class SpellShowcaseCapture {
         mc.options.pauseOnLostFocus = false;
         mc.options.bobView().set(false);
         // Spell particles are the subject: every one of them, not the capped few other harnesses keep.
-        mc.options.particles().set(net.minecraft.server.level.ParticleStatus.ALL);
+        // WB_SPELL_SHOWCASE_PARTICLES=decreased|minimal photographs the reduced settings (VFX budget check).
+        String particles = System.getenv().getOrDefault("WB_SPELL_SHOWCASE_PARTICLES", "all");
+        mc.options.particles().set(switch (particles.toLowerCase(Locale.ROOT)) {
+            case "minimal" -> net.minecraft.server.level.ParticleStatus.MINIMAL;
+            case "decreased" -> net.minecraft.server.level.ParticleStatus.DECREASED;
+            default -> net.minecraft.server.level.ParticleStatus.ALL;
+        });
         mc.debugEntries.setStatus(net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES,
                 net.minecraft.client.gui.components.debug.DebugScreenEntryStatus.NEVER);
         GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1280, 720);

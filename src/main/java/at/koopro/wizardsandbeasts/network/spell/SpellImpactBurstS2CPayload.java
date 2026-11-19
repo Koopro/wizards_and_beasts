@@ -14,6 +14,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Server-authoritative impact burst; renders tinted particles on tracking clients only.
+ *
+ * <p>{@code shake} carries the camera kick: true for a hit, false for the steady sparks of a held channel (Leviosa,
+ * Aguamenti), which used to re-arm every onlooker's screen shake twenty times a second.
  */
 public record SpellImpactBurstS2CPayload(
         double x,
@@ -22,7 +25,8 @@ public record SpellImpactBurstS2CPayload(
         int argb,
         int familyOrdinal,
         int count,
-        float spread
+        float spread,
+        boolean shake
 ) implements CustomPacketPayload {
 
     public static final Type<SpellImpactBurstS2CPayload> TYPE = new Type<>(
@@ -38,7 +42,8 @@ public record SpellImpactBurstS2CPayload(
                     buf.readInt(),
                     ByteBufCodecs.VAR_INT.decode(buf),
                     ByteBufCodecs.VAR_INT.decode(buf),
-                    buf.readFloat());
+                    buf.readFloat(),
+                    buf.readBoolean());
         }
 
         @Override
@@ -50,6 +55,7 @@ public record SpellImpactBurstS2CPayload(
             ByteBufCodecs.VAR_INT.encode(buf, pkt.familyOrdinal);
             ByteBufCodecs.VAR_INT.encode(buf, pkt.count);
             buf.writeFloat(pkt.spread);
+            buf.writeBoolean(pkt.shake);
         }
     };
 
@@ -58,8 +64,16 @@ public record SpellImpactBurstS2CPayload(
         return TYPE;
     }
 
+    /** Most a burst may ask for: the authoring cap ({@code SpellVfx.MAX_IMPACT_COUNT}). It was 256. */
+    public static final int MAX_COUNT = at.koopro.wizardsandbeasts.spell.def.SpellVfx.MAX_IMPACT_COUNT;
+
     public static void sendToTracking(Entity anchor, Vec3 pos, SpellFamily family, int argb, int count, float spread) {
-        int c = Math.min(256, Math.max(1, count));
+        sendToTracking(anchor, pos, family, argb, count, spread, true);
+    }
+
+    public static void sendToTracking(Entity anchor, Vec3 pos, SpellFamily family, int argb, int count, float spread,
+                                      boolean shake) {
+        int c = Math.min(MAX_COUNT, Math.max(1, count));
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(
                 anchor,
                 new SpellImpactBurstS2CPayload(
@@ -67,7 +81,8 @@ public record SpellImpactBurstS2CPayload(
                         argb,
                         family.ordinal(),
                         c,
-                        spread));
+                        spread,
+                        shake));
     }
 
     public static void sendToTracking(ServerPlayer anchor, Vec3 pos, SpellFamily family, int argb, int count,

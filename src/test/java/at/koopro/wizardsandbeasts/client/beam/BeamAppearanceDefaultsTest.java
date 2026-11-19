@@ -63,11 +63,14 @@ class BeamAppearanceDefaultsTest {
         assertEquals(new Lightning(6, 4f, 2), look.shape());
     }
 
-    /** Redrawn 2026-11-13 (spell pass): a green core alpha-blended, so the curse stays green against the sky. */
+    /**
+     * Redrawn 2026-11-13 (alpha-blended, so the curse stays green against the sky), then 2026-11-17 (owner: "white
+     * core for the beams"): a white-hot core in green shells.
+     */
     @Test
-    void avadaIsAGreenJet() {
+    void avadaIsAWhiteCoreInGreen() {
         BeamAppearance.Appearance look = of(BeamVisualDefaults.AVADA, GREEN);
-        assertDrawsLike(new BeamStyle(3.0f, 3.0f, 0x3CFF6A, 0x9CFFB0, 0.95f, 0.6f, 2, 0f, false), look.style());
+        assertDrawsLike(new BeamStyle(2.0f, 2.0f, 0xEAFFEF, 0x3CFF6A, 1.0f, 0.85f, 2, 0f, false), look.style());
         assertInstanceOf(Laser.class, look.shape());
     }
 
