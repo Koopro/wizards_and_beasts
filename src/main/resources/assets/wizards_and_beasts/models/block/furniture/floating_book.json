@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/furniture/crimson_leather",
+    "particle": "wizards_and_beasts:block/furniture/crimson_leather"
+  },
+  "elements": []
+}

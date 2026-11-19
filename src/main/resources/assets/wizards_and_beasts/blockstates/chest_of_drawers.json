@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/chest_of_drawers"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/chest_of_drawers",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/chest_of_drawers",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/chest_of_drawers",
+      "y": 270
+    }
+  }
+}

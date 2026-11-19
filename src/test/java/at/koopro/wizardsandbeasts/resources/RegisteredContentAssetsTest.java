@@ -99,4 +99,85 @@ class RegisteredContentAssetsTest {
         }
         assertTrue(problems.isEmpty(), "entity types with no lang name (raw key in death messages): " + problems);
     }
+
+    /**
+     * Every model a blockstate or item definition of ours names exists, and so does every texture (and parent) such a
+     * model names in our namespace. A blockstate that points at a missing model renders as the purple cube just as
+     * surely as a missing blockstate, and nothing on the server notices.
+     */
+    @Test
+    void everyModelOurAssetsNameExistsWithItsTextures() throws IOException {
+        List<String> problems = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (String dir : List.of("blockstates", "items")) {
+            for (Path root : ASSET_ROOTS) {
+                Path folder = root.resolve(dir);
+                if (!Files.isDirectory(folder)) {
+                    continue;
+                }
+                try (var files = Files.list(folder)) {
+                    for (Path file : files.filter(f -> f.toString().endsWith(".json")).toList()) {
+                        try (Reader reader = Files.newBufferedReader(file)) {
+                            List<String> models = new ArrayList<>();
+                            collectModels(JsonParser.parseReader(reader), models);
+                            for (String model : models) {
+                                checkModel(model, dir + "/" + file.getFileName(), seen, problems);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue(problems.isEmpty(), "asset references that resolve to nothing: " + problems);
+    }
+
+    private static void collectModels(com.google.gson.JsonElement json, List<String> out) {
+        if (json.isJsonObject()) {
+            for (var entry : json.getAsJsonObject().entrySet()) {
+                if (entry.getKey().equals("model") && entry.getValue().isJsonPrimitive()) {
+                    out.add(entry.getValue().getAsString());
+                } else {
+                    collectModels(entry.getValue(), out);
+                }
+            }
+        } else if (json.isJsonArray()) {
+            json.getAsJsonArray().forEach(e -> collectModels(e, out));
+        }
+    }
+
+    private static void checkModel(String model, String from, java.util.Set<String> seen, List<String> problems)
+            throws IOException {
+        if (!model.startsWith(NS + ":") || !seen.add(model)) {
+            return;
+        }
+        String path = model.substring(NS.length() + 1);
+        Path file = ASSET_ROOTS.stream().map(r -> r.resolve("models").resolve(path + ".json"))
+                .filter(Files::exists).findFirst().orElse(null);
+        if (file == null) {
+            // GeckoLib-drawn and builtin item models carry no JSON of their own on purpose.
+            if (!ASSET_ROOTS.stream().anyMatch(r -> Files.exists(r.resolve("geckolib")))
+                    || !path.startsWith("item/")) {
+                problems.add(from + " -> missing model " + model);
+            }
+            return;
+        }
+        com.google.gson.JsonObject json;
+        try (Reader reader = Files.newBufferedReader(file)) {
+            json = JsonParser.parseReader(reader).getAsJsonObject();
+        }
+        if (json.has("parent")) {
+            checkModel(json.get("parent").getAsString(), model, seen, problems);
+        }
+        if (json.has("textures")) {
+            for (var entry : json.getAsJsonObject("textures").entrySet()) {
+                String texture = entry.getValue().getAsString();
+                if (texture.startsWith(NS + ":")) {
+                    String tex = texture.substring(NS.length() + 1);
+                    if (ASSET_ROOTS.stream().noneMatch(r -> Files.exists(r.resolve("textures").resolve(tex + ".png")))) {
+                        problems.add(model + " -> missing texture " + texture);
+                    }
+                }
+            }
+        }
+    }
 }

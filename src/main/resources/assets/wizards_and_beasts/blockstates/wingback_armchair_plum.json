@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/wingback_armchair_plum"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/wingback_armchair_plum",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/wingback_armchair_plum",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/wingback_armchair_plum",
+      "y": 270
+    }
+  }
+}

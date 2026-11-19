@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_lady_in_rose",
+  "width": 3,
+  "height": 4,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_lady_in_rose.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_lady_in_rose.author",
+    "color": "gray"
+  }
+}

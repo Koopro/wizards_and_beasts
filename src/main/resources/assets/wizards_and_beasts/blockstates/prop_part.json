@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "part=clock_hour": {
+      "model": "wizards_and_beasts:block/furniture/part_clock_hour"
+    },
+    "part=clock_minute": {
+      "model": "wizards_and_beasts:block/furniture/part_clock_minute"
+    },
+    "part=globe": {
+      "model": "wizards_and_beasts:block/furniture/part_globe"
+    },
+    "part=book": {
+      "model": "wizards_and_beasts:block/furniture/part_book"
+    },
+    "part=book_page": {
+      "model": "wizards_and_beasts:block/furniture/part_book_page"
+    },
+    "part=pendulum": {
+      "model": "wizards_and_beasts:block/furniture/part_pendulum"
+    }
+  }
+}

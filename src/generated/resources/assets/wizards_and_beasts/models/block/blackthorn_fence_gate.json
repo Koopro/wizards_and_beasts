@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_fence_gate",
+  "textures": {
+    "texture": "wizards_and_beasts:block/blackthorn_planks"
+  }
+}

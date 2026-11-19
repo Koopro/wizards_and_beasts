@@ -80,6 +80,47 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         at.koopro.wizardsandbeasts.registry.DecoBlocks.TYPES.keySet().forEach(id -> dropSelf(
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier
                         .fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, id))));
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.DROPS_SELF.forEach(block -> dropSelf(block.get()));
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.BEDS.forEach(block -> add(block.get(),
+                b -> createSinglePropConditionTable(b, net.minecraft.world.level.block.BedBlock.PART,
+                        net.minecraft.world.level.block.state.properties.BedPart.HEAD)));
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.TALL.forEach(block -> add(block.get(),
+                createDoorTable(block.get())));
+        for (var block : at.koopro.wizardsandbeasts.registry.FurnitureBlocks.MULTIBLOCK) {
+            var piece = block.get();
+            add(piece, net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(piece,
+                    net.minecraft.world.level.storage.loot.LootPool.lootPool()
+                            .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(piece))
+                            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(piece)
+                                    .setProperties(StatePropertiesPredicate.Builder.properties()
+                                            .hasProperty(at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock.COL,
+                                                    piece.spec().width() / 2)
+                                            .hasProperty(at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock.ROW, 0))))));
+        }
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            add(f.door().get(), createDoorTable(f.door().get()));
+            dropSelf(f.trapdoor().get());
+            dropSelf(f.fence().get());
+            dropSelf(f.gate().get());
+            dropSelf(f.button().get());
+            dropSelf(f.plate().get());
+            dropSelf(f.sign().get());
+            dropOther(f.wallSign().get(), f.signItem().get());
+            dropSelf(f.hangingSign().get());
+            dropOther(f.wallHangingSign().get(), f.hangingSignItem().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            add(d.door().get(), createDoorTable(d.door().get()));
+            dropSelf(d.trapdoor().get());
+        }
+        for (var piece : at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES) {
+            Block block = piece.block().get();
+            if (piece.shape() == at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.Shape.SLAB) {
+                add(block, createSlabItemTable(block));
+            } else {
+                dropSelf(block);
+            }
+        }
         dropSelf(ModBlocks.MALLOWSWEET.get());
         // Acromantula silk has no item of its own; it breaks to string, like the hand-written
         // table it replaces (every hand, no shears or silk touch needed; lost to explosions).

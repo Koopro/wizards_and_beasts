@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/green_flame_lantern"
+    },
+    "hanging=false,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/green_flame_lantern"
+    },
+    "hanging=true,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/green_flame_lantern_hanging"
+    },
+    "hanging=true,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/green_flame_lantern_hanging"
+    }
+  }
+}

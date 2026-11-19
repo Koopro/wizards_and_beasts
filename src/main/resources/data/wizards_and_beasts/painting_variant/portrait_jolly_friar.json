@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_jolly_friar",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_jolly_friar.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_jolly_friar.author",
+    "color": "gray"
+  }
+}

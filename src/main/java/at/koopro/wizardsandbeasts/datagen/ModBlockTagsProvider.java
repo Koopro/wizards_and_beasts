@@ -3,6 +3,8 @@ package at.koopro.wizardsandbeasts.datagen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import at.koopro.wizardsandbeasts.registry.FurnitureBlocks;
+import at.koopro.wizardsandbeasts.registry.ArchitectureBlocks;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
@@ -24,6 +26,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider lookupProvider) {
+        furnitureTags();
         for (WoodSet woodSet : ModBlocks.ALL_WOOD_SETS) {
             addWoodSetTags(woodSet);
         }
@@ -158,5 +161,90 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
         tag(BlockTags.MINEABLE_WITH_AXE).add(log, strippedLog, woodBlock, strippedWood, planks, slab, stairs);
         tag(BlockTags.MINEABLE_WITH_HOE).add(leaves);
+    }
+
+    /** World-decoration collections: tools, climbing, fences and the enchanting table's shelves. */
+    private void furnitureTags() {
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                FurnitureBlocks.HOGWARTS_GOTHIC_ARCH.get(),
+                FurnitureBlocks.HOGWARTS_STONE_COLUMN.get(),
+                FurnitureBlocks.HOGWARTS_STONE_BALUSTRADE.get(),
+                FurnitureBlocks.IRON_WALL_SCONCE.get(),
+                FurnitureBlocks.MAGICAL_LANTERN.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(
+                FurnitureBlocks.ACADEMY_DESK.get(),
+                FurnitureBlocks.ACADEMY_CHAIR.get(),
+                FurnitureBlocks.REFECTORY_TABLE.get(),
+                FurnitureBlocks.REFECTORY_BENCH.get(),
+                FurnitureBlocks.MAGICAL_WALL_CLOCK.get(),
+                FurnitureBlocks.LIBRARY_BOOKSHELF.get(),
+                FurnitureBlocks.LIBRARY_BOOKSHELF_SPARSE.get(),
+                FurnitureBlocks.LIBRARY_LADDER.get(),
+                FurnitureBlocks.READING_ARMCHAIR.get(),
+                FurnitureBlocks.DESK_GLOBE.get(),
+                FurnitureBlocks.FLOATING_BOOK.get());
+        // Balustrades join like fences (FenceBlock only joins blocks in #fences); stone, so not #wooden_fences.
+        tag(BlockTags.FENCES).add(FurnitureBlocks.HOGWARTS_STONE_BALUSTRADE.get());
+        tag(BlockTags.CLIMBABLE).add(FurnitureBlocks.LIBRARY_LADDER.get());
+        tag(BlockTags.ENCHANTMENT_POWER_PROVIDER).add(FurnitureBlocks.LIBRARY_BOOKSHELF.get(),
+                FurnitureBlocks.LIBRARY_BOOKSHELF_SPARSE.get());
+        tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.ACADEMY_CARPET.get(), FurnitureBlocks.LIBRARY_CARPET.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.MINISTRY_GILT_PLAQUE.get(),
+                FurnitureBlocks.SPIRE_FINIAL.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ACADEMY_NOTICE_BOARD.get());
+        FurnitureBlocks.BEDS.forEach(b -> tag(BlockTags.BEDS).add(b.get()));
+        FurnitureBlocks.BEDS.forEach(b -> tag(BlockTags.MINEABLE_WITH_AXE).add(b.get()));
+        tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.WALNUT_WARDROBE.get(), FurnitureBlocks.CHEST_OF_DRAWERS.get(),
+                FurnitureBlocks.DISPLAY_CASE_BLOCK.get(), FurnitureBlocks.ROUND_TABLE.get(), FurnitureBlocks.SIDE_TABLE.get(),
+                FurnitureBlocks.WINGBACK_ARMCHAIR_CRIMSON.get(), FurnitureBlocks.WINGBACK_ARMCHAIR_AZURE.get(),
+                FurnitureBlocks.WINGBACK_ARMCHAIR_PLUM.get(), FurnitureBlocks.POTION_WORKBENCH.get(),
+                FurnitureBlocks.APOTHECARY_CABINET.get(), FurnitureBlocks.POTION_RACK.get(), FurnitureBlocks.STORAGE_CRATE.get(),
+                FurnitureBlocks.MINISTRY_LEATHER_CHAIR.get(), FurnitureBlocks.KNOCKTURN_THRONE.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.MINISTRY_FILING_CABINET.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(FurnitureBlocks.WARM_LANTERN.get(), FurnitureBlocks.GREEN_FLAME_LANTERN.get(),
+                FurnitureBlocks.CANDELABRA.get(), FurnitureBlocks.RUBY_CRYSTAL_CLUSTER.get(),
+                FurnitureBlocks.EMERALD_CRYSTAL_CLUSTER.get(), FurnitureBlocks.SAPPHIRE_CRYSTAL_CLUSTER.get(),
+                FurnitureBlocks.MOONSTONE_CRYSTAL_CLUSTER.get(), FurnitureBlocks.GOLDEN_TROPHY_CUP.get(),
+                FurnitureBlocks.SILVER_TROPHY_CUP.get(), FurnitureBlocks.OWL_STATUE.get(), FurnitureBlocks.GARGOYLE_STATUE.get(),
+                FurnitureBlocks.WIZARD_STATUE.get(), FurnitureBlocks.HOGWARTS_FIREPLACE.get(),
+                FurnitureBlocks.MINISTRY_FIREPLACE.get(), FurnitureBlocks.KNOCKTURN_FIREPLACE.get(),
+                FurnitureBlocks.GLOWING_RUNESTONE.get());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ENCHANTED_MIRROR.get(), FurnitureBlocks.DARK_MIRROR.get(),
+                FurnitureBlocks.GRANDFATHER_CLOCK.get(), FurnitureBlocks.HERALDIC_SHIELD.get());
+        tag(BlockTags.WOOL_CARPETS).add(FurnitureBlocks.DORMITORY_CARPET.get(), FurnitureBlocks.MINISTRY_CARPET.get(),
+                FurnitureBlocks.GRINGOTTS_CARPET.get(), FurnitureBlocks.KNOCKTURN_CARPET.get());
+        ArchitectureBlocks.FAMILY_PIECES.forEach(b -> tag(BlockTags.MINEABLE_WITH_PICKAXE).add(b.get()));
+        ArchitectureBlocks.BALUSTRADES.forEach(b -> tag(BlockTags.FENCES).add(b.get()));
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            tag(BlockTags.MINEABLE_WITH_AXE).add(f.door().get(), f.trapdoor().get(), f.fence().get(), f.gate().get(),
+                    f.button().get(), f.plate().get(), f.sign().get(), f.wallSign().get(), f.hangingSign().get(),
+                    f.wallHangingSign().get());
+            tag(BlockTags.WOODEN_DOORS).add(f.door().get());
+            tag(BlockTags.WOODEN_TRAPDOORS).add(f.trapdoor().get());
+            tag(BlockTags.WOODEN_FENCES).add(f.fence().get());
+            tag(BlockTags.FENCE_GATES).add(f.gate().get());
+            tag(BlockTags.WOODEN_BUTTONS).add(f.button().get());
+            tag(BlockTags.WOODEN_PRESSURE_PLATES).add(f.plate().get());
+            tag(BlockTags.STANDING_SIGNS).add(f.sign().get());
+            tag(BlockTags.WALL_SIGNS).add(f.wallSign().get());
+            tag(BlockTags.CEILING_HANGING_SIGNS).add(f.hangingSign().get());
+            tag(BlockTags.WALL_HANGING_SIGNS).add(f.wallHangingSign().get());
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            tag(d.metal() ? BlockTags.MINEABLE_WITH_PICKAXE : BlockTags.MINEABLE_WITH_AXE)
+                    .add(d.door().get(), d.trapdoor().get());
+            tag(BlockTags.DOORS).add(d.door().get());
+            tag(BlockTags.TRAPDOORS).add(d.trapdoor().get());
+        }
+        for (var piece : ArchitectureBlocks.PIECES) {
+            Block block = piece.block().get();
+            tag(piece.wood() ? BlockTags.MINEABLE_WITH_AXE : BlockTags.MINEABLE_WITH_PICKAXE).add(block);
+            switch (piece.shape()) {
+                case WALL -> tag(BlockTags.WALLS).add(block);
+                case STAIRS -> tag(BlockTags.STAIRS).add(block);
+                case SLAB -> tag(BlockTags.SLABS).add(block);
+                default -> { }
+            }
+        }
     }
 }

@@ -124,6 +124,18 @@ public final class LocationBlockHelper {
 
     // --- Factories ---
 
+    /**
+     * One more block of any kind for a set that already exists (a wall for a tile set, stairs for a floor), tracked
+     * with the rest so it joins the module tags and the item list.
+     */
+    public static <T extends Block> DeferredBlock<T> single(String id,
+                                                           java.util.function.Function<BlockBehaviour.Properties, T> factory,
+                                                           BlockBehaviour.Properties props) {
+        var block = track(ModBlocks.BLOCKS.registerBlock(id, factory, () -> props));
+        trackItem(ModItems.ITEMS.registerSimpleBlockItem(block));
+        return block;
+    }
+
     public static BlockEntry block(String id, BlockBehaviour.Properties props) {
         var base = track(ModBlocks.BLOCKS.registerBlock(id, Block::new, () -> props));
         return new BlockEntry(base, trackItem(ModItems.ITEMS.registerSimpleBlockItem(base)));

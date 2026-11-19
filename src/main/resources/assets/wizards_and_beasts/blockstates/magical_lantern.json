@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/magical_lantern"
+    },
+    "hanging=false,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/magical_lantern"
+    },
+    "hanging=true,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/magical_lantern_hanging"
+    },
+    "hanging=true,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/magical_lantern_hanging"
+    }
+  }
+}
