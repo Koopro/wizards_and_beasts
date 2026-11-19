@@ -35,7 +35,8 @@ public sealed interface CreatureAbility permits
         Tint, Evasion, PackTactics, DamageReduction, SporeCloud, Frenzy, DiveBomb,
         JarveyJinx, SphinxRiddle, LureDisguise, Duplication, BlockDecay,
         Shed, Wary, WatchedInvisibility, Foresight, Groomable, MoonBound, LycanthropicBite, SlayerCurse,
-        BlastPropulsion, Infighting, HoardGuard, StarReading, ForestKeeper, MerfolkSong, RangedShot, HeldItem {
+        BlastPropulsion, Infighting, HoardGuard, StarReading, ForestKeeper, MerfolkSong, RangedShot, HeldItem,
+        KappaBow, LuredByItem, GnomeToss, BowsToThePure {
 
     /** Dispatch codec keyed by the variant's {@link Type}, mirroring {@code SkillNodeEffect.CODEC}. */
     Codec<CreatureAbility> CODEC = Type.CODEC.dispatch(CreatureAbility::type, Type::codec);
@@ -136,7 +137,11 @@ public sealed interface CreatureAbility permits
         // Combat identity (BR-4): physical missiles for creatures that do not cast.
         RANGED_SHOT("ranged_shot", RangedShot.CODEC),
         // A real item in the hand (owner, 2026-11-12): the merperson's trident.
-        HELD_ITEM("held_item", HeldItem.CODEC);
+        HELD_ITEM("held_item", HeldItem.CODEC),
+        KAPPA_BOW("kappa_bow", KappaBow.CODEC),
+        LURED_BY_ITEM("lured_by_item", LuredByItem.CODEC),
+        GNOME_TOSS("gnome_toss", GnomeToss.CODEC),
+        BOWS_TO_THE_PURE("bows_to_the_pure", BowsToThePure.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 

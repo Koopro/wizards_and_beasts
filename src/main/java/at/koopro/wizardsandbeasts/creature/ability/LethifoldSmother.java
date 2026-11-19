@@ -34,6 +34,20 @@ public record LethifoldSmother(double range, float maxLightForHunt, float drainH
         if (!(entity.level() instanceof ServerLevel level) || !AiCadence.every(entity, 10)) {
             return;
         }
+        // The one thing that drives a Lethifold off is a Patronus (Fantastic Beasts and Where to Find Them:
+        // Flavius Belby's stag). Inside one's ward it lets go and slides away from it.
+        var patronus = at.koopro.wizardsandbeasts.spell.patronus.PatronusDetection.wardingPatronus(level, entity.position());
+        if (patronus != null) {
+            net.minecraft.world.phys.Vec3 away = entity.position().subtract(patronus.position());
+            if (away.lengthSqr() < 1.0e-4) {
+                away = new net.minecraft.world.phys.Vec3(1, 0, 0);
+            }
+            net.minecraft.world.phys.Vec3 flee = entity.position().add(away.normalize().scale(12));
+            entity.setTarget(null);
+            entity.getNavigation().moveTo(flee.x, flee.y, flee.z, 1.4);
+            AbilitySupport.emitAtBody(level, entity, AbilitySupport.Particle.SMOKE, 3);
+            return;
+        }
         if (level.getMaxLocalRawBrightness(entity.blockPosition()) > maxLightForHunt) {
             return;
         }

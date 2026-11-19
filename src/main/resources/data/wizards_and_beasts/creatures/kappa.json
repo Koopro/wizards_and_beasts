@@ -40,6 +40,11 @@
           "duration_ticks": 100
         }
       ]
+    },
+    {
+      "type": "kappa_bow",
+      "range": 5.0,
+      "weak_ticks": 400
     }
   ],
   "clips": [

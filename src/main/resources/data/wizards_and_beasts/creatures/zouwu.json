@@ -31,6 +31,11 @@
       "speed_amplifier": 1,
       "strength_amplifier": 2,
       "duration_ticks": 300
+    },
+    {
+      "type": "lured_by_item",
+      "item": "minecraft:feather",
+      "range": 10.0
     }
   ],
   "clips": [

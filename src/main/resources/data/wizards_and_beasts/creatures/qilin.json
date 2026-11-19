@@ -30,6 +30,11 @@
       "trigger_health_fraction": 1.0,
       "range": 8.0,
       "cooldown_ticks": 100
+    },
+    {
+      "type": "bows_to_the_pure",
+      "range": 6.0,
+      "cooldown_ticks": 24000
     }
   ],
   "clips": [

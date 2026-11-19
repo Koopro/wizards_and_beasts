@@ -8724,6 +8724,7 @@
   "ministry.wizards_and_beasts.licence.deny.suspended": "That licence is suspended by order of the Wizengamot.",
   "creature.wizards_and_beasts.slayer.atoned.title": "Atoned",
   "creature.wizards_and_beasts.slayer.atoned.body": "%s trusts you completely. The unicorns will let you near again.",
+  "creature.wizards_and_beasts.qilin.bows": "The Qilin bows its head to you.",
   "ministry.wizards_and_beasts.poaching.unseen": "%s is a protected species. Killing one is poaching - nobody from the Ministry saw, this time.",
   "ministry.wizards_and_beasts.poaching.title": "Poaching",
   "ministry.wizards_and_beasts.poaching.body": "A Ministry official saw you kill %s, a protected species. The Beast Division has your name.",

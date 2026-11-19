@@ -48,6 +48,10 @@ public final class CanonDepthTests {
                         + "people about and not the caster; Sectumsempra, Vulnera Sanentur, Homenum Revelio and Lumos "
                         + "Maxima are live",
                 CanonDepthTests::revealing);
+        tests.add("canon_depth_creature_quirks",
+                "canon: a gnome is flung dizzy over the hedge; crouching while holding a Kappa's gaze is a bow; a "
+                        + "feather lures the Zouwu",
+                CanonDepthTests::creatureQuirks);
     }
 
     private static void revealing(GameTestHelper helper) {
@@ -79,6 +83,45 @@ public final class CanonDepthTests {
         } finally {
             retire(helper, auror);
             retire(helper, graves);
+        }
+    }
+
+    private static void creatureQuirks(GameTestHelper helper) {
+        Runnable lease = WizardTestSupport.leaseModule(at.koopro.wizardsandbeasts.module.Module.CREATURES);
+        CreatureArena arena = CreatureArena.at(helper, 432);
+        ServerPlayer keeper = WizardTestSupport.placeMockPlayer(helper, "Keeper", GameType.SURVIVAL);
+        try {
+            var level = helper.getLevel();
+            var gnome = (at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity) arena.creature("gnome", 2, 0);
+            keeper.teleportTo(gnome.getX() - 2, gnome.getY(), gnome.getZ());
+            keeper.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, gnome.getEyePosition());
+            new at.koopro.wizardsandbeasts.creature.ability.GnomeToss(1.6f, 200).toss(level, gnome, keeper);
+            check(helper, gnome.getDeltaMovement().y > 0.5 && gnome.getDeltaMovement().x > 1.0,
+                    () -> "the gnome was not flung over the hedge: " + gnome.getDeltaMovement());
+            check(helper, gnome.hasEffect(MobEffects.SLOWNESS), () -> "the gnome landed without being dizzy");
+
+            var kappa = (at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity) arena.creature("kappa", 2, 3);
+            keeper.teleportTo(kappa.getX() - 3, kappa.getY(), kappa.getZ());
+            keeper.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, kappa.getEyePosition());
+            keeper.setShiftKeyDown(false);
+            check(helper, !at.koopro.wizardsandbeasts.creature.ability.KappaBow.bowing(keeper, kappa),
+                    () -> "standing straight counted as a bow");
+            keeper.setShiftKeyDown(true);
+            check(helper, at.koopro.wizardsandbeasts.creature.ability.KappaBow.bowing(keeper, kappa),
+                    () -> "crouching while holding the Kappa's gaze did not count as a bow");
+            keeper.setShiftKeyDown(false);
+
+            var lure = new at.koopro.wizardsandbeasts.creature.ability.LuredByItem(
+                    net.minecraft.resources.Identifier.withDefaultNamespace("feather"), 10.0);
+            check(helper, !lure.lures(keeper), () -> "an empty hand lured the Zouwu");
+            keeper.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+                    new ItemStack(net.minecraft.world.item.Items.FEATHER));
+            check(helper, lure.lures(keeper), () -> "a feather on a stick did not lure the Zouwu");
+            helper.succeed();
+        } finally {
+            arena.clear();
+            retire(helper, keeper);
+            lease.run();
         }
     }
 
