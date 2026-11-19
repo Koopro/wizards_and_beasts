@@ -225,7 +225,10 @@ public final class SpellExecutor {
             // found, so an empty cast earns no proficiency.
             new SelfUtilityRule("revelio", at.koopro.wizardsandbeasts.spell.revelio.Revelio::cast),
             // Bespoke: a count of the people about, through walls; no component expresses it.
-            new SelfUtilityRule("homenum_revelio", at.koopro.wizardsandbeasts.spell.revelio.HomenumRevelio::cast)
+            new SelfUtilityRule("homenum_revelio", at.koopro.wizardsandbeasts.spell.revelio.HomenumRevelio::cast),
+            // Bespoke: they read the past back, from a wand or from a place (WandEcho).
+            new SelfUtilityRule("prior_incantato", at.koopro.wizardsandbeasts.spell.trace.WandEcho::priorIncantato),
+            new SelfUtilityRule("appare_vestigium", at.koopro.wizardsandbeasts.spell.trace.WandEcho::appareVestigium)
     };
 
     private static boolean handleSelfUtilitySpell(ServerLevel level, ServerPlayer caster, Spell spell) {

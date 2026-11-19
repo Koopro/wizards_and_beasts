@@ -1,16 +1,26 @@
 {
   "displayName": "spell.wizards_and_beasts.appare_vestigium.name",
   "category": "utility",
-  "cooldownTicks": 20,
+  "cooldownTicks": 200,
   "color": -12669533,
   "castType": "self",
   "canonTier": "film",
-  "implementationState": "coming_soon",
   "relation": "rank_of",
   "relatedSpell": "wizards_and_beasts:revelio",
   "requirement": {
     "type": "proficiency",
     "prerequisiteId": "revelio",
     "minProficiency": "proficient"
+  },
+  "sound": {
+    "id": "minecraft:block.beacon.ambient",
+    "volume": 0.7,
+    "pitch": 1.4
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 12
   }
 }

@@ -74,7 +74,18 @@ public final class CanonDepthTests {
             check(helper, people.contains(graves), () -> "Homenum Revelio missed a person three blocks away");
             check(helper, !people.contains(auror), () -> "Homenum Revelio counted the caster");
 
-            for (String id : java.util.List.of("sectumsempra", "vulnera_sanentur", "homenum_revelio", "lumos_maxima")) {
+            ItemStack wand = new ItemStack(at.koopro.wizardsandbeasts.registry.WandItemRegistry.WAND.get());
+            auror.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, wand);
+            for (String cast : java.util.List.of("lumos", "stupefy", "expelliarmus", "accio")) {
+                at.koopro.wizardsandbeasts.spell.trace.WandEcho.record(auror, cast);
+            }
+            check(helper, at.koopro.wizardsandbeasts.spell.trace.WandEcho.echo(auror.getMainHandItem())
+                            .equals(java.util.List.of("accio", "expelliarmus", "stupefy")),
+                    () -> "the wand does not remember its last three spells newest first: "
+                            + at.koopro.wizardsandbeasts.spell.trace.WandEcho.echo(auror.getMainHandItem()));
+
+            for (String id : java.util.List.of("sectumsempra", "vulnera_sanentur", "homenum_revelio", "lumos_maxima",
+                    "rennervate", "prior_incantato", "appare_vestigium")) {
                 var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(id);
                 check(helper, spell != null && spell.isImplemented(),
                         () -> id + " is not a live spell");

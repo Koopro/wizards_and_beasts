@@ -131,6 +131,16 @@ public final class MinistryCaseData extends SavedData {
         return incidents.size();
     }
 
+    /** Incidents in {@code dimension} within {@code radius} of {@code pos} filed at or after {@code since}, newest first. */
+    public java.util.List<Incident> incidentsNear(net.minecraft.resources.Identifier dimension, net.minecraft.core.BlockPos pos, double radius,
+                                                  long since) {
+        double radiusSqr = radius * radius;
+        return incidents.values().stream()
+                .filter(i -> i.dimension().equals(dimension) && i.tick() >= since && i.pos().distSqr(pos) <= radiusSqr)
+                .sorted(java.util.Comparator.comparingLong(Incident::tick).reversed())
+                .toList();
+    }
+
     // ── reports ──
 
     public void addReport(PendingReport report) {

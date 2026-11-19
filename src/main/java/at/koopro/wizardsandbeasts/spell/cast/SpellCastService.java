@@ -251,6 +251,8 @@ public final class SpellCastService {
         long expiryTick = currentTick + cooldown;
         data.setCooldown(spellId, expiryTick);
         data.incrementCastCount(spellId);
+        // The wand remembers what it did, for Prior Incantato.
+        at.koopro.wizardsandbeasts.spell.trace.WandEcho.record(player, spellId);
         // Creatures nearby notice magic: a curious one comes to look, a prey animal bolts (creature/ecology).
         at.koopro.wizardsandbeasts.creature.ecology.CreatureStimuli.spellCast(serverLevel, player.position());
         // The Unforgivables are the corrupting acts in the lore; until now only dark artefacts stained the

@@ -1,10 +1,25 @@
 {
   "displayName": "spell.wizards_and_beasts.prior_incantato.name",
   "category": "utility",
-  "cooldownTicks": 20,
+  "cooldownTicks": 200,
   "color": -11556947,
   "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
-  "relation": "base"
+  "relation": "base",
+  "sound": {
+    "id": "minecraft:block.beacon.ambient",
+    "volume": 0.7,
+    "pitch": 0.8
+  },
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 1,
+    "impactCount": 12
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "finite_incantatem",
+    "minProficiency": "proficient"
+  }
 }

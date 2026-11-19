@@ -26,6 +26,18 @@
       "target": true
     },
     {
+      "type": "impulse",
+      "strength": 0.9,
+      "direction": "push"
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:blindness",
+      "duration": 50,
+      "amplifier": 0,
+      "target": true
+    },
+    {
       "type": "interrupt_cast",
       "lock_ticks": 30
     }

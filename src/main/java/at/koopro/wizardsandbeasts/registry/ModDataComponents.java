@@ -119,6 +119,15 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
                             .build());
 
+    /** A wand's last few spells, newest first: what Prior Incantato reads back (Goblet of Fire ch. 9). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<java.util.List<String>>> WAND_ECHO =
+            DATA_COMPONENTS.register("wand_echo", () ->
+                    DataComponentType.<java.util.List<String>>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING.listOf())
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8
+                                    .apply(net.minecraft.network.codec.ByteBufCodecs.list()))
+                            .build());
+
     /** Famous wizard card variant id (e.g. "dumbledore"). */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> WIZARD_CARD_ID =
             DATA_COMPONENTS.register("wizard_card_id", () ->

@@ -1,11 +1,43 @@
 {
   "displayName": "spell.wizards_and_beasts.rennervate.name",
-  "category": "utility",
-  "cooldownTicks": 20,
-  "color": -11163219,
-  "castType": "self",
   "canonTier": "books",
-  "implementationState": "coming_soon",
+  "category": "utility",
+  "cooldownTicks": 100,
+  "color": -11163219,
+  "castType": "targeted",
+  "range": 10.0,
+  "sound": {
+    "id": "minecraft:block.amethyst_block.chime",
+    "volume": 0.8,
+    "pitch": 1.6
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "stupefy",
+    "minProficiency": "proficient"
+  },
   "relation": "counter_of",
-  "relatedSpell": "wizards_and_beasts:stupefy"
+  "relatedSpell": "wizards_and_beasts:stupefy",
+  "effects": [
+    {
+      "type": "dispel",
+      "scope": "specific",
+      "effects": [
+        "wizards_and_beasts:stupefy",
+        "wizards_and_beasts:petrificus_totalus",
+        "minecraft:blindness"
+      ],
+      "respect_immunity": false
+    },
+    {
+      "type": "heal",
+      "amount": 2.0
+    }
+  ],
+  "vfx": {
+    "trail": "light_glow",
+    "impact": "light_glow",
+    "trailDensity": 1,
+    "impactCount": 10
+  }
 }

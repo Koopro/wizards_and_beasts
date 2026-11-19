@@ -215,6 +215,9 @@ public final class WandAllegianceTests {
                     ItemStack afterBond = wand.copy();
                     beforeBond.remove(WandComponents.WAND_CAST_COUNT.get());
                     afterBond.remove(WandComponents.WAND_CAST_COUNT.get());
+                    // Nor its memory of what it cast (Prior Incantato, 2026-11-19).
+                    beforeBond.remove(at.koopro.wizardsandbeasts.registry.ModDataComponents.WAND_ECHO.get());
+                    afterBond.remove(at.koopro.wizardsandbeasts.registry.ModDataComponents.WAND_ECHO.get());
                     check(helper, ItemStack.isSameItemSameComponents(beforeBond, afterBond),
                             () -> "casting with another's wand changed its allegiance: " + describe(before) + " -> " + describe(wand));
                     check(helper, WandComponents.getCastCount(wand) == WandComponents.getCastCount(before) + 1,
