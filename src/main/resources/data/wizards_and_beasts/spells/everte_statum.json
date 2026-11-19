@@ -1,10 +1,47 @@
 {
   "displayName": "spell.wizards_and_beasts.everte_statum.name",
   "category": "combat",
-  "cooldownTicks": 20,
+  "cooldownTicks": 60,
   "color": -5404580,
-  "castType": "self",
+  "castType": "projectile",
   "canonTier": "film",
-  "implementationState": "coming_soon",
-  "relation": "base"
+  "relation": "base",
+  "baseDamage": 2.0,
+  "projectileSpeed": 1.9,
+  "projectileSpread": 0.04,
+  "sound": {
+    "id": "minecraft:entity.player.attack.knockback",
+    "volume": 0.8,
+    "pitch": 1.2
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "flipendo",
+    "minProficiency": "proficient"
+  },
+  "effects": [
+    {
+      "type": "impulse",
+      "strength": 0.7,
+      "direction": "up"
+    },
+    {
+      "type": "impulse",
+      "strength": 1.3,
+      "direction": "push"
+    },
+    {
+      "type": "apply_effect",
+      "effect": "wizards_and_beasts:disoriented",
+      "duration": 60,
+      "amplifier": 0,
+      "target": true
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 16
+  }
 }

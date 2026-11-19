@@ -1,10 +1,53 @@
 {
   "displayName": "spell.wizards_and_beasts.rictusempra.name",
   "category": "combat",
-  "cooldownTicks": 20,
+  "cooldownTicks": 50,
   "color": -5418936,
-  "castType": "self",
+  "castType": "projectile",
   "canonTier": "books",
-  "implementationState": "coming_soon",
-  "relation": "base"
+  "relation": "base",
+  "baseDamage": 1.0,
+  "projectileSpeed": 1.8,
+  "projectileSpread": 0.04,
+  "sound": {
+    "id": "minecraft:entity.witch.celebrate",
+    "volume": 0.7,
+    "pitch": 1.6
+  },
+  "requirement": {
+    "type": "proficiency",
+    "prerequisiteId": "flipendo",
+    "minProficiency": "proficient"
+  },
+  "effects": [
+    {
+      "type": "impulse",
+      "strength": 1.1,
+      "direction": "push"
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:nausea",
+      "duration": 80,
+      "amplifier": 0,
+      "target": true
+    },
+    {
+      "type": "apply_effect",
+      "effect": "minecraft:weakness",
+      "duration": 80,
+      "amplifier": 0,
+      "target": true
+    },
+    {
+      "type": "interrupt_cast",
+      "lock_ticks": 20
+    }
+  ],
+  "vfx": {
+    "trail": "arcane_mote",
+    "impact": "arcane_mote",
+    "trailDensity": 2,
+    "impactCount": 14
+  }
 }

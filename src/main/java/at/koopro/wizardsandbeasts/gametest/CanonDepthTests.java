@@ -91,7 +91,7 @@ public final class CanonDepthTests {
                             + at.koopro.wizardsandbeasts.spell.trace.WandEcho.echo(auror.getMainHandItem()));
 
             for (String id : java.util.List.of("sectumsempra", "vulnera_sanentur", "homenum_revelio", "lumos_maxima",
-                    "rennervate", "prior_incantato", "appare_vestigium")) {
+                    "rennervate", "prior_incantato", "appare_vestigium", "rictusempra", "everte_statum")) {
                 var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(id);
                 check(helper, spell != null && spell.isImplemented(),
                         () -> id + " is not a live spell");
