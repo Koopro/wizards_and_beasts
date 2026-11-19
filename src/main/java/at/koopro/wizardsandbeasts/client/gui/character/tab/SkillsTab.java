@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.widget.SkillTreeBarWidget;
@@ -75,7 +76,7 @@ public final class SkillsTab implements CharacterTab {
         cy = drawBuild(g, font, cx, cy, innerW, unlocked);
 
         // ── Tree progress bars ────────────────────────────────────────────
-        g.drawString(font, Component.translatable(S + "trees"), cx, cy, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(S + "trees"), cx, cy);
 
         // Unspent points rides the section header rather than trailing the chips. It is the one
         // actionable number on this tab, and at the bottom it was the first thing to fall off the
@@ -101,7 +102,7 @@ public final class SkillsTab implements CharacterTab {
         cy += 4;
 
         // ── Unlocked node chips ───────────────────────────────────────────
-        g.drawString(font, Component.translatable(S + "nodes"), cx, cy, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(S + "nodes"), cx, cy);
         cy += 10;
 
         List<String> nodeNames = new ArrayList<>();
@@ -146,7 +147,7 @@ public final class SkillsTab implements CharacterTab {
         // Cached on the skill sync: the profile walks every archetype's pathway and was rebuilt each frame.
         BuildProfile profile = at.koopro.wizardsandbeasts.client.gui.character.SheetCaches.build();
         Component header = Component.translatable(B + "header");
-        g.drawString(font, header, x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, header, x, y);
         Component current = profile.current() == null
                 ? Component.translatable(B + "status.undecided")
                 : Component.translatable(B + "status." + profile.status().name().toLowerCase(Locale.ROOT),

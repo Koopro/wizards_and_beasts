@@ -35,5 +35,14 @@ public final class WardrobeInputHandler {
         if (pressed && !RobeHood.toggleTarget(mc.player).isEmpty()) {
             ClientPacketDistributor.sendToServer(new HoodToggleC2SPayload());
         }
+
+        boolean wardrobe = false;
+        while (WardrobeKeyBindings.OPEN_WARDROBE.consumeClick()) {
+            wardrobe = true;
+        }
+        if (wardrobe) {
+            ClientPacketDistributor.sendToServer(
+                    at.koopro.wizardsandbeasts.network.equipment.OpenWardrobeC2SPayload.INSTANCE);
+        }
     }
 }

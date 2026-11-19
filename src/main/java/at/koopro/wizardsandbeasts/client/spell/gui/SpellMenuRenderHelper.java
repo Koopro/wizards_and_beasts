@@ -40,9 +40,8 @@ public final class SpellMenuRenderHelper {
     private static final float ALPHA_COMING_SOON = 0.35f;
     /** The 16 px menu icons, drawn 1:1; a row is exactly one icon tall. */
     private static final int ICON = 16;
-    /** Proficiency pips at the end of a row: three 2px squares, so the count reads without colour. */
+    /** Proficiency pips: three 2px squares, so the count reads without colour. */
     private static final int PIP = 2;
-    private static final int PIPS_W = 3 * PIP + 2;
     /** Width of the direction word on a bound-spell row ("Right" is the widest in English). */
     private static final int DIRECTION_W = 28;
 
@@ -72,7 +71,10 @@ public final class SpellMenuRenderHelper {
     /** The category heading inside the list: its name in its hue over a hairline of the same hue. */
     static void renderHeader(GuiGraphics g, Font font, SpellCategory category, Rect r) {
         int hue = hue(category);
-        g.drawString(font, categoryName(category), r.x() + 2, r.y() + 5, hue, S.shadow());
+        // The category's engraved icon (UI renaissance P4), then its name beside it.
+        at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.spellCategory(g, category, r.x() + 1, r.y());
+        g.drawString(font, categoryName(category), r.x() + 1 + at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.SIZE + 3,
+                r.y() + 5, hue, S.shadow());
         g.fill(r.x(), r.bottom() - 2, r.right(), r.bottom() - 1, (0x70 << 24) | (hue & 0xFFFFFF));
     }
 
@@ -103,8 +105,13 @@ public final class SpellMenuRenderHelper {
             right -= Ui.chipWidth(font, soon);
             Ui.chip(g, font, S, right, r.y() + (r.h() - Ui.CHIP_H) / 2, soon, Ui.Tone.MUTED);
         } else {
-            right -= PIPS_W;
-            pips(g, right, r.y() + (r.h() - PIP) / 2, proficiencyPips(spell.getId()));
+            // The tier as its progression icon (UI renaissance P4): sprout, bloom, crown. Most known spells are
+            // novice, so the sprout is drawn at half strength and the two earned tiers stand out from it.
+            Proficiency tier = Proficiency.fromCastCount(ClientSpellDataState.get().getSuccessfulHits(spell.getId()));
+            right -= at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.SIZE;
+            at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.proficiency(g, tier, right,
+                    r.y() + (r.h() - at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.SIZE) / 2,
+                    tier == Proficiency.NOVICE ? 0.5f : 1f);
             if (boundSlot >= 0) {
                 right -= Ui.ARROW + 3;
                 Ui.arrow(g, boundSlot, right, r.y() + (r.h() - Ui.ARROW) / 2, S.ink2());

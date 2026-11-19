@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
@@ -280,8 +281,7 @@ public final class RecordTab implements CharacterTab {
 
     private static void section(@NonNull GuiGraphics g, @NonNull Font font, int x, int y,
                                 @NonNull String id) {
-        g.drawString(font, Component.translatable(KEY + "section." + id).getString(),
-                x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "section." + id).getString(), x, y);
     }
 
     private static void drawKV(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,

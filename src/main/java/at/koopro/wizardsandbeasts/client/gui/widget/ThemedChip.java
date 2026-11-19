@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.client.gui.widget;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiMotion;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
@@ -31,6 +33,8 @@ public final class ThemedChip extends AbstractButton {
     private static final int EDGE_PAD = 4;
 
     private final Runnable action;
+    private final UiMotion hover = new UiMotion();
+    private final UiMotion select = new UiMotion();
     private final BooleanSupplier selected;
     /** A {@code gui/sprites/<folder>/} set with a {@code button_select} face, or null for the parchment tab. */
     private final @Nullable String skin;
@@ -75,15 +79,27 @@ public final class ThemedChip extends AbstractButton {
     @Override
     protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         boolean on = active && selected.getAsBoolean();
-        McStylePanel.ControlState state = McStylePanel.ControlState.of(active, isHovered() || isFocused());
+        boolean lit = isHovered() || isFocused();
+        McStylePanel.ControlState state = McStylePanel.ControlState.of(active, lit);
         if (skin == null) {
-            McStylePanel.drawThemedButton(g, getX(), getY(), getWidth(), getHeight(),
-                    on ? McStylePanel.ButtonTone.SELECT : McStylePanel.ButtonTone.NEUTRAL, state);
+            // Resting face with the hover wash eased in, then the select face eased over it: picking a chip
+            // reads as the wash settling into the selection rather than a swap.
+            float wash = hover.eased(active && lit && !on, UiMotion.HOVER_MS);
+            float pick = select.eased(on, UiMotion.HOVER_MS);
+            McStylePanel.drawThemedButtonEased(g, getX(), getY(), getWidth(), getHeight(),
+                    McStylePanel.ButtonTone.NEUTRAL, active, wash);
+            if (pick > 0.01f) {
+                McStylePanel.drawThemedButton(g, getX(), getY(), getWidth(), getHeight(),
+                        McStylePanel.ButtonTone.SELECT, state, UiMotion.alpha(pick));
+            }
         } else if (on) {
             McStylePanel.drawNineSlice(g, McStylePanel.skinSprite(skin, "button_select"), getX(), getY(),
                     getWidth(), getHeight(), WizardsMetrics.BUTTON_SPRITE_SIZE, WizardsMetrics.BUTTON_SPRITE_BORDER);
         } else {
             McStylePanel.drawSkinButton(g, skin, getX(), getY(), getWidth(), getHeight(), state);
+        }
+        if (active && isFocused() && !isHovered()) {
+            Ui.focusRing(g, getX(), getY(), getWidth(), getHeight());
         }
         Font font = Minecraft.getInstance().font;
         String text = UiText.fit(font, getMessage().getString(), getWidth() - 2 * EDGE_PAD);

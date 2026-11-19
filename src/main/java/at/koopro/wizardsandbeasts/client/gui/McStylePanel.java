@@ -43,6 +43,12 @@ public final class McStylePanel {
      */
     public static void drawNineSlice(GuiGraphics g, Identifier tex, int x, int y, int w, int h,
                                      int u, int v, int ts, int b, int sheetW, int sheetH) {
+        drawNineSlice(g, tex, x, y, w, h, u, v, ts, b, sheetW, sheetH, -1);
+    }
+
+    /** {@link #drawNineSlice} under an ARGB tint; {@code -1} is untinted, alpha below 255 fades the cell in. */
+    public static void drawNineSlice(GuiGraphics g, Identifier tex, int x, int y, int w, int h,
+                                     int u, int v, int ts, int b, int sheetW, int sheetH, int color) {
         int inner = ts - 2 * b;
         int iw = w - 2 * b;
         int ih = h - 2 * b;
@@ -53,17 +59,17 @@ public final class McStylePanel {
         float farX = u + ts - b;
         float farY = v + ts - b;
         // corners
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x,       y,       nearX, nearY, b, b, b, b, sheetW, sheetH);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + w - b, y,     farX,  nearY, b, b, b, b, sheetW, sheetH);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x,       y + h - b, nearX, farY, b, b, b, b, sheetW, sheetH);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + w - b, y + h - b, farX, farY, b, b, b, b, sheetW, sheetH);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x,       y,       nearX, nearY, b, b, b, b, sheetW, sheetH, color);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + w - b, y,     farX,  nearY, b, b, b, b, sheetW, sheetH, color);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x,       y + h - b, nearX, farY, b, b, b, b, sheetW, sheetH, color);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + w - b, y + h - b, farX, farY, b, b, b, b, sheetW, sheetH, color);
         // edges
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y,       midX, nearY, iw, b, inner, b, sheetW, sheetH);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y + h - b, midX, farY, iw, b, inner, b, sheetW, sheetH);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x,       y + b,   nearX, midY, b, ih, b, inner, sheetW, sheetH);
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + w - b, y + b, farX, midY, b, ih, b, inner, sheetW, sheetH);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y,       midX, nearY, iw, b, inner, b, sheetW, sheetH, color);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y + h - b, midX, farY, iw, b, inner, b, sheetW, sheetH, color);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x,       y + b,   nearX, midY, b, ih, b, inner, sheetW, sheetH, color);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + w - b, y + b, farX, midY, b, ih, b, inner, sheetW, sheetH, color);
         // center
-        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y + b,   midX, midY, iw, ih, inner, inner, sheetW, sheetH);
+        g.blit(RenderPipelines.GUI_TEXTURED, tex, x + b,   y + b,   midX, midY, iw, ih, inner, inner, sheetW, sheetH, color);
     }
 
     /**
@@ -295,10 +301,33 @@ public final class McStylePanel {
     /** The same face in one of the {@link ButtonTone}s — one cell of the controls atlas. */
     public static void drawThemedButton(GuiGraphics g, int x, int y, int w, int h,
                                         ButtonTone tone, ControlState state) {
+        drawThemedButton(g, x, y, w, h, tone, state, -1);
+    }
+
+    /** One face of the controls atlas under an ARGB tint: how a hover face is faded in over the resting one. */
+    public static void drawThemedButton(GuiGraphics g, int x, int y, int w, int h,
+                                        ButtonTone tone, ControlState state, int color) {
         int ts = WizardsMetrics.BUTTON_SPRITE_SIZE;
         drawNineSlice(g, THEME_CONTROLS, x, y, w, h,
                 tone.col * ts, state.row * ts,
-                ts, WizardsMetrics.BUTTON_SPRITE_BORDER, ATLAS_W, ATLAS_H);
+                ts, WizardsMetrics.BUTTON_SPRITE_BORDER, ATLAS_W, ATLAS_H, color);
+    }
+
+    /**
+     * A resting face with the hover face faded in by {@code hover} (0..1): the kit's hover transition.
+     * Disabled controls never fade.
+     */
+    public static void drawThemedButtonEased(GuiGraphics g, int x, int y, int w, int h,
+                                             ButtonTone tone, boolean active, float hover) {
+        if (!active) {
+            drawThemedButton(g, x, y, w, h, tone, ControlState.DISABLED);
+            return;
+        }
+        drawThemedButton(g, x, y, w, h, tone, ControlState.NORMAL);
+        if (hover > 0.01f) {
+            drawThemedButton(g, x, y, w, h, tone, ControlState.HOVER,
+                    at.koopro.wizardsandbeasts.client.gui.ui.UiMotion.alpha(hover));
+        }
     }
 
     /** The default sheet: parchment, torn edge, double ink rule, gilt corner studs. */

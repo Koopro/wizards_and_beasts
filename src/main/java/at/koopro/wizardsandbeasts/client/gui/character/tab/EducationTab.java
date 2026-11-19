@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.education.ClientEducationState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
@@ -117,7 +118,7 @@ public final class EducationTab implements CharacterTab {
     }
 
     private int summary(GuiGraphics g, Font font, int x, int y, int w, EducationView view) {
-        g.drawString(font, Component.translatable(KEY + "title").getString(), x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "title").getString(), x, y);
         y += ROW_H + 1;
         long now = gameTime();
         y = row(g, font, x, y, w, Component.translatable(KEY + "sat", Component.translatable(Qualification.OWL.translationKey())),
@@ -143,7 +144,7 @@ public final class EducationTab implements CharacterTab {
     }
 
     private int subjects(GuiGraphics g, Font font, int x, int y, int w, EducationView view) {
-        g.drawString(font, Component.translatable(KEY + "subjects").getString(), x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "subjects").getString(), x, y);
         y += ROW_H + 1;
         for (EducationView.SubjectLine line : view.subjects()) {
             int y0 = y;
@@ -248,7 +249,7 @@ public final class EducationTab implements CharacterTab {
         if (view.next().isEmpty()) {
             return y;
         }
-        g.drawString(font, Component.translatable(KEY + "next").getString(), x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "next").getString(), x, y);
         y += ROW_H + 1;
         for (Component line : view.next()) {
             y = paragraph(g, font, x + 2, y, w - 2, Component.literal("• ").append(line), COLOR_VALUE);

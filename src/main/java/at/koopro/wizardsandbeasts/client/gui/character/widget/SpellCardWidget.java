@@ -16,24 +16,19 @@ public final class SpellCardWidget {
     /** Preferred card width — the grid uses it to choose a column count, not to size cards. */
     public static final int CARD_W = 88;
     public static final int CARD_H = 28;
-    /** Three 4px pips on a 6px pitch. */
-    private static final int PIP_BLOCK_W = 16;
+    /** The tier icon's width ({@code FamilyIcons.SIZE}). */
+    private static final int ICON_W = at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.SIZE;
 
     private static final int COLOR_BG_CARD    = WizardsPalette.PAGE_LIGHT;
     private static final int COLOR_HI         = 0xFFF6ECD0;
     private static final int COLOR_SHADOW     = WizardsPalette.PAGE_DEEP;
     private static final int COLOR_NAME       = WizardsPalette.PAGE_INK;
 
-    // Proficiency pip colors: NOVICE=grey, PROFICIENT=gold, MASTERED=red
-    private static final int COLOR_PIP_NONE   = WizardsPalette.PAGE_DEEP;
-    private static final int COLOR_PIP_NOVICE     = WizardsPalette.PAGE_INK_3;
-    private static final int COLOR_PIP_PROFICIENT = WizardsPalette.GILT;
-    private static final int COLOR_PIP_MASTERED   = WizardsPalette.WAX;
 
     private SpellCardWidget() {}
 
     /**
-     * Draws a spell card at (x, y), {@code w} wide and {@link #CARD_H} tall: the name and its mastery pips, how many
+     * Draws a spell card at (x, y), {@code w} wide and {@link #CARD_H} tall: its tier icon and name, how many
      * successful casts the spell has toward its next tier with the tier's name, and that progress as a bar.
      *
      * <p>The width is a parameter rather than {@link #CARD_W} because the card used to be a fixed 88px in a column
@@ -58,14 +53,17 @@ public final class SpellCardWidget {
         g.fill(x + 1, y + 2, x + 2, y + CARD_H - 2,
                 UiContrast.readableOn(spellCategoryColor(spell.getCategory()), COLOR_BG_CARD, 3.0));
 
-        int maxNameW = w - 4 - PIP_BLOCK_W - 2;
+        // The tier as its progression icon (UI renaissance P4) to the left of both lines; it replaced three pips.
+        at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.proficiency(g, proficiency, x + 3, y + 3,
+                proficiency == Proficiency.NOVICE ? 0.5f : 1f);
+        int textX = x + 3 + ICON_W + 3;
+        int maxNameW = x + w - 3 - textX;
         at.koopro.wizardsandbeasts.client.gui.util.GuiText.drawFitted(g, font,
                 at.koopro.wizardsandbeasts.client.gui.util.GuiText.resolve(spell.getDisplayName()),
-                x + 3, y + 3, maxNameW, COLOR_NAME);
-        drawPips(g, x + w - 3 - PIP_BLOCK_W, y + 4, proficiency);
+                textX, y + 3, maxNameW, COLOR_NAME);
 
         String count = nextAt < 0 ? Integer.toString(hits) : hits + "/" + nextAt;
-        g.drawString(font, count, x + 3, y + 13, WizardsPalette.PAGE_INK_2, false);
+        g.drawString(font, count, textX, y + 13, WizardsPalette.PAGE_INK_2, false);
         String tierLabel = net.minecraft.network.chat.Component.translatable(
                 "gui.wizards_and_beasts.character_sheet.magic.tier." + proficiency.name().toLowerCase(java.util.Locale.ROOT))
                 .getString();
@@ -78,22 +76,6 @@ public final class SpellCardWidget {
     }
 
     // ── internals ──────────────────────────────────────────────────────────
-
-    private static void drawPips(@NonNull GuiGraphics g, int x, int y,
-                                 @NonNull Proficiency proficiency) {
-        // 3 pips: NOVICE=1, PROFICIENT=2, MASTERED=3 filled
-        int filled = proficiency == Proficiency.MASTERED ? 3
-                   : proficiency == Proficiency.PROFICIENT ? 2
-                   : 1;
-        int pipColor = proficiency == Proficiency.MASTERED   ? COLOR_PIP_MASTERED
-                     : proficiency == Proficiency.PROFICIENT ? COLOR_PIP_PROFICIENT
-                     : COLOR_PIP_NOVICE;
-        for (int i = 0; i < 3; i++) {
-            int px = x + i * 6;
-            int color = i < filled ? pipColor : COLOR_PIP_NONE;
-            g.fill(px, y, px + 4, y + 4, color);
-        }
-    }
 
     /** The spell family's own hue, for marks drawn on paper through {@code UiContrast}. */
     public static int spellCategoryColor(@NonNull SpellCategory cat) {

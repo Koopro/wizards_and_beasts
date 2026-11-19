@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.career.ClientCareerState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
@@ -109,7 +110,7 @@ public final class CareerTab implements CharacterTab {
     }
 
     private int header(GuiGraphics g, Font font, int x, int y, int w, CareerView view) {
-        g.drawString(font, UiText.fit(font, view.profession().getString(), w), x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, UiText.fit(font, view.profession().getString(), w), x, y);
         y += ROW_H + 1;
         String wageLabel = Component.translatable(KEY + "career.wage").getString() + ": ";
         g.drawString(font, wageLabel, x, y, COLOR_LABEL, false);
@@ -166,7 +167,7 @@ public final class CareerTab implements CharacterTab {
             y = contract(g, font, x, y, w, line, true, view, mx, my);
         }
         y += 3;
-        g.drawString(font, Component.translatable(KEY + "career.offers").getString(), x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "career.offers").getString(), x, y);
         y += ROW_H + 1;
         if (view.offers().isEmpty()) {
             y = paragraph(g, font, x, y, w, Component.translatable(KEY + "career.none_offered"), COLOR_MUTED);

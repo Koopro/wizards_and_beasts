@@ -38,6 +38,12 @@ public final class ConfirmDialog {
     private Ui.Rect confirmRect = new Ui.Rect(0, 0, 0, 0);
     private Ui.Rect cancelRect = new Ui.Rect(0, 0, 0, 0);
     private boolean open;
+    /** Arrival: the scrim fades in and the card rises a few pixels into place. */
+    private final UiMotion appear = new UiMotion();
+    private final UiMotion cancelHover = new UiMotion();
+    private final UiMotion confirmHover = new UiMotion();
+    /** Pixels the card rises while arriving. Small: it should read as settling, not as sliding. */
+    private static final int RISE = 6;
 
     /** Opens the dialog. {@code tone} is CONFIRM for a commitment, DANGER for something destroyed. */
     public void open(Component title, Component body, Component confirmLabel, Component cancelLabel,
@@ -49,6 +55,7 @@ public final class ConfirmDialog {
         this.tone = tone;
         this.onConfirm = onConfirm;
         this.open = true;
+        appear.snap(0f);
     }
 
     public boolean isOpen() {
@@ -65,7 +72,8 @@ public final class ConfirmDialog {
             return;
         }
         g.nextStratum();
-        Ui.scrim(g, screenW, screenH);
+        float t = appear.eased(true, UiMotion.OPEN_MS);
+        Ui.scrim(g, screenW, screenH, t);
         int w = Math.min(WizardsMetrics.PANEL_MODAL_W, screenW - 2 * WizardsMetrics.SPACE_M);
         int pad = WizardsMetrics.SPACE_M + 4;
         int textW = w - 2 * pad;
@@ -73,7 +81,7 @@ public final class ConfirmDialog {
         int h = pad + WizardsMetrics.LINE_TITLE + WizardsMetrics.DIVIDER_H
                 + bodyLines * WizardsMetrics.LINE_BODY + WizardsMetrics.SPACE_L + BUTTON_H + pad;
         int x = (screenW - w) / 2;
-        int y = (screenH - h) / 2;
+        int y = (screenH - h) / 2 + Math.round((1f - t) * RISE);
         UiSurface s = UiSurface.PAGE;
         Ui.panel(g, s, x, y, w, h);
         int cy = Ui.title(g, font, s, title, x + pad, y + pad, textW, null);
@@ -82,14 +90,15 @@ public final class ConfirmDialog {
         int by = y + h - pad - BUTTON_H;
         cancelRect = new Ui.Rect(x + pad, by, bw, BUTTON_H);
         confirmRect = new Ui.Rect(x + pad + bw + WizardsMetrics.SPACE_M, by, bw, BUTTON_H);
-        button(g, font, cancelRect, cancelLabel, McStylePanel.ButtonTone.NEUTRAL, mouseX, mouseY);
-        button(g, font, confirmRect, confirmLabel, tone, mouseX, mouseY);
+        button(g, font, cancelRect, cancelLabel, McStylePanel.ButtonTone.NEUTRAL,
+                cancelHover.eased(cancelRect.contains(mouseX, mouseY), UiMotion.HOVER_MS));
+        button(g, font, confirmRect, confirmLabel, tone,
+                confirmHover.eased(confirmRect.contains(mouseX, mouseY), UiMotion.HOVER_MS));
     }
 
     private static void button(GuiGraphics g, Font font, Ui.Rect r, Component label,
-                               McStylePanel.ButtonTone tone, int mouseX, int mouseY) {
-        McStylePanel.drawThemedButton(g, r.x(), r.y(), r.w(), r.h(), tone,
-                McStylePanel.ControlState.of(true, r.contains(mouseX, mouseY)));
+                               McStylePanel.ButtonTone tone, float hover) {
+        McStylePanel.drawThemedButtonEased(g, r.x(), r.y(), r.w(), r.h(), tone, true, hover);
         String text = UiText.fit(font, label.getString(), r.w() - 2 * WizardsMetrics.SPACE_S);
         g.drawString(font, text, r.x() + (r.w() - font.width(text)) / 2, r.y() + (r.h() - font.lineHeight) / 2 + 1,
                 UiSurface.PAGE.ink(), false);

@@ -33,6 +33,8 @@ public class ModNetwork {
         PayloadRegistrar registrar = event.registrar("1");
 
         ModNetworkBroom.register(registrar);
+        at.koopro.wizardsandbeasts.network.equipment.OpenWardrobeC2SPayload.register(registrar);
+        at.koopro.wizardsandbeasts.network.equipment.WardrobeRenderPayloads.register(registrar);
         ModNetworkMap.register(registrar);
         ModNetworkSpells.register(registrar);
         ModNetworkVault.register(registrar);

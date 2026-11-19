@@ -61,16 +61,21 @@ public final class SpellsTab extends ScrollingTab {
         // ── the summary ──
         y = Ui.statRow(g, font, S, x, y, w, Component.translatable(KEY + "known"),
                 Component.literal(Integer.toString(book.all().size())));
+        // Each tier as its progression icon and "count tier" (UI renaissance P4), wrapping like the chips did.
         int cx = x;
+        int iconW = at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.SIZE;
         for (Proficiency tier : new Proficiency[] {Proficiency.MASTERED, Proficiency.PROFICIENT, Proficiency.NOVICE}) {
-            Component chip = Component.translatable(KEY + "chip", book.count(tier), tierName(tier));
-            if (cx > x && cx + Ui.chipWidth(font, chip) > x + w) {
+            Component label = Component.translatable(KEY + "chip", book.count(tier), tierName(tier));
+            int groupW = iconW + 2 + font.width(label);
+            if (cx > x && cx + groupW > x + w) {
                 cx = x;
-                y += Ui.CHIP_H + WizardsMetrics.SPACE_XS;
+                y += iconW + WizardsMetrics.SPACE_XS;
             }
-            cx += Ui.chip(g, font, S, cx, y, chip, tierTone(tier)) + WizardsMetrics.SPACE_XS;
+            at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.proficiency(g, tier, cx, y, 1f);
+            g.drawString(font, label, cx + iconW + 2, y + (iconW - font.lineHeight) / 2 + 1, tierInk(tier), false);
+            cx += groupW + WizardsMetrics.SPACE_S;
         }
-        y += Ui.CHIP_H + WizardsMetrics.SPACE_S;
+        y += iconW + WizardsMetrics.SPACE_S;
         y = Ui.labelledBar(g, font, S, x, y, w, Component.translatable(KEY + "mastery"),
                 Component.literal(Math.round(book.mastery() * 100) + "%"), book.mastery(), S.warn());
         y = UiText.drawWrapped(g, font, S, UiText.Role.CAPTION, Component.translatable(KEY + "how",
@@ -139,11 +144,12 @@ public final class SpellsTab extends ScrollingTab {
         return Component.translatable(KEY + "tier." + tier.name().toLowerCase(Locale.ROOT));
     }
 
-    private static Ui.Tone tierTone(Proficiency tier) {
+    /** A tier's label ink beside its icon: the earned tiers in the page's good and gilt inks, novice quiet. */
+    private static int tierInk(Proficiency tier) {
         return switch (tier) {
-            case MASTERED -> Ui.Tone.ACCENT;
-            case PROFICIENT -> Ui.Tone.GOOD;
-            case NOVICE -> Ui.Tone.MUTED;
+            case MASTERED -> at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GILT_DARK;
+            case PROFICIENT -> at.koopro.wizardsandbeasts.client.gui.WizardsPalette.PAGE_GOOD;
+            case NOVICE -> at.koopro.wizardsandbeasts.client.gui.WizardsPalette.PAGE_INK_2;
         };
     }
 }
