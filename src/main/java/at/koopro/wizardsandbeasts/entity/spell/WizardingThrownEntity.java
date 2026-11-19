@@ -46,6 +46,16 @@ public class WizardingThrownEntity extends ThrowableItemProjectile {
         if (item == ConsumableItemRegistry.HIDEBEHIND_SHADOW_ESSENCE.get()) {
             return WizardingThrownKind.SHADOW_ESSENCE;
         }
+        if (item == at.koopro.wizardsandbeasts.registry.CanonItemRegistry.DUNGBOMB.get()) {
+            return WizardingThrownKind.DUNGBOMB;
+        }
+        if (item == at.koopro.wizardsandbeasts.registry.CanonItemRegistry.WILDFIRE_WHIZ_BANGS.get()
+                || item == at.koopro.wizardsandbeasts.registry.CanonItemRegistry.FILIBUSTERS_FIREWORKS.get()) {
+            return WizardingThrownKind.WHIZ_BANG;
+        }
+        if (item == at.koopro.wizardsandbeasts.registry.CanonItemRegistry.PORTABLE_SWAMP.get()) {
+            return WizardingThrownKind.PORTABLE_SWAMP;
+        }
         return WizardingThrownKind.PERUVIAN_DARKNESS_POWDER;
     }
 
@@ -74,6 +84,12 @@ public class WizardingThrownEntity extends ThrowableItemProjectile {
                     level(), p, getOwner() instanceof LivingEntity thrower ? thrower : null);
             case SHADOW_ESSENCE ->
                     at.koopro.wizardsandbeasts.shadow.ShadowZones.create(level(), p);
+            case DUNGBOMB, WHIZ_BANG, PORTABLE_SWAMP -> {
+                if (level() instanceof ServerLevel server) {
+                    at.koopro.wizardsandbeasts.item.projectile.WheezesThrown.land(server, kindFromStack(), p,
+                            getOwner() instanceof net.minecraft.server.level.ServerPlayer thrower ? thrower : null);
+                }
+            }
             case PERUVIAN_DARKNESS_POWDER -> {
                 AABB box = new AABB(BlockPos.containing(p)).inflate(4.0);
                 for (Entity e : level().getEntities(this, box, en -> en instanceof LivingEntity)) {

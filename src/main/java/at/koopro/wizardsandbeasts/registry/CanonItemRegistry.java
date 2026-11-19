@@ -90,8 +90,10 @@ public final class CanonItemRegistry {
             ModItems.ITEMS.registerItem("revealer", Item::new);
 
     // --- Communication & information ---------------------------------------
-    public static final DeferredItem<Item> HOWLER =
-            ModItems.ITEMS.registerItem("howler", AnimatedItem.Plain::new);
+    /** Written, sent by owl, shouts its message at everyone near the recipient, then burns. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.trinket.HowlerItem> HOWLER =
+            ModItems.ITEMS.registerItem("howler", props -> new at.koopro.wizardsandbeasts.item.trinket
+                    .HowlerItem(props.stacksTo(16)));
     public static final DeferredItem<Item> DA_GALLEON =
             ModItems.ITEMS.registerItem("da_galleon", Item::new);
     public static final DeferredItem<Item> DAILY_PROPHET =
@@ -118,16 +120,32 @@ public final class CanonItemRegistry {
                     props -> new at.koopro.wizardsandbeasts.item.broom.BroomServicingKitItem(props.durability(16)));
 
     // --- Weasleys' Wizard Wheezes ------------------------------------------
-    public static final DeferredItem<Item> SKIVING_SNACKBOX =
-            ModItems.ITEMS.registerItem("skiving_snackbox", Item::new);
-    public static final DeferredItem<Item> PUKING_PASTILLES =
-            ModItems.ITEMS.registerItem("puking_pastilles", Item::new);
-    public static final DeferredItem<Item> NOSEBLEED_NOUGAT =
-            ModItems.ITEMS.registerItem("nosebleed_nougat", Item::new);
-    public static final DeferredItem<Item> FAINTING_FANCIES =
-            ModItems.ITEMS.registerItem("fainting_fancies", Item::new);
-    public static final DeferredItem<Item> FEVER_FUDGE =
-            ModItems.ITEMS.registerItem("fever_fudge", Item::new);
+    /** Opened, hands over one of each two-ended Skiving Snackbox sweet. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.SkivingSnackboxItem> SKIVING_SNACKBOX =
+            ModItems.ITEMS.registerItem("skiving_snackbox", props -> new at.koopro.wizardsandbeasts.item.consumable
+                    .SkivingSnackboxItem(props.stacksTo(16), () -> List.of(CanonItemRegistry.PUKING_PASTILLES.get(),
+                    CanonItemRegistry.NOSEBLEED_NOUGAT.get(), CanonItemRegistry.FAINTING_FANCIES.get(),
+                    CanonItemRegistry.FEVER_FUDGE.get())));
+    /** Two-ended: the orange end makes you sick; sneak-eat for the purple cure end. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> PUKING_PASTILLES =
+            ModItems.ITEMS.registerItem("puking_pastilles", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(props.stacksTo(16),
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, 300, 0), () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.HUNGER, 300, 0)),
+                    true, net.minecraft.core.particles.ParticleTypes.ITEM_SLIME, () -> net.minecraft.sounds.SoundEvents.PLAYER_BURP));
+    /** Two-ended: a nosebleed, then the cure end stops it. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> NOSEBLEED_NOUGAT =
+            ModItems.ITEMS.registerItem("nosebleed_nougat", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(props.stacksTo(16),
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 300, 0)),
+                    true, new net.minecraft.core.particles.DustParticleOptions(0xB01818, 1.0f), null));
+    /** Two-ended: you pass out; the cure end brings you round. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> FAINTING_FANCIES =
+            ModItems.ITEMS.registerItem("fainting_fancies", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(props.stacksTo(16),
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 80, 0), () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, 120, 4)),
+                    true, null, () -> net.minecraft.sounds.SoundEvents.PLAYER_HURT));
+    /** Two-ended: fever and boils; the cure end breaks them. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> FEVER_FUDGE =
+            ModItems.ITEMS.registerItem("fever_fudge", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(props.stacksTo(16),
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(at.koopro.wizardsandbeasts.effect.ModEffects.FURNUNCULUS, 300, 0), () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, 200, 0)),
+                    true, net.minecraft.core.particles.ParticleTypes.SMOKE, null));
     public static final DeferredItem<Item> HEADLESS_HAT =
             ModItems.ITEMS.registerItem("headless_hat", Item::new);
     /** Worn since Wardrobe 2.0 (W7): the travelling hat in shield blue; was a plain item. */
@@ -142,22 +160,43 @@ public final class CanonItemRegistry {
     public static final DeferredItem<at.koopro.wizardsandbeasts.item.armor.AccessoryItem> SHIELD_GLOVES =
             ModItems.ITEMS.registerItem("shield_gloves", props -> new at.koopro.wizardsandbeasts.item.armor.AccessoryItem(
                     props, "gloves", "shield_blue", net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
-    public static final DeferredItem<Item> PORTABLE_SWAMP =
-            ModItems.ITEMS.registerItem("portable_swamp", Item::new);
-    public static final DeferredItem<Item> WILDFIRE_WHIZ_BANGS =
-            ModItems.ITEMS.registerItem("wildfire_whiz_bangs", Item::new);
-    public static final DeferredItem<Item> TON_TONGUE_TOFFEE =
-            ModItems.ITEMS.registerItem("ton_tongue_toffee", Item::new);
-    public static final DeferredItem<Item> CANARY_CREAM =
-            ModItems.ITEMS.registerItem("canary_cream", Item::new);
-    public static final DeferredItem<Item> DUNGBOMB =
-            ModItems.ITEMS.registerItem("dungbomb", Item::new);
-    public static final DeferredItem<Item> FILIBUSTERS_FIREWORKS =
-            ModItems.ITEMS.registerItem("filibusters_fireworks", Item::new);
-    public static final DeferredItem<Item> PUNCHING_TELESCOPE =
-            ModItems.ITEMS.registerItem("punching_telescope", Item::new);
-    public static final DeferredItem<Item> U_NO_POO =
-            ModItems.ITEMS.registerItem("u_no_poo", Item::new);
+    /** Thrown: turns the ground where it lands into bog. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.projectile.WizardingProjectileItem> PORTABLE_SWAMP =
+            ModItems.ITEMS.registerItem("portable_swamp", props -> new at.koopro.wizardsandbeasts.item.projectile
+                    .WizardingProjectileItem(props.stacksTo(16)));
+    /** Thrown: fireworks burst where it lands. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.projectile.WizardingProjectileItem> WILDFIRE_WHIZ_BANGS =
+            ModItems.ITEMS.registerItem("wildfire_whiz_bangs", props -> new at.koopro.wizardsandbeasts.item.projectile
+                    .WizardingProjectileItem(props.stacksTo(16)));
+    /** Your tongue swells to four feet long (Dudley, Goblet of Fire): no incantations till it shrinks. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> TON_TONGUE_TOFFEE =
+            ModItems.ITEMS.registerItem("ton_tongue_toffee", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(props.stacksTo(16),
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(at.koopro.wizardsandbeasts.effect.ModEffects.LANGLOCK, 300, 0), () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, 300, 0)),
+                    false, null, null));
+    /** You turn into a large canary for a moment, then moult back. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> CANARY_CREAM =
+            ModItems.ITEMS.registerItem("canary_cream", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(props.stacksTo(16),
+                    List.of(() -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 200, 0), () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.JUMP_BOOST, 200, 1)),
+                    false, new net.minecraft.core.particles.DustParticleOptions(0xF2D530, 1.4f), () -> net.minecraft.sounds.SoundEvents.PARROT_AMBIENT));
+    /** Thrown: a stink cloud where it bursts. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.projectile.WizardingProjectileItem> DUNGBOMB =
+            ModItems.ITEMS.registerItem("dungbomb", props -> new at.koopro.wizardsandbeasts.item.projectile
+                    .WizardingProjectileItem(props.stacksTo(16)));
+    /** Filibuster's wet-start, no-heat fireworks: thrown, they go off where they land. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.projectile.WizardingProjectileItem> FILIBUSTERS_FIREWORKS =
+            ModItems.ITEMS.registerItem("filibusters_fireworks", props -> new at.koopro.wizardsandbeasts.item.projectile
+                    .WizardingProjectileItem(props.stacksTo(16)));
+    /** Put it to your eye and it punches you in it. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.trinket.PunchingTelescopeItem> PUNCHING_TELESCOPE =
+            ModItems.ITEMS.registerItem("punching_telescope", props -> new at.koopro.wizardsandbeasts.item.trinket
+                    .PunchingTelescopeItem(props.stacksTo(1)));
+    /** The constipation sweet the Ministry would rather not be named after: slow and miserable for a while. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem> U_NO_POO =
+            ModItems.ITEMS.registerItem("u_no_poo", props -> new at.koopro.wizardsandbeasts.item.consumable.JokeSweetItem(
+                    props.stacksTo(16), List.of(
+                    () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, 600, 0),
+                    () -> new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, 200, 0)),
+                    false, null, null));
 
     // --- Educational & school ----------------------------------------------
     /**
