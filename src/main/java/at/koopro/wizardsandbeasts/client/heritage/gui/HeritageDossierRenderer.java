@@ -163,11 +163,14 @@ public final class HeritageDossierRenderer {
         int w = area.w();
         int y = top;
 
-        g.drawString(font, heritage.getDisplayName(), x, y,
+        // The heritage's engraved icon to the left of its name and lineage, which share the block beside it.
+        at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.heritage(g, heritage, x, y + 1);
+        int nameX = x + at.koopro.wizardsandbeasts.client.gui.ui.FamilyIcons.SIZE + 4;
+        g.drawString(font, heritage.getDisplayName(), nameX, y,
                 UiContrast.readableOn(heritage.getColor(), s.well()), s.shadow());
         y += font.lineHeight + 2;
         if (variant != null) {
-            g.drawString(font, variant.getDisplayName(), x, y, s.ink2(), s.shadow());
+            g.drawString(font, variant.getDisplayName(), nameX, y, s.ink2(), s.shadow());
         }
         if (refusalKey != null) {
             Component tag = lockChip(refusalKey);

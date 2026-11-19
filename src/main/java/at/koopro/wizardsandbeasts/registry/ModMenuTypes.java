@@ -41,6 +41,11 @@ public final class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<HermionesBagMenu>> HERMIONES_BAG =
             MENUS.register("hermiones_bag", () -> IMenuTypeExtension.create(HermionesBagMenu::fromNetwork));
 
+    /** The wardrobe: the player's own Curios slots as an armoire (UI renaissance P6). */
+    public static final DeferredHolder<MenuType<?>, MenuType<at.koopro.wizardsandbeasts.equipment.curios.WardrobeMenu>> WARDROBE =
+            MENUS.register("wardrobe", () -> IMenuTypeExtension.create(
+                    at.koopro.wizardsandbeasts.equipment.curios.WardrobeMenu::fromNetwork));
+
     private ModMenuTypes() {
     }
 }

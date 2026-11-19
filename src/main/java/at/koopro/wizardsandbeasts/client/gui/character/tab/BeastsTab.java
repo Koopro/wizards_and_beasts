@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.companion.ClientCompanionState;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
@@ -130,14 +131,14 @@ public final class BeastsTab implements CharacterTab {
                 : at.koopro.wizardsandbeasts.client.bestiary.ClientBestiaryCache.get().tiers().values()) {
             counts.merge(tier, 1, Integer::sum);
         }
-        g.drawString(font, Component.translatable(KEY + "journal").getString(), x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "journal").getString(), x, y);
         y += ROW_H + 1;
         y = paragraph(g, font, x, y, w, Component.translatable(KEY + "journal.tiers",
                 counts.getOrDefault(at.koopro.wizardsandbeasts.bestiary.DiscoveryTier.KNOWN, 0),
                 counts.getOrDefault(at.koopro.wizardsandbeasts.bestiary.DiscoveryTier.STUDIED, 0),
                 counts.getOrDefault(at.koopro.wizardsandbeasts.bestiary.DiscoveryTier.OBSERVED, 0),
                 counts.getOrDefault(at.koopro.wizardsandbeasts.bestiary.DiscoveryTier.ENCOUNTERED, 0)), COLOR_LABEL);
-        g.drawString(font, Component.translatable(KEY + "companions").getString(), x, y + 3, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "companions").getString(), x, y + 3);
         return y + ROW_H + 4;
     }
 

@@ -34,6 +34,23 @@ public final class KnownRecipesView {
         return lines.get(recipeId);
     }
 
+    /** Every recipe this client was told about, known or not, in the server's order. */
+    public static java.util.Collection<BrewKnowledgeS2CPayload.Line> lines() {
+        return lines.values();
+    }
+
+    /** Item paths of the textbooks that teach {@code recipeId}; empty when only a lesson or an experiment does. */
+    public static List<String> taughtIn(String recipeId) {
+        List<String> out = new java.util.ArrayList<>();
+        books.forEach((book, recipes) -> {
+            if (recipes.contains(recipeId)) {
+                out.add(book);
+            }
+        });
+        java.util.Collections.sort(out);
+        return out;
+    }
+
     static void accept(List<String> knownIds, Map<String, List<String>> bookLists, List<BrewKnowledgeS2CPayload.Line> recipeLines) {
         known = Set.copyOf(knownIds);
         books = Map.copyOf(bookLists);

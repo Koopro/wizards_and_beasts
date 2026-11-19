@@ -1,5 +1,9 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.character.StatMeasureChart;
+import at.koopro.wizardsandbeasts.client.gui.character.StatStyle;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.character.StatIcons;
@@ -44,11 +48,8 @@ public final class AttributesTab implements CharacterTab {
      *  which is why Armor / Wand Affinity / Beast Resistance read as unfinished. */
     private static final int COLOR_BAR_TRACK = WizardsPalette.PAGE_SHADE;
     private static final int COLOR_BAR_FILL  = WizardsPalette.GILT_DARK;
-    /** Training hairline. Deliberately dimmer than {@link #COLOR_BAR_FILL} so the point a player
-     *  has earned stays visually louder than the fraction they are working towards. */
-    private static final int COLOR_TRAINING_FILL = WizardsPalette.GILT;
     private static final int COLOR_PRODIGY   = WizardsPalette.PAGE_RUBRIC;
-    /** The heritage ceiling, marked on the Power meter. Brass, so it reads as furniture on the bar. */
+    /** The heritage ceiling, marked across the Power spoke of the Measure. */
     private static final int COLOR_CAP_TICK   = WizardsPalette.PAGE_INK_2;
     /** Effect-line tones. Off pure red/green to match the effects column: parchment ink, not an LED. */
     private static final int COLOR_EFFECT_GOOD = WizardsPalette.PAGE_GOOD;
@@ -59,17 +60,10 @@ public final class AttributesTab implements CharacterTab {
     /** One attribute row: label line plus its bar. */
     private static final int ATTR_ROW_H = 12;
 
-    /**
-     * One stat row: name and value, the meter, the training hairline, and what the stat currently
-     * does. Twice an attribute row, because a stat carries twice the information — an attribute is a
-     * number the game already explains, where "Precision 37" means nothing without "−2.96% misfire"
-     * printed under it.
-     */
-    private static final int STAT_ROW_H = 33;
-    /** Left gutter: the 16px glyph plus its clearance. */
-    private static final int STAT_TEXT_X = StatIcons.SIZE + 4;
-    /** Right gutter reserved for the row's state mark (heritage padlock, prodigy star). */
-    private static final int STAT_STATUS_W = StatIcons.SIZE + 2;
+    /** A stat line's wash under the pointer: a tint of the page in the stat's ink, never a coloured block. */
+    private static final int LINE_WASH_HOVER = 0x2C;
+    /** Space the loading line takes before the first sync: about the chart's height, so the page does not jump. */
+    private static final int MEASURE_LOADING_H = 90;
 
     private float scrollOffset = 0f; // pixels scrolled from top
     private int lastTotalH = 0;      // content height measured last frame
@@ -129,8 +123,16 @@ public final class AttributesTab implements CharacterTab {
         // ── The character's own five numbers ──────────────────────────────
         // Above the attributes on purpose: these are the character's own numbers, where the block
         // below is the sum of everything currently modifying them.
-        if (ModuleManager.isEnabled(Module.PLAYER_STATS) && ClientStatsState.hasData()) {
-            cy = drawStatsSection(g, font, cx, cy, innerW, mouseX, mouseY);
+        if (ModuleManager.isEnabled(Module.PLAYER_STATS)) {
+            if (ClientStatsState.hasData()) {
+                cy = drawStatsSection(g, font, cx, cy, innerW, mouseX, mouseY);
+            } else {
+                // Before the first sync the five stats used to be simply absent, and the page read as if the
+                // character had none. Say it is on its way instead, in the space the section will take.
+                Ui.loadingState(g, font, UiSurface.PAGE, new Ui.Rect(cx, cy, innerW, MEASURE_LOADING_H),
+                        Component.translatable(KEY + "stats.loading"));
+                cy += MEASURE_LOADING_H + 4;
+            }
         }
 
         // ── Attributes: the sum of everything currently modifying the character ──
@@ -167,10 +169,8 @@ public final class AttributesTab implements CharacterTab {
     /**
      * Paints the five {@link PlayerStat} values and returns the new content cursor.
      *
-     * <p>Each row answers four questions in the order a player asks them: what is this, how big is it,
-     * how close am I to the next point, and what is it doing for me. Only the second of those was on
-     * screen before — five bare numbers with no consequence attached to any of them, which is a debug
-     * readout rather than a character sheet.
+     * <p>The page answers four questions in the order a player asks them: what is this, how big is it, what is it
+     * doing for me (the Measure and its lines), and how close am I to the next point (the hover card).
      *
      * <p>The stat <em>names</em> and every effect line go through {@link StatReadout}, which reads the
      * same {@link at.koopro.wizardsandbeasts.stats.StatEffects} curves the cast pipeline spends. No
@@ -186,18 +186,100 @@ public final class AttributesTab implements CharacterTab {
 
         int powerCap = powerCap();
 
-        // Declaration order, not a hand-written list: the sheet was one of the places a sixth stat
-        // would have had to be remembered, and nothing would have failed if it were not.
+        // "The Measure" (owner's pick, 2026-11-18): the five stats as an inked pentagon, then one line each for what
+        // the stat does. Replaced the five stacked stat rows.
+        return drawMeasure(g, font, x, y, w, stats, powerCap, mouseX, mouseY);
+    }
+
+    /**
+     * The stats as "The Measure": {@link StatMeasureChart} with a glyph and value at each tip (value outboard, so
+     * nothing crosses the chart), then one line per stat in its {@link StatStyle} ink with its effect on the right.
+     * Hovering a tip or a line opens the full stat card, which carries the training progress and heritage ceiling.
+     */
+    private int drawMeasure(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
+                            @NonNull PlayerStatsData stats, int powerCap, int mouseX, int mouseY) {
         PlayerStat[] all = PlayerStat.values();
-        for (int i = 0; i < all.length; i++) {
-            drawStatRow(g, font, x, y, w, all[i], stats, powerCap, mouseX, mouseY);
-            // A rule between groups: each stat's effect line belongs to the stat above it, and with no
-            // break "Spell Damage" read as the heading of "Precision" below it.
-            if (i < all.length - 1) {
-                g.fill(x + STAT_TEXT_X, y + STAT_ROW_H - 4, x + w - STAT_STATUS_W, y + STAT_ROW_H - 3,
-                        (0x80 << 24) | (COLOR_BAR_TRACK & 0xFFFFFF));
+        int n = all.length;
+        int radius = Math.max(16, Math.min(30, (w - 2 * (StatIcons.SIZE + 22)) / 2));
+        int tipGap = 11;
+        int cx = x + w / 2;
+        int cy = y + StatIcons.SIZE / 2 + tipGap + radius + 2;
+        float[] fractions = new float[n];
+        int[] inks = new int[n];
+        for (int i = 0; i < n; i++) {
+            fractions[i] = stats.get(all[i]) / (float) PlayerStatsData.MAX_VALUE;
+            inks[i] = StatStyle.ink(all[i]);
+        }
+        StatMeasureChart.draw(g, cx, cy, radius, fractions, inks);
+        // Where heritage stops Power, marked across its spoke: a shape that stalls short of the ring otherwise looks
+        // like a bug. Power is spoke 0, straight up, so the mark is a short horizontal rule.
+        for (int i = 0; i < n; i++) {
+            if (all[i].isHeritageCapped() && powerCap < PlayerStatsData.MAX_VALUE) {
+                int[] at = StatMeasureChart.point(cx, cy, radius, i, n, powerCap / (float) PlayerStatsData.MAX_VALUE);
+                g.fill(at[0] - 2, at[1], at[0] + 3, at[1] + 1, COLOR_CAP_TICK);
             }
-            y += STAT_ROW_H;
+        }
+        boolean prodigy = stats.isProdigy();
+
+        // Glyph and value at each tip: the value sits outboard of the glyph, so nothing crosses the chart.
+        for (int i = 0; i < n; i++) {
+            PlayerStat stat = all[i];
+            int[] tip = StatMeasureChart.point(cx, cy, radius + tipGap, i, n, 1f);
+            int gx = tip[0] - StatIcons.SIZE / 2;
+            int gy = tip[1] - StatIcons.SIZE / 2;
+            StatIcons.drawStat(g, stat, gx, gy);
+            String value = Integer.toString(stats.get(stat));
+            boolean left = tip[0] < cx - 2;
+            int vx = left ? gx - 2 - font.width(value) : gx + StatIcons.SIZE + 2;
+            int vy = tip[1] - font.lineHeight / 2 + 1;
+            boolean capped = stat.isHeritageCapped() && stats.get(stat) >= powerCap;
+            g.drawString(font, value, vx, vy, capped ? COLOR_PRODIGY : StatStyle.ink(stat), false);
+            // The row's state mark, outboard of the value: the heritage padlock, or the prodigy star on Power.
+            int markX = left ? vx - 1 - StatIcons.SIZE : vx + font.width(value) + 1;
+            if (capped) {
+                StatIcons.drawCapped(g, markX, gy);
+            } else if (prodigy && stat == PlayerStat.POWER) {
+                StatIcons.drawProdigy(g, markX, gy);
+            }
+            if (hovered(gx - 2, gy - 2, StatIcons.SIZE + 4, StatIcons.SIZE + 4, mouseX, mouseY)) {
+                pendingTooltip = tooltipFor(stat, stats.get(stat), ClientStatsState.trainingProgress(stat),
+                        stat.isHeritageCapped() ? powerCap : PlayerStatsData.MAX_VALUE, prodigy);
+            }
+        }
+        y = cy + (int) Math.ceil(radius * Math.cos(Math.PI / n)) + tipGap + StatIcons.SIZE / 2 + 6;
+
+        // One line per stat: a swatch, its name in its ink, then what it does on the right.
+        int lineH = 11;
+        for (PlayerStat stat : all) {
+            int value = stats.get(stat);
+            int ink = StatStyle.ink(stat);
+            // A point that just landed lifts its own line for a moment, as the old stat row did.
+            float flash = ClientStatLevelUps.flashStrength(stat);
+            if (flash > 0f) {
+                g.fill(x - 2, y - 1, x + w + 2, y + lineH - 1,
+                        ((int) (flash * 64f) << 24) | (WizardsPalette.GILT & 0x00FFFFFF));
+            }
+            boolean over = hovered(x - 2, y - 1, w + 4, lineH, mouseX, mouseY);
+            if (over) {
+                g.fill(x - 2, y - 1, x + w + 2, y + lineH - 1, StatStyle.wash(stat, LINE_WASH_HOVER));
+                pendingTooltip = tooltipFor(stat, value, ClientStatsState.trainingProgress(stat),
+                        stat.isHeritageCapped() ? powerCap : PlayerStatsData.MAX_VALUE, prodigy);
+            }
+            g.fill(x, y + 2, x + 4, y + 6, ink);
+            String name = stat.displayName().getString();
+            String effectValue = StatReadout.effectValue(stat, value).getString();
+            String effectLabel = StatReadout.effectLabel(stat).getString();
+            int nameW = font.width(name);
+            g.drawString(font, name, x + 7, y, ink, false);
+            int evX = x + w - font.width(effectValue);
+            g.drawString(font, effectValue, evX, y, toneColor(StatReadout.effectTone(stat, value)), false);
+            int labelX = x + 7 + nameW + 6;
+            int labelW = evX - LABEL_VALUE_GAP - labelX;
+            if (labelW > 12) {
+                String fitted = UiText.fit(font, effectLabel, labelW);
+                g.drawString(font, fitted, evX - LABEL_VALUE_GAP - font.width(fitted), y, COLOR_LABEL, false);
+            }
+            y += lineH;
         }
         return y + 6;
     }
@@ -214,86 +296,6 @@ public final class AttributesTab implements CharacterTab {
         return variant == null ? PlayerStatsData.MAX_VALUE : PowerBandTable.getBandMax(variant);
     }
 
-    private void drawStatRow(@NonNull GuiGraphics g, @NonNull Font font, int x, int y, int w,
-                             @NonNull PlayerStat stat, @NonNull PlayerStatsData stats, int powerCap,
-                             int mouseX, int mouseY) {
-        int value = stats.get(stat);
-        String label = stat.displayName().getString();
-        String valueText = Integer.toString(value);
-        boolean capped = stat.isHeritageCapped() && value >= powerCap;
-        boolean prodigy = stats.isProdigy();
-
-        // A point that just landed lifts its own row for a moment, so a player who opens the sheet
-        // straight after the toast can see which number moved rather than hunting for it.
-        float flash = ClientStatLevelUps.flashStrength(stat);
-        if (flash > 0f) {
-            int alpha = (int) (flash * 64f) << 24;
-            g.fill(x - 2, y - 1, x + w + 2, y + STAT_ROW_H - 2, alpha | (WizardsPalette.GILT & 0x00FFFFFF));
-        }
-
-        StatIcons.drawStat(g, stat, x, y);
-
-        int textX = x + STAT_TEXT_X;
-        int statusX = x + w - StatIcons.SIZE;
-
-        // ── name and value ──
-        int valueColor = capped ? COLOR_PRODIGY : COLOR_VALUE;
-        int valueX = x + w - STAT_STATUS_W - font.width(valueText);
-        int labelW = Math.max(0, valueX - textX - LABEL_VALUE_GAP);
-        g.drawString(font, UiText.fit(font, label, labelW), textX, y + 1, COLOR_LABEL, false);
-        g.drawString(font, valueText, valueX, y + 1, valueColor, false);
-
-        // ── the state mark, if this row has one ──
-        if (capped) {
-            StatIcons.drawCapped(g, statusX, y);
-        } else if (prodigy && stat == PlayerStat.POWER) {
-            StatIcons.drawProdigy(g, statusX, y);
-        }
-
-        // ── meter ──
-        int barX = textX;
-        int barW = w - STAT_TEXT_X - STAT_STATUS_W;
-        if (barW > 0) {
-            int barY = y + 12;
-            g.fill(barX, barY, barX + barW, barY + 3, COLOR_BAR_TRACK);
-            int filled = Mth.clamp(Math.round(value / 100.0f * barW), 0, barW);
-            g.fill(barX, barY, barX + filled, barY + 3, COLOR_BAR_FILL);
-
-            // Where heritage stops this stat, marked on the bar rather than only stated in the
-            // tooltip: a Power meter that stalls two thirds along otherwise looks like a bug.
-            if (stat.isHeritageCapped() && powerCap < PlayerStatsData.MAX_VALUE) {
-                int tickX = barX + Mth.clamp(Math.round(powerCap / 100.0f * barW), 0, barW - 1);
-                g.fill(tickX, barY - 1, tickX + 1, barY + 4, COLOR_CAP_TICK);
-            }
-
-            // Training hairline under the main bar: without it the bar sits still for hundreds of
-            // casts and training reads as broken.
-            if (stat.isTrainable()) {
-                float progress = ClientStatsState.trainingProgress(stat);
-                int hairY = barY + 4;
-                g.fill(barX, hairY, barX + barW, hairY + 1, COLOR_BAR_TRACK);
-                int hair = Mth.clamp(Math.round(progress * barW), 0, barW);
-                g.fill(barX, hairY, barX + hair, hairY + 1, COLOR_TRAINING_FILL);
-            }
-        }
-
-        // ── what it is doing right now ──
-        String effectLabel = StatReadout.effectLabel(stat).getString();
-        String effectValue = StatReadout.effectValue(stat, value).getString();
-        int effectY = y + 18;
-        int effectValueX = x + w - STAT_STATUS_W - font.width(effectValue);
-        g.drawString(font, UiText.fit(font, effectLabel,
-                        Math.max(0, effectValueX - textX - LABEL_VALUE_GAP)),
-                textX, effectY, COLOR_LABEL, false);
-        g.drawString(font, effectValue, effectValueX, effectY,
-                toneColor(StatReadout.effectTone(stat, value)), false);
-
-        // ── hover ──
-        if (hovered(x - 2, y - 1, w + 4, STAT_ROW_H - 2, mouseX, mouseY)) {
-            pendingTooltip = tooltipFor(stat, value, ClientStatsState.trainingProgress(stat),
-                    stat.isHeritageCapped() ? powerCap : PlayerStatsData.MAX_VALUE, prodigy);
-        }
-    }
 
     /**
      * The hover card for one stat, rebuilt only when something it shows has changed.
@@ -344,8 +346,7 @@ public final class AttributesTab implements CharacterTab {
 
     private static void section(@NonNull GuiGraphics g, @NonNull Font font, int x, int y,
                                 @NonNull String id) {
-        g.drawString(font, Component.translatable(KEY + "section." + id).getString(),
-                x, y, COLOR_SECTION, false);
+        Ui.rubric(g, font, Component.translatable(KEY + "section." + id).getString(), x, y);
     }
 
     /**

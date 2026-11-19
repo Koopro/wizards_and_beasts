@@ -361,9 +361,14 @@ public class WizardsConfigScreen extends Screen {
             if (font.width(glyph) <= 0) {
                 glyph = category.abbrev();
             }
-            drawCenteredNoShadow(graphics, glyph, x0 + getWidth() / 2, y0 + 16, text);
+            drawCenteredNoShadow(graphics, glyph, x0 + getWidth() / 2, y0 + 13, text);
             drawCenteredNoShadow(graphics, UiText.fit(font, getMessage().getString(), getWidth() - 12),
-                    x0 + getWidth() / 2, y1 - 22, text);
+                    x0 + getWidth() / 2, y1 - 28, text);
+            // What is behind the card, before it is opened (UI renaissance P5): the chapter's size in settings.
+            String count = Component.translatable(ConfigWidgets.KEY + "category.count",
+                    category.entries().size()).getString();
+            drawCenteredNoShadow(graphics, UiText.fit(font, count, getWidth() - 12), x0 + getWidth() / 2, y1 - 17,
+                    (0xA0 << 24) | (text & 0xFFFFFF));
         }
 
         @Override

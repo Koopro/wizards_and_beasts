@@ -151,6 +151,7 @@ public final class WizardsAndBeastsGameTests {
         CreatureAiScheduleTests.contribute(registrar);
         AdminOpsTests.contribute(registrar);
         EquipmentTests.contribute(registrar);
+        WardrobeTests.contribute(registrar);
         CareerTests.contribute(registrar);
         EducationTests.contribute(registrar);
         LocationTests.contribute(registrar);

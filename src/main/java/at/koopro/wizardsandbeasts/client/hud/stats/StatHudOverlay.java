@@ -1,6 +1,9 @@
 package at.koopro.wizardsandbeasts.client.hud.stats;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
+import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
+import at.koopro.wizardsandbeasts.client.gui.character.StatStyle;
 import at.koopro.wizardsandbeasts.client.spell.SpellKeyBindings;
 import at.koopro.wizardsandbeasts.client.stats.ClientStatsState;
 import at.koopro.wizardsandbeasts.module.Module;
@@ -30,14 +33,18 @@ public final class StatHudOverlay {
 
     private static boolean visible = false;
 
-    private static final int PANEL_BG = 0x88000000;
-    private static final int TEXT_COLOR = 0xFFE0E0E0;
-    private static final int POWER_COLOR = 0xFFB8A0FF;
-    private static final int PRODIGY_COLOR = 0xFFFFD700;
+    /**
+     * 2026-11-18: a parchment slip, each stat in its {@link StatStyle} ink with a swatch, as on the sheet's Measure.
+     * The old panel was a translucent black box with grey text and only Power coloured (lilac).
+     */
+    private static final int PRODIGY_COLOR = WizardsPalette.GILT_DARK;
     /** Training percentage: dimmer than the stat, which is the number that actually matters. */
-    private static final int TRAINING_COLOR = 0xFF8A8A8A;
-    private static final int PADDING = 4;
+    private static final int TRAINING_COLOR = WizardsPalette.PAGE_INK_3;
+    /** Inside the slip's torn edge. */
+    private static final int PADDING = 7;
     private static final int ROW_HEIGHT = 10;
+    private static final int SWATCH = 4;
+    private static final int SWATCH_GAP = 3;
 
     private StatHudOverlay() {}
 
@@ -78,21 +85,24 @@ public final class StatHudOverlay {
             maxWidth = Math.max(maxWidth, font.width(rows[i]) + font.width(suffixes[i]));
         }
 
-        int panelW = maxWidth + PADDING * 2;
-        int panelH = rows.length * ROW_HEIGHT + PADDING * 2;
+        int textX0 = PADDING + SWATCH + SWATCH_GAP;
+        int panelW = maxWidth + textX0 + PADDING;
+        int panelH = rows.length * ROW_HEIGHT + PADDING * 2 - 2;
         int panelX = screenWidth - panelW - 4;
         int panelY = 4;
 
-        graphics.fill(panelX, panelY, panelX + panelW, panelY + panelH, PANEL_BG);
+        McStylePanel.drawThemedSlip(graphics, panelX, panelY, panelW, panelH);
 
         for (int i = 0; i < rows.length; i++) {
             int x = panelX + PADDING;
             int y = panelY + PADDING + i * ROW_HEIGHT;
-            int colour = stats[i] == PlayerStat.POWER ? POWER_COLOR : TEXT_COLOR;
-            graphics.drawString(font, rows[i], x, y, colour, false);
+            int ink = StatStyle.ink(stats[i]);
+            graphics.fill(x, y + 2, x + SWATCH, y + 2 + SWATCH, ink);
+            int tx = panelX + textX0;
+            graphics.drawString(font, rows[i], tx, y, ink, false);
             if (!suffixes[i].isEmpty()) {
                 int suffixColour = stats[i] == PlayerStat.POWER ? PRODIGY_COLOR : TRAINING_COLOR;
-                graphics.drawString(font, suffixes[i], x + font.width(rows[i]), y, suffixColour, false);
+                graphics.drawString(font, suffixes[i], tx + font.width(rows[i]), y, suffixColour, false);
             }
         }
     }

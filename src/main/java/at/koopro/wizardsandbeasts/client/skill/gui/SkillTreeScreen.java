@@ -164,6 +164,12 @@ public class SkillTreeScreen extends Screen {
      * read about, type, and pay for before finding out what it would take. It sits beside the Vocation button
      * because the two are the same kind of decision: who this wizard is.
      */
+    /** The start-over question. Owns input while open. */
+    private final at.koopro.wizardsandbeasts.client.gui.ui.ConfirmDialog confirm =
+            new at.koopro.wizardsandbeasts.client.gui.ui.ConfirmDialog();
+    /** Set when the modal took a press, so the matching release is dropped too. */
+    private boolean swallowRelease;
+
     private void addStartOverButton() {
         int buttonH = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_H);
         int vocationW = layout.s(WizardsAndBeastsUiTokens.SkillTree.VOCATION_BUTTON_W);
@@ -197,16 +203,15 @@ public class SkillTreeScreen extends Screen {
                 : Component.translatable(terms.freeRespecAvailable() && terms.respecCapKnuts() > 0
                         ? "skill.wizards_and_beasts.respec.fee.first_free"
                         : "skill.wizards_and_beasts.respec.fee.free");
-        Screen self = this;
-        minecraft.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(yes -> {
-            if (yes) {
-                ClientPacketDistributor.sendToServer(
-                        at.koopro.wizardsandbeasts.network.skill.SkillRespecC2SPayload.startOver());
-            }
-            minecraft.setScreen(self);
-        },
-                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.title"),
-                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.body", refund, fee)));
+        // The kit's modal, over the chart, rather than vanilla's grey stone screen in place of it: the chart stays
+        // visible behind the scrim, and a destructive confirm takes a click, never Enter.
+        confirm.open(Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.title"),
+                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.body", refund, fee),
+                Component.translatable("screen.wizards_and_beasts.skill_tree.start_over"),
+                Component.translatable("gui.cancel"),
+                McStylePanel.ButtonTone.DANGER,
+                () -> ClientPacketDistributor.sendToServer(
+                        at.koopro.wizardsandbeasts.network.skill.SkillRespecC2SPayload.startOver()));
     }
 
     /**
@@ -384,6 +389,9 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY) {
+        if (confirm.isOpen()) {
+            return true;
+        }
         if (event.button() == 0 && insideChart(event.x(), event.y())) {
             panX -= dragX / zoom;
             panY -= dragY / zoom;
@@ -395,6 +403,9 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (confirm.isOpen()) {
+            return true;
+        }
         if (!insideChart(mouseX, mouseY)) {
             return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         }
@@ -417,6 +428,10 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        if (confirm.isOpen() || swallowRelease) {
+            swallowRelease = false;
+            return true;
+        }
         // Right-click unlearns one level. The server quotes, charges and re-checks connectivity; the card has
         // already told the player the price, and a refusal comes back as a toast naming what would be cut off.
         if (event.button() == 1 && hoveredNode != null && !panned
@@ -483,7 +498,10 @@ public class SkillTreeScreen extends Screen {
     // ── Render ──
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics graphics, int realMouseX, int realMouseY, float partialTick) {
+        // While the modal is up nothing under it may light up or open a card.
+        int mouseX = confirm.isOpen() ? -1 : realMouseX;
+        int mouseY = confirm.isOpen() ? -1 : realMouseY;
         this.renderMenuBackground(graphics);
         refreshWeb(); // hot-swap: a /reload definition resync replaces the cached list instance
         PlayerSkillData data = ClientSkillDataState.get();
@@ -515,6 +533,22 @@ public class SkillTreeScreen extends Screen {
                     prerequisiteNames(hoveredNode), unallocatedNeighbourNames(hoveredNode, data),
                     buildNotes(hoveredNode, data));
         }
+        confirm.render(graphics, font, width, height, realMouseX, realMouseY);
+    }
+
+    @Override
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        if (confirm.mouseClicked(event.x(), event.y())) {
+            // The press closed or stayed in the modal; its release must not land on a node under it.
+            swallowRelease = true;
+            return true;
+        }
+        return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        return confirm.keyPressed(event.key()) || super.keyPressed(event);
     }
 
     /**

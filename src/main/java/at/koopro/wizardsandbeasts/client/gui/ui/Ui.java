@@ -5,6 +5,7 @@ import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import java.util.List;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
@@ -122,7 +123,20 @@ public final class Ui {
 
     /** Dims everything behind a modal. Night-tinted, never pure black. */
     public static void scrim(GuiGraphics g, int screenW, int screenH) {
-        g.fill(0, 0, screenW, screenH, 0xB0000000 | (WizardsPalette.MINISTRY_DARK & 0xFFFFFF));
+        scrim(g, screenW, screenH, 1f);
+    }
+
+    /** {@link #scrim} at {@code t} of its full strength, for a modal fading in. */
+    public static void scrim(GuiGraphics g, int screenW, int screenH, float t) {
+        g.fill(0, 0, screenW, screenH, UiMotion.fade(0xB0000000 | (WizardsPalette.MINISTRY_DARK & 0xFFFFFF), t));
+    }
+
+    /**
+     * Keyboard focus: a one-pixel gilt ring just outside a control. Drawn only when the control has focus and the
+     * pointer is elsewhere, so a mouse user never sees two highlights on one button.
+     */
+    public static void focusRing(GuiGraphics g, int x, int y, int w, int h) {
+        g.renderOutline(x - 1, y - 1, w + 2, h + 2, WizardsPalette.GILT_DARK);
     }
 
     // ── text blocks ───────────────────────────────────────────────────────────
@@ -151,6 +165,22 @@ public final class Ui {
         }
         hairline(g, s, x, ry, w);
         return ry + WizardsMetrics.SPACE_S;
+    }
+
+    /**
+     * A page heading in the rubric ink with a short underline beneath it, the way a hand-kept ledger marks a new
+     * section (UI renaissance P5): the character sheet's pages used bare red words, which read as body text.
+     * The underline sits on the row under the glyphs, so callers keep their own spacing.
+     */
+    public static void rubric(GuiGraphics g, Font font, String text, int x, int y) {
+        g.drawString(font, text, x, y, WizardsPalette.PAGE_RUBRIC, false);
+        int w = font.width(text);
+        g.fill(x, y + font.lineHeight, x + w + 3, y + font.lineHeight + 1,
+                (0x90 << 24) | (WizardsPalette.PAGE_RUBRIC & 0xFFFFFF));
+    }
+
+    public static void rubric(GuiGraphics g, Font font, Component text, int x, int y) {
+        rubric(g, font, text.getString(), x, y);
     }
 
     /**
@@ -345,7 +375,17 @@ public final class Ui {
         }
         if (hint != null) {
             int hy = y + titleCount * WizardsMetrics.LINE_BODY + WizardsMetrics.SPACE_S - 3;
-            for (var line : font.split(hint, textW).subList(0, hintLines)) {
+            // At most four lines; when the hint is longer, the fourth ends in an ellipsis instead of the rest
+            // silently disappearing (a cut sentence read as the whole one).
+            List<String> lines = new java.util.ArrayList<>();
+            for (var part : font.getSplitter().splitLines(hint, textW, net.minecraft.network.chat.Style.EMPTY)) {
+                lines.add(part.getString());
+            }
+            for (int i = 0; i < hintLines; i++) {
+                String line = lines.get(i);
+                if (i == hintLines - 1 && lines.size() > hintLines) {
+                    line = UiText.fit(font, String.join(" ", lines.subList(i, lines.size())), textW);
+                }
                 g.drawString(font, line, cx - font.width(line) / 2, hy, s.ink3(), s.shadow());
                 hy += WizardsMetrics.LINE_TIGHT;
             }
@@ -489,11 +529,17 @@ public final class Ui {
      * An entity standing in a preview card, turning to follow the mouse as the inventory's player does.
      * The model is scaled to the well, so a tall form and a small one both fill it.
      */
+    /** How much of the well a previewed creature's hitbox may fill. */
+    private static final float PREVIEW_FILL = 0.7f;
+
     public static void entityPreview(GuiGraphics g, Font font, UiSurface s, Rect r, LivingEntity entity,
                                      @Nullable Component caption, int mouseX, int mouseY) {
         Rect well = previewCard(g, font, s, r, caption);
+        // Fit by both sides of the hitbox, with a margin: a small creature's model often outgrows its hitbox (a
+        // Niffler's snout and tail), and fitting by height alone drew only its head.
         float height = Math.max(0.5f, entity.getBbHeight());
-        int scale = Math.max(8, Math.round((well.h() - 8) / height));
+        float width = Math.max(0.5f, entity.getBbWidth());
+        int scale = Math.max(8, Math.round(PREVIEW_FILL * Math.min((well.h() - 8) / height, (well.w() - 8) / width)));
         g.enableScissor(well.x(), well.y(), well.right(), well.bottom());
         InventoryScreen.renderEntityInInventoryFollowsMouse(g, well.x(), well.y(), well.right(), well.bottom(),
                 scale, 0.0625f, mouseX, mouseY, entity);

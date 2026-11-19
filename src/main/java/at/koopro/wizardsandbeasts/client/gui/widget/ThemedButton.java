@@ -1,5 +1,8 @@
 package at.koopro.wizardsandbeasts.client.gui.widget;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
+import at.koopro.wizardsandbeasts.client.gui.ui.UiMotion;
+import net.minecraft.util.Util;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel.ButtonTone;
 import at.koopro.wizardsandbeasts.client.gui.McStylePanel.Sprite;
@@ -58,6 +61,10 @@ public final class ThemedButton extends AbstractButton {
      * tinting one screen's material by meaning would put two colour systems on one button.
      */
     private ButtonTone tone = ButtonTone.NEUTRAL;
+    /** The hover face fading in and out (parchment faces only; a skin is a file per state). */
+    private final UiMotion hover = new UiMotion();
+    /** When the button was last pressed, for the one-pixel press nudge; -1 before the first press. */
+    private long pressedAt = -1L;
 
     public ThemedButton(int x, int y, int w, int h, @NonNull Component label, @NonNull Runnable action) {
         this(x, y, w, h, label, action, null);
@@ -143,18 +150,26 @@ public final class ThemedButton extends AbstractButton {
 
     @Override
     public void onPress(@NonNull InputWithModifiers input) {
+        pressedAt = Util.getMillis();
         action.run();
     }
 
     @Override
     protected void renderContents(@NonNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        McStylePanel.ControlState state =
-                McStylePanel.ControlState.of(active, isHovered() || isFocused());
+        boolean lit = isHovered() || isFocused();
+        McStylePanel.ControlState state = McStylePanel.ControlState.of(active, lit);
+        float wash = hover.eased(active && lit, UiMotion.HOVER_MS);
         if (skin == null) {
-            McStylePanel.drawThemedButton(g, getX(), getY(), getWidth(), getHeight(), tone, state);
+            McStylePanel.drawThemedButtonEased(g, getX(), getY(), getWidth(), getHeight(), tone, active, wash);
         } else {
             McStylePanel.drawSkinButton(g, skin, getX(), getY(), getWidth(), getHeight(), state);
         }
+        // Keyboard focus without the pointer on it: a gilt ring outside the frame, so Tab is never invisible.
+        if (active && isFocused() && !isHovered()) {
+            Ui.focusRing(g, getX(), getY(), getWidth(), getHeight());
+        }
+        // Pressed: the contents drop one pixel for a beat, the face stays put.
+        int nudge = UiMotion.recentlyPressed(pressedAt) ? 1 : 0;
 
         Font font = Minecraft.getInstance().font;
         String label = getMessage().getString();
@@ -166,10 +181,10 @@ public final class ThemedButton extends AbstractButton {
         // Icon and label are centred as one group, so a button reads as balanced whether or not it
         // carries an icon and whichever language the label is in.
         int groupX = getX() + (getWidth() - (iconSpan + textW)) / 2;
-        int textY = getY() + (getHeight() - font.lineHeight) / 2;
+        int textY = getY() + (getHeight() - font.lineHeight) / 2 + nudge;
 
         if (icon != null) {
-            McStylePanel.drawSprite(g, icon, groupX, getY() + (getHeight() - icon.h()) / 2);
+            McStylePanel.drawSprite(g, icon, groupX, getY() + (getHeight() - icon.h()) / 2 + nudge);
         }
         // Fitted, not drawn and hoped for. A ThemedButton used to let any label wider than its own
         // frame run straight out the side: Gringotts' "Withdraw all" and "1S -> 29K" both did, and

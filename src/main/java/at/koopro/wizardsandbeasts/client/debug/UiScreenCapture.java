@@ -244,6 +244,29 @@ public final class UiScreenCapture {
             all.add(Step.client("sheet_" + tab.name().toLowerCase(java.util.Locale.ROOT),
                     () -> open(CharacterSheetScreen.onTab(tab))));
         }
+        // Kit states (2026-11-18): one control under the pointer, another with keyboard focus, the rest at rest.
+        all.add(Step.client("kit_states_profession", () -> showStates(new ProfessionSelectionScreen(grades))));
+        all.add(Step.client("kit_states_spells", () -> showStates(new SpellMenuScreen())));
+        all.add(Step.client("skill_web_confirm", UiScreenCapture::openSkillStartOver));
+        all.add(Step.server("wardrobe", UiScreenCapture::openWardrobeDressed));
+        all.add(Step.client("menagerie", UiScreenCapture::openMenagerieStocked));
+        all.add(Step.client("brewing_log", () -> open(new at.koopro.wizardsandbeasts.client.brew.gui.BrewingLogScreen())));
+        all.add(Step.client("journal", () -> open(new at.koopro.wizardsandbeasts.client.journey.gui.QuestJournalScreen())));
+        all.add(Step.client("journal_errands", () -> open(new at.koopro.wizardsandbeasts.client.journey.gui.QuestJournalScreen(
+                at.koopro.wizardsandbeasts.client.journey.gui.QuestJournal.Section.ERRANDS))));
+        // Curios' own key, pressed as a player would: the wardrobe must be what opens (Curios' screen is redirected).
+        all.add(Step.client("wardrobe_via_curios_key", UiScreenCapture::pressCuriosKey));
+        all.add(Step.client("stat_hud", () -> {
+            // Reflection, not the setter, so the same step runs on a dev build for the before shot.
+            try {
+                var f = at.koopro.wizardsandbeasts.client.hud.stats.StatHudOverlay.class.getDeclaredField("visible");
+                f.setAccessible(true);
+                f.setBoolean(null, true);
+            } catch (ReflectiveOperationException e) {
+                LOGGER.error("UI capture: cannot show the stats panel", e);
+            }
+            open(null);
+        }));
         all.add(Step.server("inventory_icons", UiScreenCapture::openIconInventory));
         // Every mod effect's icon where players see it: five at a time (vanilla squeezes a longer list
         // until the rows overlap), in the inventory's effect panel and then in the HUD's status row.
@@ -262,8 +285,11 @@ public final class UiScreenCapture {
         return all.stream().filter(s -> wanted.contains(s.name())).toList();
     }
 
-    private static void open(Screen screen) {
+    private static void open(@org.jspecify.annotations.Nullable Screen screen) {
         Minecraft.getInstance().setScreen(screen);
+        // Opening a screen after the world had the mouse re-centres the cursor, which then hovers whatever sits in
+        // the middle (the sheet's Skills tab at GUI 3): park it again after, not only before.
+        parkCursor(Minecraft.getInstance());
     }
 
     private static final int EFFECTS_PER_SHOT = 5;
@@ -364,6 +390,110 @@ public final class UiScreenCapture {
      * The heritage gate with its "this is final" card open. The card has no public way in -- it is reached
      * only through Confirm -- so the harness presses it the way a reflection-free test cannot. Dev only.
      */
+    /**
+     * Opens {@code screen}, puts the pointer on its first themed control and gives the third keyboard focus, so one
+     * shot shows rest, hover and focus side by side. The hover face eases in, which the settle time covers.
+     */
+    private static void showStates(net.minecraft.client.gui.screens.Screen screen) {
+        open(screen);
+        List<net.minecraft.client.gui.components.AbstractWidget> controls = new java.util.ArrayList<>();
+        for (var child : screen.children()) {
+            if (child instanceof at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton
+                    || child instanceof at.koopro.wizardsandbeasts.client.gui.widget.ThemedChip) {
+                controls.add((net.minecraft.client.gui.components.AbstractWidget) child);
+            }
+        }
+        if (controls.isEmpty()) {
+            LOGGER.warn("UI capture: {} has no themed controls", screen.getClass().getSimpleName());
+            return;
+        }
+        var hovered = controls.get(0);
+        pointAt(Minecraft.getInstance(), hovered.getX() + hovered.getWidth() / 2, hovered.getY() + hovered.getHeight() / 2);
+        if (controls.size() > 2) {
+            screen.setFocused(controls.get(2));
+        }
+    }
+
+    /** The skill web with its start-over question up, opened the way the button opens it. */
+    private static void openSkillStartOver() {
+        var screen = new at.koopro.wizardsandbeasts.client.skill.gui.SkillTreeScreen();
+        open(screen);
+        try {
+            var f = screen.getClass().getDeclaredField("confirm");
+            f.setAccessible(true);
+            ((at.koopro.wizardsandbeasts.client.gui.ui.ConfirmDialog) f.get(screen)).open(
+                    net.minecraft.network.chat.Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.title"),
+                    net.minecraft.network.chat.Component.translatable("screen.wizards_and_beasts.skill_tree.start_over.body", 12,
+                            net.minecraft.network.chat.Component.translatable("skill.wizards_and_beasts.respec.fee.first_free")),
+                    net.minecraft.network.chat.Component.translatable("screen.wizards_and_beasts.skill_tree.start_over"),
+                    net.minecraft.network.chat.Component.translatable("gui.cancel"),
+                    at.koopro.wizardsandbeasts.client.gui.McStylePanel.ButtonTone.DANGER, () -> { });
+        } catch (ReflectiveOperationException e) {
+            LOGGER.error("UI capture: cannot open the skill web's start-over question", e);
+        }
+    }
+
+    /**
+     * The wardrobe with a hat and a mask worn and a robe as a look, the face slot's eye shut: worn, look, empty and a
+     * hidden slot in one shot. Uses the equipment API, so it is the same path a player's equip takes.
+     */
+    private static void openWardrobeDressed(ServerPlayer player) {
+        at.koopro.wizardsandbeasts.equipment.curios.CuriosEquipment.clearCosmetics(player);
+        at.koopro.wizardsandbeasts.equipment.EquipmentAPI.stripWearables(player, stack -> false);
+        at.koopro.wizardsandbeasts.equipment.EquipmentAPI.tryEquip(player, new net.minecraft.world.item.ItemStack(
+                at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.WIZARD_HAT.get()));
+        at.koopro.wizardsandbeasts.equipment.EquipmentAPI.tryEquip(player, new net.minecraft.world.item.ItemStack(
+                at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.DEATH_EATER_MASK.get()));
+        at.koopro.wizardsandbeasts.equipment.curios.CuriosEquipment.equipCosmetic(player, "body",
+                new net.minecraft.world.item.ItemStack(
+                        at.koopro.wizardsandbeasts.registry.ArmorItemRegistry.STUDENT_ROBE_CHEST.get()));
+        at.koopro.wizardsandbeasts.network.equipment.OpenWardrobeC2SPayload.open(player);
+        var change = at.koopro.wizardsandbeasts.equipment.curios.WardrobeRenders.toggle(player, 1);
+        if (change != null) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
+                    new at.koopro.wizardsandbeasts.network.equipment.WardrobeRenderPayloads.Sync(
+                            change.entityId(), change.slotId(), change.index(), change.shown()));
+        }
+    }
+
+    /**
+     * The companions board with the companion showcase's three beasts claimed through the bond layer's own path (a
+     * Niffler at full bond and trained, a unicorn half-trusting, a bowtruckle with parents). The roster syncs while
+     * the screen is up, and the screen re-reads it every frame.
+     */
+    private static void openMenagerieStocked() {
+        Minecraft mc = Minecraft.getInstance();
+        var server = mc.getSingleplayerServer();
+        if (server != null && mc.player != null) {
+            java.util.UUID id = mc.player.getUUID();
+            server.execute(() -> {
+                ServerPlayer player = server.getPlayerList().getPlayer(id);
+                if (player != null) {
+                    CompanionShowcaseCapture.reset(player);
+                    CompanionShowcaseCapture.keeper(player);
+                }
+            });
+        }
+        open(new at.koopro.wizardsandbeasts.client.companion.gui.MenagerieScreen());
+    }
+
+    private static void pressCuriosKey() {
+        Minecraft mc = Minecraft.getInstance();
+        mc.setScreen(null);
+        for (net.minecraft.client.KeyMapping mapping : mc.options.keyMappings) {
+            if (mapping.getName().equals("key.curios.open.desc")) {
+                if (mapping.isUnbound()) {
+                    LOGGER.warn("UI capture: Curios' key is unbound, nothing to press");
+                    return;
+                }
+                net.minecraft.client.KeyMapping.click(mapping.getKey());
+                LOGGER.info("UI capture: pressed Curios' key ({})", mapping.getKey().getName());
+                return;
+            }
+        }
+        LOGGER.warn("UI capture: Curios' key mapping not found");
+    }
+
     private static void openHeritageConfirm() {
         var screen = new at.koopro.wizardsandbeasts.client.heritage.gui.HeritageSelectionScreen();
         open(screen);
@@ -621,6 +751,24 @@ public final class UiScreenCapture {
      * of the window -- it hovered whatever sat there, so a character-sheet tab's tooltip covered the page
      * in every shot. MouseHandler only learns of a move through its own callback, so its fields are set too.
      */
+    /** Puts the cursor on a GUI-space point of the current screen (the inverse of the GUI scale). */
+    private static void pointAt(Minecraft mc, int guiX, int guiY) {
+        double scale = mc.getWindow().getGuiScale();
+        double x = guiX * scale;
+        double y = guiY * scale;
+        GLFW.glfwSetCursorPos(mc.getWindow().handle(), x, y);
+        try {
+            var fx = net.minecraft.client.MouseHandler.class.getDeclaredField("xpos");
+            var fy = net.minecraft.client.MouseHandler.class.getDeclaredField("ypos");
+            fx.setAccessible(true);
+            fy.setAccessible(true);
+            fx.setDouble(mc.mouseHandler, x);
+            fy.setDouble(mc.mouseHandler, y);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("UI capture: cannot place the cursor", e);
+        }
+    }
+
     private static void parkCursor(Minecraft mc) {
         GLFW.glfwSetCursorPos(mc.getWindow().handle(), 1.0, 1.0);
         try {
@@ -642,6 +790,27 @@ public final class UiScreenCapture {
         }
         parkCursor(mc);
         Step step = steps.get(index);
+        // The sitting step leaves an O.W.L. running, and its HUD line ("O.W.L. sitting · 8:31") then showed in every
+        // later shot. Finish it before the first shot after that step.
+        if (scale == 0 && index > 0 && steps.get(index - 1).name().equals("owl_sitting") && mc.player != null) {
+            java.util.UUID id = mc.player.getUUID();
+            server.execute(() -> {
+                ServerPlayer player = server.getPlayerList().getPlayer(id);
+                if (player != null && at.koopro.wizardsandbeasts.education.ExamSittings.active(player).isPresent()) {
+                    at.koopro.wizardsandbeasts.education.ExamSittings.finish(player);
+                }
+            });
+        }
+        // The stats overlay step turns the overlay on; switch it off again for every later shot.
+        if (scale == 0 && index > 0 && steps.get(index - 1).name().equals("stat_hud")) {
+            try {
+                var f = at.koopro.wizardsandbeasts.client.hud.stats.StatHudOverlay.class.getDeclaredField("visible");
+                f.setAccessible(true);
+                f.setBoolean(null, false);
+            } catch (ReflectiveOperationException e) {
+                LOGGER.warn("UI capture: cannot hide the stats panel again", e);
+            }
+        }
         if (step.client() != null) {
             step.client().run();
         } else {

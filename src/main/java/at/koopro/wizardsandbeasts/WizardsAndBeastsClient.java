@@ -88,6 +88,7 @@ public class WizardsAndBeastsClient {
         modEventBus.addListener(SpellKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.ability.AbilityFrameworkKeyBindings::register);
         modEventBus.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeKeyBindings::register);
+        modEventBus.addListener(at.koopro.wizardsandbeasts.client.journey.JournalKeyBindings::register);
         modEventBus.addListener(
                 at.koopro.wizardsandbeasts.client.trinket.OmniocularsClientExtensions::register);
         modEventBus.addListener(this::registerGuiLayers);
@@ -100,6 +101,10 @@ public class WizardsAndBeastsClient {
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTickPre);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onClientTick);
         NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.armor.WardrobeInputHandler::onClientTick);
+        NeoForge.EVENT_BUS.addListener(at.koopro.wizardsandbeasts.client.journey.JournalKeyBindings::onClientTick);
+        // The wardrobe takes over Curios' screen (Shift keeps Curios' own).
+        NeoForge.EVENT_BUS.addListener(
+                at.koopro.wizardsandbeasts.client.equipment.curios.WardrobeCuriosClient::onScreenOpening);
         NeoForge.EVENT_BUS.addListener(SpellClientInputHandler::onScroll);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(BeamClientEvents::onEntityLeaveLevel);
@@ -157,6 +162,8 @@ public class WizardsAndBeastsClient {
         event.register(ModMenuTypes.POCKET_CONFIGURATOR.get(), PocketConfiguratorScreen::new);
         event.register(ModMenuTypes.NIFFLER_POUCH.get(), NifflerPouchScreen::new);
         event.register(ModMenuTypes.HERMIONES_BAG.get(), HermionesBagScreen::new);
+        event.register(ModMenuTypes.WARDROBE.get(),
+                at.koopro.wizardsandbeasts.client.equipment.gui.WardrobeScreen::new);
     }
 
     /**

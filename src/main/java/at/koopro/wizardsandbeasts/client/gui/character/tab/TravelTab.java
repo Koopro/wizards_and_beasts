@@ -1,5 +1,6 @@
 package at.koopro.wizardsandbeasts.client.gui.character.tab;
 
+import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.travel.ClientTravelProfileState;
 import at.koopro.wizardsandbeasts.network.travel.TravelProfileC2SPayload;
@@ -96,7 +97,7 @@ public final class TravelTab implements CharacterTab {
                 if (lines.isEmpty()) {
                     continue;
                 }
-                g.drawString(font, Component.translatable(section.translationKey()), cx, cy, COLOR_SECTION, false);
+                Ui.rubric(g, font, Component.translatable(section.translationKey()), cx, cy);
                 cy += LINE_H + 1;
                 for (TravelProfile.Line line : lines) {
                     int textW = innerW - 8;

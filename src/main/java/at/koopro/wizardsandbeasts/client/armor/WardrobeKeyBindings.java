@@ -8,7 +8,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import org.jspecify.annotations.NullMarked;
 import org.lwjgl.glfw.GLFW;
 
-/** Keybinds for worn gear. One so far: the hood. */
+/** Keybinds for worn gear: the hood, and the wardrobe screen. */
 @NullMarked
 public final class WardrobeKeyBindings {
 
@@ -24,9 +24,18 @@ public final class WardrobeKeyBindings {
             "key." + WizardsAndBeastsMod.MODID + ".hood_toggle",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
 
+    /**
+     * Opens the wardrobe. Unbound by default: Curios' inventory button and Curios' own key already open it (the
+     * wardrobe replaces Curios' screen), so this is only for players who want a key of their own.
+     */
+    public static final KeyMapping OPEN_WARDROBE = new KeyMapping(
+            "key." + WizardsAndBeastsMod.MODID + ".open_wardrobe",
+            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), CATEGORY);
+
     private WardrobeKeyBindings() {}
 
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(HOOD_TOGGLE);
+        event.register(OPEN_WARDROBE);
     }
 }

@@ -79,7 +79,7 @@ public final class CompanionShowcaseCapture {
 
     private CompanionShowcaseCapture() {}
 
-    private static void reset(ServerPlayer p) {
+    static void reset(ServerPlayer p) {
         HeritageAPI.commit(p, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
         p.setData(ModAttachments.COMPANION_ROSTER.get(), CompanionRoster.EMPTY);
         Companions.markDirty(p);
@@ -109,7 +109,7 @@ public final class CompanionShowcaseCapture {
         Companions.afterChange(beast);
     }
 
-    private static void keeper(ServerPlayer p) {
+    static void keeper(ServerPlayer p) {
         PathfinderMob niffler = spawn(p, "niffler", 2.5, 1.0);
         if (niffler != null) {
             BondableBeast beast = (BondableBeast) niffler;
