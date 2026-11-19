@@ -1,1 +1,9 @@
-{ "_comment": "Known by everyone from the start: the first-year potions.", "recipes": ["wizards_and_beasts:pepperup_potion", "wizards_and_beasts:wiggenweld_potion"] }
+{
+  "_comment": "Known by everyone from the start: the first-year potions.",
+  "recipes": [
+    "wizards_and_beasts:pepperup_potion",
+    "wizards_and_beasts:wiggenweld_potion",
+    "wizards_and_beasts:cure_for_boils",
+    "wizards_and_beasts:burn_healing_paste"
+  ]
+}

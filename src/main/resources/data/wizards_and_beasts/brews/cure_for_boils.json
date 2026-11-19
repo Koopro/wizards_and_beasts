@@ -1,0 +1,18 @@
+{
+  "displayName": "brew.wizards_and_beasts.cure_for_boils.name",
+  "color": -3562678,
+  "flavorText": "The first potion a student brews. Add the porcupine quills off the fire.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "heal": 2.0,
+      "cure": [
+        "wizards_and_beasts:furnunculus"
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 12
+    }
+  ]
+}

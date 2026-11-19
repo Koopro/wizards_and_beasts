@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:kelp",
+      "count": 2
+    },
+    {
+      "item": "minecraft:sugar",
+      "count": 2
+    }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 200,
+  "outputBrewId": "wizards_and_beasts:deflating_draught"
+}

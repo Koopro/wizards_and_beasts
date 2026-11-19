@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:glow_berries",
+      "count": 2
+    },
+    {
+      "item": "minecraft:glowstone_dust",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 400,
+  "outputBrewId": "wizards_and_beasts:wit_sharpening_potion"
+}

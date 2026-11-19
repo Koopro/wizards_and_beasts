@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:pufferfish",
+      "count": 1
+    },
+    {
+      "item": "minecraft:nether_wart",
+      "count": 2
+    }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 300,
+  "outputBrewId": "wizards_and_beasts:swelling_solution"
+}

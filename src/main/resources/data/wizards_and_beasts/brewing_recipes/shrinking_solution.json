@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:oxeye_daisy",
+      "count": 2
+    },
+    {
+      "item": "minecraft:spider_eye",
+      "count": 1
+    },
+    {
+      "item": "minecraft:slime_ball",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 300,
+  "outputBrewId": "wizards_and_beasts:shrinking_solution"
+}

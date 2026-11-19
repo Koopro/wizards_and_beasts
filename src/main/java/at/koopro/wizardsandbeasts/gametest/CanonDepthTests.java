@@ -55,6 +55,9 @@ public final class CanonDepthTests {
         tests.add("canon_depth_joke_shop_sells_the_wheezes",
                 "canon: Gambol and Japes loads with a market, and every joke it sells is a real item",
                 CanonDepthTests::jokeShop);
+        tests.add("canon_depth_classroom_potions_load",
+                "canon: the nine classroom and hospital potions load as brews, each with a recipe",
+                CanonDepthTests::classroomPotions);
     }
 
     private static void revealing(GameTestHelper helper) {
@@ -152,6 +155,17 @@ public final class CanonDepthTests {
         }
         for (String must : java.util.List.of("skiving_snackbox", "dungbomb", "wildfire_whiz_bangs", "howler")) {
             check(helper, sold.contains(must), () -> "Gambol and Japes does not sell " + must);
+        }
+        helper.succeed();
+    }
+
+    private static void classroomPotions(GameTestHelper helper) {
+        for (String id : java.util.List.of("shrinking_solution", "swelling_solution", "deflating_draught",
+                "cure_for_boils", "burn_healing_paste", "wit_sharpening_potion", "strengthening_solution",
+                "calming_draught", "dreamless_sleep")) {
+            String full = "wizards_and_beasts:" + id;
+            check(helper, at.koopro.wizardsandbeasts.brew.Brews.byId(full) != null, () -> id + " did not load as a brew");
+            check(helper, at.koopro.wizardsandbeasts.brew.BrewingRecipes.byId(full) != null, () -> id + " has no recipe");
         }
         helper.succeed();
     }

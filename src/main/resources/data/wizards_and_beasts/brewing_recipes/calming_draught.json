@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:lily_of_the_valley",
+      "count": 2
+    },
+    {
+      "item": "minecraft:honey_bottle",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 300,
+  "outputBrewId": "wizards_and_beasts:calming_draught"
+}

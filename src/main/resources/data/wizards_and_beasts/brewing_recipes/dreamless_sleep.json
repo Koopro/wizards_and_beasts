@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:allium",
+      "count": 2
+    },
+    {
+      "item": "minecraft:phantom_membrane",
+      "count": 1
+    },
+    {
+      "item": "minecraft:honey_bottle",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "brass",
+  "heatTimeTicks": 500,
+  "outputBrewId": "wizards_and_beasts:dreamless_sleep"
+}

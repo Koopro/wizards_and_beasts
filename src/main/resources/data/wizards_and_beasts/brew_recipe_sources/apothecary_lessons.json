@@ -1,1 +1,11 @@
-{ "_comment": "One per Potions lesson at the apothecary, in this order.", "recipes": ["wizards_and_beasts:skele_gro", "wizards_and_beasts:silver_solution", "wizards_and_beasts:mandrake_restoration_draught", "wizards_and_beasts:wolfsbane_potion"] }
+{
+  "_comment": "One per Potions lesson at the apothecary, in this order.",
+  "recipes": [
+    "wizards_and_beasts:skele_gro",
+    "wizards_and_beasts:silver_solution",
+    "wizards_and_beasts:mandrake_restoration_draught",
+    "wizards_and_beasts:wolfsbane_potion",
+    "wizards_and_beasts:dreamless_sleep",
+    "wizards_and_beasts:calming_draught"
+  ]
+}

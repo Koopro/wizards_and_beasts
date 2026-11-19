@@ -1,0 +1,31 @@
+{
+  "displayName": "brew.wizards_and_beasts.dreamless_sleep.name",
+  "color": -9548134,
+  "flavorText": "Deep sleep without dreams, and the body mends meanwhile. Take it as directed: it is habit-forming.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:regeneration",
+          "duration": 400,
+          "amplifier": 1
+        },
+        {
+          "id": "minecraft:slowness",
+          "duration": 400,
+          "amplifier": 2
+        },
+        {
+          "id": "minecraft:blindness",
+          "duration": 100,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 12
+    }
+  ]
+}

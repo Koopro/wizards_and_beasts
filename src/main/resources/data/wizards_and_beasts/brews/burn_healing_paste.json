@@ -1,0 +1,19 @@
+{
+  "displayName": "brew.wizards_and_beasts.burn_healing_paste.name",
+  "color": -2065862,
+  "flavorText": "Spread on a burn, it cools and closes it. Sold by the pot at St Mungo's.",
+  "components": [
+    {
+      "type": "extinguish",
+      "fireResistanceTicks": 1200
+    },
+    {
+      "type": "heal_and_cure",
+      "heal": 4.0
+    },
+    {
+      "type": "flourish",
+      "count": 12
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "displayName": "brew.wizards_and_beasts.calming_draught.name",
+  "color": -6306088,
+  "flavorText": "Settles the nerves: fear, despair and a turning stomach all ease.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "cure": [
+        "minecraft:nausea",
+        "minecraft:darkness",
+        "minecraft:blindness"
+      ]
+    },
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:regeneration",
+          "duration": 200,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 12
+    }
+  ]
+}

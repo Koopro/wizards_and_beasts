@@ -1,0 +1,28 @@
+{
+  "displayName": "brew.wizards_and_beasts.wit_sharpening_potion.name",
+  "color": -2509750,
+  "flavorText": "Clears a muddled head: confusion lifts, and the mind works quicker for a while.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "cure": [
+        "wizards_and_beasts:confundo",
+        "minecraft:nausea"
+      ]
+    },
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:haste",
+          "duration": 2400,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 16
+    }
+  ]
+}

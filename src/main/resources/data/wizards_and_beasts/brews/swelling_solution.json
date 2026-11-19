@@ -1,0 +1,21 @@
+{
+  "displayName": "brew.wizards_and_beasts.swelling_solution.name",
+  "color": -13660325,
+  "flavorText": "Swells whatever it touches. A splash across a classroom is a lesson nobody forgets.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "wizards_and_beasts:engorgio",
+          "duration": 2400,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 16
+    }
+  ]
+}

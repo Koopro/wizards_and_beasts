@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:slime_ball",
+      "count": 1
+    },
+    {
+      "item": "wizards_and_beasts:dittany",
+      "count": 1
+    },
+    {
+      "item": "minecraft:kelp",
+      "count": 1
+    }
+  ],
+  "cauldronTier": "pewter",
+  "heatTimeTicks": 200,
+  "outputBrewId": "wizards_and_beasts:burn_healing_paste"
+}

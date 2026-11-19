@@ -1,0 +1,18 @@
+{
+  "displayName": "brew.wizards_and_beasts.deflating_draught.name",
+  "color": -4668200,
+  "flavorText": "Undoes a Swelling Solution, or a Shrinking one: you come back to your own size.",
+  "components": [
+    {
+      "type": "heal_and_cure",
+      "cure": [
+        "wizards_and_beasts:engorgio",
+        "wizards_and_beasts:reducio"
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 12
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "displayName": "brew.wizards_and_beasts.shrinking_solution.name",
+  "color": -8408502,
+  "flavorText": "Shrinks whoever drinks it, for a while. Trevor spent a lesson as a tadpole.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "wizards_and_beasts:reducio",
+          "duration": 2400,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 16
+    }
+  ]
+}

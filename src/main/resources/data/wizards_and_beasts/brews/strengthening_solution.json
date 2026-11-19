@@ -1,0 +1,26 @@
+{
+  "displayName": "brew.wizards_and_beasts.strengthening_solution.name",
+  "color": -5754322,
+  "flavorText": "Griffin claw and salamander blood. Let it stand for a week, or it will not take.",
+  "components": [
+    {
+      "type": "apply_effects",
+      "effects": [
+        {
+          "id": "minecraft:strength",
+          "duration": 2400,
+          "amplifier": 0
+        },
+        {
+          "id": "minecraft:resistance",
+          "duration": 1200,
+          "amplifier": 0
+        }
+      ]
+    },
+    {
+      "type": "flourish",
+      "count": 16
+    }
+  ]
+}
