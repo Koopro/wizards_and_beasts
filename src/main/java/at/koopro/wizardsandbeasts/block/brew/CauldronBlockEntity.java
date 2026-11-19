@@ -554,7 +554,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
                 // Said out loud: a pot that went cold used to spoil with no word to anyone.
                 be.tellBrewer(serverLevel, "brew.wizards_and_beasts.spoiled_cold.title",
                         "brew.wizards_and_beasts.spoiled_cold.body");
-                be.spoil(serverLevel, pos);
+                be.spoil(serverLevel, pos, false);
             } else if (be.spoilTicksWithoutHeat % 40 == 0) {
                 // Only sync on the beat, not every tick: this is a cosmetic countdown and a packet
                 // twenty times a second per cold cauldron is a real cost for a warning.
@@ -572,7 +572,7 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         if (be.remainingTicks <= 0) {
             be.remainingTicks = 0;
             if (be.rollFailure(serverLevel)) {
-                be.spoil(serverLevel, pos);
+                be.spoil(serverLevel, pos, true);
                 return;
             }
             be.phase = CauldronPhase.DONE;
@@ -742,18 +742,25 @@ public class CauldronBlockEntity extends BlockEntity implements GeoBlockEntity {
         return spoilTicksWithoutHeat;
     }
 
-    private void spoil(ServerLevel level, BlockPos pos) {
+    /**
+     * The batch is ruined. A brew that failed on the heat goes wrong in one of {@link BrewMishap}'s ways (a pewter
+     * pot may melt, most boil over); one that went cold just gives up in smoke of its own colour.
+     */
+    private void spoil(ServerLevel level, BlockPos pos, boolean onTheHeat) {
+        Brew ruined = brewId == null ? null : Brews.byId(brewId);
+        int colour = ruined != null ? ruined.color() : 0xFF6A6A6A;
         phase = CauldronPhase.SPOILED;
         remainingTicks = 0;
         brewId = null;
         brewerId = null;
         brewPoints = 0;
         spoilTicksWithoutHeat = 0;
-        level.playSound(null, pos, net.minecraft.sounds.SoundEvents.BREWING_STAND_BREW,
-                net.minecraft.sounds.SoundSource.BLOCKS, 0.7f, 0.5f);
-        level.sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
-                pos.getX() + 0.5, pos.getY() + 0.9, pos.getZ() + 0.5, 24, 0.25, 0.2, 0.25, 0.02);
+        at.koopro.wizardsandbeasts.brew.BrewMishap.Kind kind = onTheHeat
+                && getBlockState().getBlock() instanceof WizardingCauldronBlock cauldron
+                ? at.koopro.wizardsandbeasts.brew.BrewMishap.pick(cauldron.tier(), level.getRandom())
+                : at.koopro.wizardsandbeasts.brew.BrewMishap.Kind.SMOKE;
         setChangedAndSync();
+        at.koopro.wizardsandbeasts.brew.BrewMishap.happen(level, pos, kind, colour);
     }
 
     // -- anti-spam -------------------------------------------------------------------------------

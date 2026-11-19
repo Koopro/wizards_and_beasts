@@ -58,6 +58,9 @@ public final class CanonDepthTests {
         tests.add("canon_depth_classroom_potions_load",
                 "canon: the nine classroom and hospital potions load as brews, each with a recipe",
                 CanonDepthTests::classroomPotions);
+        tests.add("canon_depth_brew_mishaps",
+                "canon: a brew that boils over splashes whoever stands by; a melted cauldron is gone",
+                CanonDepthTests::brewMishaps);
     }
 
     private static void revealing(GameTestHelper helper) {
@@ -168,6 +171,25 @@ public final class CanonDepthTests {
             check(helper, at.koopro.wizardsandbeasts.brew.BrewingRecipes.byId(full) != null, () -> id + " has no recipe");
         }
         helper.succeed();
+    }
+
+    private static void brewMishaps(GameTestHelper helper) {
+        ServerPlayer seamus = WizardTestSupport.placeMockPlayer(helper, "Seamus", GameType.SURVIVAL);
+        try {
+            var level = helper.getLevel();
+            net.minecraft.core.BlockPos pot = helper.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
+            seamus.teleportTo(pot.getX() + 1.5, pot.getY(), pot.getZ() + 0.5);
+            at.koopro.wizardsandbeasts.brew.BrewMishap.happen(level, pot,
+                    at.koopro.wizardsandbeasts.brew.BrewMishap.Kind.BOIL_OVER, 0xFF44AA44);
+            check(helper, seamus.hasEffect(MobEffects.NAUSEA), () -> "a boil-over did not splash the brewer beside it");
+            level.setBlockAndUpdate(pot, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            boolean gone = at.koopro.wizardsandbeasts.brew.BrewMishap.happen(level, pot,
+                    at.koopro.wizardsandbeasts.brew.BrewMishap.Kind.MELT, 0xFF44AA44);
+            check(helper, gone && level.getBlockState(pot).isAir(), () -> "a melted cauldron is still standing");
+            helper.succeed();
+        } finally {
+            retire(helper, seamus);
+        }
     }
 
     private static void remembrall(GameTestHelper helper) {
