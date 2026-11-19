@@ -1,0 +1,29 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/furniture/parchment",
+    "particle": "wizards_and_beasts:block/furniture/parchment"
+  },
+  "elements": [
+    {
+      "from": [
+        8,
+        9,
+        4.6
+      ],
+      "to": [
+        13,
+        9.01,
+        11.4
+      ],
+      "faces": {
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/ministry_marble_balustrade_post"
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/ministry_marble_balustrade_side",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/ministry_marble_balustrade_side",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/ministry_marble_balustrade_side",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "wizards_and_beasts:block/furniture/ministry_marble_balustrade_side",
+        "uvlock": true,
+        "y": 270
+      }
+    }
+  ]
+}

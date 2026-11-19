@@ -408,18 +408,6 @@ public final class SpellHelper {
         SpellParticles.spawnBeam(level, from, to, argbColor);
     }
 
-    public static void spawnTrail(ServerLevel level, Spell spell, Vec3 position, Vec3 motion, int segments) {
-        SpellParticles.spawnTrail(level, spell, position, motion, segments);
-    }
-
-    /**
-     * Spawns a short colored particle trail behind a moving entity/projectile.
-     */
-    public static void spawnTrail(ServerLevel level, Vec3 position, Vec3 motion,
-                                   int argbColor, int segments) {
-        SpellParticles.spawnTrail(level, position, motion, argbColor, segments);
-    }
-
     public static void spawnBurst(ServerLevel level, Spell spell, Vec3 pos, int count, double spread) {
         SpellParticles.spawnBurst(level, spell, pos, count, spread);
     }

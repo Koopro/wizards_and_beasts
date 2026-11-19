@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,part=head": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_head"
+    },
+    "facing=north,part=foot": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_foot"
+    },
+    "facing=east,part=head": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_head",
+      "y": 90
+    },
+    "facing=east,part=foot": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_foot",
+      "y": 90
+    },
+    "facing=south,part=head": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_head",
+      "y": 180
+    },
+    "facing=south,part=foot": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_foot",
+      "y": 180
+    },
+    "facing=west,part=head": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_head",
+      "y": 270
+    },
+    "facing=west,part=foot": {
+      "model": "wizards_and_beasts:block/furniture/four_poster_bed_azure_foot",
+      "y": 270
+    }
+  }
+}

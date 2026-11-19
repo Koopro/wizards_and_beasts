@@ -60,6 +60,9 @@ public final class SpellClientPayloadHandlers {
             Vec3 to = new Vec3(pkt.endX(), pkt.endY(), pkt.endZ());
             SpellVfxClient.spawnTintBeam(from, to, SpellFamily.DARK, AVADA_ARGB);
             SpellVfxClient.spawnTintBurst(to, SpellFamily.DARK, AVADA_ARGB, 20, 0.4f);
+            at.koopro.wizardsandbeasts.client.vfx.SpellVfxDirector.cue("avada_kedavra",
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.HIT_ENTITY, to,
+                    from.subtract(to), 1f, AVADA_ARGB, -1);
         });
     }
 
@@ -159,6 +162,16 @@ public final class SpellClientPayloadHandlers {
         });
     }
 
+    public static void handleSpellCue(
+            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> SpellVfxClient.cue(pkt));
+    }
+
+    public static void handleSpellVfxShape(
+            at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> SpellVfxClient.spawnShape(pkt));
+    }
+
     public static void handleSpellImpactBurst(SpellImpactBurstS2CPayload pkt, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             Vec3 pos = new Vec3(pkt.x(), pkt.y(), pkt.z());
@@ -168,7 +181,9 @@ public final class SpellClientPayloadHandlers {
             // This payload already reaches everyone tracking the impact and already carries where
             // it landed and how big it was, so the camera kick rides along on it — no extra packet,
             // and every existing impact call site gets one without being touched.
-            ScreenShakeHandler.impact(pos, count);
+            if (pkt.shake()) {
+                ScreenShakeHandler.impact(pos, count);
+            }
         });
     }
 

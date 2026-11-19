@@ -128,9 +128,9 @@ public class SpellClashRenderer extends EntityRenderer<SpellClashEntity, SpellCl
                 .add(perpB.scale((random.nextDouble() - 0.5) * 2.0 * SCATTER));
     }
 
-    /** Bolt count follows the same performance preset the rest of the spell VFX obeys. */
+    /** Bolt count follows this client's spell-VFX quality, as the rest of the spell VFX does. */
     private static int boltCount() {
-        return switch (Config.perfProfile) {
+        return switch (at.koopro.wizardsandbeasts.client.vfx.VfxBudget.quality()) {
             case LOW -> 2;
             case MEDIUM -> 3;
             case HIGH -> 4;

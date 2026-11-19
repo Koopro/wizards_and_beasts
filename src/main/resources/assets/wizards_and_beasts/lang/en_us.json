@@ -9464,5 +9464,7 @@
   "block.wizards_and_beasts.luggage": "Luggage",
   "block.wizards_and_beasts.daily_prophet_stack": "Stack of Daily Prophets",
   "block.wizards_and_beasts.quibbler_stack": "Stack of Quibblers",
-  "block.wizards_and_beasts.spider_cage": "Cage of Spiders"
+  "block.wizards_and_beasts.spider_cage": "Cage of Spiders",
+  "subtitles.wizards_and_beasts.ambient.page_turn": "Page turns",
+  "subtitles.wizards_and_beasts.ambient.forest_chime": "Distant chime"
 }

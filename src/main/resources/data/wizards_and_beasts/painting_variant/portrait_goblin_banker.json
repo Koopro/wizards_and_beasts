@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_goblin_banker",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_goblin_banker.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_goblin_banker.author",
+    "color": "gray"
+  }
+}

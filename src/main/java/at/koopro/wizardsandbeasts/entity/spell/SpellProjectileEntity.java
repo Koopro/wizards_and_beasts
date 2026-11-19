@@ -189,6 +189,10 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             var vfx = cachedSpell.vfx();
             SpellImpactBurstS2CPayload.sendToTracking(this, hit.getBoundingBox().getCenter(),
                     vfx.impact().particleFamily(), cachedSpell.getColor(), Math.max(1, vfx.impactCount()), 0.35f);
+            Vec3 back = getDeltaMovement().lengthSqr() > 1.0e-6 ? getDeltaMovement().normalize().reverse() : Vec3.ZERO;
+            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send((ServerLevel) level(), cachedSpell.getId(),
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.HIT_ENTITY, hit.getBoundingBox().getCenter(), back,
+                    getOwner() != null ? getOwner().getId() : -1);
         }
 
         if (owner instanceof ServerPlayer player) {
@@ -224,6 +228,13 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                             net.minecraft.world.phys.Vec3.atCenterOf(result.getBlockPos()),
                             props.getExplosionPower(), props.explosionBreaksBlocks());
                 }
+                if (level() instanceof ServerLevel cueLevel) {
+                    var face = result.getDirection();
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(cueLevel, cachedSpell.getId(),
+                            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.HIT_BLOCK, result.getLocation(),
+                            new Vec3(face.getStepX(), face.getStepY(), face.getStepZ()),
+                            getOwner() != null ? getOwner().getId() : -1);
+                }
                 successfulHit = true;
             } else if (level() instanceof ServerLevel serverLevel) {
                 if (cachedSpell != null && cachedSpell.getProperties() != null
@@ -255,6 +266,11 @@ public class SpellProjectileEntity extends ThrowableProjectile {
                     SpellImpactBurstS2CPayload.sendToTracking(this, result.getLocation(),
                             vfx.impact().particleFamily(), cachedSpell.getColor(),
                             Math.max(1, vfx.impactCount() * 3 / 4), 0.28f);
+                    var face = result.getDirection();
+                    at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.send(serverLevel, cachedSpell.getId(),
+                            at.koopro.wizardsandbeasts.network.spell.SpellCueS2CPayload.Stage.HIT_BLOCK, result.getLocation(),
+                            new Vec3(face.getStepX(), face.getStepY(), face.getStepZ()),
+                            getOwner() != null ? getOwner().getId() : -1);
                 }
                 SpellHelper.surfaceImpact(serverLevel, result);
             }
@@ -391,8 +407,9 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         }
     }
 
+    /** Client-side trail spacing, by this client's spell-VFX quality (not the COMMON perfProfile). */
     private int projectileTrailInterval() {
-        return switch (Config.perfProfile) {
+        return switch (Config.vfxQuality) {
             case LOW -> 3;
             case MEDIUM -> 2;
             case HIGH -> 1;

@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder"
+    },
+    "facing=north,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder"
+    },
+    "facing=east,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder",
+      "y": 90
+    },
+    "facing=east,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder",
+      "y": 90
+    },
+    "facing=south,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder",
+      "y": 180
+    },
+    "facing=south,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder",
+      "y": 180
+    },
+    "facing=west,waterlogged=false": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder",
+      "y": 270
+    },
+    "facing=west,waterlogged=true": {
+      "model": "wizards_and_beasts:block/furniture/library_ladder",
+      "y": 270
+    }
+  }
+}

@@ -34,7 +34,9 @@ public final class FragmentParticle extends SingleQuadParticle {
         /** A pollen mote: a speck drifting slowly down, steady, gone in four to six seconds. */
         MOTE(0xFFFFFFFF, 0.1f, 80, 0.0f),
         /** Light catching gold: a still four-point star that swells and shrinks in half a second. */
-        GLINT(0xFFFFFFFF, 0.2f, 9, 0.0f);
+        GLINT(0xFFFFFFFF, 0.2f, 9, 0.0f),
+        /** Dust in lit air: smaller than a mote, lit by the world, wanders on the room's draughts, seven to ten seconds. */
+        DUST(0xFFFFFFFF, 0.06f, 140, 0.0f);
 
         final int argb;
         final float size;
@@ -114,6 +116,16 @@ public final class FragmentParticle extends SingleQuadParticle {
             setAlpha(glint * fade);
             return;
         }
+        if (style == Style.DUST) {
+            // Brownian: no fall to speak of, a slow wander, and the glint of a speck turning in the light.
+            xd += (random.nextDouble() - 0.5) * 0.0012;
+            yd += (random.nextDouble() - 0.52) * 0.0008;
+            zd += (random.nextDouble() - 0.5) * 0.0012;
+            float glint = Mth.sin((age + phase) * 0.11f) > 0.9f ? 1f : 0.55f;
+            float fade = Math.min(1f, Math.min(age / 20f, (lifetime - age) / 25f));
+            setAlpha(glint * fade);
+            return;
+        }
         if (style == Style.GLINT) {
             // Held still and upright; the size does the work (getQuadSize).
             xd = yd = zd = 0;
@@ -131,7 +143,7 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     @Override
     public float getQuadSize(float partialTick) {
-        if (style == Style.FIREFLY || style == Style.WISP || style == Style.MOTE) {
+        if (style == Style.FIREFLY || style == Style.WISP || style == Style.MOTE || style == Style.DUST) {
             return baseSize;
         }
         if (style == Style.GLINT) {
@@ -149,7 +161,8 @@ public final class FragmentParticle extends SingleQuadParticle {
 
     @Override
     protected int getLightColor(float partialTick) {
-        return 0xF000F0;
+        // Dust has no light of its own: lit by the room, it shows in a sunbeam and is gone in the shade.
+        return style == Style.DUST ? super.getLightColor(partialTick) : 0xF000F0;
     }
 
     public static ParticleProvider<SimpleParticleType> provider(SpriteSet sprites, Style style) {
@@ -182,6 +195,20 @@ public final class FragmentParticle extends SingleQuadParticle {
             p.xd = (random.nextDouble() - 0.5) * 0.01;
             p.yd = -0.002;
             p.zd = (random.nextDouble() - 0.5) * 0.01;
+            return p;
+        };
+    }
+
+    /** A speck of dust, tinted by the spawner; starts almost still and slows to nothing between nudges. */
+    public static ParticleProvider<at.koopro.wizardsandbeasts.particle.SpellTintParticleOptions> dustProvider(
+            SpriteSet sprites) {
+        return (options, level, x, y, z, xSpeed, ySpeed, zSpeed, random) -> {
+            FragmentParticle p = new FragmentParticle(level, x, y, z, 0, 0, 0, Style.DUST,
+                    options.argb() | 0xFF000000, sprites);
+            p.friction = 0.95f;
+            p.xd = (random.nextDouble() - 0.5) * 0.004;
+            p.yd = (random.nextDouble() - 0.5) * 0.002;
+            p.zd = (random.nextDouble() - 0.5) * 0.004;
             return p;
         };
     }

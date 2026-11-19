@@ -1,0 +1,215 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/hogwarts_flagstone",
+    "m1": "wizards_and_beasts:block/hogwarts_stone_bricks",
+    "m2": "wizards_and_beasts:block/hogwarts_dark_stone",
+    "m3": "wizards_and_beasts:block/hogwarts_chiseled_stone_bricks",
+    "m4": "wizards_and_beasts:block/furniture/heraldic_shield",
+    "m5": "wizards_and_beasts:block/furniture/brass",
+    "m6": "wizards_and_beasts:block/furniture/iron",
+    "m7": "wizards_and_beasts:block/furniture/castle_oak",
+    "m8": "minecraft:block/fire_0",
+    "particle": "wizards_and_beasts:block/hogwarts_stone_bricks"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#m0",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m0"
+        },
+        "west": {
+          "texture": "#m0"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        2,
+        14
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m2"
+        },
+        "south": {
+          "texture": "#m2",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m2"
+        },
+        "west": {
+          "texture": "#m2"
+        },
+        "up": {
+          "texture": "#m2"
+        },
+        "down": {
+          "texture": "#m2"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        2,
+        6
+      ],
+      "to": [
+        13,
+        9,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m6"
+        },
+        "south": {
+          "texture": "#m6"
+        },
+        "east": {
+          "texture": "#m6"
+        },
+        "west": {
+          "texture": "#m6"
+        },
+        "up": {
+          "texture": "#m6"
+        },
+        "down": {
+          "texture": "#m6"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        2,
+        8
+      ],
+      "to": [
+        14,
+        5,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m7"
+        },
+        "south": {
+          "texture": "#m7"
+        },
+        "east": {
+          "texture": "#m7"
+        },
+        "west": {
+          "texture": "#m7"
+        },
+        "up": {
+          "texture": "#m7"
+        },
+        "down": {
+          "texture": "#m7"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        4,
+        9.5
+      ],
+      "to": [
+        16,
+        16,
+        9.5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#m8",
+          "uv": [
+            0.0,
+            8.0,
+            8.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#m8",
+          "uv": [
+            8.0,
+            8.0,
+            16.0,
+            16.0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        4,
+        12.5
+      ],
+      "to": [
+        16,
+        16,
+        12.5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#m8",
+          "uv": [
+            8.0,
+            8.0,
+            16.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#m8",
+          "uv": [
+            0.0,
+            8.0,
+            8.0,
+            16.0
+          ]
+        }
+      }
+    }
+  ],
+  "render_type": "minecraft:cutout"
+}

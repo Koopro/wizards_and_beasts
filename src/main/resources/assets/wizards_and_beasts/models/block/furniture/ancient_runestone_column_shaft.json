@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/ancient_runestone_pillar",
+    "particle": "wizards_and_beasts:block/ancient_runestone"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        16,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0"
+        },
+        "west": {
+          "texture": "#m0"
+        },
+        "up": {
+          "texture": "#m0",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#m0",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

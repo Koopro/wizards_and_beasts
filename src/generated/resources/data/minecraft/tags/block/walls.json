@@ -1,0 +1,15 @@
+{
+  "values": [
+    "wizards_and_beasts:ancient_runestone_wall",
+    "wizards_and_beasts:ancient_runestone_bricks_wall",
+    "wizards_and_beasts:ancient_mossy_runestone_bricks_wall",
+    "wizards_and_beasts:knockturn_slate_wall",
+    "wizards_and_beasts:knockturn_slate_bricks_wall",
+    "wizards_and_beasts:knockturn_polished_slate_wall",
+    "wizards_and_beasts:knockturn_slate_tiles_wall",
+    "wizards_and_beasts:diagon_brick_tiles_wall",
+    "wizards_and_beasts:ministry_black_marble_tiles_wall",
+    "wizards_and_beasts:ministry_dark_tile_wall",
+    "wizards_and_beasts:gringotts_white_marble_tiles_wall"
+  ]
+}

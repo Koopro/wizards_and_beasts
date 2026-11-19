@@ -57,10 +57,10 @@ public final class BeamVisualDefaults {
         return switch (key) {
             // Jagged and thin: a fat, heavily-bloomed core smears a zig-zag back into a solid bar.
             case CRUCIO -> visual(true, BeamShapeKind.LIGHTNING, 0xFFFFFF, glowFor(color), 1, 1.0, 0.5, 2);
-            // "A jet of green light" (GoF 1, 32): a green core with a pale spine and a green halo, wider than a normal
-            // beam, alpha-blended. Additive, the pale core turned cyan-white against a day sky (spell showcase,
-            // 2026-11-12) and the curse no longer read as green.
-            case AVADA -> visual(true, BeamShapeKind.LASER, 0x3CFF6A, 0x9CFFB0, 3, 0.95, 0.6, 2, false);
+            // "A jet of green light" (GoF 1, 32), as the films draw it: a white-hot core in green shells (owner,
+            // 2026-11-17: "white core for the beams"). Alpha-blended: additive, the shells turned cyan-white against a
+            // day sky (spell showcase, 2026-11-12) and the curse no longer read as green.
+            case AVADA -> visual(true, BeamShapeKind.LASER, 0xEAFFEF, 0x3CFF6A, 2, 1.0, 0.85, 2, false);
             // A jet of water (HBP 26-27): water-blue core, pale-blue shells, alpha-blended. It was a white additive
             // laser and read as light, not water.
             case AGUAMENTI -> visual(true, BeamShapeKind.LASER, 0x3A8CFF, 0x9ADCFF, 2, 0.95, 0.6, 2, false);

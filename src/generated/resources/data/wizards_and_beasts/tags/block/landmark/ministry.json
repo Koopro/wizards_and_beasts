@@ -18,6 +18,12 @@
     "wizards_and_beasts:ministry_dark_tile_stairs",
     "wizards_and_beasts:ministry_floor_tile",
     "wizards_and_beasts:ministry_floor_tile_slab",
-    "wizards_and_beasts:ministry_wall_panel"
+    "wizards_and_beasts:ministry_wall_panel",
+    "wizards_and_beasts:ministry_black_marble_tiles_wall",
+    "wizards_and_beasts:ministry_dark_tile_wall",
+    "wizards_and_beasts:ministry_floor_tile_stairs",
+    "wizards_and_beasts:ministry_chiseled_black_marble",
+    "wizards_and_beasts:ministry_checkered_marble",
+    "wizards_and_beasts:ministry_checkered_marble_slab"
   ]
 }

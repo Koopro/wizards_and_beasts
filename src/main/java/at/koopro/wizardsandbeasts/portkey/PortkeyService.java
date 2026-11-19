@@ -112,12 +112,9 @@ public final class PortkeyService {
                 at.koopro.wizardsandbeasts.spell.core.SpellFamily.ARCANE,
                 at.koopro.wizardsandbeasts.spell.core.MagicColours.MAGIC);
         for (int ring = 0; ring < 3; ring++) {
-            double y = where.y + 0.3 + ring * 0.6;
-            double r = 0.9 - ring * 0.2;
-            for (int i = 0; i < 10; i++) {
-                double a = (i / 10.0 + ring * 0.15) * Math.PI * 2;
-                level.sendParticles(motes, where.x + Math.cos(a) * r, y, where.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
-            }
+            at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload.ring(level, motes,
+                    new Vec3(where.x, where.y + 0.3 + ring * 0.6, where.z), new Vec3(0, 1, 0),
+                    0.9 - ring * 0.2, 10, (float) (ring * 0.15 * Math.PI * 2));
         }
     }
 

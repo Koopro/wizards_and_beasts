@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/reading_armchair"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/reading_armchair",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/reading_armchair",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/reading_armchair",
+      "y": 270
+    }
+  }
+}

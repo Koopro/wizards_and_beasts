@@ -170,20 +170,10 @@ public final class DeluminatorReturnService {
             return;
         }
         int steps = Mth.clamp((int) (length * 1.8D), 12, 48);
-        Vec3 dir = delta.normalize();
-        for (int i = 0; i <= steps; i++) {
-            double t = i / (double) steps;
-            Vec3 p = start.add(delta.scale(t));
-            double wobble = (level.random.nextDouble() - 0.5D) * 0.06D;
-            level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
-                    p.x + wobble, p.y + wobble * 0.5D, p.z + wobble,
-                    1, 0.02D, 0.03D, 0.02D, 0.008D);
-            if (i == steps || i % 6 == 0) {
-                level.sendParticles(ParticleTypes.FIREWORK,
-                        p.x, p.y, p.z,
-                        1, dir.x * 0.02D, dir.y * 0.02D, dir.z * 0.02D, 0.02D);
-            }
-        }
+        // Two line packets (motes, and a firework spark every sixth step) instead of one packet per particle.
+        at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload.line(level, at.koopro.wizardsandbeasts.particle.MagicMotes.light(),
+                start, end, steps + 1, 0.03f);
+        at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload.line(level, ParticleTypes.FIREWORK, start, end, steps / 6 + 1, 0.0f);
     }
 
     @Nullable

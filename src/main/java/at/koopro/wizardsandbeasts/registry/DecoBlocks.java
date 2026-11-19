@@ -34,6 +34,11 @@ public final class DecoBlocks {
 
     private DecoBlocks() {}
 
+    /**
+     * Every deco block. Their blockstates, models and item models are hand-written by the deco tools
+     * ({@code tools/deco_models*.py}) into {@code src/main/resources}, so datagen must not expect them.
+     */
+    public static final List<DeferredBlock<? extends Block>> ALL = new ArrayList<>();
     /** Every deco item, in creative-tab order. */
     public static final List<DeferredItem<BlockItem>> ITEMS = new ArrayList<>();
     /** Animated deco: block-entity type per block id, and the rig and sheet its renderer draws. */
@@ -54,6 +59,7 @@ public final class DecoBlocks {
         DeferredBlock<DecoPileBlock> block = ModBlocks.BLOCKS.registerBlock(id,
                 properties -> new DecoPileBlock(properties, shapes), () -> props(color, sound));
         ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        ALL.add(block);
         PILES.add(block);
         return block;
     }
@@ -63,6 +69,7 @@ public final class DecoBlocks {
         DeferredBlock<at.koopro.wizardsandbeasts.block.deco.DecoBlock> block = ModBlocks.BLOCKS.registerBlock(id,
                 properties -> new at.koopro.wizardsandbeasts.block.deco.DecoBlock(properties, shape), () -> props(color, sound));
         ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        ALL.add(block);
         SINGLES.add(block);
         return block;
     }
@@ -76,6 +83,7 @@ public final class DecoBlocks {
                 () -> new BlockEntityType<>(AnimatedDecoBlockEntity::new, Set.<Block>of(block.get()))));
         RIGS.put(id, rig);
         ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
+        ALL.add(block);
         return block;
     }
 

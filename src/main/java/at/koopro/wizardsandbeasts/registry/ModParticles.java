@@ -56,6 +56,15 @@ public final class ModParticles {
     /** Pixel smoke that dissipates in four frames; tinted by meaning (see {@code MagicSmoke}). */
     public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> SMOKE_PUFF =
             registerTint("smoke_puff");
+    /** A speck of dust hanging in lit air: a library's shafts of light, a ruin's settling grit (atmosphere). */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> DUST =
+            registerTint("dust");
+    /** A low, slow sheet of mist lying over the ground, lit by the world: an old forest at night (atmosphere). */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> MIST =
+            registerTint("mist");
+    /** A mote that keeps the spawner's velocity and twinkles through its frames; client spell VFX only. */
+    public static final DeferredHolder<ParticleType<?>, ParticleType<SpellTintParticleOptions>> VFX_MOTE =
+            registerTint("vfx_mote");
 
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> PROTEGO_SHATTER =
             PARTICLE_TYPES.register("protego_shatter", () -> new SimpleParticleType(true));

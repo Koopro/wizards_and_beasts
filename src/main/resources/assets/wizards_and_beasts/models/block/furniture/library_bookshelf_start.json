@@ -1,0 +1,256 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/walnut_planks",
+    "m1": "wizards_and_beasts:block/furniture/walnut",
+    "m2": "wizards_and_beasts:block/furniture/book_spines",
+    "particle": "wizards_and_beasts:block/furniture/walnut"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        15
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#m0",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m0",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m0",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#m0",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        2
+      ],
+      "to": [
+        16,
+        2,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m0",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        8,
+        2
+      ],
+      "to": [
+        16,
+        9,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m0",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        14,
+        2
+      ],
+      "to": [
+        16,
+        16,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m0",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m0",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        15,
+        1
+      ],
+      "to": [
+        16,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m1"
+        },
+        "south": {
+          "texture": "#m1"
+        },
+        "east": {
+          "texture": "#m1",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m1",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m1",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#m1"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        2,
+        3
+      ],
+      "to": [
+        16,
+        8,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m2"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        9,
+        3
+      ],
+      "to": [
+        16,
+        14,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m2"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        1.5
+      ],
+      "to": [
+        1,
+        16,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m1"
+        },
+        "south": {
+          "texture": "#m1"
+        },
+        "east": {
+          "texture": "#m1"
+        },
+        "west": {
+          "texture": "#m1",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m1",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#m1",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

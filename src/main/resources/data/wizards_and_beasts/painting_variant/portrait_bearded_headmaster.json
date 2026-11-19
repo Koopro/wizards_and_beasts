@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_bearded_headmaster",
+  "width": 2,
+  "height": 3,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_bearded_headmaster.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_bearded_headmaster.author",
+    "color": "gray"
+  }
+}

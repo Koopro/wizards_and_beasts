@@ -35,6 +35,9 @@ public final class ModParticleProviders {
         event.registerSpriteSet(ModParticles.MOTE.get(), FragmentParticle::moteProvider);
         event.registerSpriteSet(ModParticles.GLINT.get(), FragmentParticle::glintProvider);
         event.registerSpriteSet(ModParticles.SMOKE_PUFF.get(), SmokePuffParticle::provider);
+        event.registerSpriteSet(ModParticles.VFX_MOTE.get(), VfxMoteParticle::provider);
+        event.registerSpriteSet(ModParticles.DUST.get(), FragmentParticle::dustProvider);
+        event.registerSpriteSet(ModParticles.MIST.get(), MistParticle::provider);
 
         // Broom slipstreams. One particle class, three palettes: what separates a Cleansweep's dust
         // from a Firebolt's embers is colour, size and how fast it fades, none of which needs its

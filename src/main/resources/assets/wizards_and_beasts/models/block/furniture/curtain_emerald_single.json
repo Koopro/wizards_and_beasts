@@ -1,0 +1,144 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m0": "wizards_and_beasts:block/furniture/brass",
+    "m1": "wizards_and_beasts:block/furniture/curtain_emerald",
+    "particle": "wizards_and_beasts:block/furniture/curtain_emerald"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        15,
+        6.5
+      ],
+      "to": [
+        16,
+        16,
+        7.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m0",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m0",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        0.5,
+        14.5,
+        6
+      ],
+      "to": [
+        1.5,
+        16.5,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0"
+        },
+        "west": {
+          "texture": "#m0"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        14.5,
+        14.5,
+        6
+      ],
+      "to": [
+        15.5,
+        16.5,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m0"
+        },
+        "south": {
+          "texture": "#m0"
+        },
+        "east": {
+          "texture": "#m0"
+        },
+        "west": {
+          "texture": "#m0"
+        },
+        "up": {
+          "texture": "#m0"
+        },
+        "down": {
+          "texture": "#m0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        7.5
+      ],
+      "to": [
+        16,
+        15,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m1"
+        },
+        "south": {
+          "texture": "#m1"
+        },
+        "east": {
+          "texture": "#m1",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#m1",
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#m1"
+        },
+        "down": {
+          "texture": "#m1",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

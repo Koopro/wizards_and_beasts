@@ -112,6 +112,34 @@ public class ModModelProvider extends ModelProvider {
         super(output, WizardsAndBeastsMod.MODID);
     }
 
+    /**
+     * Blocks whose blockstate, models and item model are hand-written in {@code src/main/resources}
+     * (the deco tools and the Diagon passage blocks). The provider validates that every known block
+     * has a blockstate it generated, so these are left out of that check, or {@code runData} fails.
+     */
+    static Set<Block> handAuthoredBlocks() {
+        Set<Block> blocks = new java.util.HashSet<>();
+        at.koopro.wizardsandbeasts.registry.DecoBlocks.ALL.forEach(block -> blocks.add(block.get()));
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.ALL.forEach(block -> blocks.add(block.get()));
+        blocks.add(ModBlocks.LEAKY_CAULDRON_DOOR.get());
+        blocks.add(ModBlocks.DIAGON_ARCHWAY.get());
+        blocks.add(ModBlocks.DIAGON_ARCHWAY_MOVING.get());
+        return blocks;
+    }
+
+    @Override
+    protected java.util.stream.Stream<? extends net.minecraft.core.Holder<Block>> getKnownBlocks() {
+        Set<Block> skip = handAuthoredBlocks();
+        return super.getKnownBlocks().filter(holder -> !skip.contains(holder.value()));
+    }
+
+    @Override
+    protected java.util.stream.Stream<? extends net.minecraft.core.Holder<Item>> getKnownItems() {
+        Set<Block> skip = handAuthoredBlocks();
+        return super.getKnownItems().filter(holder -> !(holder.value() instanceof net.minecraft.world.item.BlockItem item
+                && skip.contains(item.getBlock())));
+    }
+
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         itemModels.generateFlatItem(WandItemRegistry.DEBUG_WAND.get(), ModelTemplates.FLAT_ITEM);
@@ -244,6 +272,8 @@ public class ModModelProvider extends ModelProvider {
 
         generateWizardingWorld(blockModels, itemModels);
         generateLocationBlocks(blockModels);
+        generateArchitecture(blockModels);
+        generateWoodFittings(blockModels, itemModels);
     }
 
     /**
@@ -492,6 +522,46 @@ public class ModModelProvider extends ModelProvider {
                         .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_paper"))
                         .put(TextureSlot.BACK, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_ink")),
                 false);
+    }
+
+    // --- Architecture (ArchitectureBlocks: each piece says what it is) ---
+
+    private void generateArchitecture(BlockModelGenerators blockModels) {
+        for (var piece : at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES) {
+            Block block = piece.block().get();
+            Block base = piece.base().get();
+            switch (piece.shape()) {
+                case CUBE -> blockModels.createTrivialCube(block);
+                case PILLAR -> blockModels.woodProvider(block).log(block);
+                case SLAB -> blockModels.familyWithExistingFullBlock(base).slab(block);
+                case STAIRS -> blockModels.familyWithExistingFullBlock(base).stairs(block);
+                case WALL -> blockModels.familyWithExistingFullBlock(base).wall(block);
+            }
+        }
+    }
+
+    // --- Wood fittings and location doors (WoodFittings) ---
+
+    private void generateWoodFittings(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            Block planks = f.wood().planks().get();
+            blockModels.familyWithExistingFullBlock(planks).fence(f.fence().get()).fenceGate(f.gate().get())
+                    .button(f.button().get()).pressurePlate(f.plate().get());
+            cutout(blockModels).createDoor(f.door().get());
+            cutout(blockModels).createOrientableTrapdoor(f.trapdoor().get());
+            blockModels.createParticleOnlyBlock(f.sign().get(), planks);
+            blockModels.createParticleOnlyBlock(f.wallSign().get(), planks);
+            itemModels.generateFlatItem(f.signItem().get(), ModelTemplates.FLAT_ITEM);
+            blockModels.createHangingSign(f.wood().strippedLog().get(), f.hangingSign().get(), f.wallHangingSign().get());
+        }
+        for (var b : at.koopro.wizardsandbeasts.registry.WoodBoats.ALL) {
+            itemModels.generateFlatItem(b.boatItem().get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(b.chestBoatItem().get(), ModelTemplates.FLAT_ITEM);
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            cutout(blockModels).createDoor(d.door().get());
+            cutout(blockModels).createOrientableTrapdoor(d.trapdoor().get());
+        }
     }
 
     // --- Location decorative block datagen ---

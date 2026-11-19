@@ -35,6 +35,12 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
 
     static final Jet DEFAULT_JET = new Jet(2.0f, 1.6);
 
+    /** How far a jet's core is lifted toward white. */
+    static final float CORE_WHITE = 0.82f;
+
+    /** Stateless shape, shared rather than built per bolt per frame. */
+    private static final Laser LASER = new Laser();
+
     static final Map<String, Jet> JETS = Map.ofEntries(
             Map.entry("diffindo", new Jet(1.0f, 2.2)),
             Map.entry("confringo", new Jet(3.0f, 1.1)),
@@ -88,10 +94,13 @@ public class SpellProjectileRenderer extends EntityRenderer<SpellProjectileEntit
         // Never longer than the way it has come, so the tail does not reach back into the caster's hand.
         double length = Math.min(state.jet.length(), Math.max(0.2, state.flown * speed));
         int rgb = state.spellColor & 0xFFFFFF;
-        int glow = mixRgb(rgb, 0xFFFFFF, 0.25f);
-        float width = state.jet.widthPx();
-        BeamStyle style = new BeamStyle(width, width, rgb, glow, 1.0f, 0.6f, 2, 0.0f, false, 0.5f);
-        new Laser().render(style, dir.scale(-length), Vec3.ZERO, 1.0f, 0,
+        // Film look (owner, 2026-11-17: "white core for the beams"): a white-hot core, a breath of the spell's colour
+        // left in it, and the colour carried by the shells around it. The core is a pixel thinner than the jet's
+        // build so the coloured shells still frame it at every width.
+        int core = mixRgb(rgb, 0xFFFFFF, CORE_WHITE);
+        float width = Math.max(1.0f, state.jet.widthPx() - 1.0f);
+        BeamStyle style = new BeamStyle(width, width, core, rgb, 1.0f, 0.85f, 2, 0.0f, false, 0.5f);
+        LASER.render(style, dir.scale(-length), Vec3.ZERO, 1.0f, 0,
                 poseStack, collector, (int) state.flown, state.flown - (int) state.flown);
     }
 

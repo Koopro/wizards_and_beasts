@@ -1,5 +1,18 @@
 {
   "values": [
+    "wizards_and_beasts:ancient_runestone_slab",
+    "wizards_and_beasts:ancient_runestone_bricks_slab",
+    "wizards_and_beasts:ancient_mossy_runestone_bricks_slab",
+    "wizards_and_beasts:ancient_runic_floor_slab",
+    "wizards_and_beasts:knockturn_slate_slab",
+    "wizards_and_beasts:knockturn_slate_bricks_slab",
+    "wizards_and_beasts:knockturn_polished_slate_slab",
+    "wizards_and_beasts:knockturn_slate_tiles_slab",
+    "wizards_and_beasts:ministry_checkered_marble_slab",
+    "wizards_and_beasts:gilt_mosaic_floor_slab",
+    "wizards_and_beasts:walnut_parquet_slab",
+    "wizards_and_beasts:slate_roof_tiles_slab",
+    "wizards_and_beasts:verdigris_roof_tiles_slab",
     "wizards_and_beasts:elder_slab",
     "wizards_and_beasts:yew_slab",
     "wizards_and_beasts:holly_slab",

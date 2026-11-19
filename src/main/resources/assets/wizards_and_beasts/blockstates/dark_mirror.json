@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/dark_mirror"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/dark_mirror",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/dark_mirror",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/dark_mirror",
+      "y": 270
+    }
+  }
+}

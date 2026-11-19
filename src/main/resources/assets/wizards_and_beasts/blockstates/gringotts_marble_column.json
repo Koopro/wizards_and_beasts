@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "part=single": {
+      "model": "wizards_and_beasts:block/furniture/gringotts_marble_column_single"
+    },
+    "part=base": {
+      "model": "wizards_and_beasts:block/furniture/gringotts_marble_column_base"
+    },
+    "part=shaft": {
+      "model": "wizards_and_beasts:block/furniture/gringotts_marble_column_shaft"
+    },
+    "part=capital": {
+      "model": "wizards_and_beasts:block/furniture/gringotts_marble_column_capital"
+    }
+  }
+}

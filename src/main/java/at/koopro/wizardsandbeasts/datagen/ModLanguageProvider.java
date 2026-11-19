@@ -16,6 +16,39 @@ public class ModLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         creativeTabs();
+        at.koopro.wizardsandbeasts.registry.FurnitureBlocks.NAMES.forEach((id, name) ->
+                add("block." + WizardsAndBeastsMod.MODID + "." + id, name));
+        add("entity." + WizardsAndBeastsMod.MODID + ".seat", "Seat");
+        for (int i = 0; i < at.koopro.wizardsandbeasts.registry.FurnitureBlocks.PORTRAITS.size(); i++) {
+            String id = at.koopro.wizardsandbeasts.registry.FurnitureBlocks.PORTRAITS.get(i);
+            add("painting." + WizardsAndBeastsMod.MODID + "." + id + ".title",
+                    at.koopro.wizardsandbeasts.registry.FurnitureBlocks.PORTRAIT_TITLES.get(i));
+            add("painting." + WizardsAndBeastsMod.MODID + "." + id + ".author", "A Hogwarts portraitist");
+        }
+        at.koopro.wizardsandbeasts.registry.ArchitectureBlocks.PIECES.forEach(piece -> add(piece.block().get(), piece.name()));
+        for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
+            String w = f.displayName();
+            add(f.door().get(), w + " Door");
+            add(f.trapdoor().get(), w + " Trapdoor");
+            add(f.fence().get(), w + " Fence");
+            add(f.gate().get(), w + " Fence Gate");
+            add(f.button().get(), w + " Button");
+            add(f.plate().get(), w + " Pressure Plate");
+            add(f.sign().get(), w + " Sign");
+            add(f.wallSign().get(), w + " Wall Sign");
+            add(f.hangingSign().get(), w + " Hanging Sign");
+            add(f.wallHangingSign().get(), w + " Wall Hanging Sign");
+        }
+        for (var b : at.koopro.wizardsandbeasts.registry.WoodBoats.ALL) {
+            add(b.boatItem().get(), b.displayName() + " Boat");
+            add(b.chestBoatItem().get(), b.displayName() + " Boat with Chest");
+            add(b.boat().get(), b.displayName() + " Boat");
+            add(b.chestBoat().get(), b.displayName() + " Boat with Chest");
+        }
+        for (var d : at.koopro.wizardsandbeasts.registry.WoodFittings.DOORS) {
+            add(d.door().get(), d.name() + " Door");
+            add(d.trapdoor().get(), d.name() + " Trapdoor");
+        }
         debugTools();
         elder();
         yew();

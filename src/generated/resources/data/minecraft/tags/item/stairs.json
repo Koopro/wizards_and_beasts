@@ -1,5 +1,18 @@
 {
   "values": [
+    "wizards_and_beasts:ancient_runestone_stairs",
+    "wizards_and_beasts:ancient_runestone_bricks_stairs",
+    "wizards_and_beasts:ancient_mossy_runestone_bricks_stairs",
+    "wizards_and_beasts:knockturn_slate_stairs",
+    "wizards_and_beasts:knockturn_slate_bricks_stairs",
+    "wizards_and_beasts:knockturn_polished_slate_stairs",
+    "wizards_and_beasts:knockturn_slate_tiles_stairs",
+    "wizards_and_beasts:hogwarts_flagstone_stairs",
+    "wizards_and_beasts:hogwarts_floor_tile_stairs",
+    "wizards_and_beasts:ministry_floor_tile_stairs",
+    "wizards_and_beasts:gringotts_counting_floor_stairs",
+    "wizards_and_beasts:slate_roof_tiles_stairs",
+    "wizards_and_beasts:verdigris_roof_tiles_stairs",
     "wizards_and_beasts:elder_stairs",
     "wizards_and_beasts:yew_stairs",
     "wizards_and_beasts:holly_stairs",

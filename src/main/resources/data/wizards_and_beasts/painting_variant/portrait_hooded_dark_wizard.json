@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_hooded_dark_wizard",
+  "width": 2,
+  "height": 3,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_hooded_dark_wizard.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_hooded_dark_wizard.author",
+    "color": "gray"
+  }
+}

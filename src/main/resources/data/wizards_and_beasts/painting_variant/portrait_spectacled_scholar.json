@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:portrait_spectacled_scholar",
+  "width": 2,
+  "height": 2,
+  "title": {
+    "translate": "painting.wizards_and_beasts.portrait_spectacled_scholar.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.portrait_spectacled_scholar.author",
+    "color": "gray"
+  }
+}

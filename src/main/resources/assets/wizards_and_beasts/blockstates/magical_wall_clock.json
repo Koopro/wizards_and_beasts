@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/magical_wall_clock"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/magical_wall_clock",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/magical_wall_clock",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/magical_wall_clock",
+      "y": 270
+    }
+  }
+}

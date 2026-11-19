@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wizards_and_beasts:block/furniture/ministry_gilt_plaque"
+    },
+    "facing=east": {
+      "model": "wizards_and_beasts:block/furniture/ministry_gilt_plaque",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wizards_and_beasts:block/furniture/ministry_gilt_plaque",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wizards_and_beasts:block/furniture/ministry_gilt_plaque",
+      "y": 270
+    }
+  }
+}

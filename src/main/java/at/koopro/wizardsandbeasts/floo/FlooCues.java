@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.floo;
 
 import at.koopro.wizardsandbeasts.registry.ModSounds;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
@@ -94,19 +95,13 @@ public final class FlooCues {
         double lift = 0.2 + 1.4 * progress;
         DustParticleOptions dust = emerald(1.0f + progress * 0.9f);
 
-        for (int arm = 0; arm < arms; arm++) {
-            double a = angle + (Mth.TWO_PI / arms) * arm;
-            double px = x + Math.cos(a) * radius;
-            double pz = z + Math.sin(a) * radius;
-            level.sendParticles(dust, px, y + lift * level.random.nextDouble(), pz,
-                    1, 0.04, 0.12, 0.04, 0.0);
-            // Ash rides the same orbit, a quarter turn behind, so the swirl has grit in it and is
-            // not purely a light show. Floo travel is famously filthy.
-            double ashAngle = a - 0.5;
-            level.sendParticles(ParticleTypes.ASH,
-                    x + Math.cos(ashAngle) * radius, y + lift * 0.6, z + Math.sin(ashAngle) * radius,
-                    1, 0.05, 0.1, 0.05, 0.0);
-        }
+        // The arms as one ring packet; ash rides the same orbit half a radian behind, so the swirl has grit in it
+        // and is not purely a light show. Floo travel is famously filthy.
+        Vec3 up = new Vec3(0, 1, 0);
+        at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload.ring(level, dust, new Vec3(x, y + lift * level.random.nextDouble(), z), up,
+                radius, arms, angle);
+        at.koopro.wizardsandbeasts.network.spell.SpellVfxShapeS2CPayload.ring(level, ParticleTypes.ASH, new Vec3(x, y + lift * 0.6, z), up, radius, arms,
+                angle - 0.5f);
     }
 
     /** The rushing loop under the swirl. Called on an interval, not every tick. */
@@ -143,12 +138,8 @@ public final class FlooCues {
         DustParticleOptions dust = emerald(1.6f);
         double cx = pos.getX() + 0.5;
         double cz = pos.getZ() + 0.5;
-        for (int i = 0; i < 40; i++) {
-            double ox = (level.random.nextDouble() - 0.5) * 0.7;
-            double oz = (level.random.nextDouble() - 0.5) * 0.7;
-            double y = pos.getY() + 0.1 + level.random.nextDouble() * 1.6;
-            level.sendParticles(dust, cx + ox, y, cz + oz, 1, 0, 0, 0, 0);
-        }
+        // One call for the column (vanilla scatters the forty itself), not forty packets.
+        level.sendParticles(dust, cx, pos.getY() + 0.9, cz, 40, 0.2, 0.45, 0.2, 0.0);
         level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, cx, pos.getY() + 0.4, cz,
                 18, 0.25, 0.5, 0.25, 0.08);
         level.sendParticles(ParticleTypes.LAVA, cx, pos.getY() + 0.3, cz, 4, 0.2, 0.2, 0.2, 0.0);
