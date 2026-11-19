@@ -61,6 +61,9 @@ public final class CanonDepthTests {
         tests.add("canon_depth_brew_mishaps",
                 "canon: a brew that boils over splashes whoever stands by; a melted cauldron is gone",
                 CanonDepthTests::brewMishaps);
+        tests.add("canon_depth_daily_prophet_prints_the_news",
+                "canon: the Daily Prophet's issue carries what happened on the server today",
+                CanonDepthTests::prophet);
     }
 
     private static void revealing(GameTestHelper helper) {
@@ -190,6 +193,18 @@ public final class CanonDepthTests {
         } finally {
             retire(helper, seamus);
         }
+    }
+
+    private static void prophet(GameTestHelper helper) {
+        var server = helper.getLevel().getServer();
+        long day = at.koopro.wizardsandbeasts.prophet.DailyProphet.day(server);
+        at.koopro.wizardsandbeasts.prophet.ProphetNews.get(server).report(day,
+                "prophet.wizards_and_beasts.story.achievement", "Hermione", "Top of the year");
+        var issue = at.koopro.wizardsandbeasts.prophet.DailyProphet.issue(server);
+        check(helper, issue.size() >= 3, () -> "the issue printed no story: " + issue);
+        boolean found = issue.stream().anyMatch(c -> c.getString().contains("Hermione"));
+        check(helper, found, () -> "today's issue left out today's news: " + issue);
+        helper.succeed();
     }
 
     private static void remembrall(GameTestHelper helper) {

@@ -124,6 +124,7 @@ public final class MinistryTrace {
                 exposure, TraceRules.underageBreach(scene), scene.inDanger(), scene.muggleWitnesses(),
                 scene.wizardWitnesses(), law.offence(), false, scene.licensedPractice());
         data.putIncident(incident);
+        at.koopro.wizardsandbeasts.prophet.DailyProphet.onIncident(server, incident);
         data.recordWitnesses(incident.id(), scene.witnessEntities());
         for (TraceRules.PlannedReport report : reports) {
             data.addReport(new PendingReport(incident.id(), report.channel(), now + report.delayTicks(),
@@ -241,6 +242,7 @@ public final class MinistryTrace {
     /** The Ministry now knows who did it. */
     static void attribute(MinecraftServer server, MinistryCaseData data, Incident incident, long now) {
         data.putIncident(incident);
+        at.koopro.wizardsandbeasts.prophet.DailyProphet.onIncident(server, incident);
         UUID wizard = incident.caster();
         UnsolvedIncident wasOnBoard = data.unsolved(incident.id());
         data.removeUnsolved(incident.id());

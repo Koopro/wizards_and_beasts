@@ -96,10 +96,14 @@ public final class CanonItemRegistry {
                     .HowlerItem(props.stacksTo(16)));
     public static final DeferredItem<Item> DA_GALLEON =
             ModItems.ITEMS.registerItem("da_galleon", Item::new);
-    public static final DeferredItem<Item> DAILY_PROPHET =
-            ModItems.ITEMS.registerItem("daily_prophet", Item::new);
-    public static final DeferredItem<Item> THE_QUIBBLER =
-            ModItems.ITEMS.registerItem("the_quibbler", Item::new);
+    /** Read it: today's issue, written from what happened on the server (DailyProphet). */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.prophet.NewspaperItem> DAILY_PROPHET =
+            ModItems.ITEMS.registerItem("daily_prophet", props -> new at.koopro.wizardsandbeasts.prophet
+                    .NewspaperItem(props, false));
+    /** Read it: Xenophilius Lovegood's headlines, whatever the day. */
+    public static final DeferredItem<at.koopro.wizardsandbeasts.prophet.NewspaperItem> THE_QUIBBLER =
+            ModItems.ITEMS.registerItem("the_quibbler", props -> new at.koopro.wizardsandbeasts.prophet
+                    .NewspaperItem(props, true));
     public static final DeferredItem<Item> WIZARDING_WIRELESS =
             ModItems.ITEMS.registerItem("wizarding_wireless", Item::new);
     public static final DeferredItem<Item> QUICK_QUOTES_QUILL =
