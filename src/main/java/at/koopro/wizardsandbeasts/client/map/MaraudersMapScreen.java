@@ -135,6 +135,16 @@ public class MaraudersMapScreen extends Screen {
     private final List<MapMarker> waypointRows = new ArrayList<>();
     private int waypointScroll;
 
+    /** Ticks the ink takes to spread over the page once the oath is said. */
+    private static final int INK_TICKS = 30;
+    private static boolean inkPending;
+    private int inkTicks;
+
+    /** Called by {@link MapOathScreen} just before it opens the map: the next map shown fades its ink in. */
+    static void inkSpreads() {
+        inkPending = true;
+    }
+
     public MaraudersMapScreen() {
         super(Component.translatable("screen.wizards_and_beasts.marauders_map.title"));
         Minecraft mc = Minecraft.getInstance();
@@ -167,6 +177,18 @@ public class MaraudersMapScreen extends Screen {
 
         addControls();
         rebuildSidePanel();
+        if (inkPending) {
+            inkPending = false;
+            inkTicks = INK_TICKS;
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (inkTicks > 0) {
+            inkTicks--;
+        }
     }
 
     /**
@@ -294,6 +316,15 @@ public class MaraudersMapScreen extends Screen {
         gfx.disableScissor();
 
         renderFooter(gfx);
+
+        if (inkTicks > 0) {
+            // The page is blank parchment the ink is still soaking into: a sheet of the paper's own colour
+            // over the map, thinning as the lines spread.
+            float left = Math.max(0f, (inkTicks - partialTick) / INK_TICKS);
+            int alpha = (int) (255 * left * left);
+            gfx.fill(view.viewX(), view.viewY(), view.viewX() + view.viewW(), view.viewY() + view.viewH(),
+                    (alpha << 24) | (MaraudersMapTextures.SKIN.base() & 0x00FFFFFF));
+        }
 
         // Before the widgets, not after: the waypoint panel's name field and buttons sit on it, and a
         // sheet submitted after them is drawn over them.
@@ -833,6 +864,11 @@ public class MaraudersMapScreen extends Screen {
 
     @Override
     public void onClose() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            mc.player.displayClientMessage(Component.translatable("screen.wizards_and_beasts.marauders_map.managed")
+                    .withStyle(ChatFormatting.ITALIC), true);
+        }
         ClientPacketDistributor.sendToServer(new MapCloseC2SPayload());
         ClientMapAtlas.close();
         MapTrails.clear();

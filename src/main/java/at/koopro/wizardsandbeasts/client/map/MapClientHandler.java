@@ -24,8 +24,9 @@ public class MapClientHandler {
             // Also fires when the holder walks through a portal with the map open, and when the
             // biome palette grows. Only the first case needs a screen; replacing a live screen in
             // the other two would throw away the player's pan and zoom mid-look.
-            if (!(mc.screen instanceof MaraudersMapScreen)) {
-                mc.setScreen(new MaraudersMapScreen());
+            // A fresh unfolding is blank parchment until the oath is said (MapOathScreen).
+            if (!(mc.screen instanceof MaraudersMapScreen) && !(mc.screen instanceof MapOathScreen)) {
+                mc.setScreen(new MapOathScreen());
             }
         });
     }
