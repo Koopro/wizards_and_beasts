@@ -53,6 +53,32 @@
     "hit",
     "death",
     "coil",
-    "taste_air"
-  ]
+    "taste_air",
+    "lie_down",
+    "wake"
+  ],
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "gilded",
+        "weight": 2,
+        "origin": "design",
+        "note": "gold plumage; canon Occamy eggshells are pure silver"
+      }
+    ]
+  },
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:glint",
+        "color": "#B7D3FF",
+        "rate": 0.05,
+        "where": "back",
+        "when": "moving"
+      }
+    ],
+    "_note": "design: light catching its plumage"
+  }
 }

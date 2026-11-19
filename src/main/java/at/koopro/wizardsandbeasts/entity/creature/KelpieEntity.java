@@ -112,7 +112,6 @@ public class KelpieEntity extends GenericAquaticBeastEntity implements at.koopro
             SynchedEntityData.defineId(KelpieEntity.class, EntityDataSerializers.BYTE);
 
     private static final String ACTION = "kelpie_action";
-    private static final RawAnimation IDLE = loop("idle");
     private static final RawAnimation WALK = loop("walk");
     private static final RawAnimation RUN = loop("run");
     private static final RawAnimation SWIM = loop("swim");
@@ -433,6 +432,7 @@ public class KelpieEntity extends GenericAquaticBeastEntity implements at.koopro
         double dy = getY() - yo;
         double dz = getZ() - zo;
         double horizontal = dx * dx + dz * dz;
+        test.setControllerSpeed(1f);
         if (isInWater()) {
             if (isGripping()) return test.setAndContinue(DROWN);
             if (dy < -0.04) return test.setAndContinue(DIVE);
@@ -443,7 +443,13 @@ public class KelpieEntity extends GenericAquaticBeastEntity implements at.koopro
             return test.setAndContinue(horizontal > RUN_SPEED_SQR || isGripping() ? RUN : WALK);
         }
         if (flag(FLAG_THREATEN)) return test.setAndContinue(THREATEN);
-        return test.setAndContinue(isDisguised() ? LURE : IDLE);
+        if (isDisguised()) return test.setAndContinue(LURE);
+        // Standing on land in its true form it shows what the ecology says it is doing, like any creature.
+        at.koopro.wizardsandbeasts.util.AnimHelper.observe(this, "kelpie");
+        at.koopro.wizardsandbeasts.creature.profile.CreatureActivity.Loop loop = activity().loop(false,
+                clip -> at.koopro.wizardsandbeasts.util.AnimHelper.rigHas("kelpie", clip), "walk");
+        test.setControllerSpeed((float) loop.speed());
+        return test.setAndContinue(at.koopro.wizardsandbeasts.util.AnimHelper.activityLoop("kelpie", loop.clip()));
     }
 
     /** Movement first, the shared one-shot layer, then the Kelpie's own beats last. */

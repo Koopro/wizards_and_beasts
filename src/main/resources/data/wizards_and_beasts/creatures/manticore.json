@@ -56,7 +56,9 @@
     "hit",
     "death",
     "shake",
-    "graze"
+    "graze",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "combat": {
@@ -67,5 +69,9 @@
       "preferredRange": 5.0
     }
   },
-  "_combat_note": "[canon FB] the sting kills; strikes and withdraws out of reach [design]."
+  "_combat_note": "[canon FB] the sting kills; strikes and withdraws out of reach [design].",
+  "fx": {
+    "footfall": 0.4,
+    "emitters": []
+  }
 }

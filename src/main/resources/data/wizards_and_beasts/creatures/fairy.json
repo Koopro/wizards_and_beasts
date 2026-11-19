@@ -37,5 +37,25 @@
     "death",
     "hover",
     "flit"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:light_glow",
+        "color": "#FFE9A8",
+        "rate": 0.06,
+        "where": "body",
+        "when": "always"
+      },
+      {
+        "particle": "wizards_and_beasts:light_glow",
+        "color": "#FFF2C4",
+        "rate": 1.0,
+        "where": "body",
+        "when": "appear"
+      }
+    ],
+    "_note": "fairies are decorative and lit (Goblet of Fire Yule Ball)"
+  }
 }

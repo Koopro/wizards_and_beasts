@@ -29,7 +29,9 @@
     "death",
     "graze",
     "sniff",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "sounds": {
@@ -44,5 +46,16 @@
       "retreatAtHealth": 0.4
     }
   },
-  "_combat_note": "[canon FB] ferocious to Muggles, yet a terrier: nips and backs off [design]."
+  "_combat_note": "[canon FB] ferocious to Muggles, yet a terrier: nips and backs off [design].",
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "black",
+        "weight": 2,
+        "origin": "design",
+        "note": "a black Crup; canon only says it resembles a Jack Russell terrier"
+      }
+    ]
+  }
 }

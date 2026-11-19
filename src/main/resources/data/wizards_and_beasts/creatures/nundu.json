@@ -55,7 +55,9 @@
     "death",
     "graze",
     "sniff",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "combat": {
@@ -66,5 +68,20 @@
       "preferredRange": 6.0
     }
   },
-  "_combat_note": "[canon FB] moves silently despite its size: it waits, then commits."
+  "_combat_note": "[canon FB] moves silently despite its size: it waits, then commits.",
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "melanistic",
+        "weight": 2,
+        "origin": "design",
+        "note": "black like a melanistic leopard; the Nundu is a giant leopard in canon"
+      }
+    ]
+  },
+  "fx": {
+    "footfall": 0.5,
+    "emitters": []
+  }
 }

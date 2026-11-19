@@ -44,5 +44,18 @@
     "death",
     "coil",
     "taste_air"
-  ]
+  ],
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:smoke_puff",
+        "color": "#8C8A86",
+        "rate": 0.25,
+        "where": "feet",
+        "when": "moving"
+      }
+    ],
+    "_note": "it leaves a trail of ash behind it (Fantastic Beasts)"
+  }
 }

@@ -89,7 +89,12 @@ import java.util.Set;
  * never moves); {@code vanish}/{@code appear} add and remove invisibility (the fade); {@code look} turns the creature's synced head away from its body (the life pass's head turn);
  * {@code @clip} fires a declared one-shot through {@code GenericBeastEntity.triggerDeclared}, {@code @controller/clip}
  * any triggerable clip of any GeckoLib creature; {@code pace}, {@code fly} and {@code glide} move the client copy so
- * a creature that reads its own movement (the Phoenix) plays those loops.
+ * a creature that reads its own movement (the Phoenix) plays those loops; {@code stroll} walks the server copy
+ * back and forth so movement-driven effects (footfall) fire as in play. A trailing {@code +} ({@code sleep+})
+ * shoots the first frame two ticks after the change instead of thirty, so the bridging one-shot ({@code lie_down},
+ * {@code wake}) is on film.
+ * An entry line carrying {@code visible=1} keeps its creature's invisibility stripped every tick, so camouflage
+ * does not hide it from the strips.
  * {@code WB_ENTITY_SHOWCASE_STRIP} is {@code frames:interval} (default {@code 4:5}): how many shots per action and
  * how many ticks apart; {@code name*frames:interval} overrides it for one action. Files are {@code <stem>__<action>_f<n>.png}.
  */
@@ -160,7 +165,8 @@ public final class EntityShowcaseCapture {
 
         /** The file name's stem: the id, and who the person is when the line says. */
         String stem() {
-            String stem = id.getPath().replace('/', '_') + (props.containsKey("age") ? "_age" + props.get("age") : "");
+            String stem = id.getPath().replace('/', '_') + (props.containsKey("age") ? "_age" + props.get("age") : "")
+                    + (props.containsKey("coat") ? "_" + props.get("coat") : "");
             if (props.containsKey("form")) {
                 stem += "_" + Identifier.parse(props.get("form")).getPath();
             }
@@ -330,6 +336,22 @@ public final class EntityShowcaseCapture {
         if (shown == null || "fight".equals(action) || "struck".equals(action)) {
             return;   // nothing, or a creature moving by its own goals: leave the client copy alone
         }
+        // `visible` on the entry line: camouflage (a Moke, a Dugbog) cannot hide the subject from the strips.
+        if (REQUEST.entities().get(SHOTS.get(shot).entry()).props().containsKey("visible")
+                && mc.getSingleplayerServer() != null) {
+            mc.getSingleplayerServer().execute(() -> {
+                var server = mc.getSingleplayerServer();
+                if (server == null || server.getPlayerList().getPlayers().isEmpty()) {
+                    return;
+                }
+                if (subject(server.getPlayerList().getPlayers().getFirst().level()) instanceof LivingEntity e) {
+                    if (e.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY)) {
+                        e.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+                    }
+                    e.setInvisible(false);
+                }
+            });
+        }
         shown.setOnGround(!airborne);
         if ("walk".equals(action) && shown instanceof LivingEntity living) {
             living.walkAnimation.setSpeed(0.9F);
@@ -337,7 +359,33 @@ public final class EntityShowcaseCapture {
         // A creature whose controller reads its own movement (the Phoenix) only walks, flies or glides when the
         // client copy moves. Move the copy, never the server one: a few hundredths a tick, back and forth, so it
         // stays in frame. `glide` also sinks, and goes back up every second.
-        if (action != null && (action.equals("pace") || airborne)) {
+        if ("stroll".equals(action)) {
+            // `stroll`: the SERVER copy walks back and forth along x, so the client interpolates real movement inside
+            // its own tick, as in play (species footfall reads that; `pace` moves only the client copy, between ticks).
+            if (mc.getSingleplayerServer() != null) {
+                int t = shown.tickCount;
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer();
+                    if (server == null || server.getPlayerList().getPlayers().isEmpty()) {
+                        return;
+                    }
+                    Entity subject = subject(server.getPlayerList().getPlayers().getFirst().level());
+                    if (subject != null) {
+                        double phase = t * 0.05;
+                        subject.setPos(0.5 + Math.sin(phase) * 2.5, STAGE_Y, 0.5);
+                        // an AI-off mob never runs move(), so its synced onGround stays false and every position
+                        // packet overwrites the client's: a walking creature is on the ground
+                        subject.setOnGround(true);
+                        subject.setYRot(Math.cos(phase) >= 0 ? -90.0F : 90.0F);
+                        subject.setYBodyRot(subject.getYRot());
+                        subject.setYHeadRot(subject.getYRot());
+                    }
+                });
+            }
+            if (shown instanceof LivingEntity living) {
+                living.walkAnimation.setSpeed(0.9F);
+            }
+        } else if (action != null && (action.equals("pace") || airborne)) {
             double baseY = STAGE_Y + (airborne ? 0.8 : 0.0);
             double wiggle = (shown.tickCount % 2 == 0 ? 0.04 : -0.04);
             double y = action.equals("glide") ? baseY + 0.6 - (shown.tickCount % 20) * 0.05 : baseY;
@@ -421,7 +469,7 @@ public final class EntityShowcaseCapture {
                 villager.snapTo(-(size * 0.5 + 1.0), shown ? STAGE_Y : STAGE_Y - 40, 0.5, 0.0F, 0.0F);
             }
             if (action != null && current.frame() == 0 && subject instanceof GenericBeastEntity beast) {
-                act(beast, action);
+                act(beast, action.endsWith("+") ? action.substring(0, action.length() - 1) : action);
             } else if (action != null && current.frame() == 0 && action.startsWith("@") && action.contains("/")
                     && subject instanceof software.bernie.geckolib.animatable.GeoEntity geo) {
                 // `@controller/clip`: any triggerable clip, for creatures with their own controllers (the Phoenix).
@@ -465,7 +513,9 @@ public final class EntityShowcaseCapture {
         if (action != null) {
             // The first frame waits for the controller to blend in (and lids or a sit to settle).
             boolean quick = action.startsWith("@") || action.equals("vanish") || action.equals("appear")
-                    || action.equals("fight") || action.equals("struck");
+                    || action.equals("fight") || action.equals("struck")
+                    // `sleep+`: shoot from the change on, to see the bridging one-shot (lie_down, wake) play.
+                    || action.endsWith("+");
             wait = current.frame() == 0 ? (quick ? 2 : 30) : current.interval();
             return;
         }
@@ -549,6 +599,10 @@ public final class EntityShowcaseCapture {
         if (entity instanceof at.koopro.wizardsandbeasts.entity.creature.BasiliskEntity basilisk
                 && entry.props().containsKey("age")) {
             basilisk.setAgeTicks(Long.parseLong(entry.props().get("age")));   // hatchling, adult or full grown
+        }
+        if (entity instanceof at.koopro.wizardsandbeasts.creature.variant.VariantHolder holder
+                && entry.props().containsKey("coat") && !holder.applyVariant(entry.props().get("coat"))) {
+            LOGGER.warn("Entity showcase: {} has no coat {}", entry.id(), entry.props().get("coat"));   // coat=smoke
         }
         if (entity instanceof at.koopro.wizardsandbeasts.entity.spell.PatronusEntity patronus
                 && entry.props().containsKey("form")) {

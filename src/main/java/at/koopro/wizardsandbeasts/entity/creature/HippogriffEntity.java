@@ -1,5 +1,7 @@
 package at.koopro.wizardsandbeasts.entity.creature;
 
+import at.koopro.wizardsandbeasts.creature.profile.CreatureActivity;
+import at.koopro.wizardsandbeasts.util.AnimHelper;
 import at.koopro.wizardsandbeasts.creature.wildlife.WildlifeRules;
 import at.koopro.wizardsandbeasts.entity.flight.RiddenFlight;
 import at.koopro.wizardsandbeasts.entity.flight.WingedWalkerFlightGoal;
@@ -411,9 +413,6 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements
         return RawAnimation.begin().thenLoop("animation.hippogriff." + name);
     }
 
-    private static final RawAnimation IDLE = loop("idle");
-    private static final RawAnimation WALK = loop("walk");
-    private static final RawAnimation RUN = loop("run");
     private static final RawAnimation FLY = loop("fly");
     private static final RawAnimation GLIDE = loop("glide");
 
@@ -440,11 +439,16 @@ public class HippogriffEntity extends GenericFlyingBeastEntity implements
         double dy = getY() - yo;
         double horizontal = dx * dx + dz * dz;
         if (onGround() || isInWater()) {
-            if (horizontal < 1.0e-4) {
-                return test.setAndContinue(IDLE);
-            }
-            return test.setAndContinue(horizontal > 0.03 ? RUN : WALK);
+            // On the ground it shows what the ecology says it is doing (sleep, drink, preen, alert...), like every
+            // other creature; before, this controller only knew idle/walk/run, so the activity byte never showed.
+            AnimHelper.observe(this, "hippogriff");
+            boolean moving = horizontal >= 1.0e-4;
+            CreatureActivity.Loop loop = activity().loop(moving, clip -> AnimHelper.rigHas("hippogriff", clip),
+                    horizontal > 0.03 ? "run" : "walk");
+            test.setControllerSpeed((float) loop.speed());
+            return test.setAndContinue(AnimHelper.activityLoop("hippogriff", loop.clip()));
         }
+        test.setControllerSpeed(1f);
         return test.setAndContinue(dy < -0.05 && horizontal > 0.01 ? GLIDE : FLY);
     }
 }

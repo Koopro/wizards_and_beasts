@@ -30,6 +30,19 @@
     "death",
     "preen",
     "ruffle",
-    "stretch"
-  ]
+    "stretch",
+    "lie_down",
+    "wake"
+  ],
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "white",
+        "weight": 2,
+        "origin": "design",
+        "note": "a white Diricawl"
+      }
+    ]
+  }
 }

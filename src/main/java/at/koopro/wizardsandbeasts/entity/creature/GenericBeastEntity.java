@@ -25,6 +25,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
@@ -76,6 +80,7 @@ import java.util.Set;
  * subclass exists — only the four locomotion subclasses, which supply movement goals + animation.
  */
 public abstract class GenericBeastEntity extends GeoEntityBase implements BondableBeast,
+        at.koopro.wizardsandbeasts.creature.variant.VariantHolder,
         at.koopro.wizardsandbeasts.creature.profile.HasActivity {
 
     /**
@@ -194,6 +199,12 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
      * What it is visibly doing ({@link at.koopro.wizardsandbeasts.creature.profile.CreatureActivity}), written by the
      * ecology goal on the server and read by the movement controller on the client. Not saved.
      */
+    /** Client only: ticks since the last footfall (CreatureFx). */
+    private int fxStrideClock;
+
+    /** Which of its definition's coats (Coats) this creature wears; 0 = the base coat. Rolled once, at spawn. */
+    private static final EntityDataAccessor<Integer> DATA_COAT =
+            SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Byte> DATA_ACTIVITY =
             SynchedEntityData.defineId(GenericBeastEntity.class, EntityDataSerializers.BYTE);
 
@@ -214,6 +225,61 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
         builder.define(DATA_BOND_LEVEL, 0);
         builder.define(DATA_GUISE, "");
         builder.define(DATA_ACTIVITY, at.koopro.wizardsandbeasts.creature.profile.CreatureActivity.IDLE.id());
+        builder.define(DATA_COAT, 0);
+    }
+
+    // ── coats (cosmetic variants from the definition JSON) ─────────────────────
+
+    private java.util.List<at.koopro.wizardsandbeasts.creature.variant.Coats.DataCoat> coats() {
+        return at.koopro.wizardsandbeasts.creature.variant.Coats.of(creatureId().getPath());
+    }
+
+    /** The coat's texture sub-path under {@code textures/entity/} ({@code kneazle/smoke}), or null for the base coat. */
+    public @Nullable String coatTexture() {
+        int index = entityData.get(DATA_COAT);
+        if (index <= 0) {
+            return null;
+        }
+        var all = coats();
+        return index < all.size() ? all.get(index).texture() : null;
+    }
+
+    /**
+     * The coat as a variant. Creatures with a Java coat enum (Hippogriff, Kelpie) override this; for the rest it is
+     * the data coat, or a base placeholder when the definition declares none.
+     */
+    @Override
+    public at.koopro.wizardsandbeasts.creature.variant.CreatureVariant variant() {
+        var all = coats();
+        int index = entityData.get(DATA_COAT);
+        return all.isEmpty() ? new at.koopro.wizardsandbeasts.creature.variant.Coats.DataCoat("base", 0, 100, null)
+                : all.get(Math.max(0, Math.min(index, all.size() - 1)));
+    }
+
+    @Override
+    public boolean applyVariant(String variantId) {
+        for (var coat : coats()) {
+            if (coat.variantId().equals(variantId)) {
+                entityData.set(DATA_COAT, coat.index());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public @Nullable SpawnGroupData finalizeSpawn(
+            ServerLevelAccessor level, DifficultyInstance difficulty,
+            EntitySpawnReason reason, @Nullable SpawnGroupData data) {
+        // Rolled once, here and not in the constructor (which also runs on every chunk load), under the server's
+        // creature rules: a disabled coat is never rolled, an overridden weight replaces the authored one.
+        var all = coats();
+        if (!all.isEmpty()) {
+            var coat = at.koopro.wizardsandbeasts.creature.variant.CreatureVariants.roll(creatureId().getPath(),
+                    all.toArray(new at.koopro.wizardsandbeasts.creature.variant.Coats.DataCoat[0]), getRandom());
+            entityData.set(DATA_COAT, coat.index());
+        }
+        return super.finalizeSpawn(level, difficulty, reason, data);
     }
 
     @Override
@@ -768,6 +834,9 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             output.store("AbilityCooldowns", COOLDOWNS_CODEC, Map.copyOf(abilityCooldowns));
         }
         saveBond(output);
+        if (entityData.get(DATA_COAT) > 0) {
+            output.putString("CoatVariant", variant().variantId());   // by id; own key: Hippogriff and Kelpie save "Coat"
+        }
     }
 
     @Override
@@ -785,6 +854,7 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             abilityCooldowns.put("legacy", legacy);
         }
         loadBond(input);
+        input.getString("CoatVariant").ifPresent(this::applyVariant);
         reapplyDefinitionBases();
     }
 
@@ -817,6 +887,12 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
     @Override
     public void tick() {
         super.tick();
+        if (level().isClientSide()) {
+            CreatureDefinition def = definition();
+            if (def != null && !def.fx().isEmpty()) {
+                fxStrideClock = def.fx().tick(this, activity(), fxStrideClock);   // footfall dust, embers, smoke
+            }
+        }
         tickBond();
         if (!level().isClientSide() && has(Trait.REGEN) && AiCadence.every(this, 40)
                 && getHealth() < getMaxHealth() && isAlive()) {

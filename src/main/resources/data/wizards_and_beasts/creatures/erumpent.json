@@ -42,7 +42,9 @@
     "death",
     "graze",
     "sniff",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "combat": {
@@ -52,5 +54,20 @@
       "recoveryTicks": 34
     }
   },
-  "_combat_note": "[canon FB] charges only when sorely provoked; the horn's fluid is the explosive_horn ability."
+  "_combat_note": "[canon FB] charges only when sorely provoked; the horn's fluid is the explosive_horn ability.",
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "albino",
+        "weight": 2,
+        "origin": "design",
+        "note": "a white Erumpent"
+      }
+    ]
+  },
+  "fx": {
+    "footfall": 0.9,
+    "emitters": []
+  }
 }

@@ -37,7 +37,7 @@ public class TintedBeastRenderer<R extends EntityRenderState & GeoRenderState>
         extends GeoEntityRenderer<GenericBeastEntity, R> {
 
     public TintedBeastRenderer(EntityRendererProvider.Context context, String modelName) {
-        super(context, new DefaultedEntityGeoModel<>(
+        super(context, new CoatedBeastGeoModel<>(
                 Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, modelName)));
         withRenderLayer(new BeastHeldItemLayer<>(this));
     }

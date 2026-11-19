@@ -66,6 +66,21 @@
     "death",
     "graze",
     "sniff",
-    "shake"
-  ]
+    "shake",
+    "lie_down",
+    "wake"
+  ],
+  "fx": {
+    "footfall": 0.25,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:mote",
+        "color": "#E8EEFF",
+        "rate": 0.04,
+        "where": "body",
+        "when": "always"
+      }
+    ],
+    "_note": "design: a faint silver shimmer"
+  }
 }

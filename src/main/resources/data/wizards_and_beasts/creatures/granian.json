@@ -24,6 +24,12 @@
     "death",
     "stretch",
     "shake",
-    "graze"
-  ]
+    "graze",
+    "lie_down",
+    "wake"
+  ],
+  "fx": {
+    "footfall": 0.35,
+    "emitters": []
+  }
 }

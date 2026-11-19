@@ -191,6 +191,7 @@ public class GenericFlyingBeastEntity extends GenericBeastEntity implements Wing
             return;
         }
         controllers.add(new AnimationController<GenericBeastEntity>(name + "_movement", 5, state -> {
+            AnimHelper.observe(this, name);
             double dx = getX() - xo;
             double dz = getZ() - zo;
             CreatureActivity.Loop loop = FlightLoop.pick(onGround() || isInWater(), state.isMoving(), getY() - yo,

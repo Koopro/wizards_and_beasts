@@ -66,6 +66,30 @@ public enum CreatureActivity {
         return id >= 0 && id < BY_ID.length ? BY_ID[id] : IDLE;
     }
 
+    /**
+     * The one-shot that bridges two activities, or {@code null}: {@code lie_down} on falling asleep, {@code wake} on
+     * getting up. The loops alone would snap a standing creature to the ground in the controller's five-tick blend.
+     * Played only when the rig has the clip; a rig without one keeps the blend.
+     */
+    public static @org.jspecify.annotations.Nullable String bridge(CreatureActivity from, CreatureActivity to) {
+        if (from == to) {
+            return null;
+        }
+        if (to == SLEEP) {
+            return "lie_down";
+        }
+        return from == SLEEP ? "wake" : null;
+    }
+
+    /**
+     * Whether the clip for this activity aims the head itself (at a flank, a paw, the water, the grass), so the
+     * life pass must not turn it toward whoever is watching. Without this a grooming dog scratched with its nose
+     * to the sky, looking at the camera.
+     */
+    public boolean headBusy() {
+        return this == GROOM || this == DRINK || this == EAT;
+    }
+
     /** A clip to loop and the speed to play it at. */
     public record Loop(String clip, double speed) {}
 

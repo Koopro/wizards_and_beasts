@@ -36,6 +36,39 @@
     "groom",
     "hit",
     "death",
-    "skitter"
-  ]
+    "skitter",
+    "lie_down",
+    "wake"
+  ],
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "sapphire",
+        "weight": 2,
+        "origin": "design",
+        "note": "a sapphire shell; canon says the shell is jewel-encrusted"
+      }
+    ]
+  },
+  "fx": {
+    "footfall": 0.0,
+    "emitters": [
+      {
+        "particle": "wizards_and_beasts:fire_ember",
+        "color": "#FF7A1C",
+        "rate": 0.04,
+        "where": "back",
+        "when": "always"
+      },
+      {
+        "particle": "wizards_and_beasts:fire_ember",
+        "color": "#FFB347",
+        "rate": 0.4,
+        "where": "back",
+        "when": "threaten"
+      }
+    ],
+    "_note": "it shoots flames from its rear end when attacked (Fantastic Beasts)"
+  }
 }

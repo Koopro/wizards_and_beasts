@@ -35,6 +35,8 @@
     "call",
     "death",
     "attack",
-    "peek"
+    "peek",
+    "lie_down",
+    "wake"
   ]
 }

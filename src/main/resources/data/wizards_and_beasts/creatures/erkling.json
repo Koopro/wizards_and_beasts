@@ -49,6 +49,8 @@
     "call",
     "hit",
     "death",
-    "peek"
+    "peek",
+    "lie_down",
+    "wake"
   ]
 }

@@ -41,7 +41,9 @@
     "hit",
     "death",
     "stretch",
-    "grunt"
+    "grunt",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "combat": {
@@ -51,5 +53,9 @@
       "recoveryTicks": 24
     }
   },
-  "_combat_note": "[canon PS ch.10] slow, stupid, a club swung wide: the raise is shown, the blow can be stepped out of."
+  "_combat_note": "[canon PS ch.10] slow, stupid, a club swung wide: the raise is shown, the blow can be stepped out of.",
+  "fx": {
+    "footfall": 0.8,
+    "emitters": []
+  }
 }

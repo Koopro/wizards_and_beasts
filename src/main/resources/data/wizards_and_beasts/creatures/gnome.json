@@ -28,6 +28,8 @@
     "flinch",
     "call",
     "death",
-    "peek"
+    "peek",
+    "lie_down",
+    "wake"
   ]
 }

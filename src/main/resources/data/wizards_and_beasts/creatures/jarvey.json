@@ -37,7 +37,9 @@
     "death",
     "graze",
     "sniff",
-    "shake"
+    "shake",
+    "lie_down",
+    "wake"
   ],
   "behaviour": {
     "sounds": {
@@ -45,5 +47,16 @@
       "hurt": "minecraft:entity.fox.hurt",
       "death": "minecraft:entity.fox.death"
     }
+  },
+  "coats": {
+    "base_weight": 98,
+    "variants": [
+      {
+        "id": "albino",
+        "weight": 2,
+        "origin": "design",
+        "note": "an albino Jarvey, as ferrets often are"
+      }
+    ]
   }
 }
