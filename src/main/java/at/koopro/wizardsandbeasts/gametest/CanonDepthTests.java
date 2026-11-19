@@ -52,6 +52,9 @@ public final class CanonDepthTests {
                 "canon: a gnome is flung dizzy over the hedge; crouching while holding a Kappa's gaze is a bow; a "
                         + "feather lures the Zouwu",
                 CanonDepthTests::creatureQuirks);
+        tests.add("canon_depth_joke_shop_sells_the_wheezes",
+                "canon: Gambol and Japes loads with a market, and every joke it sells is a real item",
+                CanonDepthTests::jokeShop);
     }
 
     private static void revealing(GameTestHelper helper) {
@@ -134,6 +137,23 @@ public final class CanonDepthTests {
             retire(helper, keeper);
             lease.run();
         }
+    }
+
+    private static void jokeShop(GameTestHelper helper) {
+        var shop = at.koopro.wizardsandbeasts.location.Locations.get(net.minecraft.resources.Identifier
+                .fromNamespaceAndPath("wizards_and_beasts", "gambol_and_japes"));
+        check(helper, shop != null && shop.market().isPresent(), () -> "Gambol and Japes did not load with a market");
+        java.util.Set<String> sold = new java.util.HashSet<>();
+        for (var good : shop.market().get().sells()) {
+            var id = good.item().orElseThrow();
+            check(helper, net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(id),
+                    () -> "Gambol and Japes sells " + id + ", which does not exist");
+            sold.add(id.getPath());
+        }
+        for (String must : java.util.List.of("skiving_snackbox", "dungbomb", "wildfire_whiz_bangs", "howler")) {
+            check(helper, sold.contains(must), () -> "Gambol and Japes does not sell " + must);
+        }
+        helper.succeed();
     }
 
     private static void remembrall(GameTestHelper helper) {

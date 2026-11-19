@@ -1,0 +1,32 @@
+{
+ "location": "wizards_and_beasts:gambol_and_japes",
+ "names": [
+  "npc.wizards_and_beasts.jokeshop.name.0",
+  "npc.wizards_and_beasts.jokeshop.name.1"
+ ],
+ "greetings": [
+  {
+   "text": "npc.wizards_and_beasts.jokeshop.greet.default"
+  },
+  {
+   "text": "npc.wizards_and_beasts.jokeshop.greet.wheezes"
+  }
+ ],
+ "topics": [
+  {
+   "id": "snackbox",
+   "label": "npc.wizards_and_beasts.jokeshop.topic.snackbox",
+   "reply": "npc.wizards_and_beasts.jokeshop.reply.snackbox"
+  },
+  {
+   "id": "howler",
+   "label": "npc.wizards_and_beasts.jokeshop.topic.howler",
+   "reply": "npc.wizards_and_beasts.jokeshop.reply.howler"
+  },
+  {
+   "id": "swamp",
+   "label": "npc.wizards_and_beasts.jokeshop.topic.swamp",
+   "reply": "npc.wizards_and_beasts.jokeshop.reply.swamp"
+  }
+ ]
+}

@@ -1,0 +1,178 @@
+{
+ "_comment": "Gambol and Japes Wizarding Joke Shop, Diagon Alley (canon depth 2026-11-19): a settlement keeper posted with the jokeshop role keeps it, and while Weasleys' Wizard Wheezes has no front of its own it stocks the twins' products too. Sneak-use opens the board. Sells joke sweets, Dungbombs, fireworks, Portable Swamps, Punching Telescopes and Howlers; prices move with trade. Standing is earned by buying here and by supply contracts.",
+ "module": "gringotts",
+ "skin": "workbench",
+ "presence": {
+  "hosts": [
+   "wizards_and_beasts:settlement_npc"
+  ],
+  "host_role": "wizards_and_beasts:jokeshop",
+  "host_reach": 6.0
+ },
+ "standing": {
+  "max_active": 2,
+  "board_size": 3,
+  "xp_rules": [
+   {
+    "when": {
+     "activity": "goods_traded",
+     "species": [
+      "wizards_and_beasts:gambol_and_japes"
+     ]
+    },
+    "xp": 6,
+    "daily_cap": 36
+   },
+   {
+    "when": {
+     "activity": "courier_delivered",
+     "species": [
+      "wizards_and_beasts:gambol_and_japes"
+     ]
+    },
+    "xp": 12,
+    "daily_cap": 36
+   }
+  ],
+  "ranks": [
+   {
+    "id": "customer",
+    "xp": 0
+   },
+   {
+    "id": "regular",
+    "xp": 100
+   }
+  ],
+  "contracts": [
+   {
+    "id": "gunpowder",
+    "min_rank": "customer",
+    "duration_days": 4,
+    "cooldown_days": 2,
+    "weight": 10,
+    "objective": {
+     "type": "delivery",
+     "item": "minecraft:gunpowder",
+     "count": 16
+    },
+    "reward": {
+     "knuts": 145,
+     "xp": 30
+    }
+   },
+   {
+    "id": "sugar",
+    "min_rank": "customer",
+    "duration_days": 4,
+    "cooldown_days": 2,
+    "weight": 10,
+    "objective": {
+     "type": "delivery",
+     "item": "minecraft:sugar",
+     "count": 24
+    },
+    "reward": {
+     "knuts": 116,
+     "xp": 25
+    }
+   }
+  ]
+ },
+ "services": [
+  {
+   "service": "wizards_and_beasts:courier_dispatch",
+   "min_tier": "customer"
+  }
+ ],
+ "market": {
+  "half_life_days": 4.0,
+  "demand_bonus": 0.0,
+  "sells": [
+   {
+    "id": "skiving_snackbox",
+    "item": "wizards_and_beasts:skiving_snackbox",
+    "price_knuts": 116,
+    "depth": 6
+   },
+   {
+    "id": "puking_pastilles",
+    "item": "wizards_and_beasts:puking_pastilles",
+    "price_knuts": 29,
+    "depth": 16
+   },
+   {
+    "id": "nosebleed_nougat",
+    "item": "wizards_and_beasts:nosebleed_nougat",
+    "price_knuts": 29,
+    "depth": 16
+   },
+   {
+    "id": "fainting_fancies",
+    "item": "wizards_and_beasts:fainting_fancies",
+    "price_knuts": 29,
+    "depth": 16
+   },
+   {
+    "id": "fever_fudge",
+    "item": "wizards_and_beasts:fever_fudge",
+    "price_knuts": 29,
+    "depth": 16
+   },
+   {
+    "id": "ton_tongue_toffee",
+    "item": "wizards_and_beasts:ton_tongue_toffee",
+    "price_knuts": 20,
+    "depth": 16
+   },
+   {
+    "id": "canary_cream",
+    "item": "wizards_and_beasts:canary_cream",
+    "price_knuts": 20,
+    "depth": 16
+   },
+   {
+    "id": "u_no_poo",
+    "item": "wizards_and_beasts:u_no_poo",
+    "price_knuts": 15,
+    "depth": 16
+   },
+   {
+    "id": "dungbomb",
+    "item": "wizards_and_beasts:dungbomb",
+    "price_knuts": 20,
+    "depth": 24
+   },
+   {
+    "id": "wildfire_whiz_bangs",
+    "item": "wizards_and_beasts:wildfire_whiz_bangs",
+    "price_knuts": 87,
+    "depth": 8
+   },
+   {
+    "id": "filibusters_fireworks",
+    "item": "wizards_and_beasts:filibusters_fireworks",
+    "price_knuts": 58,
+    "depth": 12
+   },
+   {
+    "id": "punching_telescope",
+    "item": "wizards_and_beasts:punching_telescope",
+    "price_knuts": 145,
+    "depth": 4
+   },
+   {
+    "id": "portable_swamp",
+    "item": "wizards_and_beasts:portable_swamp",
+    "price_knuts": 290,
+    "depth": 3
+   },
+   {
+    "id": "howler",
+    "item": "wizards_and_beasts:howler",
+    "price_knuts": 58,
+    "depth": 8
+   }
+  ]
+ }
+}
