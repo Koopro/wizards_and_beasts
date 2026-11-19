@@ -111,6 +111,14 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
                             .build());
 
+    /** What a Remembrall's holder has forgotten (a {@code Remembrall.Forgotten} name); absent when nothing. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> REMEMBRALL_FORGOTTEN =
+            DATA_COMPONENTS.register("remembrall_forgotten", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
     /** Famous wizard card variant id (e.g. "dumbledore"). */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> WIZARD_CARD_ID =
             DATA_COMPONENTS.register("wizard_card_id", () ->

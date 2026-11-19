@@ -39,6 +39,32 @@ public final class CanonDepthTests {
                 "canon: a Skiving Snackbox gives four two-ended sweets; the orange end sickens, the purple end cures "
                         + "only that; a Dungbomb makes everyone near it retch",
                 CanonDepthTests::wheezes);
+        tests.add("canon_depth_remembrall_glows_for_real_things",
+                "canon: a Remembrall stays clear for a wizard with nothing owed, glows while a Ministry fine is "
+                        + "outstanding, and clears once it is paid",
+                CanonDepthTests::remembrall);
+    }
+
+    private static void remembrall(GameTestHelper helper) {
+        ServerPlayer neville = WizardTestSupport.placeMockPlayer(helper, "Neville", GameType.SURVIVAL);
+        try {
+            ItemStack ball = new ItemStack(at.koopro.wizardsandbeasts.registry.TrinketItemRegistry.REMEMBRALL.get());
+            at.koopro.wizardsandbeasts.item.trinket.RemembrallItem.refresh(ball, neville);
+            check(helper, !ball.has(at.koopro.wizardsandbeasts.registry.ModDataComponents.REMEMBRALL_FORGOTTEN.get()),
+                    () -> "a fresh wizard's Remembrall glowed: " + at.koopro.wizardsandbeasts.item.trinket.Remembrall.check(neville));
+            at.koopro.wizardsandbeasts.ministry.MinistryRecords.mutate(neville, r -> r.withOutstandingFine(500L));
+            at.koopro.wizardsandbeasts.item.trinket.RemembrallItem.refresh(ball, neville);
+            check(helper, "A_FINE".equals(ball.get(
+                            at.koopro.wizardsandbeasts.registry.ModDataComponents.REMEMBRALL_FORGOTTEN.get())),
+                    () -> "an unpaid fine did not turn the smoke red");
+            at.koopro.wizardsandbeasts.ministry.MinistryRecords.mutate(neville, r -> r.withOutstandingFine(0L));
+            at.koopro.wizardsandbeasts.item.trinket.RemembrallItem.refresh(ball, neville);
+            check(helper, !ball.has(at.koopro.wizardsandbeasts.registry.ModDataComponents.REMEMBRALL_FORGOTTEN.get()),
+                    () -> "the smoke stayed red after the fine was paid");
+            helper.succeed();
+        } finally {
+            retire(helper, neville);
+        }
     }
 
     private static void howler(GameTestHelper helper) {
