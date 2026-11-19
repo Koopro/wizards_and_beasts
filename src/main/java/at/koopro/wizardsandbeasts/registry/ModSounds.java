@@ -15,8 +15,8 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_CRASH =
             register("broom_crash");
 
-    // Broom flight, per tier. Every one of these is a vanilla sample re-pitched in sounds.json,
-    // which is the mod's whole audio strategy -- there is not one .ogg in the repo. A broom names
+    // Broom flight, per tier. Every one of these is a vanilla sample re-pitched in sounds.json
+    // (most of the mod's newer audio is self-made, tools/sound_synth.py; these are not yet). A broom names
     // one of these in its definition's boostSound / idleLoopSound; a broom that names neither keeps
     // the shared elytra rush and gets no boost cue at all.
     public static final DeferredHolder<SoundEvent, SoundEvent> BROOM_WIND_SLOW =
@@ -206,6 +206,13 @@ public class ModSounds {
     /** Diagon Alley's wall opening to a wand, and closing again (tools/sound_synth.py, diagon/). */
     public static final DeferredHolder<SoundEvent, SoundEvent> DIAGON_ARCHWAY_OPEN = register("diagon_archway_open");
     public static final DeferredHolder<SoundEvent, SoundEvent> DIAGON_ARCHWAY_CLOSE = register("diagon_archway_close");
+
+    // A place's air (client/atmosphere): sparse one-shots and quiet room-tone loops, named by the atmosphere
+    // profiles in assets/wizards_and_beasts/atmosphere. Self-made in tools/sound_synth.py ("ambient/...").
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT_PAGE_TURN = register("ambient.page_turn");
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT_LIBRARY_TONE = register("ambient.library_tone");
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT_FOREST_CHIME = register("ambient.forest_chime");
+    public static final DeferredHolder<SoundEvent, SoundEvent> AMBIENT_FOREST_NIGHT = register("ambient.forest_night");
 
     // Sneakoscope — one spinning top wound tighter and tighter, so the three tiers read as the
     // same object rather than three unrelated noises. Pitch does the winding; see SneakoscopeTuning.

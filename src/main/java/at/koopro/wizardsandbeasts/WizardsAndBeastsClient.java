@@ -177,6 +177,11 @@ public class WizardsAndBeastsClient {
                 net.minecraft.resources.Identifier.fromNamespaceAndPath(
                         WizardsAndBeastsMod.MODID, "map_marker_style_reload_listener"),
                 new at.koopro.wizardsandbeasts.client.map.style.MapStyleLoaders.Markers());
+        // What each kind of place looks and sounds like (client/atmosphere): appearance, so a resource pack may change it.
+        event.addListener(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                        WizardsAndBeastsMod.MODID, "atmosphere_profiles"),
+                new at.koopro.wizardsandbeasts.client.atmosphere.AtmosphereProfiles());
         // Not a loader — it only invalidates a cache. The wand HUD remembers which spells have an
         // icon of their own so it does not ask the resource manager once per slot per frame, and
         // that answer changes exactly when the packs do.

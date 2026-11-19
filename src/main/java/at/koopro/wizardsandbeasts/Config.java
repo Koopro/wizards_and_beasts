@@ -317,6 +317,19 @@ public class Config {
             .comment("How much quiet magic the world shows around you: fireflies over grass and flowers on clear",
                     "nights. 1.0 is the designed amount, 0.0 turns it off. Client-side and purely cosmetic.")
             .defineInRange("ambientMagicDensity", 1.0D, 0.0D, 2.0D);
+    private static final ModConfigSpec.EnumValue<Atmosphere> ATMOSPHERE = BUILDER
+            .comment("How much a place shows its own air: dust in a library's light, mist and magic dust in an old",
+                    "forest at night, and so on. OFF, SUBTLE (about half) or FULL (the designed amount). The vanilla",
+                    "Particles option still applies on top. Client-side and purely cosmetic.")
+            .defineEnum("atmosphere", Atmosphere.FULL);
+    private static final ModConfigSpec.BooleanValue ATMOSPHERE_FOG = BUILDER
+            .comment("If true, a place may tint and draw in the fog a little (an old forest at night, a dark place).",
+                    "Client-side and purely cosmetic.")
+            .define("atmosphereFog", true);
+    private static final ModConfigSpec.DoubleValue AMBIENT_SOUND_VOLUME = BUILDER
+            .comment("Volume of the quiet sounds a place makes (pages turning, a forest's whisper, a room's hum),",
+                    "on top of the vanilla Ambient/Environment slider. 0.0 silences them. Client-side.")
+            .defineInRange("ambientSoundVolume", 1.0D, 0.0D, 1.0D);
     private static final ModConfigSpec.EnumValue<WandEffects> WAND_EFFECTS = BUILDER
             .comment("How much a wand at rest shows its core: OFF, SUBTLE (a mote of the core's light now and then,",
                     "a glint on gilt fittings) or FULL (about three times as often). Client-side and purely cosmetic;",
@@ -600,6 +613,9 @@ public class Config {
     public static float broomFovEffect = 0.12f;
     public static float ambientMagicDensity = 1.0f;
     public static WandEffects wandEffects = WandEffects.SUBTLE;
+    public static Atmosphere atmosphere = Atmosphere.FULL;
+    public static boolean atmosphereFog = true;
+    public static float ambientSoundVolume = 1.0f;
     public static boolean legendaryGroundShimmer = true;
     public static VfxQuality vfxQuality = VfxQuality.MEDIUM;
     public static boolean broomSpeedParticles = true;
@@ -651,6 +667,17 @@ public class Config {
     }
 
     /** How much a wand at rest shows its core ({@code WandIdleEffects}). */
+    /** How much of a place's atmosphere ({@code client/atmosphere}) is drawn: a multiplier on every emitter. */
+    public enum Atmosphere {
+        OFF(0f), SUBTLE(0.5f), FULL(1f);
+
+        public final float scale;
+
+        Atmosphere(float scale) {
+            this.scale = scale;
+        }
+    }
+
     public enum WandEffects {
         OFF,
         SUBTLE,
@@ -755,6 +782,9 @@ public class Config {
         broomFovEffect = BROOM_FOV_EFFECT.get().floatValue();
         ambientMagicDensity = AMBIENT_MAGIC_DENSITY.get().floatValue();
         wandEffects = WAND_EFFECTS.get();
+        atmosphere = ATMOSPHERE.get();
+        atmosphereFog = ATMOSPHERE_FOG.get();
+        ambientSoundVolume = AMBIENT_SOUND_VOLUME.get().floatValue();
         legendaryGroundShimmer = LEGENDARY_GROUND_SHIMMER.get();
         vfxQuality = VFX_QUALITY.get();
         broomSpeedParticles = BROOM_SPEED_PARTICLES.get();

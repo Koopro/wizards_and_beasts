@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bookshelf",
+    "minecraft:chiseled_bookshelf",
+    "minecraft:lectern",
+    "wizards_and_beasts:library_bookshelf",
+    "wizards_and_beasts:library_bookshelf_sparse",
+    "wizards_and_beasts:library_ladder",
+    "wizards_and_beasts:floating_book",
+    "wizards_and_beasts:book_stack",
+    "wizards_and_beasts:book_stack_bright",
+    "wizards_and_beasts:book_stack_leather"
+  ]
+}

@@ -1570,5 +1570,71 @@
         "volume": 0.9
       }
     ]
+  },
+  "ambient.page_turn": {
+    "subtitle": "subtitles.wizards_and_beasts.ambient.page_turn",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:ambient/page_turn_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/page_turn_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/page_turn_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "ambient.forest_chime": {
+    "subtitle": "subtitles.wizards_and_beasts.ambient.forest_chime",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:ambient/forest_chime_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/forest_chime_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/forest_chime_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "ambient.library_tone": {
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:ambient/library_tone_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/library_tone_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/library_tone_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "ambient.forest_night": {
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:ambient/forest_night_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/forest_night_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:ambient/forest_night_3",
+        "volume": 1.0
+      }
+    ]
   }
 }

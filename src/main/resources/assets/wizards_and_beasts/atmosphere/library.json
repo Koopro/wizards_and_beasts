@@ -1,0 +1,41 @@
+{
+  "blocks": [
+    { "tag": "#wizards_and_beasts:atmosphere/library", "weight": 1.0 }
+  ],
+  "enter": 0.04,
+  "leave": 0.02,
+  "full": 0.10,
+  "emitters": [
+    {
+      "particle": "wizards_and_beasts:dust",
+      "colour": "#EFE3C8",
+      "where": "air",
+      "rate": 0.45,
+      "reach": 8,
+      "min_light": 10
+    },
+    {
+      "particle": "wizards_and_beasts:dust",
+      "colour": "#D9C9A8",
+      "where": "anchor",
+      "rate": 0.12,
+      "reach": 10,
+      "min_light": 6,
+      "offset": [0.5, 0.5, 0.5],
+      "spread": [0.8, 0.6, 0.8]
+    }
+  ],
+  "sounds": [
+    {
+      "sound": "wizards_and_beasts:ambient.page_turn",
+      "at": "anchor",
+      "interval": [9, 24],
+      "volume": 0.28,
+      "pitch": [0.9, 1.1]
+    }
+  ],
+  "bed": {
+    "sound": "wizards_and_beasts:ambient.library_tone",
+    "volume": 0.10
+  }
+}
