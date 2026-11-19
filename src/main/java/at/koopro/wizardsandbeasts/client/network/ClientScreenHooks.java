@@ -106,6 +106,10 @@ public final class ClientScreenHooks {
         Minecraft.getInstance().setScreen(new DiaryWriteScreen());
     }
 
+    public static void openHowlerWriteScreen() {
+        Minecraft.getInstance().setScreen(new at.koopro.wizardsandbeasts.client.trinket.gui.HowlerWriteScreen());
+    }
+
     public static void appendDiaryReply(String line, int tier) {
         DiaryWriteScreen.appendReply(line, tier);
     }

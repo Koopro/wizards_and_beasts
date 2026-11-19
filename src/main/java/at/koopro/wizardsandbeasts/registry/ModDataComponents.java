@@ -87,6 +87,30 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
                             .build());
 
+    /** A sealed Howler's message, written by its sender. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> HOWLER_MESSAGE =
+            DATA_COMPONENTS.register("howler_message", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
+    /** Who sealed a Howler: name for the shout, so the whole room knows whose mother it is. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> HOWLER_AUTHOR =
+            DATA_COMPONENTS.register("howler_author", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
+    /** Game time a sealed Howler first sat in someone else's pocket; it opens itself a minute later. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> HOWLER_ARMED_AT =
+            DATA_COMPONENTS.register("howler_armed_at", () ->
+                    DataComponentType.<Long>builder()
+                            .persistent(com.mojang.serialization.Codec.LONG)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
+                            .build());
+
     /** Famous wizard card variant id (e.g. "dumbledore"). */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> WIZARD_CARD_ID =
             DATA_COMPONENTS.register("wizard_card_id", () ->

@@ -51,5 +51,11 @@ public final class ModNetworkTrinkets {
                 DiaryWriteC2SPayload.TYPE,
                 DiaryWriteC2SPayload.STREAM_CODEC,
                 DiaryWriteC2SPayload::handle);
+
+        // Howler
+        registrar.playToServer(
+                HowlerSealC2SPayload.TYPE,
+                HowlerSealC2SPayload.STREAM_CODEC,
+                HowlerSealC2SPayload::handle);
     }
 }
