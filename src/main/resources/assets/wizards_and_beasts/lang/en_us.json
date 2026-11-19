@@ -8978,6 +8978,15 @@
   "gui.wizards_and_beasts.howler.field": "Message",
   "gui.wizards_and_beasts.howler.hint": "...and don't you ever do it again!",
   "gui.wizards_and_beasts.howler.seal": "Seal",
+  "gui.wizards_and_beasts.sorting.title": "The Sorting Hat",
+  "gui.wizards_and_beasts.sorting.sees.gryffindor": "Hmm. Plenty of nerve, I see, and a habit of walking straight at trouble. Daring, chivalry... that would be Gryffindor.",
+  "gui.wizards_and_beasts.sorting.sees.hufflepuff": "Hmm. Patient, loyal, not afraid of hard work in a muddy field. Just and true... that would be Hufflepuff.",
+  "gui.wizards_and_beasts.sorting.sees.ravenclaw": "Hmm. A ready mind, and a curious one: every wand and every recipe taken apart to see how. Wit and learning... that would be Ravenclaw.",
+  "gui.wizards_and_beasts.sorting.sees.slytherin": "Hmm. Ambition, and cunning to match, and you have not been afraid of the darker shelves. Slytherin would help you on the way to greatness.",
+  "gui.wizards_and_beasts.sorting.unsure": "But it is not so simple. Where shall I put you?",
+  "gui.wizards_and_beasts.sorting.sure": "Oh, there is no doubt about it at all.",
+  "gui.wizards_and_beasts.sorting.decide": "Let the Hat decide",
+  "gui.wizards_and_beasts.sorting.plead": "Not %s!",
   "command.wizards_and_beasts.admin.console_help": "The Control Center opens for an administrator in the game. From the console: /wandb admin config|module|players|report|op|profile … (try /wandb admin report list).",
   "admin.wizards_and_beasts.section.diagnostics": "Diagnostics",
   "admin.wizards_and_beasts.section.diagnostics.summary": "Network, performance, registries, data packs, modules and the audit timeline — measured, never estimated.",
@@ -9634,5 +9643,11 @@
   "prophet.wizards_and_beasts.quibbler.4": "Stubby Boardman: the singer was Sirius Black all along?",
   "prophet.wizards_and_beasts.quibbler.5": "Read the runes upside-down: a spell to make you speak Ancient Runes.",
   "prophet.wizards_and_beasts.quibbler.6": "Heliopaths: fire spirits the Ministry does not want you to know about.",
-  "prophet.wizards_and_beasts.quibbler.7": "Blibbering Humdingers: how to tell if your house is infested."
+  "prophet.wizards_and_beasts.quibbler.7": "Blibbering Humdingers: how to tell if your house is infested.",
+  "house.wizards_and_beasts.gryffindor": "Gryffindor",
+  "house.wizards_and_beasts.hufflepuff": "Hufflepuff",
+  "house.wizards_and_beasts.ravenclaw": "Ravenclaw",
+  "house.wizards_and_beasts.slytherin": "Slytherin",
+  "house.wizards_and_beasts.sorted": "The Sorting Hat considers %s, and shouts: %s!",
+  "house.wizards_and_beasts.cup": "House Cup:"
 }

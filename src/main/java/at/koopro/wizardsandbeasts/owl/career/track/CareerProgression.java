@@ -121,6 +121,8 @@ public final class CareerProgression {
     public static void record(ServerPlayer player, CareerActivity done) {
         // The one activity stream: every place keeps its own standing in the same work, whatever the career.
         at.koopro.wizardsandbeasts.location.LocationProgression.record(player, done);
+        // And the wizard's house, within its daily cap.
+        at.koopro.wizardsandbeasts.house.HousePointRules.forWork(player, done.type());
         Holding holding = holding(player);
         if (holding == null) {
             return;

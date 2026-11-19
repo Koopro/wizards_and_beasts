@@ -64,6 +64,10 @@ public final class CanonDepthTests {
         tests.add("canon_depth_daily_prophet_prints_the_news",
                 "canon: the Daily Prophet's issue carries what happened on the server today",
                 CanonDepthTests::prophet);
+        tests.add("canon_depth_sorting_and_house_points",
+                "canon: the Hat sorts an unsorted wizard once; points go to their house, up to the daily cap; the "
+                        + "unsorted earn none",
+                CanonDepthTests::sorting);
     }
 
     private static void revealing(GameTestHelper helper) {
@@ -205,6 +209,35 @@ public final class CanonDepthTests {
         boolean found = issue.stream().anyMatch(c -> c.getString().contains("Hermione"));
         check(helper, found, () -> "today's issue left out today's news: " + issue);
         helper.succeed();
+    }
+
+    private static void sorting(GameTestHelper helper) {
+        ServerPlayer student = WizardTestSupport.placeMockPlayer(helper, "NewStudent", GameType.SURVIVAL);
+        try {
+            var server = helper.getLevel().getServer();
+            at.koopro.wizardsandbeasts.house.HouseService.setHouse(student, null);
+            check(helper, at.koopro.wizardsandbeasts.house.HouseService.award(student, 5) == 0,
+                    () -> "an unsorted wizard earned house points");
+            var house = at.koopro.wizardsandbeasts.house.HouseService.sort(student, false);
+            check(helper, house != null && house == at.koopro.wizardsandbeasts.house.HouseService.houseOf(student),
+                    () -> "the Hat sorted nobody");
+            check(helper, at.koopro.wizardsandbeasts.house.HouseService.sort(student, true) == null,
+                    () -> "a sorted wizard was sorted again");
+            int before = at.koopro.wizardsandbeasts.house.HousePoints.get(server).of(house);
+            int given = 0;
+            for (int i = 0; i < 20; i++) {
+                given += at.koopro.wizardsandbeasts.house.HouseService.award(student, 5);
+            }
+            int earned = given;
+            check(helper, earned == at.koopro.wizardsandbeasts.house.HouseService.DAILY_CAP,
+                    () -> "a day's everyday points were " + earned + ", not the cap");
+            check(helper, at.koopro.wizardsandbeasts.house.HousePoints.get(server).of(house) == before + earned,
+                    () -> "the points did not reach the house");
+            helper.succeed();
+        } finally {
+            at.koopro.wizardsandbeasts.house.HouseService.setHouse(student, null);
+            retire(helper, student);
+        }
     }
 
     private static void remembrall(GameTestHelper helper) {

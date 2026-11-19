@@ -52,6 +52,16 @@ public final class ModNetworkTrinkets {
                 DiaryWriteC2SPayload.STREAM_CODEC,
                 DiaryWriteC2SPayload::handle);
 
+        // The Sorting
+        registrar.playToClient(
+                at.koopro.wizardsandbeasts.house.SortingOfferS2CPayload.TYPE,
+                at.koopro.wizardsandbeasts.house.SortingOfferS2CPayload.STREAM_CODEC,
+                at.koopro.wizardsandbeasts.house.SortingOfferS2CPayload::handleClient);
+        registrar.playToServer(
+                at.koopro.wizardsandbeasts.house.SortingChoiceC2SPayload.TYPE,
+                at.koopro.wizardsandbeasts.house.SortingChoiceC2SPayload.STREAM_CODEC,
+                at.koopro.wizardsandbeasts.house.SortingChoiceC2SPayload::handle);
+
         // Howler
         registrar.playToServer(
                 HowlerSealC2SPayload.TYPE,

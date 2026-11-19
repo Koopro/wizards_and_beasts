@@ -60,6 +60,7 @@ public final class OWLExaminationHandler {
         PlayerOWLData previous = player.getData(ModAttachments.OWL_DATA.get());
         Map<OWLSubject, OWLGrade> merged = OWLGradeRules.best(previous.grades(),
                 OWLGradeCalculator.calculateAll(player));
+        at.koopro.wizardsandbeasts.house.HousePointRules.forExam(player, previous.grades(), merged);
         player.setData(ModAttachments.OWL_DATA.get(),
                 previous.afterSitting(merged, player.level().getGameTime()));
         syncToPlayer(player);

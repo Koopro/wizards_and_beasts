@@ -106,6 +106,10 @@ public final class ClientScreenHooks {
         Minecraft.getInstance().setScreen(new DiaryWriteScreen());
     }
 
+    public static void openSortingScreen(String house, boolean sure) {
+        Minecraft.getInstance().setScreen(new at.koopro.wizardsandbeasts.client.house.SortingScreen(house, sure));
+    }
+
     public static void openHowlerWriteScreen() {
         Minecraft.getInstance().setScreen(new at.koopro.wizardsandbeasts.client.trinket.gui.HowlerWriteScreen());
     }

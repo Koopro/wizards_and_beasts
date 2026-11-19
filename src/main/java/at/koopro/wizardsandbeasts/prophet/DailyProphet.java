@@ -50,6 +50,7 @@ public final class DailyProphet {
         String where = incident.pos().getX() + ", " + incident.pos().getZ();
         String spell = MinistryTrace.spellName(incident.spellId()).getString();
         if (incident.attributed()) {
+            at.koopro.wizardsandbeasts.house.HousePointRules.forDarkMagic(server, incident);
             ProphetNews.get(server).report(day(server), KEY + "story.dark_named", incident.casterName(), spell, where);
         } else {
             ProphetNews.get(server).report(day(server), KEY + "story.dark_unknown", spell, where);
@@ -94,6 +95,9 @@ public final class DailyProphet {
             }
             MutableComponent line = Component.literal("• ").withStyle(ChatFormatting.DARK_GRAY);
             lines.add(line.append(Component.translatable(story.key(), story.args().toArray()).withStyle(ChatFormatting.WHITE)));
+        }
+        if (at.koopro.wizardsandbeasts.house.HousePoints.get(server).any()) {
+            lines.add(at.koopro.wizardsandbeasts.house.HouseService.standings(server).copy().withStyle(ChatFormatting.GRAY));
         }
         if (stories.isEmpty()) {
             int filler = (int) Math.floorMod(today * 31 + 7, FILLERS);

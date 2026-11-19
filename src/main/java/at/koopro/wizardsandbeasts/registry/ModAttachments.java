@@ -149,6 +149,17 @@ public class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    /**
+     * The player's Hogwarts house id ({@code house.House}), empty until the Sorting Hat has sorted them. Survives
+     * death, and is sent to the player's own client so the sheet and the Hat can show it.
+     */
+    public static final Supplier<AttachmentType<String>> HOUSE =
+            ATTACHMENTS.register("house", () -> AttachmentType.builder(() -> "")
+                    .serialize(Codec.STRING.fieldOf("house"))
+                    .sync(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                    .copyOnDeath()
+                    .build());
+
     /** Committed Vocation slots — separate from SKILL_DATA; absent on existing players → both empty. */
     public static final Supplier<AttachmentType<PlayerVocationData>> VOCATION_DATA =
             ATTACHMENTS.register("vocation_data", () -> AttachmentType.builder(() -> PlayerVocationData.EMPTY)

@@ -90,6 +90,7 @@ public final class LessonServices {
             }
             PlayerEducationData next = data.withLesson(subject, today);
             player.setData(ModAttachments.EDUCATION_DATA.get(), next);
+            at.koopro.wizardsandbeasts.house.HouseService.award(player, at.koopro.wizardsandbeasts.house.HousePointRules.LESSON);
             PlayerFeedback.toast(player, NoticeKind.SUCCESS,
                     Component.translatable(KEY + "done.title", Component.translatable(subject.translationKey())),
                     Component.translatable(KEY + "done.body", next.lessonsIn(subject), OWLGradeRules.LESSONS_TO_A));
