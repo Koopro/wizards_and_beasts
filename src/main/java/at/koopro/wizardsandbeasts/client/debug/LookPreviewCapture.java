@@ -45,10 +45,14 @@ public final class LookPreviewCapture {
 
     private static final List<Step> SCRIPT = List.of(
             new Step("", 100, LookPreviewCapture::stage),
-            new Step("", 40, p -> look(p, 1.5, 1, -2.4, 0f, 4f)),
+            new Step("", 40, p -> look(p, 2.5, 0.6, -3.0, 0f, 10f)),
             new Step("quidditch_balls", 10, p -> {}),
-            new Step("", 40, p -> look(p, 8.5, 1, -3.5, 0f, 18f)),
+            new Step("", 40, p -> look(p, 8.5, 0.4, -2.2, 0f, 22f)),
             new Step("ridgeback_egg", 10, p -> {}),
+            new Step("", 40, p -> look(p, 17.0, 0.7, -1.4, 0f, 6f)),
+            new Step("owls", 10, p -> {}),
+            new Step("", 40, p -> look(p, 28.5, 0.5, -3.0, 0f, -6f)),
+            new Step("weasley_clock", 10, p -> {}),
             new Step("", 40, p -> {
                 p.level().setDayTime(18000);
                 look(p, 0.5, 1, 0.5, 180f, -32f);
@@ -71,18 +75,52 @@ public final class LookPreviewCapture {
         base = p.blockPosition().offset(40, 0, 40);
         level.setDayTime(6000);
         level.setWeatherParameters(6000, 0, false, false);
-        for (int x = -4; x <= 12; x++) {
+        for (int x = -4; x <= 32; x++) {
             for (int z = -6; z <= 4; z++) {
                 level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.POLISHED_DEEPSLATE.defaultBlockState());
             }
         }
-        // The three balls of the films, side by side at eye height: Quaffle, Snitch, Bludger.
-        display(level, base.offset(-1, 0, 0), 1.9, "quaffle", 1.6f);
-        display(level, base.offset(1, 0, 0), 1.9, "golden_snitch", 2.2f);
-        display(level, base.offset(3, 0, 0), 1.9, "bludger", 1.6f);
+        // The balls at the size they are, beside a Seeker in Quidditch robes for scale: Quaffle, Snitch, Bludger.
+        level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack()
+                .withSuppressedOutput().withLevel(level), String.format(java.util.Locale.ROOT,
+                "summon minecraft:armor_stand %.1f %d %.1f {Rotation:[180f,0f],ShowArms:1b,"
+                        + "equipment:{chest:{id:\"wizards_and_beasts:quidditch_robes\",count:1},"
+                        + "mainhand:{id:\"wizards_and_beasts:beaters_bat\",count:1}}}",
+                base.getX() + 4.5, base.getY(), base.getZ() + 0.5));
+        display(level, base.offset(0, 0, 0), 1.25, "quaffle", 1.0f);
+        display(level, base.offset(1, 0, 0), 1.6, "golden_snitch", 1.0f);
+        display(level, base.offset(2, 0, 0), 1.2, "bludger", 1.0f);
         // Norbert's egg in Hagrid's fire.
         level.setBlockAndUpdate(base.offset(8, 0, 0), Blocks.CAMPFIRE.defaultBlockState());
-        display(level, base.offset(8, 0, 0), 1.05, "norwegian_ridgeback_egg", 1.4f);
+        display(level, base.offset(8, 0, 0), 0.95, "norwegian_ridgeback_egg", 1.0f);
+        // The post owls on perches: snowy (Hedwig), great grey (Errol), tawny and barn (the post office).
+        String[] coats = {"base", "great_grey", "tawny", "barn"};
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "owl"));
+        for (int i = 0; i < coats.length; i++) {
+            BlockPos perch = base.offset(14 + i * 2, 0, 0);
+            level.setBlockAndUpdate(perch, Blocks.SPRUCE_FENCE.defaultBlockState());
+            var owl = type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            if (owl instanceof net.minecraft.world.entity.Mob mob) {
+                mob.snapTo(perch.getX() + 0.5, perch.getY() + 1.0, perch.getZ() + 0.5, 180f, 0f);
+                mob.setYHeadRot(180f);
+                mob.setNoAi(true);
+                if (!coats[i].equals("base") && mob instanceof at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity beast) {
+                    beast.applyVariant(coats[i]);
+                }
+                level.addFreshEntity(mob);
+            }
+        }
+        // The Weasley clock on a kitchen wall.
+        for (int x = 25; x <= 32; x++) {
+            for (int y = 0; y <= 5; y++) {
+                level.setBlockAndUpdate(base.offset(x, y, 3), Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState());
+            }
+        }
+        level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack()
+                .withSuppressedOutput().withLevel(level), String.format(java.util.Locale.ROOT,
+                "summon minecraft:painting %d %d %d {facing:2b,variant:\"wizards_and_beasts:weasley_clock\"}",
+                base.getX() + 28, base.getY() + 2, base.getZ() + 2));
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
@@ -134,7 +172,7 @@ public final class LookPreviewCapture {
             server.execute(() -> {
                 ServerLevel level = server.overworld();
                 at.koopro.wizardsandbeasts.spell.darkmark.DarkMark.draw(level,
-                        Vec3.atCenterOf(base).add(0, 46, -60), 1.4, 0f);
+                        Vec3.atCenterOf(base).add(0, 44, -56), 1.6, 0f);
             });
         }
         if (captureThisFrame || --wait > 0) {

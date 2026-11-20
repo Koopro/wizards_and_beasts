@@ -1,0 +1,47 @@
+{
+  "id": "wizards_and_beasts:owl",
+  "bodyPlan": "AVIAN",
+  "locomotion": "FLYING",
+  "temperament": "PASSIVE",
+  "width": 0.7,
+  "height": 1.2,
+  "scale": 0.5,
+  "_scale_note": "Reference: a snowy owl is 53-71 cm long, about a third of a person. The rig is drawn at twice that so its face and eyes carry texels; scale 0.5 brings it to about 0.6 blocks.",
+  "maxHealth": 6.0,
+  "movementSpeed": 0.22,
+  "flyingSpeed": 0.55,
+  "followRange": 20.0,
+  "model": "wizards_and_beasts:entity/owl",
+  "texture": "wizards_and_beasts:textures/entity/owl.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/owl.animation.json",
+  "attackDamage": 0.0,
+  "traits": [
+    "FEARFUL"
+  ],
+  "clips": [
+    "flinch"
+  ],
+  "coats": {
+    "base_weight": 40,
+    "variants": [
+      {
+        "id": "great_grey",
+        "weight": 20,
+        "origin": "canon",
+        "note": "Errol, the Weasleys' great grey owl"
+      },
+      {
+        "id": "tawny",
+        "weight": 25,
+        "origin": "canon",
+        "note": "a tawny owl, as the post office keeps"
+      },
+      {
+        "id": "barn",
+        "weight": 15,
+        "origin": "canon",
+        "note": "a barn owl, as the post office keeps"
+      }
+    ]
+  }
+}

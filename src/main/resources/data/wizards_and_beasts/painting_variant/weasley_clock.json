@@ -1,0 +1,13 @@
+{
+  "asset_id": "wizards_and_beasts:weasley_clock",
+  "width": 3,
+  "height": 3,
+  "title": {
+    "translate": "painting.wizards_and_beasts.weasley_clock.title",
+    "color": "yellow"
+  },
+  "author": {
+    "translate": "painting.wizards_and_beasts.weasley_clock.author",
+    "color": "gray"
+  }
+}

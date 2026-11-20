@@ -77,6 +77,7 @@ public final class ModCreatures {
             new Spec("obscurus", Locomotion.FLYING, 0.95f, 1.25f),
             new Spec("occamy", Locomotion.GROUND, 1.7f, 1.9f),
             new Spec("peruvian_vipertooth", Locomotion.FLYING, 1.7f, 1.9f),
+            new Spec("owl", Locomotion.FLYING, 0.7f, 1.2f),
             new Spec("plimpy", Locomotion.AQUATIC, 0.65f, 0.75f),
             new Spec("qilin", Locomotion.GROUND, 0.95f, 1.25f),
             new Spec("reem", Locomotion.GROUND, 2.7f, 2.9f),

@@ -89,9 +89,10 @@ public final class DarkMark {
             double x = centre.x + rightX * p[0] * pixel;
             double y = centre.y + p[1] * pixel;
             double z = centre.z + rightZ * p[0] * pixel;
-            level.sendParticles(core, true, true, x, y, z, 3, pixel * 0.25, pixel * 0.25, pixel * 0.25, 0.0);
-            level.sendParticles(glow, true, true, x, y, z, 1, pixel * 0.6, pixel * 0.6, pixel * 0.6, 0.0);
-            level.sendParticles(smoke, true, true, x, y, z, 1, pixel * 0.9, pixel * 0.9, pixel * 0.9, 0.0);
+            // Dense enough to read as one luminous shape, not a scatter of sparks.
+            level.sendParticles(core, true, true, x, y, z, 7, pixel * 0.18, pixel * 0.18, pixel * 0.18, 0.0);
+            level.sendParticles(glow, true, true, x, y, z, 3, pixel * 0.45, pixel * 0.45, pixel * 0.45, 0.0);
+            level.sendParticles(smoke, true, true, x, y, z, 2, pixel * 0.8, pixel * 0.8, pixel * 0.8, 0.0);
         }
     }
 }

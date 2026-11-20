@@ -64,7 +64,7 @@ public class ModEntityLootTableProvider extends EntityLootSubProvider {
             case "sea_serpent" -> simple(Items.PRISMARINE_SHARD, 1, 3);
             case "hippocampus" -> simple(Items.PRISMARINE_SHARD, 0, 2);
             // birds
-            case "fwooper", "jobberknoll", "diricawl" -> simple(Items.FEATHER, 1, 2);
+            case "fwooper", "jobberknoll", "diricawl", "owl" -> simple(Items.FEATHER, 1, 2);
             // winged mounts and raptors
             case "abraxan", "aethonan" -> two(Items.LEATHER, 1, 2, Items.FEATHER, 0, 2);
             case "griffin", "snallygaster" ->

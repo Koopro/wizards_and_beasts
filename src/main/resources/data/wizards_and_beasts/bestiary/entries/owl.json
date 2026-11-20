@@ -1,0 +1,41 @@
+{
+  "id": "wizards_and_beasts:owl",
+  "displayName": "bestiary.wizards_and_beasts.owl.name",
+  "category": "MAGICAL_BIRD",
+  "mmRating": 1,
+  "habitat": "bestiary.wizards_and_beasts.owl.habitat",
+  "size": "SMALL",
+  "shortLore": "bestiary.wizards_and_beasts.owl.short_lore",
+  "fullLore": "bestiary.wizards_and_beasts.owl.full_lore",
+  "magicAbilities": [
+    "bestiary.wizards_and_beasts.owl.ability.1",
+    "bestiary.wizards_and_beasts.owl.ability.2"
+  ],
+  "threats": [
+    "bestiary.wizards_and_beasts.owl.threat.1",
+    "bestiary.wizards_and_beasts.owl.threat.2"
+  ],
+  "weaknesses": [
+    "bestiary.wizards_and_beasts.owl.weakness.1",
+    "bestiary.wizards_and_beasts.owl.weakness.2"
+  ],
+  "encounterTrigger": "PROXIMITY",
+  "iconTexture": "wizards_and_beasts:textures/bestiary/icons/owl.png",
+  "silhouetteTexture": "wizards_and_beasts:textures/bestiary/silhouettes/owl.png",
+  "sortOrder": 31,
+  "entityType": "wizards_and_beasts:owl",
+  "profile": {
+    "classification": "beast",
+    "basis": "canon",
+    "diet": "bestiary.wizards_and_beasts.owl.diet",
+    "behaviour": "bestiary.wizards_and_beasts.owl.behaviour",
+    "society": "bestiary.wizards_and_beasts.owl.society",
+    "interactions": [
+      "bestiary.wizards_and_beasts.owl.interaction.1"
+    ],
+    "materials": [],
+    "study": [
+      "watch"
+    ]
+  }
+}
