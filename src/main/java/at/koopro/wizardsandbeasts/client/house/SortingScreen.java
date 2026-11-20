@@ -1,6 +1,5 @@
 package at.koopro.wizardsandbeasts.client.house;
 
-import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
@@ -24,7 +23,21 @@ import java.util.List;
 public class SortingScreen extends Screen {
 
     private static final int PANEL_W = 260;
-    private static final int PANEL_H = 112;
+    private static final int PANEL_H = 116;
+    /** The black inside of the Hat over the wearer's eyes, its frayed brim below (tools/canon_gui.py). */
+    private static final net.minecraft.resources.Identifier INSIDE = art("inside");
+    /** The Hat itself, its face in the creases. */
+    private static final net.minecraft.resources.Identifier HAT = art("hat");
+    private static final int HAT_W = 56;
+    private static final int HAT_H = 64;
+    /** The voice: warm and pale against the dark leather. */
+    private static final int VOICE = 0xFFE6D3A8;
+    private static final int NAME = 0xFFD9B25A;
+
+    private static net.minecraft.resources.Identifier art(String name) {
+        return net.minecraft.resources.Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
+                "textures/gui/artefact/sorting/" + name + ".png");
+    }
     private static final GuiSkin SKIN = GuiSkin.SORTING_HAT;
     private static final int MIN_SKINNED = 2 * WizardsMetrics.PANEL_SPRITE_BORDER + 2;
     private static final String KEY = "gui.wizards_and_beasts.sorting.";
@@ -48,11 +61,11 @@ public class SortingScreen extends Screen {
         int py = layout.panelY();
         int pw = layout.panelW();
         int btnH = Math.max(MIN_SKINNED, layout.s(18));
-        int btnW = layout.s(112);
-        int btnY = py + layout.panelH() - layout.s(12) - btnH;
-        addRenderableWidget(ThemedButton.skinned(px + pw / 2 - btnW - layout.s(4), btnY, btnW, btnH,
+        int btnW = layout.s(86);
+        int btnY = py + layout.s(70);
+        addRenderableWidget(ThemedButton.skinned(px + layout.s(72), btnY, btnW, btnH,
                 Component.translatable(KEY + "decide"), () -> answer(false), SKIN));
-        addRenderableWidget(ThemedButton.skinned(px + pw / 2 + layout.s(4), btnY, btnW, btnH,
+        addRenderableWidget(ThemedButton.skinned(px + layout.s(164), btnY, btnW, btnH,
                 Component.translatable(KEY + "plead", Component.translatable(lean.nameKey())), () -> answer(true), SKIN));
     }
 
@@ -67,17 +80,19 @@ public class SortingScreen extends Screen {
         int px = layout.panelX();
         int py = layout.panelY();
         int pw = layout.panelW();
-        McStylePanel.drawSkinPanel(gfx, SKIN, px, py, pw, layout.panelH());
-        gfx.drawString(font, title, px + pw / 2 - font.width(title) / 2, py + layout.s(10), SKIN.ink(), false);
-        McStylePanel.drawSkinDivider(gfx, SKIN, px + layout.s(12), py + layout.s(20), pw - layout.s(24));
+        gfx.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, INSIDE, px, py, 0.0F, 0.0F,
+                pw, layout.panelH(), PANEL_W, PANEL_H, PANEL_W, PANEL_H);
+        gfx.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, HAT, px + layout.s(8), py + layout.s(10),
+                0.0F, 0.0F, layout.s(HAT_W), layout.s(HAT_H), HAT_W, HAT_H, HAT_W, HAT_H);
+        gfx.drawString(font, title, px + layout.s(72), py + layout.s(10), NAME, false);
         Component speech = Component.translatable(KEY + "sees." + lean.id())
                 .append(" ")
                 .append(Component.translatable(sure ? KEY + "sure" : KEY + "unsure"))
                 .withStyle(ChatFormatting.ITALIC);
-        List<FormattedCharSequence> lines = font.split(speech, pw - layout.s(28));
-        int y = py + layout.s(30);
+        List<FormattedCharSequence> lines = font.split(speech, pw - layout.s(82));
+        int y = py + layout.s(24);
         for (FormattedCharSequence line : lines) {
-            gfx.drawString(font, line, px + layout.s(14), y, SKIN.ink(), false);
+            gfx.drawString(font, line, px + layout.s(72), y, VOICE, false);
             y += font.lineHeight + 1;
         }
         super.render(gfx, mouseX, mouseY, partialTick);
