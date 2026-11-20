@@ -44,6 +44,10 @@ public final class HogsmeadeLookCapture {
     private static final boolean ENABLED = System.getenv("WB_HOGS_LOOK") != null && !FMLEnvironment.isProduction();
     private static final Identifier TEMPLATE =
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "hogsmeade/high_street/a");
+    private static final Identifier MOUNTAINS =
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "hogsmeade/mountains/a");
+    private static final Identifier SHACK =
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "hogsmeade/shrieking_shack/a");
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
@@ -59,7 +63,11 @@ public final class HogsmeadeLookCapture {
             new Step("three_broomsticks", 10, p -> {}),
             new Step("", 40, p -> look(p, 31.5, 2, 14.0, 0f, -18f)),
             new Step("south_side", 10, p -> {}),
-            new Step("", 60, p -> look(p, 26.5, 30, 60.5, 180f, 30f)),
+            new Step("", 40, p -> look(p, 49.5, 3, 17.5, -105f, -6f)),
+            new Step("hogs_head_lane", 10, p -> {}),
+            new Step("", 60, p -> look(p, -35.5, 10, 74.5, 180f, 8f)),
+            new Step("shrieking_shack", 10, p -> {}),
+            new Step("", 60, p -> look(p, 35.5, 26, 96.5, 180f, 14f)),
             new Step("overview", 10, p -> {}),
             new Step("", 60, p -> {
                 p.level().setDayTime(12900);
@@ -79,12 +87,18 @@ public final class HogsmeadeLookCapture {
     private static void stage(ServerPlayer p) {
         ServerLevel level = p.level();
         base = p.blockPosition().offset(-26, -2, -60);
-        level.getStructureManager().get(TEMPLATE).ifPresentOrElse(template -> template.placeInWorld(level, base, base,
-                new StructurePlaceSettings(), level.getRandom(), 2),
-                () -> LOGGER.error("Hogsmeade look: template {} missing", TEMPLATE));
+        place(level, TEMPLATE, base);
+        place(level, MOUNTAINS, base.offset(-40, 0, -58));
+        place(level, SHACK, base.offset(-50, 0, 40));
         level.setDayTime(6000);
         level.setWeatherParameters(6000, 0, false, false);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+    }
+
+    private static void place(ServerLevel level, Identifier id, BlockPos at) {
+        level.getStructureManager().get(id).ifPresentOrElse(template -> template.placeInWorld(level, at, at,
+                new StructurePlaceSettings(), level.getRandom(), 2),
+                () -> LOGGER.error("Hogsmeade look: template {} missing", id));
     }
 
     private static void look(ServerPlayer p, double x, double y, double z, float yaw, float pitch) {

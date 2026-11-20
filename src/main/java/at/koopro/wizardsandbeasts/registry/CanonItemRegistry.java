@@ -252,10 +252,15 @@ public final class CanonItemRegistry {
     // --- Quidditch ---------------------------------------------------------
     public static final DeferredItem<Item> GOLDEN_SNITCH =
             ModItems.ITEMS.registerItem("golden_snitch", AnimatedItem.Plain::new);
-    public static final DeferredItem<Item> QUAFFLE =
-            ModItems.ITEMS.registerItem("quaffle", Item::new);
-    public static final DeferredItem<Item> BLUDGER =
-            ModItems.ITEMS.registerItem("bludger", Item::new);
+    /** In hand, the 3D ball of the films (tools/item_geo.py). */
+    public static final DeferredItem<AnimatedItem.Plain> QUAFFLE =
+            ModItems.ITEMS.registerItem("quaffle", AnimatedItem.Plain::new);
+    /** In hand, the 3D ball of the films (tools/item_geo.py). */
+    public static final DeferredItem<AnimatedItem.Plain> BLUDGER =
+            ModItems.ITEMS.registerItem("bludger", AnimatedItem.Plain::new);
+    /** Norbert's kind: a Norwegian Ridgeback's egg, charcoal with ember cracks, rocking (tools/item_geo.py). */
+    public static final DeferredItem<AnimatedItem.Plain> NORWEGIAN_RIDGEBACK_EGG =
+            ModItems.ITEMS.registerItem("norwegian_ridgeback_egg", props -> new AnimatedItem.Plain(props.stacksTo(1)));
     public static final DeferredItem<Item> BEATERS_BAT =
             ModItems.ITEMS.registerItem("beaters_bat", Item::new);
     /**
@@ -350,7 +355,7 @@ public final class CanonItemRegistry {
             FANTASTIC_BEASTS_AND_WHERE_TO_FIND_THEM, QUIDDITCH_THROUGH_THE_AGES, ONE_THOUSAND_MAGICAL_HERBS_AND_FUNGI,
             BEGINNERS_GUIDE_TO_TRANSFIGURATION, UNFOGGING_THE_FUTURE, WIZARDS_CHESS_SET,
             GOBSTONES, EXPLODING_SNAP, GOLDEN_SNITCH,
-            QUAFFLE, BLUDGER, BEATERS_BAT,
+            QUAFFLE, BLUDGER, NORWEGIAN_RIDGEBACK_EGG, BEATERS_BAT,
             QUIDDITCH_ROBES,
             ESSENCE_OF_DITTANY, MURTLAP_ESSENCE,
             BLOOD_REPLENISHING_POTION, CHOCOLATE_BAR, MEMORY_VIAL,
