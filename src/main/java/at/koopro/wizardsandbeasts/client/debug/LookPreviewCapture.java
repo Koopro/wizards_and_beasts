@@ -63,6 +63,10 @@ public final class LookPreviewCapture {
             steps.addAll(QILIN_SCENES);
             return steps;
         }
+        if ("zouwu".equals(System.getenv("WB_LOOK_ONLY"))) {
+            steps.addAll(ZOUWU_SCENES);
+            return steps;
+        }
         // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
         steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
@@ -184,6 +188,53 @@ public final class LookPreviewCapture {
             new Step("qilin_three_quarter", 10, p -> {}),
             new Step("", 40, p -> eyeAt(p, QLX + 0.7, 1.35, -1.4, QLX, 1.15, -0.2)),
             new Step("qilin_head", 10, p -> {}));
+
+    /** Where the Zouwu stands, well east of the Qilin: it is elephant-sized and its tail is longer still. */
+    private static final double ZX = 118.5;
+
+    /**
+     * The Zouwu (A1), Mojang style (The Crimes of Grindelwald): on open ground with a person for scale, then front,
+     * side (the whole tail), three-quarter and the face in its mane.
+     */
+    private static final List<Step> ZOUWU_SCENES = List.of(
+            new Step("", 40, p -> eyeAt(p, ZX + 7.5, 5.5, -12.5, ZX + 0.5, 2.0, 2.0)),
+            new Step("zouwu_scale", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, ZX, 3.2, -9.5, ZX, 2.6, 0.0)),
+            new Step("zouwu_front", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, ZX + 14.0, 3.0, 2.5, ZX, 2.3, 2.5)),
+            new Step("zouwu_side", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, ZX + 6.5, 4.5, -7.0, ZX, 2.4, 0.5)),
+            new Step("zouwu_three_quarter", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, ZX + 1.5, 3.3, -5.4, ZX, 3.0, -2.0)),
+            new Step("zouwu_face", 10, p -> {}));
+
+    private static void zouwuGround(ServerLevel level) {
+        for (int x = 106; x <= 130; x++) {
+            for (int z = -14; z <= 10; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 0; y <= 4; y++) {
+                    if (!level.getBlockState(base.offset(x, y, z)).isAir()) {
+                        level.setBlockAndUpdate(base.offset(x, y, z), Blocks.AIR.defaultBlockState());
+                    }
+                }
+            }
+        }
+        command(level, "kill @e[type=wizards_and_beasts:zouwu]");
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "zouwu"));
+        if (type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                instanceof net.minecraft.world.entity.Mob zouwu) {
+            zouwu.snapTo(base.getX() + ZX, base.getY(), base.getZ() + 0.5, 180f, 0f);
+            zouwu.setYHeadRot(180f);
+            zouwu.setYBodyRot(180f);
+            zouwu.setNoAi(true);
+            zouwu.setPersistenceRequired();
+            level.addFreshEntity(zouwu);
+        }
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + ZX - 4.2, (double) base.getY(), base.getZ() - 1.5));
+    }
 
     private static void qilinMeadow(ServerLevel level) {
         for (int x = 91; x <= 101; x++) {
@@ -427,6 +478,7 @@ public final class LookPreviewCapture {
         nifflerFamily(level);
         kappaPond(level);
         qilinMeadow(level);
+        zouwuGround(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
