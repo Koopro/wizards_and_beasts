@@ -4226,3 +4226,15 @@ are copies: `owl.json` of `hippogriff.json` (rabbit and chicken only), `kneazle.
 **Not done:** Graphorn and Occamy. Both are `HOSTILE`, and `GenericBeastEntity` adds a
 `NearestAttackableTargetGoal<Player>` with no bond-owner exemption, so a profile alone would leave either one
 hunting the person who feeds it. Needs an owner decision on whether a bond calms a hostile beast.
+# House scarf (2026-11-25, `feat/house-scarf`)
+
+Owner ruling 2026-11-25: plain grey/white by default, house colours once sorted.
+
+A **plain** scarf (no livery stitched, or `school_plain`) now draws in the wearer's house livery once the
+Sorting Hat has sorted them (`house_lion` / `house_badger` / `house_eagle` / `house_serpent`, mapped by
+`House.livery()`); before that it keeps the cut's own grey-and-white base sheet, as it always did. A scarf
+**stitched** in a house's colours by choice is unchanged and keeps them on any wearer. Only the worn look
+changes: the item, its inventory icon, its tooltip and its recipes are untouched, and no other cut follows
+the house (`Wardrobe.HOUSE_FOLLOWING_CUTS = {"scarf"}`). Rule in `Wardrobe.wornLivery`, read by
+`WizardArmorRenderer.addRenderData`; the `HOUSE` attachment already synced to every client that sees the
+wearer. Pinned by `WardrobeHouseLiveryTest`.
