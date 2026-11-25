@@ -13,6 +13,18 @@
           "fixed",
           "on_shelf"
         ]
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "wizards_and_beasts:item/bludger"
+        },
+        "when": [
+          "firstperson_lefthand",
+          "firstperson_righthand",
+          "thirdperson_lefthand",
+          "thirdperson_righthand"
+        ]
       }
     ],
     "fallback": {

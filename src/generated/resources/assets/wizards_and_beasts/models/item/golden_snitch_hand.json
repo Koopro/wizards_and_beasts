@@ -1,0 +1,49 @@
+{
+  "parent": "minecraft:item/generated",
+  "display": {
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        25
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        1.13,
+        3.2,
+        1.13
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ],
+      "translation": [
+        0,
+        2,
+        0
+      ]
+    },
+    "thirdperson_righthand": {
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ],
+      "translation": [
+        0,
+        2.5,
+        1
+      ]
+    }
+  },
+  "textures": {
+    "layer0": "wizards_and_beasts:item/golden_snitch"
+  }
+}

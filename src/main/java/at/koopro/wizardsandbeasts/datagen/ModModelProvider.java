@@ -306,10 +306,37 @@ public class ModModelProvider extends ModelProvider {
      * the centre of the item cube, so every geo item rendered eight units high.
      */
     private static void iconInSlotGeoInHand(ItemModelGenerators itemModels, Item item, Identifier icon) {
+        String id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
+        if (FLAT_IN_HAND.contains(id)) {
+            flatInHandGeoOnDisplays(itemModels, item, icon, id);
+            return;
+        }
         itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
                 ItemModelUtils.plainModel(icon),
                 ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item, "_held"),
                         new GeckolibItemSpecialRenderer.Unbaked())));
+    }
+
+    /**
+     * Items held the way vanilla holds a snowball or a slime ball (owner, 2026-11-25: "like Mojang would do it"):
+     * the flat sprite in slots, on the ground, in frames <em>and in hand</em>. Their GeckoLib model -- one cube,
+     * vanilla style -- is left to the contexts nobody holds: display entities ({@code none}) and the head.
+     */
+    private static final Set<String> FLAT_IN_HAND = Set.of("quaffle", "bludger", "golden_snitch");
+
+    private static void flatInHandGeoOnDisplays(ItemModelGenerators itemModels, Item item, Identifier icon, String id) {
+        Identifier hand = SMALL_IN_HAND.contains(id) ? flatIcon(itemModels, item, "_hand", SMALL_FLAT_ITEM) : icon;
+        itemModels.itemModelOutput.accept(item, ItemModelUtils.select(
+                new net.minecraft.client.renderer.item.properties.select.DisplayContext(),
+                ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item, "_held"),
+                        new GeckolibItemSpecialRenderer.Unbaked()),
+                ItemModelUtils.when(java.util.List.of(net.minecraft.world.item.ItemDisplayContext.GUI,
+                        net.minecraft.world.item.ItemDisplayContext.GROUND, net.minecraft.world.item.ItemDisplayContext.FIXED,
+                        net.minecraft.world.item.ItemDisplayContext.ON_SHELF), ItemModelUtils.plainModel(icon)),
+                ItemModelUtils.when(java.util.List.of(net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
+                        net.minecraft.world.item.ItemDisplayContext.FIRST_PERSON_RIGHT_HAND,
+                        net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_LEFT_HAND,
+                        net.minecraft.world.item.ItemDisplayContext.THIRD_PERSON_RIGHT_HAND), ItemModelUtils.plainModel(hand))));
     }
 
     private static Identifier flatIcon(ItemModelGenerators itemModels, Item item, String suffix) {

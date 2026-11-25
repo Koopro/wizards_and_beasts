@@ -46,19 +46,49 @@ public final class LookPreviewCapture {
     private static List<Step> script() {
         List<Step> steps = new java.util.ArrayList<>();
         steps.add(new Step("", 100, LookPreviewCapture::stage));
-        // The Quidditch balls after the owner's concept sheet: a hero shot, then four views of each ball.
-        steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -2.4, 0f, 0f)));
+        // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
+        steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
         for (int b = 0; b < BALLS.length; b++) {
             for (int v = 0; v < VIEWS.length; v++) {
                 double x = viewX(b, v);
                 double back = VIEW_BACK[b];
-                // A three-quarter look from up and to one side, as the concept sheet draws its views.
+                // A three-quarter look from up and to one side.
                 steps.add(new Step("", 30, p -> eyeAt(p, x - 0.45 * back, VIEW_Y + 0.55 * back, VIEW_Z - back,
                         x, VIEW_Y, VIEW_Z)));
                 steps.add(new Step(BALLS[b] + "_" + VIEWS[v], 10, p -> {}));
             }
         }
+        // Held as vanilla holds a snowball: the flat sprite in hand, the hotbar showing the icons.
+        String[] held = {"quaffle", "bludger", "golden_snitch"};
+        steps.add(new Step("", 40, p -> {
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            p.getAbilities().flying = true;
+            p.onUpdateAbilities();
+            p.getInventory().clearContent();
+            for (int i = 0; i < held.length; i++) {
+                p.getInventory().setItem(i, new net.minecraft.world.item.ItemStack(
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
+                                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, held[i]))));
+            }
+            p.getInventory().setItem(3, new net.minecraft.world.item.ItemStack(
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "beaters_bat"))));
+            eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f);
+            hold(p, 0);
+            showGui = true;
+        }));
+        for (int i = 0; i < held.length; i++) {
+            int slot = i;
+            if (i > 0) {
+                steps.add(new Step("", 20, p -> hold(p, slot)));
+            }
+            steps.add(new Step("hand_" + held[i], 10, p -> {}));
+        }
+        steps.add(new Step("", 10, p -> {
+            showGui = false;
+            p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+        }));
         steps.addAll(OTHER_SCENES);
         return steps;
     }
@@ -83,6 +113,8 @@ public final class LookPreviewCapture {
     private static int step;
     private static boolean captureThisFrame;
     private static boolean markLit;
+    /** Set by a server step, applied on the client tick: the in-hand shots need the hand and hotbar drawn. */
+    private static volatile boolean showGui;
 
     private LookPreviewCapture() {}
 
@@ -138,8 +170,8 @@ public final class LookPreviewCapture {
     private static final String[] BALLS = {"quaffle", "bludger", "golden_snitch"};
     private static final String[] VIEWS = {"front", "side", "top", "bottom"};
     /** Room per view (the Snitch's wings span two blocks) and the camera's distance back. */
-    private static final double[] BALL_SPACING = {2.2, 2.0, 3.2};
-    private static final double[] VIEW_BACK = {1.8, 1.6, 3.0};
+    private static final double[] BALL_SPACING = {1.2, 1.2, 1.8};
+    private static final double[] VIEW_BACK = {0.9, 0.8, 1.0};
     private static final double VIEW_Y = 1.6;
     /** Beyond the hoops and far east of the hero shot, so neither shows behind the other. */
     private static final double VIEW_Z = 30;
@@ -150,8 +182,8 @@ public final class LookPreviewCapture {
     }
 
     /**
-     * The owner's concept sheet (2026-11-25): the three balls at the sheet's sizes (model scale 1: Quaffle 14 units,
-     * Bludger 12, Snitch 7 with its wings) over a pitch with goal hoops, then each ball turned to show its front,
+     * The Quidditch balls in vanilla style (owner, 2026-11-25): each one element at model scale 1 (Quaffle 6 px,
+     * Bludger 5, Snitch 2 with plane wings) over a pitch with goal hoops, then each ball turned to show its front,
      * side, top and bottom. Every display has a fixed daylight brightness.
      */
     private static void quidditch(ServerLevel level) {
@@ -177,9 +209,9 @@ public final class LookPreviewCapture {
             }
         }
         // The hero shot: the balls in a row in the air, Quaffle on the left (+x is the left facing +z).
-        ball(level, QX + 3.5, 1.85, 0.5, "quaffle", 1.0, 8, NONE, 0);
+        ball(level, QX + 2.8, 1.85, 0.5, "quaffle", 1.0, 8, NONE, 0);
         ball(level, QX + 1.9, 1.85, 0.5, "bludger", 1.0, 8, NONE, 0);
-        ball(level, QX + 0.1, 2.15, 0.5, "golden_snitch", 1.0, 8, NONE, 0);
+        ball(level, QX + 0.9, 2.05, 0.5, "golden_snitch", 1.0, 8, NONE, 0);
         // Four views of each: as made, turned to show its east side, its top, its bottom.
         for (int b = 0; b < BALLS.length; b++) {
             for (int v = 0; v < VIEWS.length; v++) {
@@ -217,6 +249,12 @@ public final class LookPreviewCapture {
     private static void command(ServerLevel level, String cmd) {
         level.getServer().getCommands().performPrefixedCommand(
                 level.getServer().createCommandSourceStack().withSuppressedOutput().withLevel(level), cmd);
+    }
+
+    /** Selects a hotbar slot on the server and tells the client, which owns the selected slot. */
+    private static void hold(ServerPlayer p, int slot) {
+        p.getInventory().setSelectedSlot(slot);
+        p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket(slot));
     }
 
     /** Places the eye at (ex, ey, ez) looking at (tx, ty, tz), all base-relative. */
@@ -271,6 +309,9 @@ public final class LookPreviewCapture {
         MinecraftServer server = mc.getSingleplayerServer();
         if (mc.player == null || server == null) {
             return;
+        }
+        if (mc.options.hideGui == showGui) {
+            mc.options.hideGui = !showGui;
         }
         if (mc.screen instanceof PauseScreen) {
             mc.setScreen(null);
