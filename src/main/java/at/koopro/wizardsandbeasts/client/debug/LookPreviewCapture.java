@@ -67,6 +67,10 @@ public final class LookPreviewCapture {
             steps.addAll(ZOUWU_SCENES);
             return steps;
         }
+        if ("hippogriff".equals(System.getenv("WB_LOOK_ONLY"))) {
+            steps.addAll(HIPPOGRIFF_SCENES);
+            return steps;
+        }
         // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
         steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
@@ -207,6 +211,72 @@ public final class LookPreviewCapture {
             new Step("zouwu_three_quarter", 10, p -> {}),
             new Step("", 40, p -> eyeAt(p, ZX + 1.5, 3.3, -5.4, ZX, 3.0, -2.0)),
             new Step("zouwu_face", 10, p -> {}));
+
+    /**
+     * The Hippogriff in Mojang style (A1, 2026-11-25): the storm-grey coat beside a person for scale, from the front,
+     * the side, three-quarter and at the face, then Hagrid's five coats in a row (PoA ch.6).
+     */
+    private static final double HX = 141.5;
+    private static final List<Step> HIPPOGRIFF_SCENES = List.of(
+            new Step("", 40, p -> eyeAt(p, HX + 6.5, 4.0, -9.5, HX + 0.5, 1.6, 1.0)),
+            new Step("hippogriff_scale", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, HX, 2.6, -7.5, HX, 2.0, 0.0)),
+            new Step("hippogriff_front", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, HX + 9.0, 2.4, 1.0, HX, 1.8, 1.0)),
+            new Step("hippogriff_side", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, HX + 5.0, 3.2, -5.5, HX, 1.9, 0.5)),
+            new Step("hippogriff_three_quarter", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, HX + 1.4, 2.7, -3.4, HX, 2.4, -1.0)),
+            new Step("hippogriff_face", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, HX + 4.0, 4.5, 18.0, HX + 4.0, 1.5, 9.0)),
+            new Step("hippogriff_coats", 10, p -> {}));
+
+    private static void hippogriffGround(ServerLevel level) {
+        for (int x = 128; x <= 156; x++) {
+            for (int z = -14; z <= 22; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 0; y <= 5; y++) {
+                    if (!level.getBlockState(base.offset(x, y, z)).isAir()) {
+                        level.setBlockAndUpdate(base.offset(x, y, z), Blocks.AIR.defaultBlockState());
+                    }
+                }
+            }
+        }
+        command(level, "kill @e[type=wizards_and_beasts:hippogriff]");
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "hippogriff"));
+        var coats = at.koopro.wizardsandbeasts.entity.creature.HippogriffEntity.Coat.values();
+        for (int i = -1; i < coats.length; i++) {
+            if (type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                    instanceof at.koopro.wizardsandbeasts.entity.creature.HippogriffEntity hippogriff) {
+                // The hero first (storm grey, the default), then the five in a row behind it, facing the camera.
+                double x = i < 0 ? HX : HX - 4.0 + i * 4.0;
+                double z = i < 0 ? 0.5 : 9.0;
+                float yaw = i < 0 ? 180f : 0f;
+                hippogriff.setCoat(i < 0 ? coats[0] : coats[i]);
+                hippogriff.snapTo(base.getX() + x, base.getY(), base.getZ() + z, yaw, 0f);
+                hippogriff.setYHeadRot(yaw);
+                hippogriff.setYBodyRot(yaw);
+                // Not NoAi: a NoAi mob never runs physics, so its client never hears it landed and it plays its
+                // flight clips. AI on, but going nowhere: it stands, settles and shows its ground idle.
+                for (var attribute : List.of(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED,
+                        net.minecraft.world.entity.ai.attributes.Attributes.FLYING_SPEED)) {
+                    var instance = hippogriff.getAttribute(attribute);
+                    if (instance != null) {
+                        instance.setBaseValue(0.0);
+                    }
+                }
+                hippogriff.setPersistenceRequired();
+                level.addFreshEntity(hippogriff);
+                // No goals: it neither wanders, turns nor takes off, so every shot frames the pose set here.
+                hippogriff.goalSelector.removeAllGoals(goal -> true);
+                hippogriff.targetSelector.removeAllGoals(goal -> true);
+            }
+        }
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + HX - 3.4, (double) base.getY(), base.getZ() - 1.5));
+    }
 
     private static void zouwuGround(ServerLevel level) {
         for (int x = 106; x <= 130; x++) {
@@ -479,6 +549,7 @@ public final class LookPreviewCapture {
         kappaPond(level);
         qilinMeadow(level);
         zouwuGround(level);
+        hippogriffGround(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
