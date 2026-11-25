@@ -46,6 +46,11 @@ public final class LookPreviewCapture {
     private static List<Step> script() {
         List<Step> steps = new java.util.ArrayList<>();
         steps.add(new Step("", 100, LookPreviewCapture::stage));
+        // WB_LOOK_ONLY=gnome: just the signature-rig sheet in hand (systems audit A1), not the whole sweep.
+        if ("gnome".equals(System.getenv("WB_LOOK_ONLY"))) {
+            steps.addAll(GNOME_SCENES);
+            return steps;
+        }
         // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
         steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
@@ -90,7 +95,56 @@ public final class LookPreviewCapture {
             p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         }));
         steps.addAll(OTHER_SCENES);
+        steps.addAll(GNOME_SCENES);
         return steps;
+    }
+
+    /** Where the gnome's garden starts, east of the humanoid corridor. */
+    private static final double GX = 54.5;
+
+    /**
+     * The garden gnome (A1), Mojang style with its own jaw and ears: in the Burrow's weedy garden by a hedge
+     * (Chamber of Secrets ch.3), a person beside it for scale, then front, side and three-quarter close-ups.
+     */
+    private static final List<Step> GNOME_SCENES = List.of(
+            new Step("", 40, p -> eyeAt(p, GX + 1.2, 1.7, -3.2, GX + 1.2, 0.8, 0.5)),
+            new Step("gnome_garden", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, GX, 0.55, -0.9, GX, 0.25, 0.5)),
+            new Step("gnome_front", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, GX + 1.4, 0.55, 0.5, GX, 0.25, 0.5)),
+            new Step("gnome_side", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, GX + 0.9, 0.85, -0.6, GX, 0.25, 0.5)),
+            new Step("gnome_three_quarter", 10, p -> {}));
+
+    private static void gnomeGarden(ServerLevel level) {
+        for (int x = 51; x <= 60; x++) {
+            for (int z = -5; z <= 3; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+            // The hedge the gnomes are flung over, and weeds along it.
+            level.setBlockAndUpdate(base.offset(x, 0, 2), Blocks.OAK_LEAVES.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
+            level.setBlockAndUpdate(base.offset(x, 1, 2), Blocks.OAK_LEAVES.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT, true));
+            if (x % 2 == 0) {
+                level.setBlockAndUpdate(base.offset(x, 0, 1), Blocks.SHORT_GRASS.defaultBlockState());
+            }
+        }
+        level.setBlockAndUpdate(base.offset(56, 0, 0), Blocks.DANDELION.defaultBlockState());
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "gnome"));
+        if (type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                instanceof net.minecraft.world.entity.Mob gnome) {
+            gnome.snapTo(base.getX() + GX, base.getY(), base.getZ() + 0.5, 180f, 0f);
+            gnome.setYHeadRot(180f);
+            gnome.setYBodyRot(180f);
+            gnome.setNoAi(true);
+            level.addFreshEntity(gnome);
+        }
+        // A person for scale (a plain mannequin, 1.8 blocks): a gnome reaches just past their ankle-to-shin.
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + GX + 1.6, (double) base.getY(), base.getZ() + 0.8));
     }
 
     private static final List<Step> OTHER_SCENES = List.of(
@@ -203,6 +257,7 @@ public final class LookPreviewCapture {
                 "summon minecraft:painting %d %d %d {facing:2b,variant:\"wizards_and_beasts:weasley_clock\"}",
                 base.getX() + 28, base.getY() + 2, base.getZ() + 2));
         humanoids(level);
+        gnomeGarden(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }

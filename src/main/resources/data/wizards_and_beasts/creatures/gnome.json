@@ -3,8 +3,8 @@
   "bodyPlan": "BIPED_HUMANOID",
   "locomotion": "GROUND",
   "temperament": "PASSIVE",
-  "width": 0.65,
-  "height": 0.75,
+  "width": 0.35,
+  "height": 0.4,
   "maxHealth": 5.0,
   "movementSpeed": 0.26,
   "flyingSpeed": 0.0,
@@ -30,10 +30,11 @@
     }
   ],
   "clips": [
-    "flinch",
     "call",
-    "death",
+    "bite",
+    "flinch",
     "peek",
+    "death",
     "lie_down",
     "wake"
   ],
