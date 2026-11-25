@@ -65,7 +65,7 @@ public final class PlacesLookCapture {
 
     private static void script() {
         SCRIPT.add(new Step("", 100, PlacesLookCapture::stage));
-        double reach = Math.max(sizeX, sizeZ) * 1.1 + 6;
+        double reach = Math.max(sizeX, sizeZ) * 0.8 + 4;
         double eye = sizeY * 0.45 + 2;
         String[] sides = {"south", "west", "north", "east"};
         for (int i = 0; i < 4; i++) {
@@ -76,6 +76,11 @@ public final class PlacesLookCapture {
             float pitch = (float) Math.toDegrees(Math.atan2(eye - sizeY * 0.35, reach)) ;
             SCRIPT.add(new Step("", 50, p -> look(p, x, eye, z, (float) yaw, pitch)));
             SCRIPT.add(new Step(sides[i], 10, p -> {}));
+        }
+        if (!"portkey_hill".equals(PLACE)) {
+            // A building: its face from the approach (south, where the lane or gate is), then inside.
+            SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0, 2.2, sizeZ + 3.0, 180f, 4f)));
+            SCRIPT.add(new Step("front", 10, p -> {}));
         }
         SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0 + 2.5, 3.2, sizeZ / 2.0 + 3.5, 145f, 30f)));
         SCRIPT.add(new Step("close", 10, p -> {}));
