@@ -425,3 +425,49 @@ Manual. You need a survival world, a pewter and a brass cauldron on a heat sourc
    The other player sees "Something tugs at your hair". Drinking the bottle disguises you as them.
 8. Petrify the other player (`/wandb player condition set petrified true <them>`). Right-click them with a Mandrake Restoration
    Draught: they can move again, and you get the glass bottle back.
+
+## November 2026: houses, Hogsmeade, systems audit, wardrobe and bonds (2026-11-25)
+
+Manual, and **never yet run in a live client**: the steps below were checked by unit tests and GameTests only.
+Survival world, two players for steps 4, 11 and 13. Work through it in order: the first join leads into the rest.
+
+1. **First join.** New player: the heritage ceremony opens; pick Wizardkind. Get a wand (Ollivander's or the
+   path), cast Lumos. Does the first ten minutes read as one path?
+2. **Sorting.** Wear the Sorting Hat while unsorted. Within a second the Hat murmurs (own sound, not vanilla) and
+   the drawn Sorting screen names the house it leans to. If it is unsure you may plead; take its choice. The
+   character sheet now shows the house.
+3. **House scarf.** Before step 2, wear a plain scarf: grey on charcoal. After sorting, the same scarf shows your
+   house colours, worn and in third person. Craft a scarf in another house's colours (scarf + dyes): it keeps
+   them on you.
+4. **Seen by others.** The second player, unsorted, wears a plain scarf: you see it grey; sort them, you see it
+   change without either of you relogging.
+5. **House Cup.** Earn and lose house points. After the 7-day cycle the Cup is settled: a
+   toast, a chat line, the feast sound and a Daily Prophet story. A tie gives no Cup.
+6. **Exam week.** Outside exam week the O.W.L. desk refuses ("not exam week"). The Prophet announces the sitting
+   3 days ahead; for 3 days the desk seats you. Sit one subject. Results still come at once.
+7. **Vocation.** Try to commit to a vocation without its O.W.L. (Duelist: DADA; Scholar: Potions; Herbologist:
+   Herbology; Magizoologist: Care of Magical Creatures; Wandlore: Charms; Explorer: Transfiguration): refused.
+   Earn the grade, commit again: accepted. Try its own mechanic (Wandmaker mends another player's wand; Healer
+   heals at range; Curse-Breaker disarms a warded tomb chest; Magizoologist bonds at half the curve).
+8. **Hogsmeade.** Find a Hogsmeade (plains or taiga, snowy roofs in the snow; one about every 2000 blocks). Walk
+   the high street to the shack. Each shop has a keeper behind its counter: Honeydukes, Three Broomsticks, Hog's
+   Head, Zonko's, Scrivenshaft's, the post office.
+9. **Owl and Kneazle.** Feed a wild owl rabbit or chicken; feed a Kneazle cod or salmon. Hearts or a bond
+   message, then it follows at 70 (owl) / 50 (Kneazle). The owl leaves feathers from 60. Feeding again before
+   the cooldown is refused (parrot hurt / cat hiss).
+10. **Brooms.** Mount a school broom and a Firebolt. Mount, wind at low and high speed, boost, a light crash into a
+    wall and a hard one, dismount, polish: every one is now the mod's own sound. Do the gusts blend or stutter?
+11. **Formal duel.** `/wandb magic duel challenge <player>`, they `accept`. Bow, the 3-2-1, then duel; `yield`
+    ends it with no incident filed.
+12. **Wand tooltip.** Hover a cracked or corrupted wand: a Stability row shows. Cast with it: it hits as weakly as
+    the tooltip says.
+13. **Killing Curse.** With the Dark Arts module on: a mob between caster and target takes the curse, and a wall
+    still stops it.
+14. **Fiendfyre.** Cast it near a Horcrux: the fire roams, the caster's control is rolled each second, and the
+    Horcrux shatters with its sound. Stand clear.
+15. **Amortentia.** Sneak and sniff a bottle: three scents, one of them your house. Right-click another player with a
+    bottle to add their hair; whoever drinks it sees hearts toward them, and nobody else does.
+16. **Obliviator.** Do magic in front of a villager in a Muggle village: within about a minute an Obliviator
+    arrives, witnesses forget, the record stays.
+17. **Painful memories.** Lose a companion, or survive a Dementor: a painful memory is recorded and the Patronus is
+    harder. A Swooping Evil's sting removes the newest one.
