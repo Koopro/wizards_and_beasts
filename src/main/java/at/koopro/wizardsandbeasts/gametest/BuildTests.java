@@ -117,10 +117,8 @@ public final class BuildTests {
     private static void spendingAndCapstone(GameTestHelper helper) {
         ServerPlayer player = wizard(helper, "BuildDuelist");
         try {
-            // The Duelist asks an O.W.L. in Defence Against the Dark Arts (D2); this wizard sat it.
-            player.setData(ModAttachments.OWL_DATA.get(), new at.koopro.wizardsandbeasts.owl.data.PlayerOWLData(
-                    java.util.Map.of(at.koopro.wizardsandbeasts.owl.OWLSubject.DEFENCE_AGAINST_DARK_ARTS,
-                            at.koopro.wizardsandbeasts.owl.OWLGrade.E), true, 1, 0L));
+            // The Duelist asks an O.W.L. in Defence Against the Dark Arts (D2): wizard() already granted every O.W.L.
+            // and N.E.W.T. at O. Overwriting OWL_DATA here with the O.W.L. alone wiped the N.E.W.T.s the capstone asks.
             SkillSystemAPI.awardPoints(player, SkillSystemAPI.MAX_SKILL_POINTS);
             PlayerSkillData data = SkillSystemAPI.getSkillData(player);
             int start = data.getSkillPoints();
