@@ -1,0 +1,26 @@
+{
+  "location": "wizards_and_beasts:three_broomsticks",
+  "names": [
+    "npc.wizards_and_beasts.three_broomsticks.name.0"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.three_broomsticks.greet.0"
+    },
+    {
+      "text": "npc.wizards_and_beasts.three_broomsticks.greet.1"
+    }
+  ],
+  "topics": [
+    {
+      "id": "butterbeer",
+      "label": "npc.wizards_and_beasts.three_broomsticks.topic.butterbeer",
+      "reply": "npc.wizards_and_beasts.three_broomsticks.reply.butterbeer"
+    },
+    {
+      "id": "news",
+      "label": "npc.wizards_and_beasts.three_broomsticks.topic.news",
+      "reply": "npc.wizards_and_beasts.three_broomsticks.reply.news"
+    }
+  ]
+}

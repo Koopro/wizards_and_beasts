@@ -1,0 +1,85 @@
+{
+  "_comment": "Zonko's Joke Shop, Hogsmeade. A settlement keeper posted with the zonkos role keeps it (H3, 2026-11-25).",
+  "module": "gringotts",
+  "skin": "workbench",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:settlement_npc"
+    ],
+    "host_role": "wizards_and_beasts:zonkos",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      {
+        "when": {
+          "activity": "goods_traded",
+          "species": [
+            "wizards_and_beasts:zonkos"
+          ]
+        },
+        "xp": 6,
+        "daily_cap": 36
+      },
+      {
+        "when": {
+          "activity": "courier_delivered",
+          "species": [
+            "wizards_and_beasts:zonkos"
+          ]
+        },
+        "xp": 12,
+        "daily_cap": 36
+      }
+    ],
+    "ranks": [
+      {
+        "id": "customer",
+        "xp": 0
+      },
+      {
+        "id": "regular",
+        "xp": 100
+      }
+    ],
+    "contracts": [
+      {
+        "id": "gunpowder",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:gunpowder",
+          "count": 16
+        },
+        "reward": {
+          "knuts": 145,
+          "xp": 25
+        }
+      }
+    ]
+  },
+  "services": [],
+  "market": {
+    "half_life_days": 4.0,
+    "demand_bonus": 0.0,
+    "sells": [
+      {
+        "id": "dungbomb",
+        "item": "wizards_and_beasts:dungbomb",
+        "price_knuts": 20,
+        "depth": 24
+      },
+      {
+        "id": "filibusters_fireworks",
+        "item": "wizards_and_beasts:filibusters_fireworks",
+        "price_knuts": 58,
+        "depth": 12
+      }
+    ]
+  }
+}

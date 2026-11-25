@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:hogsmeade",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1857204193,
+    "spacing": 125,
+    "separation": 60,
+    "spread_type": "linear"
+  }
+}

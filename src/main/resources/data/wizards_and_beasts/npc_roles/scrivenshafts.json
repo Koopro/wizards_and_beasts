@@ -1,0 +1,26 @@
+{
+  "location": "wizards_and_beasts:scrivenshafts",
+  "names": [
+    "npc.wizards_and_beasts.scrivenshafts.name.0"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.scrivenshafts.greet.0"
+    },
+    {
+      "text": "npc.wizards_and_beasts.scrivenshafts.greet.1"
+    }
+  ],
+  "topics": [
+    {
+      "id": "quills",
+      "label": "npc.wizards_and_beasts.scrivenshafts.topic.quills",
+      "reply": "npc.wizards_and_beasts.scrivenshafts.reply.quills"
+    },
+    {
+      "id": "parchment",
+      "label": "npc.wizards_and_beasts.scrivenshafts.topic.parchment",
+      "reply": "npc.wizards_and_beasts.scrivenshafts.reply.parchment"
+    }
+  ]
+}

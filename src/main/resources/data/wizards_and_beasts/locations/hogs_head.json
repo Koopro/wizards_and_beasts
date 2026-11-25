@@ -1,0 +1,99 @@
+{
+  "_comment": "The Hog's Head inn, Hogsmeade; Aberforth Dumbledore keeps the bar. Nobody asks questions in here, so it fences goods for a known face; the back room carries a smaller risk than Knockturn's (a village, fewer eyes). A settlement keeper posted with the hogs_head role keeps it (H3, 2026-11-25).",
+  "module": "ministry",
+  "skin": "workbench",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:settlement_npc"
+    ],
+    "host_role": "wizards_and_beasts:hogs_head",
+    "host_reach": 6.0
+  },
+  "risk": {
+    "chance": 0.05,
+    "watch_radius": 12.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      {
+        "when": {
+          "activity": "goods_traded",
+          "species": [
+            "wizards_and_beasts:hogs_head"
+          ]
+        },
+        "xp": 6,
+        "daily_cap": 36
+      },
+      {
+        "when": {
+          "activity": "courier_delivered",
+          "species": [
+            "wizards_and_beasts:hogs_head"
+          ]
+        },
+        "xp": 12,
+        "daily_cap": 36
+      }
+    ],
+    "ranks": [
+      {
+        "id": "stranger",
+        "xp": 0
+      },
+      {
+        "id": "known_face",
+        "xp": 100
+      }
+    ],
+    "contracts": [
+      {
+        "id": "hay",
+        "min_rank": "stranger",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:hay_block",
+          "count": 8
+        },
+        "reward": {
+          "knuts": 116,
+          "xp": 25
+        }
+      }
+    ]
+  },
+  "services": [],
+  "market": {
+    "half_life_days": 4.0,
+    "demand_bonus": 0.0,
+    "sells": [
+      {
+        "id": "firewhisky",
+        "item": "wizards_and_beasts:firewhisky",
+        "price_knuts": 87,
+        "depth": 12
+      },
+      {
+        "id": "butterbeer",
+        "item": "wizards_and_beasts:butterbeer",
+        "price_knuts": 58,
+        "depth": 8
+      }
+    ],
+    "buys": [
+      {
+        "id": "artefacts",
+        "kind": "treasure",
+        "condition": "any",
+        "rate": 0.6,
+        "depth": 4,
+        "min_tier": "known_face"
+      }
+    ]
+  }
+}

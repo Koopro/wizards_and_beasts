@@ -1,0 +1,26 @@
+{
+  "location": "wizards_and_beasts:honeydukes",
+  "names": [
+    "npc.wizards_and_beasts.honeydukes.name.0"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.honeydukes.greet.0"
+    },
+    {
+      "text": "npc.wizards_and_beasts.honeydukes.greet.1"
+    }
+  ],
+  "topics": [
+    {
+      "id": "frogs",
+      "label": "npc.wizards_and_beasts.honeydukes.topic.frogs",
+      "reply": "npc.wizards_and_beasts.honeydukes.reply.frogs"
+    },
+    {
+      "id": "whizzbees",
+      "label": "npc.wizards_and_beasts.honeydukes.topic.whizzbees",
+      "reply": "npc.wizards_and_beasts.honeydukes.reply.whizzbees"
+    }
+  ]
+}

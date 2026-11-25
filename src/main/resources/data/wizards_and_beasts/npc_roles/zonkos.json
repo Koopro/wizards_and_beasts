@@ -1,0 +1,26 @@
+{
+  "location": "wizards_and_beasts:zonkos",
+  "names": [
+    "npc.wizards_and_beasts.zonkos.name.0"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.zonkos.greet.0"
+    },
+    {
+      "text": "npc.wizards_and_beasts.zonkos.greet.1"
+    }
+  ],
+  "topics": [
+    {
+      "id": "dungbomb",
+      "label": "npc.wizards_and_beasts.zonkos.topic.dungbomb",
+      "reply": "npc.wizards_and_beasts.zonkos.reply.dungbomb"
+    },
+    {
+      "id": "fireworks",
+      "label": "npc.wizards_and_beasts.zonkos.topic.fireworks",
+      "reply": "npc.wizards_and_beasts.zonkos.reply.fireworks"
+    }
+  ]
+}

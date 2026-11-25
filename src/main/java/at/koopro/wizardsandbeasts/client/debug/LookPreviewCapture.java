@@ -108,6 +108,24 @@ public final class LookPreviewCapture {
             new Step("ghost", 10, p -> {}),
             new Step("", 40, p -> eyeAt(p, 44.5, 1.75, -1.7, 44.5, 1.0, 0.5)),
             new Step("inferius", 10, p -> {}),
+            // H3 worldgen, in this void test world (no surface for /place structure to project onto): /place jigsaw
+            // from the lane's connector runs the same jigsaw assembly worldgen does, so the Shrieking Shack must
+            // attach; /place template lays the street square-on so the camera can stand outside Honeydukes.
+            new Step("", 60, p -> command(p.level(), String.format(java.util.Locale.ROOT,
+                    "place jigsaw wizards_and_beasts:hogsmeade/high_street wizards_and_beasts:shack_path 3 %d %d %d",
+                    LookPreviewCapture.base.getX(), LookPreviewCapture.base.getY() + 1, LookPreviewCapture.base.getZ() - 170))),
+            new Step("", 60, p -> eyeAt(p, 0, 95, -170.2, 0, 0, -170)),
+            new Step("hogsmeade_worldgen", 10, p -> {}),
+            new Step("", 200, p -> command(p.level(), String.format(java.util.Locale.ROOT,
+                    "place template wizards_and_beasts:hogsmeade/high_street/a %d %d %d",
+                    LookPreviewCapture.base.getX(), LookPreviewCapture.base.getY(), LookPreviewCapture.base.getZ() - 90))),
+            new Step("", 60, p -> eyeAt(p, 7.5, 2.6, -70.5, 7.5, 2.4, -78)),
+            new Step("hogsmeade_worldgen_street", 10, p -> {}),
+            // Inside, behind the windows: the counter and the keeper its post brought (H3 staffing).
+            new Step("", 80, p -> eyeAt(p, 7.5, 2.6, -78.6, 7.5, 2.0, -86)),
+            new Step("hogsmeade_honeydukes_inside", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, 19.5, 2.6, -78.6, 19.5, 2.0, -86)),
+            new Step("hogsmeade_broomsticks_inside", 10, p -> {}),
             new Step("", 40, p -> {
                 p.level().setDayTime(18000);
                 look(p, 0.5, 1, 0.5, 180f, -32f);

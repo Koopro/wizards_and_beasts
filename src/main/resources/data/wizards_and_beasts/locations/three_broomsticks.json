@@ -1,0 +1,100 @@
+{
+  "_comment": "The Three Broomsticks inn, Hogsmeade; Madam Rosmerta keeps it. A settlement keeper posted with the three_broomsticks role keeps it (H3, 2026-11-25).",
+  "module": "gringotts",
+  "skin": "workbench",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:settlement_npc"
+    ],
+    "host_role": "wizards_and_beasts:three_broomsticks",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      {
+        "when": {
+          "activity": "goods_traded",
+          "species": [
+            "wizards_and_beasts:three_broomsticks"
+          ]
+        },
+        "xp": 6,
+        "daily_cap": 36
+      },
+      {
+        "when": {
+          "activity": "courier_delivered",
+          "species": [
+            "wizards_and_beasts:three_broomsticks"
+          ]
+        },
+        "xp": 12,
+        "daily_cap": 36
+      }
+    ],
+    "ranks": [
+      {
+        "id": "customer",
+        "xp": 0
+      },
+      {
+        "id": "regular",
+        "xp": 100
+      }
+    ],
+    "contracts": [
+      {
+        "id": "wheat",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:wheat",
+          "count": 24
+        },
+        "reward": {
+          "knuts": 116,
+          "xp": 25
+        }
+      },
+      {
+        "id": "honey",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "minecraft:honey_bottle",
+          "count": 6
+        },
+        "reward": {
+          "knuts": 145,
+          "xp": 25
+        }
+      }
+    ]
+  },
+  "services": [
+    {
+      "service": "wizards_and_beasts:courier_dispatch",
+      "min_tier": "customer"
+    }
+  ],
+  "market": {
+    "half_life_days": 4.0,
+    "demand_bonus": 0.0,
+    "sells": [
+      {
+        "id": "butterbeer",
+        "item": "wizards_and_beasts:butterbeer",
+        "price_knuts": 58,
+        "depth": 24
+      }
+    ]
+  }
+}

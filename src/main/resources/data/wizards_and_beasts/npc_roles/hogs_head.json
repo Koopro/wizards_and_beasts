@@ -1,0 +1,26 @@
+{
+  "location": "wizards_and_beasts:hogs_head",
+  "names": [
+    "npc.wizards_and_beasts.hogs_head.name.0"
+  ],
+  "greetings": [
+    {
+      "text": "npc.wizards_and_beasts.hogs_head.greet.0"
+    },
+    {
+      "text": "npc.wizards_and_beasts.hogs_head.greet.1"
+    }
+  ],
+  "topics": [
+    {
+      "id": "firewhisky",
+      "label": "npc.wizards_and_beasts.hogs_head.topic.firewhisky",
+      "reply": "npc.wizards_and_beasts.hogs_head.reply.firewhisky"
+    },
+    {
+      "id": "back_room",
+      "label": "npc.wizards_and_beasts.hogs_head.topic.back_room",
+      "reply": "npc.wizards_and_beasts.hogs_head.reply.back_room"
+    }
+  ]
+}
