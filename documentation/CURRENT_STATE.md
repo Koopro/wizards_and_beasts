@@ -6,6 +6,15 @@ What changed since Rev 1: two of the three criticals moved. The wand-wood system
 
 **Addendum, 2026-09-08 — Critical #1 is closed. Addendum, 2026-09-09 — Critical #2 is closed.** Each finding below is left as written, because it is the record of what was wrong and the reasoning still explains why it mattered. What has since landed is summarised under it. Critical #3 stands unchanged. The scores, the top-10 list and the roadmap below were written before either fix and are annotated where they are now out of date.
 
+**Addendum, 2026-11-25 — the numbers below are three months old.** Re-checked against source on dev (post-canon audit,
+`AUDIT_PUNCHLIST.md`): audio is 133 sound events with 83 on the mod's own .ogg (97 once the broom set lands), not
+"all-vanilla"; 11 creatures bond (owl and Kneazle added), not four; 16 of 129 creature rigs are box-per-bone, not 83,
+and new rigs follow the owner's Mojang-style rule rather than a density bar; vocations are 7, each with a capstone,
+an O.W.L. gate and its own mechanic; worldgen adds Hogsmeade, the Leaky Cauldron and treasure sites on vanilla ruins.
+Score notes (not a full re-grade): Atmosphere and Creature Design have each moved up since Rev 2 on these counts;
+Replayability still lacks small places to find in the world (D3). Nothing of November has had a live-client pass yet
+(`ALPHA_SMOKE.md`, November section).
+
 1. What the mod actually is
 
 Core fantasy (as-built): "Be sorted into a magical heritage, earn a wand that chooses you, learn a spellbook of canon spells, and grow into a specialized wizard whose bloodline changes how magic leaves the wand." The lore layer is enormous and genuinely faithful — 96 canon creature definitions plus 107 bestiary entries, 10 wand woods / 8 cores drawn straight from Pottermore, the three Unforgivables gated correctly, Azkaban, the Chamber of Secrets, Gringotts, Ollivander, 10 heritages across 31 variants with paragraph-long canon descriptions.

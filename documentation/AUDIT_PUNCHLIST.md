@@ -2183,3 +2183,25 @@ Found during the pass, **not fixed**. See `documentation/SKILL_WEB.md` for the d
   `crucio_unlock` and `imperio_unlock` were left without `learn_spell` while the other 13 gained it.
   Teaching Unforgivables from a skill node is a gameplay expansion of a module that ships disabled,
   not a wiring fix. Revisit when Dark Arts is designed, not before.
+
+## Post-Canon-Depth audit — finish, rework or rebuild (2026-11-25)
+
+Brief: decide per subsystem IMPROVE / REWORK / REMAKE. The brief's numbers came from CURRENT_STATE Rev 2
+(2026-08-10, head `b2b3655`, 568 commits behind); every claim was re-checked against source on dev `468117a1`.
+**No REMAKE survived**: each engine the brief called the wrong shape exists and works.
+
+| # | Brief | Verdict | Evidence at audit | Outcome (2026-11-25) |
+|---|---|---|---|---|
+| R1 worldgen | REMAKE | IMPROVE | `settlement/` (25 files), `one_per_world` placement, Hogsmeade H3 in world, 5 `treasure_sites/` on vanilla ruins, spellbook/spell-page/recipe-page loot in ruins; 12 flora features (not 14). Gap: no small places of the mod's own | D3 (hedge-witch cottage / shrine / ruin): one look each, owner verdict before any worldgen |
+| R2 vocations | REMAKE | KEEP | 7 vocations (not 5) with pathway + capstone; systems audit added O.W.L. gates (D2) and role mechanics (B5) | Owner: keep, no cut. Merged with systems audit |
+| R3 audio | REMAKE | IMPROVE | 109 events / 45 own (not 41 / 0); systems audit A2 raised it to 133 / 83 | Brooms (14 events) on `feat/audio-brooms`, waiting for the owner's listen; 36 events stay vanilla (werewolf, blood pact, sneakoscope, butterbeer, creature barks) |
+| I1 bonds | IMPROVE | IMPROVE | 9 profiles (not 4); `GenericBeastEntity` implements `BondableBeast`, so one JSON = a bond | Owl (copy of hippogriff) and Kneazle (copy of demiguise) merged: 11 profiles. Graphorn and Occamy **not** bonded: both HOSTILE, and the hostile target goal has no bond-owner exemption; owner undecided |
+| I2 rigs | IMPROVE (Horntail bar) | owned by A1 | 14 / 128 box-per-bone (not 102 / 111); owner ruling "Mojang style + more bones" replaces the density bar | A1 gnome, baby Niffler, Kappa, Qilin merged; Zouwu waits for its verdict |
+| I3 house colours | IMPROVE | IMPROVE | House banners and scarf liveries already shipped; scarf did not follow the sorted house | Merged: plain scarf grey until sorted, then the wearer's house; stitched scarves keep their colours (`WardrobeHouseLiveryTest`) |
+| I4 snake / musk | IMPROVE | IMPROVE | Serpensortia / Vipera Evanesca are `coming_soon` (no silent failure); no Erumpent musk item exists at all; no test tied creatures to their model files | `CreatureAssetParityTest` merged (108 creatures). Snake in progress elsewhere (`C:/tmp/wb-looks`); musk needs a look first |
+| I5 in-game pass | IMPROVE | IMPROVE | `ALPHA_SMOKE.md` had no November section | Section added (17 steps); never yet run in a live client |
+
+Also found while gating the systems-audit merge: `builds_spending_and_the_capstone_gate` failed deterministically
+because D2's test setup overwrote `OWL_DATA` with the four-argument constructor and wiped the N.E.W.T.s the capstone
+asks for; fixed in the test (`d8ed3ec3`). `ecology_life_drinks_at_water` and `combat_yeti_runs_from_fire` each
+failed once in a full run and pass alone.
