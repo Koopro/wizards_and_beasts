@@ -42,7 +42,7 @@ public class ClientSetup {
         // Not `simple`: the goblin picks its geometry and texture from its synced Gringotts role.
         event.registerEntityRenderer(ModEntities.GOBLIN_TELLER.get(), GoblinRenderer.provider("goblin_teller"));
         event.registerEntityRenderer(ModEntities.NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::new);
-        event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::new);
+        event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::baby);
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);
         event.registerEntityRenderer(ModEntities.SEAT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         event.registerEntityRenderer(ModEntities.FIENDFYRE.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);

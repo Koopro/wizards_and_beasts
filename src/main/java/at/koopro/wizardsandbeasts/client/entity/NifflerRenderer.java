@@ -20,8 +20,21 @@ public class NifflerRenderer<R extends EntityRenderState & GeoRenderState> exten
     static final DataTicket<NifflerEntity.Coat> TICKET_COAT = DataTicket.create("niffler_coat", NifflerEntity.Coat.class);
 
     public NifflerRenderer(EntityRendererProvider.Context context) {
-        super(context, new CoatModel());
-        this.shadowRadius = 0.3f;
+        this(context, "niffler", 0.3f);
+    }
+
+    /**
+     * The Baby Niffler's own rig (systems audit A1): {@code baby_niffler} geometry and coats at true size, the adult's
+     * clip names, so one entity class asks for both.
+     */
+    public static <R extends EntityRenderState & GeoRenderState> NifflerRenderer<R> baby(
+            EntityRendererProvider.Context context) {
+        return new NifflerRenderer<>(context, "baby_niffler", 0.15f);
+    }
+
+    private NifflerRenderer(EntityRendererProvider.Context context, String asset, float shadow) {
+        super(context, new CoatModel(asset));
+        this.shadowRadius = shadow;
     }
 
     @Override
@@ -32,15 +45,19 @@ public class NifflerRenderer<R extends EntityRenderState & GeoRenderState> exten
 
     private static final class CoatModel extends DefaultedEntityGeoModel<NifflerEntity> {
 
-        CoatModel() {
-            super(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "niffler"), "look");
+        private final String asset;
+
+        CoatModel(String asset) {
+            super(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, asset), "look");
+            this.asset = asset;
         }
 
         @Override
         public Identifier getTextureResource(GeoRenderState renderState) {
             String name = renderState.getOrDefaultGeckolibData(TICKET_COAT, NifflerEntity.Coat.CLASSIC).texture();
             return name == null ? super.getTextureResource(renderState)
-                    : buildFormattedTexturePath(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, name));
+                    : buildFormattedTexturePath(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
+                            asset + name.substring(name.indexOf('/'))));
         }
     }
 }

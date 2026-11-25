@@ -20,7 +20,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.sounds.SoundEvent;
 
 /**
- * Baby Niffler variant. 9-slot pouch, half-scale, cannot be pocket-carried,
+ * Baby Niffler variant. 9-slot pouch, its own true-size rig (baby_niffler, A1), cannot be pocket-carried,
  * grows into adult after 3 in-game days (72000 ticks) with at least 3 feedings.
  */
 public class BabyNifflerEntity extends NifflerEntity {
@@ -40,7 +40,8 @@ public class BabyNifflerEntity extends NifflerEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.ATTACK_DAMAGE, 0.5)
                 .add(Attributes.FOLLOW_RANGE, 16.0)
-                .add(Attributes.SCALE, 0.35);
+                // The adult's scale: both rigs share one texel size, and the baby stands half the adult's height.
+                .add(Attributes.SCALE, 0.7);
     }
 
     @Override

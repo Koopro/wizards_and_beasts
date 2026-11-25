@@ -101,7 +101,7 @@ public class ModEntities {
     static { EntityAttributeBindings.queue(NIFFLER, NifflerEntity::createAttributes); }
 
     public static final DeferredHolder<EntityType<?>, EntityType<BabyNifflerEntity>> BABY_NIFFLER =
-            EntityHelper.register(ENTITY_TYPES, "baby_niffler", BabyNifflerEntity::new, MobCategory.CREATURE, 0.6f, 0.6f);
+            EntityHelper.register(ENTITY_TYPES, "baby_niffler", BabyNifflerEntity::new, MobCategory.CREATURE, 0.36f, 0.4f);
     static { EntityAttributeBindings.queue(BABY_NIFFLER, BabyNifflerEntity::createAttributes); }
 
     /** A Chocolate Frog that got away. An ItemEntity, so catching it is just picking it up. */

@@ -51,6 +51,10 @@ public final class LookPreviewCapture {
             steps.addAll(GNOME_SCENES);
             return steps;
         }
+        if ("baby_niffler".equals(System.getenv("WB_LOOK_ONLY"))) {
+            steps.addAll(BABY_NIFFLER_SCENES);
+            return steps;
+        }
         // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
         steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
@@ -115,6 +119,59 @@ public final class LookPreviewCapture {
             new Step("gnome_side", 10, p -> {}),
             new Step("", 40, p -> eyeAt(p, GX + 0.9, 0.85, -0.6, GX, 0.25, 0.5)),
             new Step("gnome_three_quarter", 10, p -> {}));
+
+    /** Where the Niffler family sits, east of the gnome's garden. */
+    private static final double NX = 66.5;
+
+    /**
+     * The Baby Niffler (A1), its own rig at the adult's texel size: three babies in three coats around an adult on a
+     * scatter of gold (Crimes of Grindelwald: the babies tumbling over Newt's desk), a person for scale, then front,
+     * side and three-quarter close-ups of the classic black baby.
+     */
+    private static final List<Step> BABY_NIFFLER_SCENES = List.of(
+            new Step("", 40, p -> eyeAt(p, NX + 0.5, 1.4, -2.8, NX + 0.5, 0.3, 1.0)),
+            new Step("baby_niffler_family", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, NX, 0.3, -0.55, NX, 0.12, 0.5)),
+            new Step("baby_niffler_front", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, NX + 0.9, 0.3, 0.5, NX, 0.12, 0.5)),
+            new Step("baby_niffler_side", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, NX + 0.6, 0.55, -0.45, NX, 0.12, 0.5)),
+            new Step("baby_niffler_three_quarter", 10, p -> {}));
+
+    private static void nifflerFamily(ServerLevel level) {
+        for (int x = 63; x <= 71; x++) {
+            for (int z = -5; z <= 3; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+        }
+        level.setBlockAndUpdate(base.offset(68, 0, 2), Blocks.GOLD_BLOCK.defaultBlockState());
+        // The adult behind, the babies in front: classic black (the close-ups), grey and dark brown.
+        // The preview world is kept between runs: last run's family goes first.
+        command(level, "kill @e[type=wizards_and_beasts:baby_niffler]");
+        command(level, "kill @e[type=wizards_and_beasts:niffler]");
+        spawnNiffler(level, "niffler", NX - 1.3, 1.2, 160f, at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity.Coat.CLASSIC);
+        spawnNiffler(level, "baby_niffler", NX, 0.5, 180f, at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity.Coat.CLASSIC);
+        spawnNiffler(level, "baby_niffler", NX + 1.6, 1.6, 150f, at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity.Coat.GREY);
+        spawnNiffler(level, "baby_niffler", NX - 0.5, 2.2, 210f, at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity.Coat.DARK_BROWN);
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + NX + 2.8, (double) base.getY(), base.getZ() + 0.6));
+    }
+
+    private static void spawnNiffler(ServerLevel level, String id, double x, double z, float yaw,
+                                     at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity.Coat coat) {
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, id));
+        if (type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                instanceof at.koopro.wizardsandbeasts.entity.niffler.NifflerEntity niffler) {
+            niffler.snapTo(base.getX() + x, base.getY(), base.getZ() + z, yaw, 0f);
+            niffler.setYHeadRot(yaw);
+            niffler.setYBodyRot(yaw);
+            niffler.setNoAi(true);
+            niffler.setCoat(coat);
+            level.addFreshEntity(niffler);
+        }
+    }
 
     private static void gnomeGarden(ServerLevel level) {
         for (int x = 51; x <= 60; x++) {
@@ -258,6 +315,7 @@ public final class LookPreviewCapture {
                 base.getX() + 28, base.getY() + 2, base.getZ() + 2));
         humanoids(level);
         gnomeGarden(level);
+        nifflerFamily(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
