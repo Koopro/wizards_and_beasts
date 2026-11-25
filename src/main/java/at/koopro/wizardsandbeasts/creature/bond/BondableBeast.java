@@ -258,9 +258,9 @@ public interface BondableBeast {
         if (claimed && player instanceof net.minecraft.server.level.ServerPlayer claimer) {
             at.koopro.wizardsandbeasts.creature.companion.Companions.onClaimed(this, claimer);
         }
-        if (MagizoologyHelper.isMagizoologist(player)) {
-            amount = (int) Math.ceil(amount * 1.5);
-        }
+        amount = TrustCurve.scaled(amount,
+                at.koopro.wizardsandbeasts.skill.vocation.VocationHelper.hasGrantedAbility(player, TrustCurve.HALF_CURVE),
+                MagizoologyHelper.isMagizoologist(player));
 
         int before = bondState().level();
         int after = bondState().setLevel(before + amount, profile.maxBond());

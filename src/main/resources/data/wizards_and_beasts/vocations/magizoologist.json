@@ -6,7 +6,9 @@
   "pillar": "vocation.wizards_and_beasts.magizoologist.pillar",
   "grantedAbilities": [
     "beast_capacity",
-    "mount_loyalty"
+    "mount_loyalty",
+    "trust_half_curve",
+    "advanced_harvest"
   ],
   "capstoneNodeId": "wizards_and_beasts:beast_masters_voice",
   "pathway": {

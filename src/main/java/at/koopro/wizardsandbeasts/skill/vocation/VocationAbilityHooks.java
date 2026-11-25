@@ -20,6 +20,8 @@ import org.jspecify.annotations.NullMarked;
  *   <li>{@code wand_steadiness} — five points off every cast's misfire chance: the Wandlore Master's wand
  *       answers them more surely. Replaces a commitment boost to {@code wand_affinity}, an attribute no
  *       player carries, so the vocation used to change nothing.</li>
+ *   <li>Signature mechanics (systems audit B5, one per vocation, not a stat): {@code trust_half_curve} and
+ *       {@code advanced_harvest} (Magizoologist: {@code TrustCurve}, {@code BestiaryHarvestLootModifier}).</li>
  * </ul>
  */
 @NullMarked

@@ -105,6 +105,10 @@ public class BestiaryHarvestLootModifier extends LootModifier {
         for (HarvestRule rule : rules) {
             DiscoveryTier held = ModuleManager.isEnabled(Module.BESTIARY)
                     ? BestiaryDataHelper.getTier(player, rule.entry()) : DiscoveryTier.KNOWN;
+            // The Magizoologist's signature (B5): the rare harvests open one tier of study earlier.
+            if (at.koopro.wizardsandbeasts.skill.vocation.VocationHelper.hasGrantedAbility(player, "advanced_harvest")) {
+                held = held.raised();
+            }
             long last = BestiaryDataHelper.getLastHarvestTick(player, rule.entry());
 
             boolean researched = BestiaryDataHelper.getData(player).historyOf(rule.entry()).complete();

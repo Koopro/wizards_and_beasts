@@ -58,6 +58,14 @@ public enum DiscoveryTier {
             DiscoveryTier::tierIndex);
 
     private final int tierIndex;
+
+    /**
+     * One tier higher, never past {@link #KNOWN}: what a Magizoologist's knowledge counts as at a harvest gate
+     * (systems audit B5, the advanced harvests open a tier early).
+     */
+    public DiscoveryTier raised() {
+        return values()[Math.min(values().length - 1, ordinal() + 1)];
+    }
     private final String translationKey;
     private final String hintKey;
 
