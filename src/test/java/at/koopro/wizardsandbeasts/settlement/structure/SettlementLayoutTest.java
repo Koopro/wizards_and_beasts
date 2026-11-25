@@ -119,7 +119,8 @@ class SettlementLayoutTest {
                 assertTrue(lang.get(key).getAsString().length() <= 15, key);
             }
         }
-        assertEquals(236, lines);   // the hamlet's 32, Diagon Alley's boards and hanging signs, Knockturn's, and Hogsmeade's 72
+        assertEquals(248, lines);   // the hamlet's 32, Diagon Alley's boards and hanging signs, Knockturn's, Hogsmeade's 72
+                                    // and the Lovegoods' three gate signs (12)
     }
 
     private static List<String> postRoles(Path template) throws IOException {

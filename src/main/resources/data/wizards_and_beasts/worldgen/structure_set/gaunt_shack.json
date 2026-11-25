@@ -1,0 +1,16 @@
+{
+  "_comment": "The Gaunts' house (HBP ch.10): one family, one house, in a copse; one per world.",
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:gaunt_shack",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "wizards_and_beasts:one_per_world",
+    "salt": 19250623,
+    "target_biomes": "#wizards_and_beasts:has_structure/gaunt_shack",
+    "min_chunk_radius": 24,
+    "max_chunk_radius": 64
+  }
+}

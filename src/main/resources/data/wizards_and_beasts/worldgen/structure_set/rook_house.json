@@ -1,0 +1,16 @@
+{
+  "_comment": "The Lovegoods' house (DH ch.20): one family, one house, on open country; one per world.",
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:rook_house",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "wizards_and_beasts:one_per_world",
+    "salt": 19970213,
+    "target_biomes": "#wizards_and_beasts:has_structure/rook_house",
+    "min_chunk_radius": 24,
+    "max_chunk_radius": 72
+  }
+}

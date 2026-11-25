@@ -4252,3 +4252,21 @@ owner once the bond reaches the profile's first milestone (`sparesAsBonded`; 25 
 everyone else, they hunt as before; the owner who strikes one is still fought back (retaliation is unchanged).
 Territory defence already stood down for any bonded creature (`EcologyBrain`). No hostile creature without a bond
 profile is affected. Pinned by GameTest `creature_hostile_bond_spares_its_owner`.
+# Canon places in the world: Stoatshead Hill, the Gaunt shack, the Lovegoods' house (2026-11-25, `feat/canon-places`)
+
+Owner 2026-11-25: the three looks approved; placement and generation may proceed; the snake on the Gaunt door waits
+for the snake model. New chunks may now generate (existing chunks never change):
+
+| Place | Structure / set | Where | How often |
+|---|---|---|---|
+| Stoatshead Hill (GoF ch.6): heath crown, grey tor, the Portkey boot as an item display | `portkey_hill`, random spread 28 / 10 | plains, meadow, windswept hills | recurring |
+| The Gaunt shack (HBP ch.10, 23): ruined cottage in its own copse; a warded chest under a loose board | `gaunt_shack`, `one_per_world` 24-64 chunks | targets forest, dark forest, birch, taiga | once per world |
+| The Lovegoods' house (DH ch.20-21): black rook tower, three gate signs, Dirigible Plum trees | `rook_house`, `one_per_world` 24-72 chunks | targets plains, sunflower plains, flower forest | once per world |
+
+A one-per-world place snaps its chunk to its target biome but accepts any ordinary land biome at the start corner
+(`has_structure/canon_place_land`), because the jigsaw re-checks the biome there and a forest edge otherwise lost the
+world its only Gaunt shack (seen on seed 3). The Gaunt chest is a treasure site (`treasure_sites/gaunt_shack`, chance
+1.0: canon never leaves it clean): opening it raises a Curse-Breaker ward over a rolled artefact; its own table is the
+hidden cache's coin pool. Marvolo Gaunt's ring is **not** placed (a balance call left to the owner). The boot is
+decoration, not a working Portkey. Probe: `WB_SETTLEMENT_PROBE=places` on `runSettlementProbe` found all three on five
+seeds, most within 0-2 blocks of the land around them. Pinned by `CanonPlacesDataTest`.

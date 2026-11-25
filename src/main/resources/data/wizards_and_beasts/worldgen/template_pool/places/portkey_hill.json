@@ -1,0 +1,15 @@
+{
+  "name": "wizards_and_beasts:places/portkey_hill",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "wizards_and_beasts:places/portkey_hill/a",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

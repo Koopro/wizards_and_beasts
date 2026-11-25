@@ -1,0 +1,16 @@
+{
+  "_comment": "Stoatshead Hill (GoF ch.6): a Portkey boot on open moorland tops. Portkeys are many, so the hill recurs.",
+  "structures": [
+    {
+      "structure": "wizards_and_beasts:portkey_hill",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 19940625,
+    "spacing": 28,
+    "separation": 10,
+    "spread_type": "linear"
+  }
+}
