@@ -151,7 +151,8 @@ public class ModAttachments {
 
     /**
      * The player's Hogwarts house id ({@code house.House}), empty until the Sorting Hat has sorted them. Survives
-     * death, and is sent to the player's own client so the sheet and the Hat can show it.
+     * death, and is sent to every client that sees the player (NeoForge's default sync predicate): their own, for
+     * the sheet and the Hat, and everyone else's, for the house colours a plain scarf takes on them.
      */
     public static final Supplier<AttachmentType<String>> HOUSE =
             ATTACHMENTS.register("house", () -> AttachmentType.builder(() -> "")

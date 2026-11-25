@@ -4211,3 +4211,18 @@ front of the rider. Now `BroomGeometry.tailOffset`: z negated, scaled, on the li
 - Arms `-1.15 → -0.55` (hands on the shaft), legs `-0.15 → +0.25`.
 - `root` position tracks removed from `idle`/`hover`/`fly_forward`/`boost`; the hover bob is
   `BroomVisuals.bob`, applied identically to broom and rider. Three animation controllers became one.
+
+---
+
+# House scarf (2026-11-25, `feat/house-scarf`)
+
+Owner ruling 2026-11-25: plain grey/white by default, house colours once sorted.
+
+A **plain** scarf (no livery stitched, or `school_plain`) now draws in the wearer's house livery once the
+Sorting Hat has sorted them (`house_lion` / `house_badger` / `house_eagle` / `house_serpent`, mapped by
+`House.livery()`); before that it keeps the cut's own grey-and-white base sheet, as it always did. A scarf
+**stitched** in a house's colours by choice is unchanged and keeps them on any wearer. Only the worn look
+changes: the item, its inventory icon, its tooltip and its recipes are untouched, and no other cut follows
+the house (`Wardrobe.HOUSE_FOLLOWING_CUTS = {"scarf"}`). Rule in `Wardrobe.wornLivery`, read by
+`WizardArmorRenderer.addRenderData`; the `HOUSE` attachment already synced to every client that sees the
+wearer. Pinned by `WardrobeHouseLiveryTest`.

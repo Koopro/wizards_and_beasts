@@ -300,6 +300,19 @@ public final class EquipmentShowcaseCapture {
                 wear(p, stitched(p, ArmorItemRegistry.PROFESSOR_HAT.get(), "faculty_potions", 0));
                 wear(p, stitched(p, ArmorItemRegistry.SCARF.get(), "house_serpent", 0));
             }),
+            // House scarf (owner 2026-11-25): a plain scarf is grey and white until the Hat sorts the wearer, then
+            // their house; a scarf stitched in a house by choice keeps it. Each sets the house it needs, since the
+            // attachment outlives undress().
+            new Outfit("scarf_house_unsorted", p -> plainScarf(p, null)),
+            new Outfit("scarf_house_sorted_slytherin", p -> plainScarf(p, at.koopro.wizardsandbeasts.house.House.SLYTHERIN)),
+            new Outfit("scarf_house_sorted_gryffindor", p -> plainScarf(p, at.koopro.wizardsandbeasts.house.House.GRYFFINDOR)),
+            new Outfit("scarf_house_stitched_lion_on_slytherin", p -> {
+                at.koopro.wizardsandbeasts.house.HouseService.setHouse(p, at.koopro.wizardsandbeasts.house.House.SLYTHERIN);
+                p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+                p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+                wear(p, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_CHEST.get()));
+                wear(p, stitched(p, ArmorItemRegistry.SCARF.get(), "house_lion", 0));
+            }),
             // Jewellery drawn from its own item model (JewelleryCurioRenderer): pendant on the chest, diadem on the brow.
             new Outfit("acc_jewellery_locket_diadem", p -> {
                 wear(p, stitched(p, ArmorItemRegistry.WIZARD_ROBE_CHEST.get(), "moss", 0));
@@ -488,6 +501,15 @@ public final class EquipmentShowcaseCapture {
         if (!EquipmentAPI.tryEquip(p, stack)) {
             LOGGER.warn("Equipment showcase: could not wear {}", stack);
         }
+    }
+
+    /** A plain student robe and a plain scarf on a wearer of {@code house} ({@code null}: not yet sorted). */
+    private static void plainScarf(ServerPlayer p, at.koopro.wizardsandbeasts.house.@org.jspecify.annotations.Nullable House house) {
+        at.koopro.wizardsandbeasts.house.HouseService.setHouse(p, house);
+        p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
+        p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_BOOTS.get()));
+        wear(p, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_CHEST.get()));
+        wear(p, new ItemStack(ArmorItemRegistry.SCARF.get()));
     }
 
     private static void winter(ServerPlayer p, String house, int rank) {

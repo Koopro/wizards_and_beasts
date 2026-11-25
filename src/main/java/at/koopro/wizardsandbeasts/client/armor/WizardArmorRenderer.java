@@ -102,8 +102,14 @@ public class WizardArmorRenderer<T extends Item & GeoItem, R extends HumanoidRen
             // The livery in effect: the stamped one, else the item's own default. That default is usually the cut's
             // base sheet, but not always: the Shield Gloves are the gloves cut in shield blue (2026-11-15), so a
             // livery sheet is used whenever one exists and the base sheet only when it does not.
-            java.util.Optional<net.minecraft.resources.Identifier> effective = outfit.livery().isPresent()
-                    ? outfit.livery() : java.util.Optional.ofNullable(item.defaultLivery());
+            // A plain scarf takes the wearer's house colours once they are sorted (owner 2026-11-25); the house
+            // attachment syncs to every client that sees the wearer, so others see it too.
+            at.koopro.wizardsandbeasts.house.House house =
+                    renderData.entity() instanceof net.minecraft.world.entity.player.Player player
+                            ? at.koopro.wizardsandbeasts.house.HouseService.houseOf(player) : null;
+            java.util.Optional<net.minecraft.resources.Identifier> effective =
+                    at.koopro.wizardsandbeasts.equipment.wardrobe.Wardrobe.wornLivery(
+                            assetName, item.defaultLivery(), outfit.livery(), house);
             Identifier candidate = Wardrobe.liveryTexture(assetName, null, effective);
             sheet = candidate != null && sheetExists(candidate) ? candidate : null;
         }
