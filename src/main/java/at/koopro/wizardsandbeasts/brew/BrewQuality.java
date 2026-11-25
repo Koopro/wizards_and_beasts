@@ -48,10 +48,17 @@ public final class BrewQuality {
         return clamp(MIN + PER_POTENCY_LEVEL * levels + grade);
     }
 
-    /** The quality this brewer puts in a bottle now. */
+    /** The quality this brewer puts in a bottle now. A Healer's never falls below their floor (B5). */
     public static int of(ServerPlayer brewer) {
-        return percent(SkillSystemAPI.getSkillData(brewer).getSkillLevel(BrewPotency.SKILL_ID),
+        int made = percent(SkillSystemAPI.getSkillData(brewer).getSkillLevel(BrewPotency.SKILL_ID),
                 brewer.getData(ModAttachments.OWL_DATA.get()).grades().get(OWLSubject.POTIONS));
+        return withHealersFloor(made, at.koopro.wizardsandbeasts.skill.vocation.VocationHelper.hasGrantedAbility(
+                brewer, at.koopro.wizardsandbeasts.skill.vocation.HealersWard.BREW));
+    }
+
+    /** Pure: a Healer's bottle is at least {@code HealersWard.BREW_FLOOR}%. */
+    public static int withHealersFloor(int percent, boolean healer) {
+        return healer ? Math.max(percent, at.koopro.wizardsandbeasts.skill.vocation.HealersWard.BREW_FLOOR) : percent;
     }
 
     /** The bottle's quality, {@value #PLAIN} when it carries none. */

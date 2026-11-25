@@ -26,5 +26,9 @@
   "owlGate": {
     "subject": "potions",
     "grade": "A"
-  }
+  },
+  "grantedAbilities": [
+    "healers_reach",
+    "healers_brew"
+  ]
 }

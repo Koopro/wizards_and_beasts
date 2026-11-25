@@ -171,8 +171,13 @@ public final class SpellExecutor {
                 // caster as subject, at the same SELF cast-time point legacy self-effects run. No-op for
                 // spells without an effects list (all Java spells today).
                 List<SpellEffectEntry> selfComponents = SpellEffectRunner.effectsOf(spell);
+                // The Healer's ward (B5): Episkey lands on the patient the Healer looks at, up to eight blocks off.
+                net.minecraft.world.entity.LivingEntity patient = SpellIds.matches(spell.getId(), "episkey")
+                        && at.koopro.wizardsandbeasts.skill.vocation.HealersWard.reaches(caster)
+                        ? at.koopro.wizardsandbeasts.skill.vocation.HealersWard.patientInView(caster) : null;
                 if (!selfComponents.isEmpty()) {
-                    SpellEffectRunner.run(selfComponents, SpellEffectContext.ofSelf(caster, level)
+                    SpellEffectRunner.run(selfComponents, (patient != null
+                            ? SpellEffectContext.ofTarget(caster, patient, level) : SpellEffectContext.ofSelf(caster, level))
                             .withScaling(damageMultiplier,
                                     scalingProfile.durationMult(), scalingProfile.controlMult()));
                     successful = true;

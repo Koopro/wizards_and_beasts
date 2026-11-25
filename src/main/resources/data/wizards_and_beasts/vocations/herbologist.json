@@ -5,7 +5,9 @@
   "description": "vocation.wizards_and_beasts.herbologist.desc",
   "pillar": "vocation.wizards_and_beasts.herbologist.pillar",
   "grantedAbilities": [
-    "crop_yield"
+    "crop_yield",
+    "healers_reach",
+    "healers_brew"
   ],
   "capstoneNodeId": "wizards_and_beasts:healers_hands",
   "pathway": {

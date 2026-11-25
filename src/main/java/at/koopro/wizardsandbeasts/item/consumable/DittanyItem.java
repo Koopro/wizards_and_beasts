@@ -69,6 +69,25 @@ public class DittanyItem extends ConsumedItem {
      * <p>Refused on a patient who needs nothing, and the bottle is not spent — a rare healing item
      * used on a healthy sheep by mis-click should not vanish.
      */
+    /** A Healer applies Dittany to the patient they look at, up to eight blocks off (B5); anyone else holds it. */
+    @Override
+    public InteractionResult use(Level level, Player player, net.minecraft.world.InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (player instanceof net.minecraft.server.level.ServerPlayer healer
+                && !player.getCooldowns().isOnCooldown(stack)
+                && at.koopro.wizardsandbeasts.skill.vocation.HealersWard.reaches(healer)) {
+            LivingEntity patient = at.koopro.wizardsandbeasts.skill.vocation.HealersWard.patientInView(healer);
+            if (patient != null && Dittany.needsTreatment(patient)) {
+                treat(player, patient, strength);
+                stack.consume(1, player);
+                player.getCooldowns().addCooldown(stack, Dittany.COOLDOWN_TICKS);
+                player.awardStat(Stats.ITEM_USED.get(this));
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return super.use(level, player, hand);
+    }
+
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player,
                                                   LivingEntity target, InteractionHand hand) {
