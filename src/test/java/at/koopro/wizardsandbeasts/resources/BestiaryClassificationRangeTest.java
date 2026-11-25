@@ -47,6 +47,25 @@ class BestiaryClassificationRangeTest {
         }
     }
 
+    /**
+     * Scamander rates the Dragon once, as one XXXXX entry; the breeds are described under it and never graded
+     * apart. The mod splits breeds into entries, so every one of them must carry the same XXXXX.
+     */
+    @Test
+    void everyDragonBreedCarriesTheSingleDragonGrade() throws IOException {
+        int dragons = 0;
+        for (Path file : entryFiles()) {
+            JsonObject json = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+            if (!json.has("category") || !"DRAGON".equals(json.get("category").getAsString())) {
+                continue;
+            }
+            dragons++;
+            assertEquals(5, json.has("mmRating") ? json.get("mmRating").getAsInt() : -1,
+                    file + ": a dragon breed is graded apart from Scamander's single XXXXX Dragon entry");
+        }
+        assertTrue(dragons >= 10, "expected the ten dragon breeds, found " + dragons);
+    }
+
     /** Absence must round-trip as absence, not as a defaulted grade. */
     @Test
     void anEntryWithoutAnMmRatingParsesAsUnclassified() throws IOException {
