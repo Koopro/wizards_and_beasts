@@ -83,6 +83,14 @@ public class BrewItem extends ConsumedItem {
             tooltipAdder.accept(Component.translatable(descKey)
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         }
+        if (at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.is(brewId)) {
+            at.koopro.wizardsandbeasts.polyjuice.PolyjuiceSample sample =
+                    at.koopro.wizardsandbeasts.polyjuice.PolyjuiceSample.read(stack);
+            tooltipAdder.accept((sample.isPresent()
+                    ? Component.translatable("brew.wizards_and_beasts.amortentia.aimed", sample.name())
+                    : Component.translatable("brew.wizards_and_beasts.amortentia.unaimed"))
+                    .withStyle(ChatFormatting.LIGHT_PURPLE));
+        }
         Integer quality = stack.get(ModDataComponents.BREW_QUALITY.get());
         if (quality != null) {
             int q = BrewQuality.of(stack);
@@ -103,6 +111,20 @@ public class BrewItem extends ConsumedItem {
             out.append(word.substring(0, 1).toUpperCase(Locale.ROOT)).append(word.substring(1));
         }
         return out.isEmpty() ? path : out.toString();
+    }
+
+    /** Amortentia is sniffed, not only drunk (C1): use it while sneaking to smell what draws you. */
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (player.isShiftKeyDown()
+                && at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.is(stack.get(ModDataComponents.BREW_ID.get()))) {
+            if (player instanceof ServerPlayer sniffer) {
+                at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.sniff(sniffer);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return super.use(level, player, hand);
     }
 
     /** Convenience: build a stack of a specific brew. */
@@ -126,13 +148,16 @@ public class BrewItem extends ConsumedItem {
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target,
                                                   InteractionHand hand) {
         String brewId = stack.get(ModDataComponents.BREW_ID.get());
+        boolean amortentia = at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.is(brewId);
         if (!(target instanceof Player other) || other == player
-                || !(POLYJUICE.equals(brewId) || MANDRAKE_RESTORATION.equals(brewId))) {
+                || !(POLYJUICE.equals(brewId) || MANDRAKE_RESTORATION.equals(brewId) || amortentia)) {
             return InteractionResult.PASS;
         }
         if (player instanceof ServerPlayer user && other instanceof ServerPlayer patient) {
-            if (POLYJUICE.equals(brewId)) {
-                takeHair(stack, user, patient);
+            if (POLYJUICE.equals(brewId) || amortentia) {
+                // Amortentia is aimed the same way (C1): a hair of the one it is meant for.
+                takeHair(stack, user, patient, amortentia ? "brew.wizards_and_beasts.amortentia.took_hair"
+                        : "brew.wizards_and_beasts.polyjuice.took_hair");
             } else {
                 pourOver(stack, user, patient);
             }
@@ -140,7 +165,7 @@ public class BrewItem extends ConsumedItem {
         return InteractionResult.SUCCESS;
     }
 
-    private static void takeHair(ItemStack stack, ServerPlayer user, ServerPlayer target) {
+    private static void takeHair(ItemStack stack, ServerPlayer user, ServerPlayer target, String tookKey) {
         if (at.koopro.wizardsandbeasts.polyjuice.PolyjuiceSample.read(stack).isPresent()) {
             user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.polyjuice.has_hair"), true);
             return;
@@ -150,8 +175,7 @@ public class BrewItem extends ConsumedItem {
         if (bottle != stack) {
             at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(user, bottle);
         }
-        user.displayClientMessage(Component.translatable("brew.wizards_and_beasts.polyjuice.took_hair",
-                target.getDisplayName()), true);
+        user.displayClientMessage(Component.translatable(tookKey, target.getDisplayName()), true);
         // Not who: a hair goes missing unnoticed, but not unfelt.
         target.displayClientMessage(Component.translatable("brew.wizards_and_beasts.polyjuice.hair_taken")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), true);
@@ -211,6 +235,9 @@ public class BrewItem extends ConsumedItem {
             // is a property of this bottle and not of the brew every bottle shares.
             BrewEffectEntry.run(brew.components(),
                     BrewEffectContext.onDrink(brew, player, serverLevel, potency, stack));
+            if (at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.is(brew.id())) {
+                at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.onDrunk(player, stack);
+            }
         }
 
         level.playSound(null, player.getX(), player.getY(), player.getZ(),

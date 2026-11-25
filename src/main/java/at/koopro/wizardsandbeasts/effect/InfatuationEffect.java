@@ -11,14 +11,11 @@ import net.minecraft.world.effect.MobEffectCategory;
  * infatuation reliably means: the drinker's blows against other players simply do not land. Read by
  * {@code InfatuationHandler}.
  *
- * <h2>The alpha simplification, stated plainly</h2>
- * <p>In canon the obsession has an object — you are besotted with a particular person, not with
- * everybody. This effect is indiscriminate, because a brewed bottle does not record who made it and
- * adding that is a separate piece of work (the cauldron would have to stamp the brewer onto the
- * output stack, and the `on_brew_complete` phase acts on the brewer rather than on the item). Rather
- * than fake an object of affection by picking the nearest player, the effect is honest about being
- * broad: while it lasts you are harmless to people, and the fiction is that everyone looks lovely.
- * Narrowing it to one target later is a change to this class and its handler, not to the brew.
+ * <h2>Aimed, or not</h2>
+ * <p>In canon the obsession has an object: Romilda's chocolates were meant for Harry (HBP ch.18). A bottle pressed to
+ * someone takes one of their hairs and is brewed for them; its drinker cannot strike that one person and nobody else
+ * is spared. An unaimed bottle stays honest about being broad: while it lasts the drinker is harmless to every
+ * person. Both live in {@code brew.amortentia.Amortentia} (systems audit C1, 2026-11-25).
  *
  * <h2>What it does not touch</h2>
  * <p>Movement, camera, chat and inventory are all left alone. A potion that steered a player's body

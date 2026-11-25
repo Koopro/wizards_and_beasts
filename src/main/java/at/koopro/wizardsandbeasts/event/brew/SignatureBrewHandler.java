@@ -74,7 +74,9 @@ public final class SignatureBrewHandler {
                 || !attacker.hasEffect(ModEffects.INFATUATION)) {
             return;
         }
-        if (!(event.getEntity() instanceof Player)) {
+        // Aimed (C1): only the potion's object is spared; an unaimed bottle spares everyone.
+        if (!(event.getEntity() instanceof Player victim)
+                || !at.koopro.wizardsandbeasts.brew.amortentia.Amortentia.restrains(attacker, victim)) {
             return;
         }
         event.setCanceled(true);
