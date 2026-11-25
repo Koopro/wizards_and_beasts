@@ -1,0 +1,29 @@
+{
+  "_comment": "A Kneazle is independent and won slowly; once it takes to a witch or wizard it makes an excellent pet (Fantastic Beasts). Numbers copied from demiguise.json, the nearest shipped profile (small, wary, won with patience, no gift): same gains, cooldowns, follow threshold, milestones, proximity and betrayal. Fruit swapped for fish, a cat's food; sounds swapped for a cat's. No gift: canon names no Kneazle material.",
+  "feeds": [
+    {
+      "item": "minecraft:cod",
+      "gain": 5,
+      "cooldownSeconds": 90
+    },
+    {
+      "item": "minecraft:salmon",
+      "gain": 6,
+      "cooldownSeconds": 90
+    }
+  ],
+  "followThreshold": 50,
+  "milestones": [
+    20,
+    50,
+    80,
+    100
+  ],
+  "proximityRange": 6.0,
+  "proximitySeconds": 60,
+  "proximityGain": 1,
+  "betrayalPenalty": 30,
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.cat.eat",
+  "refuseSound": "minecraft:entity.cat.hiss"
+}

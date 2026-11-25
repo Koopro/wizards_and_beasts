@@ -4211,3 +4211,18 @@ front of the rider. Now `BroomGeometry.tailOffset`: z negated, scaled, on the li
 - Arms `-1.15 → -0.55` (hands on the shaft), legs `-0.15 → +0.25`.
 - `root` position tracks removed from `idle`/`hover`/`fly_forward`/`boost`; the hover bob is
   `BroomVisuals.bob`, applied identically to broom and rider. Three animation controllers became one.
+
+---
+
+# Bond breadth (2026-11-25, `feat/bond-breadth`)
+
+Owner ruling 2026-11-25: copy the nearest existing creature's profile.
+
+The **owl** and the **Kneazle** now accept food and build bond (follow, milestones, mastery XP; the owl gives
+feathers from 60). Before, right-clicking either with food fell through to the default interaction. Numbers
+are copies: `owl.json` of `hippogriff.json` (rabbit and chicken only), `kneazle.json` of `demiguise.json`
+(cod and salmon in place of berries, cat sounds). Datapack only, no Java.
+
+**Not done:** Graphorn and Occamy. Both are `HOSTILE`, and `GenericBeastEntity` adds a
+`NearestAttackableTargetGoal<Player>` with no bond-owner exemption, so a profile alone would leave either one
+hunting the person who feeds it. Needs an owner decision on whether a bond calms a hostile beast.

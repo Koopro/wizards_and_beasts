@@ -1,0 +1,36 @@
+{
+  "_comment": "Owls hunt small animals and birds (Hedwig goes out hunting at night in Philosopher's Stone; Minecraft has no mice, so rabbit and chicken stand in). Numbers copied from hippogriff.json, the nearest shipped profile (a meat-eating bird that sheds feathers): same gains, cooldowns, follow threshold, milestones, proximity and betrayal. Its fish and beef feeds were dropped as not owl prey. The gift is the hippogriff's feather, here the quill a wizard writes with.",
+  "feeds": [
+    {
+      "item": "minecraft:rabbit",
+      "gain": 15,
+      "cooldownSeconds": 60
+    },
+    {
+      "item": "minecraft:chicken",
+      "gain": 12,
+      "cooldownSeconds": 60
+    }
+  ],
+  "followThreshold": 70,
+  "milestones": [
+    25,
+    50,
+    75,
+    100
+  ],
+  "proximityRange": 8.0,
+  "proximitySeconds": 45,
+  "proximityGain": 1,
+  "betrayalPenalty": 40,
+  "gift": {
+    "item": "minecraft:feather",
+    "minBond": 60,
+    "cooldownSeconds": 900,
+    "minCount": 1,
+    "maxCount": 3
+  },
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.parrot.eat",
+  "refuseSound": "minecraft:entity.parrot.hurt"
+}
