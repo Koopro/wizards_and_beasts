@@ -53,6 +53,16 @@ public final class PortkeyService {
     public static Result travel(ServerPlayer holder, ItemStack portkey) {
         BlockPos target = portkey.get(ModDataComponents.PORTKEY_TARGET.get());
         if (target == null) {
+            // A Portkey left for travellers (Stoatshead Hill's boot) is set for a place, not a block: the first use
+            // finds where that place stands in this world and sets it there.
+            java.util.Optional<Identifier> landmark = landmark(portkey);
+            BlockPos found = landmark.isPresent() ? resolveLandmark(holder.level(), landmark.get()) : null;
+            if (found != null) {
+                set(portkey, holder.level(), found);
+                target = found;
+            }
+        }
+        if (target == null) {
             tell(holder, "item.wizards_and_beasts.portkey.unset");
             return Result.UNSET;
         }
@@ -116,6 +126,60 @@ public final class PortkeyService {
                     new Vec3(where.x, where.y + 0.3 + ring * 0.6, where.z), new Vec3(0, 1, 0),
                     0.9 - ring * 0.2, 10, (float) (ring * 0.15 * Math.PI * 2));
         }
+    }
+
+    /** The custom-data key a placed Portkey carries instead of a target: the id of the structure it is set for. */
+    public static final String LANDMARK_KEY = "portkey_landmark";
+
+    /** The structure this Portkey is set for, when it was left set for a place rather than a block. */
+    public static java.util.Optional<Identifier> landmark(ItemStack portkey) {
+        net.minecraft.world.item.component.CustomData data =
+                portkey.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        if (data == null) {
+            return java.util.Optional.empty();
+        }
+        return data.copyTag().getString(LANDMARK_KEY).map(Identifier::tryParse);
+    }
+
+    /**
+     * The ground to set down on beside {@code structureId} in this world: a one-per-world place's own chunk, any other
+     * structure's nearest start. Lands a few blocks off the template's south side, on the surface, so travellers
+     * arrive outside the building rather than on its roof. {@code null} when the world has none.
+     */
+    public static @org.jspecify.annotations.Nullable BlockPos resolveLandmark(ServerLevel level, Identifier structureId) {
+        var structures = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.STRUCTURE);
+        var holder = structures.get(net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.STRUCTURE, structureId)).orElse(null);
+        if (holder == null) {
+            return null;
+        }
+        var state = level.getChunkSource().getGeneratorState();
+        net.minecraft.world.level.ChunkPos chunk = null;
+        for (var placement : state.getPlacementsForStructure(holder)) {
+            if (placement instanceof at.koopro.wizardsandbeasts.azkaban.structure.OnePerWorldPlacement one) {
+                chunk = one.target(state);
+            }
+        }
+        if (chunk == null) {
+            var found = level.getChunkSource().getGenerator().findNearestMapStructure(level,
+                    net.minecraft.core.HolderSet.direct(holder), level.getRespawnData().pos(), 100, false);
+            if (found == null) {
+                return null;
+            }
+            chunk = new net.minecraft.world.level.ChunkPos(found.getFirst());
+        }
+        var start = level.getChunk(chunk.x, chunk.z).getStartForStructure(holder.value());
+        int x = chunk.getMiddleBlockX();
+        int z = chunk.getMiddleBlockZ();
+        if (start != null && start.isValid() && !start.getPieces().isEmpty()) {
+            var box = start.getPieces().get(0).getBoundingBox();
+            x = box.getCenter().getX();
+            z = box.maxZ() + 3;
+        }
+        // The landing column can lie in the next chunk over; an unloaded chunk reads its height as the world's floor.
+        level.getChunk(x >> 4, z >> 4);
+        int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        return new BlockPos(x, y - 1, z);
     }
 
     private static void tell(ServerPlayer player, String key) {

@@ -82,6 +82,11 @@ public final class PlacesLookCapture {
             SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0, 2.2, sizeZ + 3.0, 180f, 4f)));
             SCRIPT.add(new Step("front", 10, p -> {}));
         }
+        if ("gaunt_shack".equals(PLACE)) {
+            // The door, close enough to see what is nailed to it (HBP ch.10).
+            SCRIPT.add(new Step("", 50, p -> look(p, 10.5, 2.0, 17.6, 180f, 3f)));
+            SCRIPT.add(new Step("door", 10, p -> {}));
+        }
         if ("portkey_hill".equals(PLACE)) {
             SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0 + 2.5, 3.2, sizeZ / 2.0 + 3.5, 145f, 30f)));
             SCRIPT.add(new Step("close", 10, p -> {}));

@@ -2709,6 +2709,8 @@
   "item.wizards_and_beasts.trunk_access_mode.keyed": "Entry granted to those holding a Sympathetic Key.",
   "item.wizards_and_beasts.trunk_access_mode.open": "Unguarded. Any witch or wizard may enter.",
   "item.wizards_and_beasts.portkey.linked": "Linked destination: %s, %s, %s",
+  "item.wizards_and_beasts.portkey.landmark": "Set for %s",
+  "portkey.wizards_and_beasts.landmark.leaky_cauldron": "the Leaky Cauldron",
   "item.wizards_and_beasts.portkey.unlinked": "Sneak-right-click a block to bind this Portkey.",
   "entity.wizards_and_beasts.niffler": "Niffler",
   "entity.wizards_and_beasts.baby_niffler": "Baby Niffler",

@@ -36,6 +36,9 @@ public final class ArtefactTests {
                 "artefact: a Time-Turner takes its wearer back to where they stood an hour ago, leaves the world's "
                         + "clock alone, spends the hours it went through, and forgets them when set aside",
                 ArtefactTests::timeTurnerTakesTheWearerBack);
+        tests.add("artefact_portkey_boot_takes_its_toucher_to_the_leaky_cauldron",
+                "artefact: Stoatshead Hill's boot carries whoever touches it to the Leaky Cauldron and leaves the hill",
+                ArtefactTests::portkeyBootGoesToTheLeakyCauldron);
         tests.add("artefact_portkey_carries_everyone_holding_on",
                 "artefact: a Portkey carries its holder and whoever is touching them to where it was set, then is spent",
                 ArtefactTests::portkeyCarriesEveryone);
@@ -107,6 +110,49 @@ public final class ArtefactTests {
             WizardTestSupport.retire(helper, holder);
             WizardTestSupport.retire(helper, friend);
             WizardTestSupport.retire(helper, stranger);
+        }
+    }
+
+    /**
+     * The boot, touched. Where the world has a Leaky Cauldron the toucher lands beside it and the boot leaves the hill
+     * (checked on real terrain by the settlement probe's {@code places} mode: the GameTest world is flat and has no
+     * structure placements); where it has none, as here, nothing happens and the boot stays for a world that does.
+     */
+    private static void portkeyBootGoesToTheLeakyCauldron(GameTestHelper helper) {
+        ServerPlayer walker = player(helper, "BootToucher", GameType.SURVIVAL);
+        Runnable artefacts = WizardTestSupport.leaseModule(Module.ARTEFACTS);
+        try {
+            var level = helper.getLevel();
+            BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
+            var display = net.minecraft.world.entity.EntityType.ITEM_DISPLAY.create(level,
+                    net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            var touch = net.minecraft.world.entity.EntityType.INTERACTION.create(level,
+                    net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            for (var part : java.util.List.of(display, touch)) {
+                part.snapTo(origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5, 0f, 0f);
+                part.addTag(at.koopro.wizardsandbeasts.portkey.PortkeyBoot.TAG);
+                level.addFreshEntity(part);
+            }
+            walker.teleportTo(origin.getX() + 1.5, origin.getY(), origin.getZ() + 0.5);
+            Vec3 before = walker.position();
+            BlockPos expected = PortkeyService.resolveLandmark(level, at.koopro.wizardsandbeasts.portkey.PortkeyBoot.LANDMARK);
+
+            walker.interactOn(touch, InteractionHand.MAIN_HAND);
+            if (expected != null) {
+                Vec3 arrival = Vec3.atBottomCenterOf(expected.above());
+                check(helper, walker.position().distanceTo(arrival) < 0.01,
+                        () -> "the toucher is at " + walker.position() + ", not by the Leaky Cauldron at " + arrival);
+                check(helper, display.isRemoved() && touch.isRemoved(), () -> "the boot stayed on the hill");
+            } else {
+                check(helper, walker.position().distanceTo(before) < 0.01, () -> "the boot went nowhere and took them");
+                check(helper, !display.isRemoved() && !touch.isRemoved(), () -> "the boot was spent on no journey");
+                display.discard();
+                touch.discard();
+            }
+            helper.succeed();
+        } finally {
+            artefacts.run();
+            WizardTestSupport.retire(helper, walker);
         }
     }
 
