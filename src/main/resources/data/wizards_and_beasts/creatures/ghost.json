@@ -1,0 +1,32 @@
+{
+  "id": "wizards_and_beasts:ghost",
+  "bodyPlan": "BIPED_HUMANOID",
+  "locomotion": "FLYING",
+  "temperament": "PASSIVE",
+  "width": 0.6,
+  "height": 1.9,
+  "scale": 1.0,
+  "_tint_note": "Translucent, not invisible (owner, 2026-11-25): the tint's alpha (#AARRGGBB) breathes between 72% and 50%, a pale silvery-blue; TintedBeastRenderer draws any alpha under 255 translucent.",
+  "maxHealth": 20.0,
+  "movementSpeed": 0.12,
+  "flyingSpeed": 0.18,
+  "followRange": 16.0,
+  "model": "wizards_and_beasts:entity/ghost",
+  "texture": "wizards_and_beasts:textures/entity/ghost.png",
+  "animation": "wizards_and_beasts:geckolib/animations/entity/ghost.animation.json",
+  "attackDamage": 0.0,
+  "traits": [],
+  "clips": [
+    "flinch",
+    "death"
+  ],
+  "abilities": [
+    {
+      "type": "tint",
+      "color": "#B8E6F0FF",
+      "pulse": true,
+      "pulse_color": "#80D6E6F8",
+      "period_ticks": 80
+    }
+  ]
+}

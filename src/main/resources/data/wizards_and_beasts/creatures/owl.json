@@ -3,10 +3,10 @@
   "bodyPlan": "AVIAN",
   "locomotion": "FLYING",
   "temperament": "PASSIVE",
-  "width": 0.7,
-  "height": 1.2,
-  "scale": 0.5,
-  "_scale_note": "Reference: a snowy owl is 53-71 cm long, about a third of a person. The rig is drawn at twice that so its face and eyes carry texels; scale 0.5 brings it to about 0.6 blocks.",
+  "width": 0.45,
+  "height": 0.85,
+  "scale": 1.0,
+  "_scale_note": "Reference: a snowy owl is 53-71 cm long. Built at true size the way vanilla builds its birds (one texel a pixel, 2026-11-25), about 0.8 blocks; the first build was drawn at twice size and shown at 0.5.",
   "maxHealth": 6.0,
   "movementSpeed": 0.22,
   "flyingSpeed": 0.55,
@@ -19,7 +19,11 @@
     "FEARFUL"
   ],
   "clips": [
-    "flinch"
+    "flinch",
+    "death",
+    "preen",
+    "ruffle",
+    "stretch"
   ],
   "coats": {
     "base_weight": 40,

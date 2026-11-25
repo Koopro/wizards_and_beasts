@@ -60,7 +60,7 @@ public final class LookPreviewCapture {
             }
         }
         // Held as vanilla holds a snowball: the flat sprite in hand, the hotbar showing the icons.
-        String[] held = {"quaffle", "bludger", "golden_snitch"};
+        String[] held = {"quaffle", "bludger", "golden_snitch", "norwegian_ridgeback_egg"};
         steps.add(new Step("", 40, p -> {
             p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
             p.getAbilities().flying = true;
@@ -71,7 +71,7 @@ public final class LookPreviewCapture {
                         net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
                                 net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, held[i]))));
             }
-            p.getInventory().setItem(3, new net.minecraft.world.item.ItemStack(
+            p.getInventory().setItem(held.length, new net.minecraft.world.item.ItemStack(
                     net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
                             net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "beaters_bat"))));
             eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f);
@@ -96,10 +96,18 @@ public final class LookPreviewCapture {
     private static final List<Step> OTHER_SCENES = List.of(
             new Step("", 40, p -> look(p, 8.5, 0.4, -2.2, 0f, 22f)),
             new Step("ridgeback_egg", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, 8.1, 1.75, -0.7, 8.5, 1.35, 0.5)),
+            new Step("ridgeback_egg_close", 10, p -> {}),
             new Step("", 40, p -> look(p, 17.0, 0.7, -1.4, 0f, 6f)),
             new Step("owls", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, 17.0, 1.45, -1.3, 17.0, 1.3, 0.5)),
+            new Step("owls_close", 10, p -> {}),
             new Step("", 40, p -> look(p, 28.5, 0.5, -3.0, 0f, -6f)),
             new Step("weasley_clock", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, 38.5, 1.75, -1.7, 38.5, 1.15, 0.5)),
+            new Step("ghost", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, 44.5, 1.75, -1.7, 44.5, 1.0, 0.5)),
+            new Step("inferius", 10, p -> {}),
             new Step("", 40, p -> {
                 p.level().setDayTime(18000);
                 look(p, 0.5, 1, 0.5, 180f, -32f);
@@ -130,9 +138,24 @@ public final class LookPreviewCapture {
             }
         }
         quidditch(level);
-        // Norbert's egg in Hagrid's fire.
-        level.setBlockAndUpdate(base.offset(8, 0, 0), Blocks.CAMPFIRE.defaultBlockState());
-        display(level, base.offset(8, 0, 0), 0.95, "norwegian_ridgeback_egg", 1.0f);
+        // Norbert's egg in Hagrid's fire: a brick hearth; the egg model's foot is the item origin, so the display
+        // stands on the netherrack.
+        for (int x = 6; x <= 10; x++) {
+            for (int y = 0; y <= 3; y++) {
+                level.setBlockAndUpdate(base.offset(x, y, 1), Blocks.BRICKS.defaultBlockState());
+            }
+            for (int z = -3; z <= 0; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.BRICKS.defaultBlockState());   // fire can't spread
+            }
+        }
+        // The egg on glowing embers (a magma block), fire burning either side: a campfire's smoke hid it, and a fire
+        // block in the same space buried it in flames.
+        level.setBlockAndUpdate(base.offset(8, 0, 0), Blocks.MAGMA_BLOCK.defaultBlockState());
+        for (int dx : new int[] {-1, 1}) {
+            level.setBlockAndUpdate(base.offset(8 + dx, 0, 0), Blocks.NETHERRACK.defaultBlockState());
+            level.setBlockAndUpdate(base.offset(8 + dx, 1, 0), Blocks.FIRE.defaultBlockState());
+        }
+        display(level, base.offset(8, 0, 0), 1.0, "norwegian_ridgeback_egg", 1.0f);
         // The post owls on perches: snowy (Hedwig), great grey (Errol), tawny and barn (the post office).
         String[] coats = {"base", "great_grey", "tawny", "barn"};
         var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
@@ -161,6 +184,7 @@ public final class LookPreviewCapture {
                 .withSuppressedOutput().withLevel(level), String.format(java.util.Locale.ROOT,
                 "summon minecraft:painting %d %d %d {facing:2b,variant:\"wizards_and_beasts:weasley_clock\"}",
                 base.getX() + 28, base.getY() + 2, base.getZ() + 2));
+        humanoids(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
@@ -268,6 +292,51 @@ public final class LookPreviewCapture {
     /** Places the spectator so the eye, 1.62 above the feet, is at these base-relative coordinates. */
     private static void eye(ServerPlayer p, double x, double y, double z, float yaw, float pitch) {
         look(p, x, y - 1.62, z, yaw, pitch);
+    }
+
+    /**
+     * The humanoid look sheets. Nearly Headless Nick is the ghost creature (translucent through its tint) in a stone
+     * corridor; the Inferius stands on a mannequin, vanilla's player-shaped stand that wears any skin -- the way
+     * vanilla makes its husk and drowned from the zombie -- in the cave lake's water.
+     */
+    private static void humanoids(ServerLevel level) {
+        for (int x = 34; x <= 48; x++) {
+            for (int z = -4; z <= 2; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.STONE_BRICKS.defaultBlockState());
+            }
+            for (int y = 0; y <= 4; y++) {
+                level.setBlockAndUpdate(base.offset(x, y, 2), (x + y) % 5 == 0 ? Blocks.CRACKED_STONE_BRICKS.defaultBlockState()
+                        : Blocks.STONE_BRICKS.defaultBlockState());
+            }
+        }
+        for (int x = 42; x <= 47; x++) {
+            for (int z = -2; z <= 1; z++) {
+                // A pool sunk into the floor, so the water has nowhere to run.
+                level.setBlockAndUpdate(base.offset(x, -2, z), Blocks.DEEPSLATE.defaultBlockState());
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.WATER.defaultBlockState());
+            }
+        }
+        // The ghost is the creature itself: its tint's alpha is what makes it translucent. Set here because a
+        // creature without AI may not tick its abilities.
+        var ghostType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "ghost"));
+        if (ghostType.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                instanceof at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity ghost) {
+            ghost.snapTo(base.getX() + 38.5, base.getY() + 0.15, base.getZ() + 0.5, 180f, 0f);
+            ghost.setYHeadRot(180f);
+            ghost.setNoAi(true);
+            ghost.setNoGravity(true);
+            ghost.setTint(0xB8E6F0FF);
+            level.addFreshEntity(ghost);
+        }
+        mannequin(level, 44.5, -0.7, 0.5, "inferius");     // rising out of the lake
+    }
+
+    private static void mannequin(ServerLevel level, double x, double y, double z, String skin) {
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {profile:{texture:\"%s:entity/humanoid/%s\"},"
+                        + "Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + x, base.getY() + y, base.getZ() + z, WizardsAndBeastsMod.MODID, skin));
     }
 
     private static void display(ServerLevel level, BlockPos at, double up, String item, float scale) {
