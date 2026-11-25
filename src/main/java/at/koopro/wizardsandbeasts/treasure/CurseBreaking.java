@@ -90,6 +90,7 @@ public final class CurseBreaking {
         if (!ModuleManager.isEnabled(Module.GRINGOTTS)) {
             return;
         }
+        ChestWards.onSpellCast(player, spellId);
         InteractionHand hand = TreasureArtefacts.handHolding(player);
         if (hand == null) {
             return;

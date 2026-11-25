@@ -67,7 +67,13 @@ public class TreasureLootModifier extends LootModifier {
             }
             float chance = expeditions.contains(siteId) ? site.expeditionChance() : site.chance();
             if (context.getRandom().nextFloat() < chance) {
-                generatedLoot.add(TreasureArtefacts.create(siteId, site, context.getRandom()));
+                ItemStack artefact = TreasureArtefacts.create(siteId, site, context.getRandom());
+                generatedLoot.add(artefact);
+                // The chest is warded with its treasure's curse (B5, Curse-Breaker).
+                TreasureArtefact rolled = TreasureArtefacts.of(artefact);
+                if (opener instanceof ServerPlayer player && origin != null && rolled != null) {
+                    ChestWards.raise(player, rolled, BlockPos.containing(origin));
+                }
                 break;
             }
         }

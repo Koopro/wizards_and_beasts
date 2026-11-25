@@ -4,6 +4,9 @@
   "displayName": "vocation.wizards_and_beasts.explorer.name",
   "description": "vocation.wizards_and_beasts.explorer.desc",
   "pillar": "vocation.wizards_and_beasts.explorer.pillar",
+  "grantedAbilities": [
+    "curse_breaker"
+  ],
   "capstoneNodeId": "wizards_and_beasts:seasoned_traveller",
   "pathway": {
     "early": [
