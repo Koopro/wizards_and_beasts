@@ -53,7 +53,9 @@ public final class ExamSittings {
 
     /** Why a sitting could not open. */
     public enum Refusal {
-        MODULE_OFF, NOT_AT_DESK, IN_PROGRESS, TOO_SOON, NO_SEAT;
+        MODULE_OFF, NOT_AT_DESK, IN_PROGRESS, TOO_SOON, NO_SEAT,
+        /** Outside exam week (D2): the desk seats nobody until the examiners come. */
+        NOT_EXAM_WEEK;
 
         public String translationKey() {
             return "education.sitting.refused." + name().toLowerCase(java.util.Locale.ROOT);
@@ -81,6 +83,8 @@ public final class ExamSittings {
         long now = player.level().getGameTime();
         List<OWLSubject> papers = ExamRules.papers(level, record);
         if (level == Qualification.NEWT && (!record.examTaken() || papers.isEmpty())) return Refusal.NO_SEAT;
+        // The calendar binds candidates at the desk; an operator's command may still open a sitting at any time.
+        if (atDesk && !ExamWeek.isOpen(player.level().getServer())) return Refusal.NOT_EXAM_WEEK;
         if (!ExamRules.maySit(level, record, now)) return Refusal.TOO_SOON;
 
         Set<String> tomes = player.getData(ModAttachments.SKILL_DATA.get()).getLoreEntriesRead();

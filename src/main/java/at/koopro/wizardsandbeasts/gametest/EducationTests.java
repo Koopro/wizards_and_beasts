@@ -76,6 +76,12 @@ final class EducationTests {
         tests.add("education_sitting_survives_a_relog",
                 "education: a sitting and its practicals are saved",
                 EducationTests::survivesRelog);
+        tests.add("education_desk_seats_only_in_exam_week",
+                "education: outside exam week the desk refuses a candidate; inside it seats them (D2)",
+                EducationTests::examWeek);
+        tests.add("education_vocation_needs_its_owl",
+                "education: a vocation asks its O.W.L. at A; a wizard already committed keeps it (D2)",
+                EducationTests::vocationNeedsItsOwl);
         tests.add("education_lessons_count_toward_the_owl",
                 "education: three lessons lift a blank subject to Acceptable and no further",
                 EducationTests::lessonsCount);
@@ -97,6 +103,8 @@ final class EducationTests {
     }
 
     private static void desk(GameTestHelper helper) {
+        // These scenarios are about the sitting, not the calendar: exam week is open every day for them (D2).
+        at.koopro.wizardsandbeasts.education.ExamWeek.setRules(at.koopro.wizardsandbeasts.education.ExamWeek.Rules.ALWAYS);
         helper.setBlock(new BlockPos(2, 1, 1), ModBlocks.EXAMINATION_DESK.get());
     }
 
@@ -117,6 +125,68 @@ final class EducationTests {
     }
 
     // -- scenarios -------------------------------------------------------------------------------------
+
+    private static void examWeek(GameTestHelper helper) {
+        requireOwls(helper);
+        ServerPlayer player = candidate(helper, "ExamWeekCandidate");
+        try {
+            desk(helper);
+            long day = at.koopro.wizardsandbeasts.prophet.DailyProphet.day(helper.getLevel().getServer());
+            // A fortnight whose one open day is tomorrow: today is shut.
+            int notice = (int) ((Math.floorMod(day, 14L) + 1) % 14);
+            at.koopro.wizardsandbeasts.education.ExamWeek.setRules(
+                    new at.koopro.wizardsandbeasts.education.ExamWeek.Rules(14, 1, notice));
+            check(helper, ExamSittings.begin(player, Qualification.OWL, true) == ExamSittings.Refusal.NOT_EXAM_WEEK,
+                    () -> "the desk seated a candidate outside exam week");
+            check(helper, !at.koopro.wizardsandbeasts.education.EducationService.view(player).maySitOwl(),
+                    () -> "the sheet offered a sitting outside exam week");
+            check(helper, ExamSittings.begin(player, Qualification.OWL, false) == null,
+                    () -> "an operator's sitting was held to the calendar");
+            player.setData(ModAttachments.EDUCATION_DATA.get(), PlayerEducationData.EMPTY);
+
+            at.koopro.wizardsandbeasts.education.ExamWeek.setRules(
+                    at.koopro.wizardsandbeasts.education.ExamWeek.Rules.ALWAYS);
+            check(helper, ExamSittings.begin(player, Qualification.OWL, true) == null,
+                    () -> "the desk refused a candidate in exam week");
+            helper.succeed();
+        } finally {
+            at.koopro.wizardsandbeasts.education.ExamWeek.setRules(
+                    at.koopro.wizardsandbeasts.education.ExamWeek.Rules.ALWAYS);
+            WizardTestSupport.retire(helper, player);
+        }
+    }
+
+    private static void vocationNeedsItsOwl(GameTestHelper helper) {
+        requireOwls(helper);
+        ServerPlayer player = candidate(helper, "VocationCandidate");
+        var wandlore = net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "wandlore");
+        try {
+            check(helper, at.koopro.wizardsandbeasts.skill.vocation.VocationManager.commit(player, wandlore)
+                            == at.koopro.wizardsandbeasts.skill.vocation.VocationManager.CommitResult.OWL_GRADE_SHORT,
+                    () -> "a wizard with no O.W.L.s committed to Wandlore");
+            player.setData(ModAttachments.OWL_DATA.get(), new PlayerOWLData(
+                    java.util.Map.of(at.koopro.wizardsandbeasts.owl.OWLSubject.CHARMS,
+                            at.koopro.wizardsandbeasts.owl.OWLGrade.P), true, 1, 0L));
+            check(helper, at.koopro.wizardsandbeasts.skill.vocation.VocationManager.commit(player, wandlore)
+                            == at.koopro.wizardsandbeasts.skill.vocation.VocationManager.CommitResult.OWL_GRADE_SHORT,
+                    () -> "a Poor in Charms was enough for Wandlore");
+            player.setData(ModAttachments.OWL_DATA.get(), new PlayerOWLData(
+                    java.util.Map.of(at.koopro.wizardsandbeasts.owl.OWLSubject.CHARMS,
+                            at.koopro.wizardsandbeasts.owl.OWLGrade.A), true, 1, 0L));
+            check(helper, at.koopro.wizardsandbeasts.skill.vocation.VocationManager.commit(player, wandlore)
+                            == at.koopro.wizardsandbeasts.skill.vocation.VocationManager.CommitResult.OK,
+                    () -> "an Acceptable in Charms did not open Wandlore");
+            // Existing wizards keep what they hold: the grade going away does not unseat a declaration.
+            player.setData(ModAttachments.OWL_DATA.get(), PlayerOWLData.DEFAULT);
+            check(helper, at.koopro.wizardsandbeasts.skill.vocation.VocationManager.commit(player, wandlore)
+                            == at.koopro.wizardsandbeasts.skill.vocation.VocationManager.CommitResult.OK,
+                    () -> "a committed Wandlore wizard was refused their own vocation");
+            helper.succeed();
+        } finally {
+            at.koopro.wizardsandbeasts.skill.vocation.VocationManager.clear(player);
+            WizardTestSupport.retire(helper, player);
+        }
+    }
 
     private static void practicalLifts(GameTestHelper helper) {
         requireOwls(helper);

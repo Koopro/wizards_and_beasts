@@ -197,6 +197,9 @@ public final class SkillCommands {
                     Component.translatable("vocation.wizards_and_beasts.commit.build_sealed").withStyle(ChatFormatting.RED));
             case MASTERY_HELD -> ChatHelper.send(player,
                     Component.translatable("vocation.wizards_and_beasts.commit.mastery_held").withStyle(ChatFormatting.RED));
+            case OWL_GRADE_SHORT -> ChatHelper.send(player,
+                    at.koopro.wizardsandbeasts.network.skill.VocationCommitC2SPayload.owlShort(id).copy()
+                            .withStyle(ChatFormatting.RED));
         }
         return 0;
     }

@@ -9863,5 +9863,10 @@
   "entity.wizards_and_beasts.obliviator": "Obliviator",
   "entity.wizards_and_beasts.obliviator.title": "Ministry Obliviator",
   "ministry.wizards_and_beasts.obliviator.arrive": "%s: \"Ministry of Magic, Accidental Magic Reversal Squad. Stand clear.\"",
-  "ministry.wizards_and_beasts.obliviator.reminder": "The Muggles who saw your magic will remember nothing of it. The Ministry will."
+  "ministry.wizards_and_beasts.obliviator.reminder": "The Muggles who saw your magic will remember nothing of it. The Ministry will.",
+  "prophet.wizards_and_beasts.story.exam_week_notice": "EXAMINATIONS: The Wizarding Examinations Authority announces that O.W.L. and N.E.W.T. papers will be sat in %s days; the Ministry examiners have arrived.",
+  "prophet.wizards_and_beasts.story.exam_week_open": "EXAMINATIONS BEGIN TODAY: Candidates may present themselves at any examination desk for the next %s days. Quills ready.",
+  "education.sitting.refused.not_exam_week": "The examiners are not here. Watch the Daily Prophet for the next exam week.",
+  "vocation.wizards_and_beasts.commit.owl_short": "Needs an O.W.L. in %s at %s or better. Sit it in exam week.",
+  "vocation.wizards_and_beasts.commit.owl_short_any": "Needs an O.W.L. you do not hold yet."
 }

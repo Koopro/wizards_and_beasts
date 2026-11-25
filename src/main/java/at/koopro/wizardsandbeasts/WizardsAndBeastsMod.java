@@ -205,6 +205,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "house_cup_reload_listener"),
                     new at.koopro.wizardsandbeasts.house.HouseCup.Loader());
+            // Exam week calendar (education/ExamWeek).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "exam_week_reload_listener"),
+                    new at.koopro.wizardsandbeasts.education.ExamWeek.Loader());
             // Mirror of Erised: what the Mirror can show, and to whom (artefact/erised/).
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "erised_vision_reload_listener"),

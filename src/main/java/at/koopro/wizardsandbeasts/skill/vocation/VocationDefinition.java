@@ -52,7 +52,33 @@ public record VocationDefinition(
         Optional<Identifier> capstoneNodeId,
         List<SkillNodeEffect> commitmentEffects,
         List<String> grantedAbilities,
-        Optional<BuildPathway> pathway) {
+        Optional<BuildPathway> pathway,
+        Optional<OwlGate> owlGate) {
+
+    /**
+     * The O.W.L. a wizard must hold to commit to this vocation (systems audit D2): one subject per vocation, the grade
+     * at or above {@code grade}. Canon: Aurors need DADA among their O.W.L.s and N.E.W.T.s (OotP ch.29, McGonagall's
+     * careers advice); the rest follow the subject each trade is built on.
+     */
+    public record OwlGate(at.koopro.wizardsandbeasts.owl.OWLSubject subject, at.koopro.wizardsandbeasts.owl.OWLGrade grade) {
+        private static final Codec<at.koopro.wizardsandbeasts.owl.OWLGrade> GRADE = Codec.STRING.comapFlatMap(s -> {
+            try {
+                return DataResult.success(at.koopro.wizardsandbeasts.owl.OWLGrade.valueOf(s.toUpperCase(java.util.Locale.ROOT)));
+            } catch (IllegalArgumentException e) {
+                return DataResult.error(() -> "Unknown O.W.L. grade: " + s);
+            }
+        }, g -> g.name());
+        public static final Codec<OwlGate> CODEC = RecordCodecBuilder.create(i -> i.group(
+                at.koopro.wizardsandbeasts.owl.OWLSubject.CODEC.fieldOf("subject").forGetter(OwlGate::subject),
+                GRADE.optionalFieldOf("grade", at.koopro.wizardsandbeasts.owl.OWLGrade.A).forGetter(OwlGate::grade)
+        ).apply(i, OwlGate::new));
+
+        /** Whether {@code grades} (a wizard's best O.W.L.s) meet this gate. */
+        public boolean metBy(java.util.Map<at.koopro.wizardsandbeasts.owl.OWLSubject, at.koopro.wizardsandbeasts.owl.OWLGrade> grades) {
+            at.koopro.wizardsandbeasts.owl.OWLGrade held = grades.get(subject);
+            return held != null && held.value >= grade.value;
+        }
+    }
 
     public static final Codec<SkillTreeId> TREE_CODEC = Codec.STRING.comapFlatMap(
             s -> {
@@ -77,7 +103,8 @@ public record VocationDefinition(
                     .forGetter(VocationDefinition::commitmentEffects),
             Codec.STRING.listOf().optionalFieldOf("grantedAbilities", List.of())
                     .forGetter(VocationDefinition::grantedAbilities),
-            BuildPathway.CODEC.optionalFieldOf("pathway").forGetter(VocationDefinition::pathway)
+            BuildPathway.CODEC.optionalFieldOf("pathway").forGetter(VocationDefinition::pathway),
+            OwlGate.CODEC.optionalFieldOf("owlGate").forGetter(VocationDefinition::owlGate)
     ).apply(instance, VocationDefinition::new));
 
     public Component displayName() { return Component.translatable(displayNameKey); }

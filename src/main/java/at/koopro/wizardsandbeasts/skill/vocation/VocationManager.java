@@ -37,7 +37,9 @@ public final class VocationManager {
         /** The build's mechanics live in a module that is switched off. */
         BUILD_SEALED,
         /** The player holds another build's capstone; their vocation follows their mastery. */
-        MASTERY_HELD
+        MASTERY_HELD,
+        /** The vocation's O.W.L. is not held at the grade it asks (D2). */
+        OWL_GRADE_SHORT
     }
 
     private VocationManager() {}
@@ -62,6 +64,13 @@ public final class VocationManager {
         var held = BuildRules.heldCapstone(SkillSystemAPI.getSkillData(player).getUnlockedSkills(), Builds.all());
         if (held.isPresent() && !held.get().id().equals(vocationId)) {
             return CommitResult.MASTERY_HELD;
+        }
+
+        // O.W.L. gate (D2): one subject per vocation. A wizard already committed keeps what they hold.
+        boolean alreadyHeld = VocationHelper.getPrimary(player).filter(vocationId::equals).isPresent();
+        if (!alreadyHeld && vocation.owlGate().isPresent() && !vocation.owlGate().get().metBy(
+                player.getData(ModAttachments.OWL_DATA.get()).grades())) {
+            return CommitResult.OWL_GRADE_SHORT;
         }
 
         PlayerVocationData updated = VocationHelper.getData(player).withPrimary(Optional.of(vocationId));

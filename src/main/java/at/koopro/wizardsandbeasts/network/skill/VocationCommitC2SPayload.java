@@ -68,7 +68,21 @@ public record VocationCommitC2SPayload(String vocationId) implements CustomPacke
                         Component.translatable(L + "refused"), Component.translatable(L + "build_sealed"));
                 case MASTERY_HELD -> PlayerFeedback.refuse(player,
                         Component.translatable(L + "refused"), Component.translatable(L + "mastery_held"));
+                case OWL_GRADE_SHORT -> PlayerFeedback.refuse(player,
+                        Component.translatable(L + "refused"), owlShort(id));
             }
         });
+    }
+
+    /** "Needs an O.W.L. in Charms at A or better." */
+    public static Component owlShort(net.minecraft.resources.Identifier id) {
+        var vocation = at.koopro.wizardsandbeasts.skill.vocation.VocationRegistry.get(id);
+        if (vocation == null || vocation.owlGate().isEmpty()) {
+            return Component.translatable("vocation.wizards_and_beasts.commit.owl_short_any");
+        }
+        var gate = vocation.owlGate().get();
+        return Component.translatable("vocation.wizards_and_beasts.commit.owl_short",
+                Component.translatable(gate.subject().translationKey()),
+                gate.grade().name());
     }
 }

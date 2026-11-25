@@ -31,5 +31,9 @@
     "modules": [
       "wands_and_spells"
     ]
+  },
+  "owlGate": {
+    "subject": "defence_against_dark_arts",
+    "grade": "A"
   }
 }

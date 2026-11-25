@@ -76,10 +76,15 @@ public final class EducationService {
                 : List.of();
         next = withPathLead(next, ApprenticePathService.current(player));
 
+        // Exam week (D2): outside the window nobody sits, and the next sitting is the later of the resit wait and the
+        // window's opening.
+        boolean weekOpen = ExamWeek.isOpen(player.level().getServer());
+        long opening = ExamWeek.nextOpeningTick(player.level().getServer());
         return new EducationView(enabled, record.sittings(), record.newtSittings(),
-                ExamRules.nextSittingTick(Qualification.OWL, record), ExamRules.nextSittingTick(Qualification.NEWT, record),
-                enabled && education.sitting().isEmpty() && ExamRules.maySit(Qualification.OWL, record, now),
-                enabled && education.sitting().isEmpty() && ExamRules.maySit(Qualification.NEWT, record, now),
+                Math.max(opening, ExamRules.nextSittingTick(Qualification.OWL, record)),
+                Math.max(opening, ExamRules.nextSittingTick(Qualification.NEWT, record)),
+                enabled && weekOpen && education.sitting().isEmpty() && ExamRules.maySit(Qualification.OWL, record, now),
+                enabled && weekOpen && education.sitting().isEmpty() && ExamRules.maySit(Qualification.NEWT, record, now),
                 OWLExaminationHandler.careerOpen(record, career), subjects, sitting, results, next);
     }
 

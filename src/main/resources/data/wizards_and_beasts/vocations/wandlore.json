@@ -27,5 +27,9 @@
     "modules": [
       "wands"
     ]
+  },
+  "owlGate": {
+    "subject": "charms",
+    "grade": "A"
   }
 }

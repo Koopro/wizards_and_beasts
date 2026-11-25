@@ -24,5 +24,9 @@
     "modules": [
       "apparition"
     ]
+  },
+  "owlGate": {
+    "subject": "transfiguration",
+    "grade": "A"
   }
 }

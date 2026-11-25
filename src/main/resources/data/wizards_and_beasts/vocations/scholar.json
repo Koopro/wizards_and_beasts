@@ -22,5 +22,9 @@
     ],
     "capstoneDepth": 1,
     "modules": []
+  },
+  "owlGate": {
+    "subject": "potions",
+    "grade": "A"
   }
 }

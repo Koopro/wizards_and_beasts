@@ -29,5 +29,9 @@
     "modules": [
       "creatures"
     ]
+  },
+  "owlGate": {
+    "subject": "care_of_magical_creatures",
+    "grade": "A"
   }
 }

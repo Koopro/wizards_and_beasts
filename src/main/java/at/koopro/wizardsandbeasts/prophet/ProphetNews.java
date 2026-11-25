@@ -59,6 +59,17 @@ public final class ProphetNews extends SavedData {
         setDirty();
     }
 
+    /** {@link #report}, unless the same story is already filed for that day: for callers that check every few seconds. */
+    public void reportOnce(long day, String key, String... args) {
+        List<String> told = List.of(args);
+        for (Story s : stories) {
+            if (s.day() == day && s.key().equals(key) && s.args().equals(told)) {
+                return;
+            }
+        }
+        report(day, key, args);
+    }
+
     /** Stories from {@code sinceDay} on, newest first, each told once: the same story twice is printed once. */
     public List<Story> since(long sinceDay) {
         List<Story> out = new ArrayList<>();

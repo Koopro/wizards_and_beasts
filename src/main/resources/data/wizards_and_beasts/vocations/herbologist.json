@@ -25,5 +25,9 @@
     ],
     "capstoneDepth": 2,
     "modules": []
+  },
+  "owlGate": {
+    "subject": "herbology",
+    "grade": "A"
   }
 }
