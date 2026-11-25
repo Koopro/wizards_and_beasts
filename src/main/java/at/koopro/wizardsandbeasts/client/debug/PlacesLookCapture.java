@@ -82,8 +82,14 @@ public final class PlacesLookCapture {
             SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0, 2.2, sizeZ + 3.0, 180f, 4f)));
             SCRIPT.add(new Step("front", 10, p -> {}));
         }
-        SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0 + 2.5, 3.2, sizeZ / 2.0 + 3.5, 145f, 30f)));
-        SCRIPT.add(new Step("close", 10, p -> {}));
+        if ("portkey_hill".equals(PLACE)) {
+            SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0 + 2.5, 3.2, sizeZ / 2.0 + 3.5, 145f, 30f)));
+            SCRIPT.add(new Step("close", 10, p -> {}));
+        } else {
+            // Standing in the middle of the ground floor, looking round the room.
+            SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0, 1.2, sizeZ / 2.0, 160f, 15f)));
+            SCRIPT.add(new Step("inside", 10, p -> {}));
+        }
         SCRIPT.add(new Step("", 50, p -> look(p, sizeX / 2.0, sizeY + reach * 0.9, sizeZ / 2.0 + reach * 0.6,
                 180f, 52f)));
         SCRIPT.add(new Step("above", 10, p -> {}));
