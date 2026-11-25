@@ -42,4 +42,51 @@ public final class MemoryEventHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         MemoryService.tryFormMemory(player, MemoryType.HAPPY, SLEEP_INTENSITY, "sleep", SLEEP_COOLDOWN);
     }
+
+    // ---- A12 painful memories (owner, 2026-11-25, option 1): formed by real harm, one per kind per day ----
+    private static final long  PAIN_COOLDOWN       = 24000L;  // one in-game day per kind
+    private static final float DEMENTOR_INTENSITY  = 0.5f;
+    private static final float CRUCIO_INTENSITY    = 0.7f;
+    private static final float NEAR_DEATH_INTENSITY = 0.4f;
+    public static final float COMPANION_INTENSITY  = 0.8f;
+    /** Left at two hearts or less by a blow of at least two hearts. */
+    private static final float NEAR_DEATH_HEALTH = 4.0f;
+    private static final float NEAR_DEATH_BLOW   = 4.0f;
+
+    /** Forms a painful memory and says so, quietly. */
+    public static void pain(ServerPlayer player, float intensity, String key, long cooldown) {
+        if (MemoryService.tryFormMemory(player, MemoryType.PAINFUL, intensity, key, cooldown)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                    "memory.wizards_and_beasts.painful.formed").withStyle(net.minecraft.ChatFormatting.GRAY), true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onHurt(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || event.getNewDamage() <= 0) return;
+        net.minecraft.world.entity.Entity attacker = event.getSource().getEntity();
+        // A Swooping Evil's sting draws the newest bad memory out (Fantastic Beasts: its venom erases bad memories).
+        if (attacker != null && "swooping_evil".equals(
+                net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(attacker.getType()).getPath())) {
+            if (MemoryService.forgetNewestPainful(player)) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                        "memory.wizards_and_beasts.painful.forgotten").withStyle(net.minecraft.ChatFormatting.AQUA), true);
+            }
+            return;
+        }
+        if (attacker instanceof at.koopro.wizardsandbeasts.entity.azkaban.DementorEntity) {
+            pain(player, DEMENTOR_INTENSITY, "dementor", PAIN_COOLDOWN);
+        }
+        if (player.isAlive() && player.getHealth() <= NEAR_DEATH_HEALTH && event.getNewDamage() >= NEAR_DEATH_BLOW) {
+            pain(player, NEAR_DEATH_INTENSITY, "near_death", PAIN_COOLDOWN);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEffectAdded(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Added event) {
+        if (event.getEntity() instanceof ServerPlayer player
+                && event.getEffectInstance().is(at.koopro.wizardsandbeasts.effect.ModEffects.CRUCIO_SANITY_DRAIN)) {
+            pain(player, CRUCIO_INTENSITY, "cruciatus", PAIN_COOLDOWN);
+        }
+    }
 }

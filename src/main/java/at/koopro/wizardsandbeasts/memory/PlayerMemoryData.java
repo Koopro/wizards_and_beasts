@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class PlayerMemoryData {
 
@@ -38,8 +39,23 @@ public final class PlayerMemoryData {
     public void setCooldown(String sourceKey, long expiryTick) { cooldowns.put(sourceKey, expiryTick); }
 
     public float happyIntensitySum() {
+        return intensitySum(MemoryType.HAPPY);
+    }
+
+    public float intensitySum(MemoryType type) {
         float sum = 0f;
-        for (MemoryEntry m : memories) if (m.type() == MemoryType.HAPPY) sum += m.intensity();
+        for (MemoryEntry m : memories) if (m.type() == type) sum += m.intensity();
         return sum;
+    }
+
+    /** Removes the most recently formed memory of {@code type}; empty when there is none. */
+    public Optional<MemoryEntry> forgetNewest(MemoryType type) {
+        MemoryEntry newest = null;
+        for (MemoryEntry m : memories) {
+            if (m.type() == type && (newest == null || m.createdGameTime() >= newest.createdGameTime())) newest = m;
+        }
+        if (newest == null) return Optional.empty();
+        memories.remove(newest);
+        return Optional.of(newest);
     }
 }

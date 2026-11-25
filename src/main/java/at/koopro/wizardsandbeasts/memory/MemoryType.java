@@ -5,7 +5,7 @@ import net.minecraft.util.StringRepresentable;
 
 public enum MemoryType implements StringRepresentable {
     HAPPY("happy"),
-    PAINFUL("painful"),   // v1 ungenutzt — Raum für Dementoren/Pensieve später
+    PAINFUL("painful"),   // A12 (2026-11-25): formed by real harm, dims the Patronus, a Swooping Evil's sting takes it
     MUNDANE("mundane");
 
     public static final Codec<MemoryType> CODEC = StringRepresentable.fromValues(MemoryType::values);

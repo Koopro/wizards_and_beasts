@@ -9293,6 +9293,8 @@
   "npc.wizards_and_beasts.closed": "%1$s shakes their head. Nothing is open in %2$s today.",
   "entity.wizards_and_beasts.settlement_npc": "Shopkeeper",
   "entity.wizards_and_beasts.owl": "Owl",
+  "memory.wizards_and_beasts.painful.formed": "A memory you would rather not keep.",
+  "memory.wizards_and_beasts.painful.forgotten": "The sting draws a bad memory out, and it is gone.",
   "entity.wizards_and_beasts.ghost": "Ghost",
   "item.wizards_and_beasts.ghost_spawn_egg": "Ghost Spawn Egg",
   "bestiary.wizards_and_beasts.ghost.name": "Ghost",

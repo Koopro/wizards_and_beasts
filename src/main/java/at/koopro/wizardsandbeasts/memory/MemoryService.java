@@ -26,6 +26,24 @@ public final class MemoryService {
         return true;
     }
 
+    /** How much each unit of painful intensity takes from the Patronus, and the most it can take. */
+    public static final float PAIN_SCALE       = 5.0f;
+    public static final float MAX_PAIN_PENALTY = 15.0f;
+
+    /**
+     * What painful memories take from the Patronus (owner, A12 option 1): bounded, so the charm grows harder but never
+     * impossible. Canon: the Dementors' pull is the memories a wizard would rather not keep.
+     */
+    public static float patronusMemoryPenalty(ServerPlayer player) {
+        float sum = player.getData(ModAttachments.MEMORIES.get()).intensitySum(MemoryType.PAINFUL);
+        return Math.min(MAX_PAIN_PENALTY, sum * PAIN_SCALE);
+    }
+
+    /** Takes the newest painful memory away (a Swooping Evil's sting); whether there was one. */
+    public static boolean forgetNewestPainful(ServerPlayer player) {
+        return player.getData(ModAttachments.MEMORIES.get()).forgetNewest(MemoryType.PAINFUL).isPresent();
+    }
+
     /** Bounded, intensity-weighted Patronus contribution from accumulated HAPPY memories. */
     public static float patronusMemoryBonus(ServerPlayer player) {
         float sum = player.getData(ModAttachments.MEMORIES.get()).happyIntensitySum();

@@ -44,11 +44,12 @@ public class ExpectoPatronum extends Spell {
     /** Below this the charm finds no memory to hold and does not form. */
     static final float MIN_FORMING_POWER = 15.0f;
 
-    /** How strongly this caster can conjure: happiness, happy memories and practice, dimmed by corruption. */
+    /** How strongly this caster can conjure: happiness, happy memories and practice, dimmed by painful memories and corruption. */
     float patronusPower(ServerPlayer caster) {
         float happiness = caster.getData(ModAttachments.HAPPINESS.get());
         // Akkumulierte HAPPY-Memories: intensity-gewichtet + gedeckelt (MemoryService.MAX_MEMORY_BONUS).
-        float memoryBonus = at.koopro.wizardsandbeasts.memory.MemoryService.patronusMemoryBonus(caster);
+        float memoryBonus = at.koopro.wizardsandbeasts.memory.MemoryService.patronusMemoryBonus(caster)
+                - at.koopro.wizardsandbeasts.memory.MemoryService.patronusMemoryPenalty(caster);   // A12: painful ones
         float darkCorruption = caster.getData(ModAttachments.DARK_CORRUPTION.get());
         return Mth.clamp(
                 happiness * 0.4f + memoryBonus + getProficiencyScalar(caster) * 20.0f - darkCorruption * 0.3f,

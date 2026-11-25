@@ -733,6 +733,10 @@ public final class Companions {
         markDirty(owner);
         PlayerFeedback.toast(owner, NoticeKind.FAIL,
                 Component.translatable("companion.wizards_and_beasts.died", mob.getDisplayName()), null);
+        // A12: losing a companion is a memory the owner would rather not keep -- once for each companion.
+        at.koopro.wizardsandbeasts.event.memory.MemoryEventHandler.pain(owner,
+                at.koopro.wizardsandbeasts.event.memory.MemoryEventHandler.COMPANION_INTENSITY,
+                "companion:" + mob.getUUID(), 0L);
     }
 
     public static void markDirty(ServerPlayer owner) {
