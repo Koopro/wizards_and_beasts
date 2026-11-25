@@ -14,6 +14,7 @@ import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action;
+import at.koopro.wizardsandbeasts.skill.vocation.VocationHelper;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Material;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Status;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
@@ -167,11 +168,13 @@ public class WandRefineMenu extends AbstractContainerMenu {
         boolean hasWand = isFinishedWand(wand);
         boolean knowsGrain = player instanceof ServerPlayer sp
                 && SkillSystemAPI.getSkillData(sp).hasSkill(WandRefinement.GRAIN_NODE);
+        WandRefinement.Hands hands = hands(wand, hasWand);
         Status status = WandRefinement.check(action, rules, hasWand, knowsGrain, classify(material, wand),
-                hasWand ? WandComponents.getIntegrity(wand) : 1.0f, hasWand ? WandComponents.getFlexibility(wand) : null);
+                hasWand ? WandComponents.getIntegrity(wand) : 1.0f, hasWand ? WandComponents.getFlexibility(wand) : null,
+                hands);
         ItemStack out = ItemStack.EMPTY;
         if (status == Status.READY) {
-            out = apply(action, rules, wand);
+            out = apply(action, rules, wand, hands);
             if (out.isEmpty()) {
                 status = Status.NOTHING_TO_DO;
             }
@@ -205,12 +208,28 @@ public class WandRefineMenu extends AbstractContainerMenu {
         return material.is(ItemTags.LOGS) || wood != null ? Material.OTHER_LOG : Material.OTHER;
     }
 
+    /** Whose wand is on the bench, and whether the one at it is a Wandmaker (B5). */
+    private WandRefinement.Hands hands(ItemStack wand, boolean hasWand) {
+        if (!hasWand) {
+            return WandRefinement.Hands.OWN;
+        }
+        boolean anothers = WandComponents.getMaster(wand).filter(m -> !m.equals(player.getUUID())).isPresent();
+        boolean wandmaker = VocationHelper.hasGrantedAbility(player, WandRefinement.CARE_FOR_OTHERS);
+        return new WandRefinement.Hands(anothers, wandmaker, WandComponents.getCorruption(wand));
+    }
+
     /** The refined copy; wood, core, bond and everything else on the stack are carried over untouched. */
-    private ItemStack apply(Action action, WandRefinement.Bench rules, ItemStack wand) {
+    private ItemStack apply(Action action, WandRefinement.Bench rules, ItemStack wand, WandRefinement.Hands hands) {
         ItemStack out = wand.copyWithCount(1);
         switch (action) {
-            case POLISH -> out.set(WandComponents.WAND_INTEGRITY.get(),
-                    Math.min(1.0f, WandComponents.getIntegrity(wand) + WandRefinement.polishAmount(rules)));
+            case POLISH -> {
+                out.set(WandComponents.WAND_INTEGRITY.get(),
+                        Math.min(1.0f, WandComponents.getIntegrity(wand) + WandRefinement.polishAmount(rules)));
+                if (hands.cleanses()) {
+                    out.set(WandComponents.WAND_CORRUPTION.get(),
+                            Math.max(0.0f, hands.corruption() - WandRefinement.CLEANSE));
+                }
+            }
             case STIFFER, SUPPLER -> {
                 Optional<WandFlexibility> next = WandRefinement.refit(WandComponents.getFlexibility(wand), action);
                 if (next.isEmpty()) {

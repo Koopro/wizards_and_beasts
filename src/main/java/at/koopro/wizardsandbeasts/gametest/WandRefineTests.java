@@ -1,7 +1,12 @@
 package at.koopro.wizardsandbeasts.gametest;
 
 import at.koopro.wizardsandbeasts.item.wand.WandItem;
+import at.koopro.wizardsandbeasts.owl.OWLGrade;
+import at.koopro.wizardsandbeasts.owl.OWLSubject;
+import at.koopro.wizardsandbeasts.owl.data.PlayerOWLData;
+import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
+import at.koopro.wizardsandbeasts.skill.vocation.VocationManager;
 import at.koopro.wizardsandbeasts.wand.WandAppearance;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
@@ -21,6 +26,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
 
 /**
@@ -39,6 +48,60 @@ public final class WandRefineTests {
                 "wandmaking: at a furnished bench a wand is polished (stronger with a cauldron), re-fitted a step "
                         + "(a lectern stands in for Wandlore) and given a new handle; material spent, bond untouched",
                 WandRefineTests::refine);
+        tests.add("wandmaking_wandmaker_mends_anothers_wand",
+                "wandmaking: another wizard's wand is refused to a stranger; a Wandmaker polishes it, cleanses its "
+                        + "dark residue, and it still answers to its master (B5)",
+                WandRefineTests::wandmakerMendsAnothers);
+    }
+
+    private static void wandmakerMendsAnothers(GameTestHelper helper) {
+        ServerPlayer stranger = WizardTestSupport.placeMockPlayer(helper, "WandStranger", GameType.SURVIVAL);
+        ServerPlayer maker = WizardTestSupport.placeMockPlayer(helper, "WandOllivander", GameType.SURVIVAL);
+        try {
+            WizardTestSupport.parkAtOrigin(helper, stranger);
+            WizardTestSupport.parkAtOrigin(helper, maker);
+            helper.setBlock(BENCH, ModBlocks.WANDMAKERS_BENCH.get());
+            helper.setBlock(new BlockPos(0, 1, 4), ModBlocks.SPELL_TEACHER.get());
+            helper.setBlock(new BlockPos(4, 1, 4), ModBlocks.SPELL_TEACHER.get());
+            WandmakersBenchBlockEntity bench = (WandmakersBenchBlockEntity) helper.getLevel()
+                    .getBlockEntity(helper.absolutePos(BENCH));
+            check(helper, bench != null, () -> "setup: no bench");
+
+            UUID owner = UUID.nameUUIDFromBytes("wand-owner".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            ItemStack wand = WandItem.createWand(WandWood.HOLLY, WandCore.PHOENIX_FEATHER, WandLength.values()[0],
+                    WandFlexibility.PLIANT);
+            wand.set(WandComponents.WAND_MASTER.get(), Optional.of(owner));
+            wand.set(WandComponents.WAND_INTEGRITY.get(), 0.5f);
+            wand.set(WandComponents.WAND_CORRUPTION.get(), 0.6f);
+            float bond = WandComponents.getAllegianceScore(wand);
+
+            WandRefineMenu strangers = new WandRefineMenu(0, stranger.getInventory(), bench);
+            strangers.slots.get(0).set(wand.copy());
+            strangers.slots.get(1).set(new ItemStack(Items.HONEYCOMB));
+            strangers.chooseAction(Action.POLISH.ordinal());
+            check(helper, strangers.status() == Status.NOT_YOURS,
+                    () -> "a stranger may polish another's wand: " + strangers.status());
+            strangers.slots.get(0).set(ItemStack.EMPTY);
+            strangers.slots.get(1).set(ItemStack.EMPTY);
+
+            maker.setData(ModAttachments.OWL_DATA.get(), new PlayerOWLData(
+                    Map.of(OWLSubject.CHARMS, OWLGrade.E), true, 1, 0L));
+            check(helper, VocationManager.commit(maker, Identifier.fromNamespaceAndPath("wizards_and_beasts",
+                    "wandlore")) == VocationManager.CommitResult.OK, () -> "setup: could not commit to Wandlore");
+            WandRefineMenu makers = new WandRefineMenu(1, maker.getInventory(), bench);
+            ItemStack mended = run(helper, makers, maker, wand, new ItemStack(Items.HONEYCOMB), Action.POLISH);
+            check(helper, Math.abs(WandComponents.getIntegrity(mended) - 0.75f) < 1e-4f,
+                    () -> "the Wandmaker's polish gave integrity " + WandComponents.getIntegrity(mended));
+            check(helper, Math.abs(WandComponents.getCorruption(mended) - 0.35f) < 1e-4f,
+                    () -> "the Wandmaker's polish left corruption " + WandComponents.getCorruption(mended));
+            check(helper, WandComponents.getMaster(mended).equals(Optional.of(owner))
+                            && WandComponents.getAllegianceScore(mended) == bond,
+                    () -> "the wand changed allegiance at the bench");
+            helper.succeed();
+        } finally {
+            WizardTestSupport.retire(helper, stranger);
+            WizardTestSupport.retire(helper, maker);
+        }
     }
 
     private static void refine(GameTestHelper helper) {

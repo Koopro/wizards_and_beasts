@@ -28,6 +28,12 @@ import java.util.Set;
  *   <li><b>Re-handle, re-tip, ornament</b> change the look only (any log): the next handle, tip or ornament.</li>
  * </ul>
  * Tier unlocks: looks at any bench of tier 1, polish at 2, re-fit at 4.
+ *
+ * <p><b>Whose wand</b> (systems audit B5, Wandmaker, 2026-11-25): a wizard cares only for a wand that answers to
+ * them, or to no one. A wand that answers to somebody else is a Wandmaker's work (vocation flag
+ * {@link #CARE_FOR_OTHERS}): Ollivander mends Lucius Malfoy's wand and weighs Wormtail's, and Gregorovitch's trade is
+ * other people's wands (DH ch.24, ch.14). The bond never changes hands at the bench. A Wandmaker's polish also draws
+ * {@link #CLEANSE} of the dark residue out of the wood.
  */
 @NullMarked
 public final class WandRefinement {
@@ -46,6 +52,10 @@ public final class WandRefinement {
     public static final Identifier LECTERN = id("spell_teacher");
     /** The Wandlore node a re-fit asks for. */
     public static final String GRAIN_NODE = "wandwood_grain";
+    /** Vocation flag: may refine a wand that answers to someone else, and polish cleanses. */
+    public static final String CARE_FOR_OTHERS = "wand_care_for_others";
+    /** Corruption a Wandmaker's polish takes away. */
+    public static final float CLEANSE = 0.25f;
 
     private WandRefinement() {}
 
@@ -71,7 +81,7 @@ public final class WandRefinement {
 
     /** What the bench says about the action chosen; READY means the output slot holds the result. */
     public enum Status {
-        READY, NO_WAND, NO_MATERIAL, WRONG_MATERIAL, TOO_PLAIN, NEEDS_GRAIN, SNAPPED, NOTHING_TO_DO;
+        READY, NO_WAND, NO_MATERIAL, WRONG_MATERIAL, TOO_PLAIN, NEEDS_GRAIN, SNAPPED, NOTHING_TO_DO, NOT_YOURS;
 
         public String key() {
             return "gui.wizards_and_beasts.wand_refine.status." + name().toLowerCase(Locale.ROOT);
@@ -135,8 +145,27 @@ public final class WandRefinement {
      */
     public static Status check(Action action, Bench bench, boolean wand, boolean knowsGrain, Material material,
                                float integrity, @Nullable WandFlexibility flexibility) {
+        return check(action, bench, wand, knowsGrain, material, integrity, flexibility, Hands.OWN);
+    }
+
+    /** Who stands at the bench, as the rules need it: whose wand it is, and whether they are a Wandmaker. */
+    public record Hands(boolean anothersWand, boolean wandmaker, float corruption) {
+        public static final Hands OWN = new Hands(false, false, 0.0f);
+
+        /** Whether this polish also cleanses: a Wandmaker's, on a wand with dark residue in it. */
+        public boolean cleanses() {
+            return wandmaker && corruption > 0.0f;
+        }
+    }
+
+    /** As {@link #check(Action, Bench, boolean, boolean, Material, float, WandFlexibility)}, for these hands. */
+    public static Status check(Action action, Bench bench, boolean wand, boolean knowsGrain, Material material,
+                               float integrity, @Nullable WandFlexibility flexibility, Hands hands) {
         if (!wand) {
             return Status.NO_WAND;
+        }
+        if (hands.anothersWand() && !hands.wandmaker()) {
+            return Status.NOT_YOURS;
         }
         if (bench.tier() < action.requiredTier()) {
             return Status.TOO_PLAIN;
@@ -153,7 +182,7 @@ public final class WandRefinement {
         if (!pays(action, material)) {
             return Status.WRONG_MATERIAL;
         }
-        if (action == Action.POLISH && integrity >= 1.0f) {
+        if (action == Action.POLISH && integrity >= 1.0f && !hands.cleanses()) {
             return Status.NOTHING_TO_DO;
         }
         if (action.refit() && (flexibility == null || refit(flexibility, action).isEmpty())) {

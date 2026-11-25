@@ -1,6 +1,7 @@
 package at.koopro.wizardsandbeasts.wand.refine;
 
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action;
+import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Hands;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Bench;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Material;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Status;
@@ -85,5 +86,27 @@ class WandRefinementTest {
         assertEquals(Status.NO_WAND, WandRefinement.check(Action.POLISH, FURNISHED, false, true, Material.HONEYCOMB, 0.5f, null));
         assertTrue(Action.STIFFER.refit() && Action.HANDLE.look() && !Action.POLISH.look());
         assertFalse(WandRefinement.pays(Action.POLISH, Material.OWN_WOOD_LOG));
+    }
+
+    @Test
+    void anotherWizardsWandIsAWandmakersWork() {
+        Hands stranger = new Hands(true, false, 0f);
+        Hands wandmaker = new Hands(true, true, 0f);
+        assertEquals(Status.NOT_YOURS, WandRefinement.check(Action.HANDLE, FURNISHED, true, true, Material.OTHER_LOG,
+                1f, WandFlexibility.PLIANT, stranger));
+        assertEquals(Status.READY, WandRefinement.check(Action.HANDLE, FURNISHED, true, true, Material.OTHER_LOG,
+                1f, WandFlexibility.PLIANT, wandmaker));
+        assertEquals(Status.READY, WandRefinement.check(Action.POLISH, FURNISHED, true, true, Material.HONEYCOMB,
+                0.5f, WandFlexibility.PLIANT, Hands.OWN));
+    }
+
+    @Test
+    void aWandmakersPolishCleansesASoundButDarkenedWand() {
+        assertEquals(Status.NOTHING_TO_DO, WandRefinement.check(Action.POLISH, FURNISHED, true, true,
+                Material.HONEYCOMB, 1f, WandFlexibility.PLIANT, new Hands(false, false, 0.6f)));
+        assertEquals(Status.READY, WandRefinement.check(Action.POLISH, FURNISHED, true, true,
+                Material.HONEYCOMB, 1f, WandFlexibility.PLIANT, new Hands(false, true, 0.6f)));
+        assertEquals(Status.NOTHING_TO_DO, WandRefinement.check(Action.POLISH, FURNISHED, true, true,
+                Material.HONEYCOMB, 1f, WandFlexibility.PLIANT, new Hands(false, true, 0f)));
     }
 }

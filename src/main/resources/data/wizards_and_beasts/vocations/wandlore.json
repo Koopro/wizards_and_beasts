@@ -5,7 +5,8 @@
   "description": "vocation.wizards_and_beasts.wandlore.desc",
   "pillar": "vocation.wizards_and_beasts.wandlore.pillar",
   "grantedAbilities": [
-    "wand_steadiness"
+    "wand_steadiness",
+    "wand_care_for_others"
   ],
   "capstoneNodeId": "wizards_and_beasts:wandkeepers_hands",
   "pathway": {
