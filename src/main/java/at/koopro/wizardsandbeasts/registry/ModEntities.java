@@ -84,6 +84,13 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity>>
             SETTLEMENT_NPC = EntityHelper.register(ENTITY_TYPES, "settlement_npc",
                     at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity::new, MobCategory.MISC, 0.6f, 1.8f);
+    /** The Accidental Magic Reversal Squad's Obliviator (C2): never saved, gone within seconds. */
+    public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.ministry.trace.ObliviatorEntity>>
+            OBLIVIATOR = EntityHelper.register(ENTITY_TYPES, "obliviator",
+                    at.koopro.wizardsandbeasts.ministry.trace.ObliviatorEntity::new, MobCategory.MISC, 0.6f, 1.8f);
+    static {
+        EntityAttributeBindings.queue(OBLIVIATOR, at.koopro.wizardsandbeasts.ministry.trace.ObliviatorEntity::createAttributes);
+    }
     static {
         EntityAttributeBindings.queue(SETTLEMENT_NPC,
                 at.koopro.wizardsandbeasts.settlement.npc.SettlementNpcEntity::createAttributes);

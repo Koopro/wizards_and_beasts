@@ -103,6 +103,7 @@ public final class WizardsAndBeastsGameTests {
         AvadaRulingTests.contribute(registrar);
         HouseCupTests.contribute(registrar);
         FiendfyreTests.contribute(registrar);
+        ObliviatorTests.contribute(registrar);
         CauldronBrewingTests.contribute(registrar);
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);

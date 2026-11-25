@@ -9859,5 +9859,9 @@
   "skill.wizards_and_beasts.node.fiendfyre_unlock.name": "Fiendfyre",
   "skill.wizards_and_beasts.node.fiendfyre_unlock.desc": "Cursed fire in the shape of beasts. It burns out in twenty seconds, water does not quench it, and it ends a Horcrux. Needs Incendio and Confringo proficient.",
   "skill.wizards_and_beasts.node.fiendfyre_unlock.lore": "Crabbe learned it from the Carrows and could not stop it. The diadem burned in it, and so did he.",
-  "skill.wizards_and_beasts.node.fiendfyre_unlock.practice": "Every second you must hold it again. Lose it once and it is no longer yours."
+  "skill.wizards_and_beasts.node.fiendfyre_unlock.practice": "Every second you must hold it again. Lose it once and it is no longer yours.",
+  "entity.wizards_and_beasts.obliviator": "Obliviator",
+  "entity.wizards_and_beasts.obliviator.title": "Ministry Obliviator",
+  "ministry.wizards_and_beasts.obliviator.arrive": "%s: \"Ministry of Magic, Accidental Magic Reversal Squad. Stand clear.\"",
+  "ministry.wizards_and_beasts.obliviator.reminder": "The Muggles who saw your magic will remember nothing of it. The Ministry will."
 }

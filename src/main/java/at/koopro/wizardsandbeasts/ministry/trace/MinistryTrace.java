@@ -199,7 +199,8 @@ public final class MinistryTrace {
             }
             case OFFICIAL -> data.addEvidence(Evidence.of(EvidenceKind.OFFICIAL_REPORT, incident.id(), now));
             case MUGGLE_REPORT -> {
-                // The Obliviators learn a place and a time, not a person.
+                // The Obliviators learn a place and a time, not a person, and go to make the Muggles forget (C2).
+                Obliviators.dispatch(server, data, incident);
             }
             case INQUIRY -> fileMuggleAccounts(data, incident, now);
         }

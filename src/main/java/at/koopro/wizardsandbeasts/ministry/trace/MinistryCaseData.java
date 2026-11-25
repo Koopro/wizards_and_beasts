@@ -257,6 +257,29 @@ public final class MinistryCaseData extends SavedData {
         }
     }
 
+    /**
+     * The Obliviators have been: every witness {@code forgets} accepts no longer remembers this incident (C2).
+     *
+     * @return whether anyone forgot
+     */
+    public boolean forgetWitnesses(long incidentId, java.util.function.Predicate<UUID> forgets) {
+        List<UUID> seen = witnesses.get(incidentId);
+        if (seen == null) {
+            return false;
+        }
+        List<UUID> kept = seen.stream().filter(forgets.negate()).toList();
+        if (kept.size() == seen.size()) {
+            return false;
+        }
+        if (kept.isEmpty()) {
+            witnesses.remove(incidentId);
+        } else {
+            witnesses.put(incidentId, kept);
+        }
+        setDirty();
+        return true;
+    }
+
     /** The Muggles and officials who saw this incident, by entity id. */
     public List<UUID> witnessEntities(long incidentId) {
         return witnesses.getOrDefault(incidentId, List.of());
