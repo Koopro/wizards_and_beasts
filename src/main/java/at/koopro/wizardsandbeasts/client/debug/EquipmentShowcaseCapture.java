@@ -306,6 +306,8 @@ public final class EquipmentShowcaseCapture {
             new Outfit("scarf_house_unsorted", p -> plainScarf(p, null)),
             new Outfit("scarf_house_sorted_slytherin", p -> plainScarf(p, at.koopro.wizardsandbeasts.house.House.SLYTHERIN)),
             new Outfit("scarf_house_sorted_gryffindor", p -> plainScarf(p, at.koopro.wizardsandbeasts.house.House.GRYFFINDOR)),
+            new Outfit("scarf_house_sorted_ravenclaw", p -> plainScarf(p, at.koopro.wizardsandbeasts.house.House.RAVENCLAW)),
+            new Outfit("scarf_house_sorted_hufflepuff", p -> plainScarf(p, at.koopro.wizardsandbeasts.house.House.HUFFLEPUFF)),
             new Outfit("scarf_house_stitched_lion_on_slytherin", p -> {
                 at.koopro.wizardsandbeasts.house.HouseService.setHouse(p, at.koopro.wizardsandbeasts.house.House.SLYTHERIN);
                 p.setItemSlot(EquipmentSlot.LEGS, new ItemStack(ArmorItemRegistry.STUDENT_ROBE_LEGS.get()));
