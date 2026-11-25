@@ -1,0 +1,29 @@
+{
+  "_comment": "An Occamy 'feeds mainly on rats and birds' (Fantastic Beasts); Minecraft has no rat, so rabbit and chicken. Numbers copied from hippogriff.json, the nearest shipped profile (a feathered beast that eats birds and small animals): same gains, cooldowns, follow threshold, milestones, proximity and betrayal; the hippogriff's fish and beef are dropped, and its feather gift too (canon gives the Occamy no feather, and its silver eggshell stays a harvest until the owner sets a gift rate). Hostile: from the first milestone (25) it stops hunting its owner.",
+  "feeds": [
+    {
+      "item": "minecraft:rabbit",
+      "gain": 15,
+      "cooldownSeconds": 60
+    },
+    {
+      "item": "minecraft:chicken",
+      "gain": 12,
+      "cooldownSeconds": 60
+    }
+  ],
+  "followThreshold": 70,
+  "milestones": [
+    25,
+    50,
+    75,
+    100
+  ],
+  "proximityRange": 8.0,
+  "proximitySeconds": 45,
+  "proximityGain": 1,
+  "betrayalPenalty": 40,
+  "masteryBond": 100,
+  "feedSound": "minecraft:entity.parrot.eat",
+  "refuseSound": "minecraft:entity.parrot.hurt"
+}

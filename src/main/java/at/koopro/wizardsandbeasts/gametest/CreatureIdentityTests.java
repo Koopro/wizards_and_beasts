@@ -75,6 +75,10 @@ public final class CreatureIdentityTests {
     private CreatureIdentityTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
+        tests.add("creature_hostile_bond_spares_its_owner",
+                "graphorn and occamy: a bond profile each; from the first milestone the owner is spared the hunt, "
+                        + "not before, and nobody else is",
+                CreatureIdentityTests::hostileBondSparesOwner);
         tests.add("creature_augurey_cries_before_rain",
                 "augurey: cries only when rain is coming, and whoever hears it has seen its signature; keeps its roost",
                 CreatureIdentityTests::augureyCriesBeforeRain);
@@ -298,6 +302,31 @@ public final class CreatureIdentityTests {
     }
 
     // ── the Griffin ───────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * A hostile species with a bond profile (Graphorn, Occamy) stops hunting its owner once the bond reaches the
+     * profile's first milestone. Nothing is added to the world: the creatures and the two people are made and read
+     * in place, so the scenario takes no ground from the others.
+     */
+    private static void hostileBondSparesOwner(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        for (String species : List.of("graphorn", "occamy")) {
+            GenericBeastEntity beast = (GenericBeastEntity) at.koopro.wizardsandbeasts.registry.ModCreatures.ENTITIES
+                    .get(species).get().create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            check(helper, beast != null && beast.isNaturallyHostile(), () -> species + " should be a hostile species");
+            check(helper, beast.bondProfile() != null, () -> species + " has no bond profile");
+            var owner = EntityType.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            var stranger = EntityType.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+            int trust = beast.bondProfile().milestones().get(0);
+            beast.bondState().setOwner(owner.getUUID());
+            beast.bondState().setLevel(trust - 1, 100);
+            check(helper, !beast.sparesAsBonded(owner), () -> species + " spared its owner below the first milestone");
+            beast.bondState().setLevel(trust, 100);
+            check(helper, beast.sparesAsBonded(owner), () -> species + " still hunts its owner at bond " + trust);
+            check(helper, !beast.sparesAsBonded(stranger), () -> species + " spared a stranger");
+        }
+        helper.succeed();
+    }
 
     private static void griffinGuardsGold(GameTestHelper helper) {
         stage(helper, GRIFFIN_Y);
