@@ -250,20 +250,25 @@ final class WandBeamSpellHandlers {
         if (los.getType() != HitResult.Type.MISS) {
             return;
         }
-        if (target instanceof ServerPlayer victim
+        // Unblockable, but not unstoppable: a body that steps into the jet takes it (AvadaInterposition has the
+        // ruling). An interposer spends the curse whether or not it dies — a phoenix bursts into flame and is
+        // reborn, as Fawkes was.
+        LivingEntity struck = AvadaInterposition.struck(caster, target);
+        boolean interposed = struck != target;
+        if (struck instanceof ServerPlayer victim
                 && Boolean.TRUE.equals(victim.getData(ModAttachments.LOVE_PROTECTION.get()))) {
             return;
         }
-        target.invulnerableTime = 0;
-        target.hurt(level.damageSources().playerAttack(caster), 1_000_000f);
-        if (target.isAlive()) {
+        struck.invulnerableTime = 0;
+        struck.hurt(level.damageSources().playerAttack(caster), 1_000_000f);
+        if (!interposed && struck.isAlive()) {
             return;
         }
-        level.playSound(null, target.blockPosition(), ModSounds.SPELL_IMPACT_AVADA.get(), SoundSource.PLAYERS,
+        level.playSound(null, struck.blockPosition(), ModSounds.SPELL_IMPACT_AVADA.get(), SoundSource.PLAYERS,
                 0.85f, 0.94f + level.random.nextFloat() * 0.08f);
         s.avadaConsumed = true;
         recordBeamProficiencyHit(caster, spellId, s, 1);
-        AvadaBlastS2CPayload.sendToTracking(caster, caster.getEyePosition(), target.getBoundingBox().getCenter());
+        AvadaBlastS2CPayload.sendToTracking(caster, caster.getEyePosition(), struck.getBoundingBox().getCenter());
         // Spends this hold's single release token, so the client's own release for the same hold —
         // whenever the player actually lets go — is refused as a duplicate instead of casting again.
         // This used to be backed up by a fifteen-tick ignore window, which ate a genuine re-press
