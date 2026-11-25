@@ -55,6 +55,10 @@ public final class LookPreviewCapture {
             steps.addAll(BABY_NIFFLER_SCENES);
             return steps;
         }
+        if ("kappa".equals(System.getenv("WB_LOOK_ONLY"))) {
+            steps.addAll(KAPPA_SCENES);
+            return steps;
+        }
         // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
         steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
@@ -137,6 +141,55 @@ public final class LookPreviewCapture {
             new Step("baby_niffler_side", 10, p -> {}),
             new Step("", 40, p -> eyeAt(p, NX + 0.6, 0.55, -0.45, NX, 0.12, 0.5)),
             new Step("baby_niffler_three_quarter", 10, p -> {}));
+
+    /** Where the Kappa's pond is, east of the Niffler family. */
+    private static final double KX = 80.5;
+
+    /**
+     * The Kappa (A1), Mojang style with the dish as geometry: on the bank of a shallow pond (Prisoner of Azkaban
+     * ch.8, the water-dwellers of Lupin's lessons), a person for scale, then front, side, three-quarter and a look
+     * down into the water in its head.
+     */
+    private static final List<Step> KAPPA_SCENES = List.of(
+            new Step("", 40, p -> eyeAt(p, KX + 0.8, 2.0, -3.4, KX + 0.8, 0.8, 0.8)),
+            new Step("kappa_pond", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, KX, 1.0, -1.7, KX, 0.75, 0.5)),
+            new Step("kappa_front", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, KX + 2.1, 0.9, 0.5, KX, 0.75, 0.5)),
+            new Step("kappa_side", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, KX + 1.3, 1.6, -1.2, KX, 0.8, 0.5)),
+            new Step("kappa_three_quarter", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, KX + 0.2, 2.1, -0.5, KX, 1.15, 0.45)),
+            new Step("kappa_dish", 10, p -> {}));
+
+    private static void kappaPond(ServerLevel level) {
+        for (int x = 76; x <= 85; x++) {
+            for (int z = -5; z <= 4; z++) {
+                boolean pond = x >= 81 && x <= 84 && z >= 1 && z <= 3;
+                level.setBlockAndUpdate(base.offset(x, -1, z), pond ? Blocks.WATER.defaultBlockState()
+                        : Blocks.GRASS_BLOCK.defaultBlockState());
+                if (pond) {
+                    level.setBlockAndUpdate(base.offset(x, -2, z), Blocks.MUD.defaultBlockState());
+                }
+            }
+        }
+        level.setBlockAndUpdate(base.offset(80, 0, 3), Blocks.TALL_GRASS.defaultBlockState());
+        command(level, "kill @e[type=wizards_and_beasts:kappa]");
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "kappa"));
+        if (type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                instanceof net.minecraft.world.entity.Mob kappa) {
+            kappa.snapTo(base.getX() + KX, base.getY(), base.getZ() + 0.5, 180f, 0f);
+            kappa.setYHeadRot(180f);
+            kappa.setYBodyRot(180f);
+            kappa.setNoAi(true);
+            kappa.setPersistenceRequired();
+            level.addFreshEntity(kappa);
+        }
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + KX - 1.6, (double) base.getY(), base.getZ() + 0.8));
+    }
 
     private static void nifflerFamily(ServerLevel level) {
         for (int x = 63; x <= 71; x++) {
@@ -316,6 +369,7 @@ public final class LookPreviewCapture {
         humanoids(level);
         gnomeGarden(level);
         nifflerFamily(level);
+        kappaPond(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
