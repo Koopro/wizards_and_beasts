@@ -6,7 +6,8 @@
   "pillar": "vocation.wizards_and_beasts.duelist.pillar",
   "grantedAbilities": [
     "duelist_spell_power",
-    "duelist_cast_speed"
+    "duelist_cast_speed",
+    "formal_duel"
   ],
   "capstoneNodeId": "wizards_and_beasts:duelling_riposte",
   "pathway": {

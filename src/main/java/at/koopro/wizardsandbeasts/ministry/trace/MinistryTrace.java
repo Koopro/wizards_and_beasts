@@ -108,6 +108,10 @@ public final class MinistryTrace {
         if (!TraceService.isActive()) {
             return;
         }
+        // A sanctioned duel is no crime (B5); Dark magic cast in one still is.
+        if (at.koopro.wizardsandbeasts.duel.FormalDuels.shieldsFromTrace(caster, law.legalClass())) {
+            return;
+        }
         MinecraftServer server = caster.level().getServer();
         long now = now(server);
         CastScene scene = CastSurvey.survey(caster, law, now);

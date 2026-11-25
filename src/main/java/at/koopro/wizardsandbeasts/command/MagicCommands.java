@@ -33,6 +33,7 @@ public final class MagicCommands {
                 .then(SpellCommands.registerPatronus())
                 .then(AnimagusCommands.register())
                 .then(ApparitionPointCommands.register())
-                .then(PactCommands.register());
+                .then(PactCommands.register())
+                .then(at.koopro.wizardsandbeasts.duel.DuelCommands.register());
     }
 }

@@ -106,6 +106,7 @@ public final class WizardsAndBeastsGameTests {
         ObliviatorTests.contribute(registrar);
         AmortentiaTests.contribute(registrar);
         HealersWardTests.contribute(registrar);
+        FormalDuelTests.contribute(registrar);
         CauldronBrewingTests.contribute(registrar);
         RegistrySyncTests.contribute(registrar);
         HeritageCommitTests.contribute(registrar);
