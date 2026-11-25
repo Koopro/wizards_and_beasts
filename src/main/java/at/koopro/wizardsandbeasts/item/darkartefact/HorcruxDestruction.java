@@ -3,10 +3,11 @@ package at.koopro.wizardsandbeasts.item.darkartefact;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Ending a Horcrux: the one place its soul fragment is released.
@@ -31,13 +32,23 @@ public final class HorcruxDestruction {
      * @return whether a fragment was bound and is now gone
      */
     public static boolean destroy(ServerLevel level, Player by, ItemStack horcrux) {
+        return destroy(level, new Vec3(by.getX(), by.getEyeY() - 0.4, by.getZ()), horcrux);
+    }
+
+    /**
+     * Releases the fragment in {@code horcrux} where it lies: Fiendfyre takes a vessel nobody is holding (the diadem
+     * on its shelf in the Room of Requirement, DH ch.31). Server-side.
+     *
+     * @return whether a fragment was bound and is now gone
+     */
+    public static boolean destroy(ServerLevel level, Vec3 at, ItemStack horcrux) {
         if (!isIntact(horcrux)) {
             return false;
         }
         horcrux.set(ModDataComponents.SOUL_FRAGMENT_INTACT.get(), false);
-        level.playSound(null, by.blockPosition(), SoundEvents.GHAST_SCREAM, SoundSource.PLAYERS, 1.2f, 0.6f);
-        level.sendParticles(ParticleTypes.SQUID_INK, by.getX(), by.getEyeY() - 0.4, by.getZ(), 24, 0.3, 0.3, 0.3, 0.05);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, by.getX(), by.getEyeY() - 0.4, by.getZ(), 12, 0.3, 0.3, 0.3, 0.02);
+        level.playSound(null, at.x, at.y, at.z, ModSounds.HORCRUX_SHATTER.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
+        level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 24, 0.3, 0.3, 0.3, 0.05);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.02);
         return true;
     }
 }

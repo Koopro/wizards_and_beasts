@@ -77,6 +77,7 @@ public final class Spells {
     public static final Imperio IMPERIO = register(new Imperio());
     public static final ObscurusSurge OBSCURUS_SURGE = register(new ObscurusSurge());
     public static final ObscurusGrasp OBSCURUS_GRASP = register(new ObscurusGrasp());
+    public static final Fiendfyre FIENDFYRE = register(new Fiendfyre());
 
     private Spells() {}
 

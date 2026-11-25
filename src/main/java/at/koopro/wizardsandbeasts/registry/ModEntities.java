@@ -63,6 +63,11 @@ public class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<SpellClashEntity>> SPELL_CLASH =
             EntityHelper.registerMisc(ENTITY_TYPES, "spell_clash", SpellClashEntity::new, 0.6f, 0.6f, 32, 2);
 
+    /** Fiendfyre's roaming fire (B3): short-lived, never saved, drawn by server particles. */
+    public static final DeferredHolder<EntityType<?>, EntityType<at.koopro.wizardsandbeasts.entity.spell.FiendfyreEntity>> FIENDFYRE =
+            EntityHelper.registerMisc(ENTITY_TYPES, "fiendfyre", at.koopro.wizardsandbeasts.entity.spell.FiendfyreEntity::new,
+                    1.0f, 1.0f, 64, 2);
+
     public static final DeferredHolder<EntityType<?>, EntityType<PatronusEntity>> PATRONUS =
             EntityHelper.register(ENTITY_TYPES, "patronus", PatronusEntity::new, MobCategory.MISC, 0.6f, 1.2f, 8, 2);
     static { EntityAttributeBindings.queue(PATRONUS, PatronusEntity::createAttributes); }

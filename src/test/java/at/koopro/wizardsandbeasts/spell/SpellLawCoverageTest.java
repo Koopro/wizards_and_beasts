@@ -72,7 +72,7 @@ class SpellLawCoverageTest {
      * neither is expressible as an effect-component list. Their law still lives in the datapack with
      * everyone else's, which is the point: one register of what is forbidden, whatever implements it.
      */
-    private static final Set<String> JAVA_REGISTERED = Set.of("avada_kedavra", "imperio");
+    private static final Set<String> JAVA_REGISTERED = Set.of("avada_kedavra", "imperio", "fiendfyre");
 
     /**
      * Every law file must name a spell that exists, or the classification protects nothing and the

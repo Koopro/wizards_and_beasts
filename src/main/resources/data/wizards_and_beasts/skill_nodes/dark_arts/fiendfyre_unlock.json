@@ -1,0 +1,25 @@
+{
+  "id": "fiendfyre_unlock",
+  "displayName": "skill.wizards_and_beasts.node.fiendfyre_unlock.name",
+  "description": "skill.wizards_and_beasts.node.fiendfyre_unlock.desc",
+  "lore": "skill.wizards_and_beasts.node.fiendfyre_unlock.lore",
+  "practice": "skill.wizards_and_beasts.node.fiendfyre_unlock.practice",
+  "tree": "dark_arts",
+  "pointCost": 4,
+  "provenance": {
+    "citation": "Attested in the novels"
+  },
+  "effects": [
+    {
+      "type": "learn_spell",
+      "spellId": "fiendfyre"
+    },
+    {
+      "type": "dark_study",
+      "corruption": 5.0
+    }
+  ],
+  "x": 36.0,
+  "y": 214.0,
+  "edges": []
+}

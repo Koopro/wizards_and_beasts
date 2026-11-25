@@ -21,5 +21,7 @@
   ],
   "x": 32.0,
   "y": 160.0,
-  "edges": []
+  "edges": [
+    "fiendfyre_unlock"
+  ]
 }

@@ -45,6 +45,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntities.BABY_NIFFLER.get(), at.koopro.wizardsandbeasts.client.entity.NifflerRenderer::new);
         event.registerEntityRenderer(ModEntities.FORM_MANNEQUIN.get(), FormMannequinRenderer::new);
         event.registerEntityRenderer(ModEntities.SEAT.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+        event.registerEntityRenderer(ModEntities.FIENDFYRE.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.FurnitureBlocks.MOVING_PROP.get(),
                 context -> new at.koopro.wizardsandbeasts.client.furniture.MovingPropRenderer());
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.FurnitureBlocks.DISPLAY_CASE.get(),

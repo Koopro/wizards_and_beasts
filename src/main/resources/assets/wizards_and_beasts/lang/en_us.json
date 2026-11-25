@@ -9852,5 +9852,12 @@
   "subtitles.wizards_and_beasts.entity.ghost.hurt": "Ghost shudders",
   "subtitles.wizards_and_beasts.house_cup_feast": "House Cup feast",
   "house.wizards_and_beasts.sorted": "The Sorting Hat considers %s, and shouts: %s!",
-  "house.wizards_and_beasts.cup": "House Cup:"
+  "house.wizards_and_beasts.cup": "House Cup:",
+  "spell.wizards_and_beasts.fiendfyre.name": "Fiendfyre",
+  "spell.wizards_and_beasts.fiendfyre.turned": "The Fiendfyre has slipped your control and turns on everything, you included.",
+  "entity.wizards_and_beasts.fiendfyre": "Fiendfyre",
+  "skill.wizards_and_beasts.node.fiendfyre_unlock.name": "Fiendfyre",
+  "skill.wizards_and_beasts.node.fiendfyre_unlock.desc": "Cursed fire in the shape of beasts. It burns out in twenty seconds, water does not quench it, and it ends a Horcrux. Needs Incendio and Confringo proficient.",
+  "skill.wizards_and_beasts.node.fiendfyre_unlock.lore": "Crabbe learned it from the Carrows and could not stop it. The diadem burned in it, and so did he.",
+  "skill.wizards_and_beasts.node.fiendfyre_unlock.practice": "Every second you must hold it again. Lose it once and it is no longer yours."
 }

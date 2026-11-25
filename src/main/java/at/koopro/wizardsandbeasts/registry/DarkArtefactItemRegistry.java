@@ -13,21 +13,23 @@ import net.neoforged.neoforge.registries.DeferredItem;
 public final class DarkArtefactItemRegistry {
 
     // ── Horcrux Vessels ──────────────────────────────────────────
+    // Fire-resistant: a Horcrux survives almost anything (DH ch.6); ordinary fire and lava must not end one when
+    // Fiendfyre, basilisk venom and the venom-steeped sword are the canon means (HorcruxDestruction).
 
     public static final DeferredItem<RiddlesDiaryItem> RIDDLES_DIARY =
-            ModItems.ITEMS.registerItem("riddles_diary", props -> new RiddlesDiaryItem(props.stacksTo(1)));
+            ModItems.ITEMS.registerItem("riddles_diary", props -> new RiddlesDiaryItem(props.stacksTo(1).fireResistant()));
 
     public static final DeferredItem<GauntRingItem> MARVOLO_GAUNTS_RING =
-            ModItems.ITEMS.registerItem("marvolo_gaunts_ring", props -> new GauntRingItem(props.stacksTo(1)));
+            ModItems.ITEMS.registerItem("marvolo_gaunts_ring", props -> new GauntRingItem(props.stacksTo(1).fireResistant()));
 
     public static final DeferredItem<SlytherinsLocketItem> SLYTHERINS_LOCKET =
-            ModItems.ITEMS.registerItem("slytherins_locket", props -> new SlytherinsLocketItem(props.stacksTo(1)));
+            ModItems.ITEMS.registerItem("slytherins_locket", props -> new SlytherinsLocketItem(props.stacksTo(1).fireResistant()));
 
     public static final DeferredItem<HufflepuffsCupItem> HUFFLEPUFFS_CUP =
-            ModItems.ITEMS.registerItem("hufflepuffs_cup", props -> new HufflepuffsCupItem(props.stacksTo(1)));
+            ModItems.ITEMS.registerItem("hufflepuffs_cup", props -> new HufflepuffsCupItem(props.stacksTo(1).fireResistant()));
 
     public static final DeferredItem<RavenclawsDiademItem> RAVENCLAWS_DIADEM =
-            ModItems.ITEMS.registerItem("ravenclaws_diadem", props -> new RavenclawsDiademItem(props.stacksTo(1)));
+            ModItems.ITEMS.registerItem("ravenclaws_diadem", props -> new RavenclawsDiademItem(props.stacksTo(1).fireResistant()));
 
     // ── Unique Artefacts ─────────────────────────────────────────
 

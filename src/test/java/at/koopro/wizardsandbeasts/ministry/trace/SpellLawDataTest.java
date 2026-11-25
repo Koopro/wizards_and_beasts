@@ -28,7 +28,7 @@ class SpellLawDataTest {
 
     @Test
     void everyShippedFileParsesAndNamesARealSpell() throws IOException {
-        List<String> bespoke = List.of("imperio", "avada_kedavra");
+        List<String> bespoke = List.of("imperio", "avada_kedavra", "fiendfyre");
         try (Stream<Path> files = Files.list(ROOT.resolve("spell_law"))) {
             for (Path file : files.toList()) {
                 String spell = file.getFileName().toString().replace(".json", "");
