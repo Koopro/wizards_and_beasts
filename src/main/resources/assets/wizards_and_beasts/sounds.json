@@ -3,14 +3,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_crash",
     "sounds": [
       {
-        "name": "minecraft:random/explode1",
-        "volume": 0.7,
-        "pitch": 1.2
+        "name": "wizards_and_beasts:broom/crash_1",
+        "volume": 0.7
       },
       {
-        "name": "minecraft:random/explode2",
-        "volume": 0.7,
-        "pitch": 1.3
+        "name": "wizards_and_beasts:broom/crash_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:broom/crash_3",
+        "volume": 0.7
       }
     ]
   },
@@ -18,14 +20,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_wind_slow",
     "sounds": [
       {
-        "name": "minecraft:mob/enderdragon/wings1",
-        "volume": 0.35,
-        "pitch": 0.62
+        "name": "wizards_and_beasts:broom/wind_slow_1",
+        "volume": 0.35
       },
       {
-        "name": "minecraft:mob/enderdragon/wings2",
-        "volume": 0.32,
-        "pitch": 0.58
+        "name": "wizards_and_beasts:broom/wind_slow_2",
+        "volume": 0.35
+      },
+      {
+        "name": "wizards_and_beasts:broom/wind_slow_3",
+        "volume": 0.35
       }
     ]
   },
@@ -33,14 +37,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_wind_mid",
     "sounds": [
       {
-        "name": "minecraft:item/elytra/elytra_loop1",
-        "volume": 0.45,
-        "pitch": 0.95
+        "name": "wizards_and_beasts:broom/wind_mid_1",
+        "volume": 0.45
       },
       {
-        "name": "minecraft:item/elytra/elytra_loop2",
-        "volume": 0.45,
-        "pitch": 1.0
+        "name": "wizards_and_beasts:broom/wind_mid_2",
+        "volume": 0.45
+      },
+      {
+        "name": "wizards_and_beasts:broom/wind_mid_3",
+        "volume": 0.45
       }
     ]
   },
@@ -48,14 +54,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_wind_fast",
     "sounds": [
       {
-        "name": "minecraft:item/elytra/elytra_loop3",
-        "volume": 0.5,
-        "pitch": 1.28
+        "name": "wizards_and_beasts:broom/wind_fast_1",
+        "volume": 0.5
       },
       {
-        "name": "minecraft:item/elytra/elytra_loop4",
-        "volume": 0.5,
-        "pitch": 1.35
+        "name": "wizards_and_beasts:broom/wind_fast_2",
+        "volume": 0.5
+      },
+      {
+        "name": "wizards_and_beasts:broom/wind_fast_3",
+        "volume": 0.5
       }
     ]
   },
@@ -63,9 +71,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_boost_school",
     "sounds": [
       {
-        "name": "minecraft:item/firecharge/use",
-        "volume": 0.45,
-        "pitch": 0.75
+        "name": "wizards_and_beasts:broom/boost_school_1",
+        "volume": 0.45
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_school_2",
+        "volume": 0.45
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_school_3",
+        "volume": 0.45
       }
     ]
   },
@@ -73,9 +88,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_boost_standard",
     "sounds": [
       {
-        "name": "minecraft:item/firecharge/use",
-        "volume": 0.5,
-        "pitch": 0.95
+        "name": "wizards_and_beasts:broom/boost_standard_1",
+        "volume": 0.5
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_standard_2",
+        "volume": 0.5
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_standard_3",
+        "volume": 0.5
       }
     ]
   },
@@ -83,9 +105,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_boost_racing",
     "sounds": [
       {
-        "name": "minecraft:entity/firework/launch1",
-        "volume": 0.55,
-        "pitch": 1.25
+        "name": "wizards_and_beasts:broom/boost_racing_1",
+        "volume": 0.55
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_racing_2",
+        "volume": 0.55
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_racing_3",
+        "volume": 0.55
       }
     ]
   },
@@ -93,14 +122,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_boost_firebolt",
     "sounds": [
       {
-        "name": "minecraft:entity/firework/launch1",
-        "volume": 0.6,
-        "pitch": 1.55
+        "name": "wizards_and_beasts:broom/boost_firebolt_1",
+        "volume": 0.6
       },
       {
-        "name": "minecraft:item/firecharge/use",
-        "volume": 0.4,
-        "pitch": 1.6
+        "name": "wizards_and_beasts:broom/boost_firebolt_2",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_firebolt_3",
+        "volume": 0.6
       }
     ]
   },
@@ -108,9 +139,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_boost_heavy",
     "sounds": [
       {
-        "name": "minecraft:mob/enderdragon/wings3",
-        "volume": 0.55,
-        "pitch": 0.55
+        "name": "wizards_and_beasts:broom/boost_heavy_1",
+        "volume": 0.55
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_heavy_2",
+        "volume": 0.55
+      },
+      {
+        "name": "wizards_and_beasts:broom/boost_heavy_3",
+        "volume": 0.55
       }
     ]
   },
@@ -118,14 +156,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_crash_minor",
     "sounds": [
       {
-        "name": "minecraft:block/wood/break1",
-        "volume": 0.55,
-        "pitch": 1.15
+        "name": "wizards_and_beasts:broom/crash_minor_1",
+        "volume": 0.55
       },
       {
-        "name": "minecraft:block/wood/break2",
-        "volume": 0.55,
-        "pitch": 1.05
+        "name": "wizards_and_beasts:broom/crash_minor_2",
+        "volume": 0.55
+      },
+      {
+        "name": "wizards_and_beasts:broom/crash_minor_3",
+        "volume": 0.55
       }
     ]
   },
@@ -133,14 +173,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_crash_severe",
     "sounds": [
       {
-        "name": "minecraft:block/wood/break3",
-        "volume": 0.85,
-        "pitch": 0.72
+        "name": "wizards_and_beasts:broom/crash_severe_1",
+        "volume": 0.85
       },
       {
-        "name": "minecraft:random/explode1",
-        "volume": 0.45,
-        "pitch": 1.35
+        "name": "wizards_and_beasts:broom/crash_severe_2",
+        "volume": 0.85
+      },
+      {
+        "name": "wizards_and_beasts:broom/crash_severe_3",
+        "volume": 0.85
       }
     ]
   },
@@ -148,14 +190,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_mount",
     "sounds": [
       {
-        "name": "minecraft:block/wood/step1",
-        "volume": 0.5,
-        "pitch": 0.85
+        "name": "wizards_and_beasts:broom/mount_1",
+        "volume": 0.5
       },
       {
-        "name": "minecraft:mob/enderdragon/wings4",
-        "volume": 0.25,
-        "pitch": 1.4
+        "name": "wizards_and_beasts:broom/mount_2",
+        "volume": 0.5
+      },
+      {
+        "name": "wizards_and_beasts:broom/mount_3",
+        "volume": 0.5
       }
     ]
   },
@@ -163,9 +207,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_dismount",
     "sounds": [
       {
-        "name": "minecraft:block/wood/step4",
-        "volume": 0.45,
-        "pitch": 0.95
+        "name": "wizards_and_beasts:broom/dismount_1",
+        "volume": 0.45
+      },
+      {
+        "name": "wizards_and_beasts:broom/dismount_2",
+        "volume": 0.45
+      },
+      {
+        "name": "wizards_and_beasts:broom/dismount_3",
+        "volume": 0.45
       }
     ]
   },
@@ -173,9 +224,16 @@
     "subtitle": "subtitles.wizards_and_beasts.broom_polish_apply",
     "sounds": [
       {
-        "name": "minecraft:item/honeycomb/wax_on",
-        "volume": 0.7,
-        "pitch": 1.1
+        "name": "wizards_and_beasts:broom/polish_apply_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:broom/polish_apply_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:broom/polish_apply_3",
+        "volume": 0.7
       }
     ]
   },
