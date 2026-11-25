@@ -4238,3 +4238,17 @@ changes: the item, its inventory icon, its tooltip and its recipes are untouched
 the house (`Wardrobe.HOUSE_FOLLOWING_CUTS = {"scarf"}`). Rule in `Wardrobe.wornLivery`, read by
 `WizardArmorRenderer.addRenderData`; the `HOUSE` attachment already synced to every client that sees the
 wearer. Pinned by `WardrobeHouseLiveryTest`.
+
+---
+
+# Hostile bonds: Graphorn and Occamy (2026-11-25, `feat/bond-hostile`)
+
+Owner ruling 2026-11-25: bond stats for the owl, Kneazle, Graphorn and Occamy derive from the closest existing profile.
+
+The **Graphorn** (copy of `griffin.json`: raw meat, follows at 100, milestones 25/50/100, betrayal 40, no gift) and the
+**Occamy** (copy of `hippogriff.json`, fed rabbit and chicken for "rats and birds", no gift) can now be befriended.
+Both are `HOSTILE`, so `GenericBeastEntity`'s unprovoked `NearestAttackableTargetGoal<Player>` now skips the bond
+owner once the bond reaches the profile's first milestone (`sparesAsBonded`; 25 for both). Before that, and for
+everyone else, they hunt as before; the owner who strikes one is still fought back (retaliation is unchanged).
+Territory defence already stood down for any bonded creature (`EcologyBrain`). No hostile creature without a bond
+profile is affected. Pinned by GameTest `creature_hostile_bond_spares_its_owner`.

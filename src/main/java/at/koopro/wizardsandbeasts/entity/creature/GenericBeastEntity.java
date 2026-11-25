@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.creature.Temperament;
 import at.koopro.wizardsandbeasts.creature.Trait;
 import at.koopro.wizardsandbeasts.creature.ability.CreatureAbility;
 import at.koopro.wizardsandbeasts.creature.ability.FireAffinity;
+import at.koopro.wizardsandbeasts.creature.bond.BondProfile;
 import at.koopro.wizardsandbeasts.creature.bond.BondState;
 import at.koopro.wizardsandbeasts.creature.bond.BondableBeast;
 import at.koopro.wizardsandbeasts.creature.bond.FollowBondedOwnerGoal;
@@ -696,9 +697,28 @@ public abstract class GenericBeastEntity extends GeoEntityBase implements Bondab
             }
             targetSelector.addGoal(1, retaliate);
             if (temperament == Temperament.HOSTILE) {
-                targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+                // A hostile beast that has come to trust someone stops hunting them (it still answers a blow through
+                // the retaliation goal above). Without this a bond profile on a hostile species would leave it
+                // stalking the very person feeding it.
+                targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
+                        (target, level) -> !sparesAsBonded(target)));
             }
         }
+    }
+
+    /**
+     * Whether this creature's bond spares {@code target} from its unprovoked hunting: the bond owner, once the bond has
+     * reached the profile's first milestone (its first step of trust; the follow threshold when it lists none). Pure
+     * data: no number of its own.
+     */
+    public boolean sparesAsBonded(net.minecraft.world.entity.LivingEntity target) {
+        BondProfile profile = bondProfile();
+        java.util.UUID owner = bondOwner();
+        if (profile == null || owner == null || !owner.equals(target.getUUID())) {
+            return false;
+        }
+        int trust = profile.milestones().isEmpty() ? profile.followThreshold() : profile.milestones().get(0);
+        return bondLevel() >= trust;
     }
 
     // ── combat / trait effects ────────────────────────────────────────────────
