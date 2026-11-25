@@ -36,5 +36,11 @@
     "peek",
     "lie_down",
     "wake"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.gnome.ambient",
+      "hurt": "wizards_and_beasts:entity.gnome.hurt"
+    }
+  }
 }

@@ -61,5 +61,11 @@
   "fx": {
     "footfall": 0.25,
     "emitters": []
+  },
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.qilin.ambient",
+      "hurt": "wizards_and_beasts:entity.qilin.hurt"
+    }
   }
 }

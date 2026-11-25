@@ -6,7 +6,6 @@ import at.koopro.wizardsandbeasts.module.ModuleManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NullMarked;
@@ -111,7 +110,7 @@ public final class OwlPostService {
                 UUID.randomUUID(), sender.getUUID(), recipientId, payload, now + FLIGHT_TICKS, false));
 
         sender.level().playSound(null, sender.blockPosition(),
-                SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.6f, 1.4f);
+                at.koopro.wizardsandbeasts.registry.ModSounds.OWL_POST_ARRIVE.get(), SoundSource.PLAYERS, 0.6f, 1.1f);
         // Correspondence is a Journalist's working day.
         at.koopro.wizardsandbeasts.owl.career.CareerWork.record(sender, at.koopro.wizardsandbeasts.owl.career.CareerWork.Kind.CORRESPONDENCE);
         return SendResult.SENT;
@@ -156,7 +155,7 @@ public final class OwlPostService {
         if (payload.isEmpty()) {
             data.remove(parcel.id());
             target.level().playSound(null, target.blockPosition(),
-                    SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.7f, 1.1f);
+                    at.koopro.wizardsandbeasts.registry.ModSounds.OWL_POST_ARRIVE.get(), SoundSource.PLAYERS, 0.7f, 1.0f);
             PlayerFeedback.toast(target,
                     at.koopro.wizardsandbeasts.feedback.NoticeKind.SUCCESS,
                     Component.translatable(parcel.returning()

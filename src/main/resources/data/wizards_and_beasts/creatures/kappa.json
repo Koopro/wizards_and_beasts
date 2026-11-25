@@ -53,5 +53,11 @@
     "death",
     "drift",
     "roll"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.kappa.ambient",
+      "hurt": "wizards_and_beasts:entity.kappa.hurt"
+    }
+  }
 }

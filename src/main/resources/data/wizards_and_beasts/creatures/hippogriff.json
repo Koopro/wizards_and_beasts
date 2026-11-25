@@ -45,5 +45,11 @@
   "fx": {
     "footfall": 0.3,
     "emitters": []
+  },
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.hippogriff.ambient",
+      "hurt": "wizards_and_beasts:entity.hippogriff.hurt"
+    }
   }
 }

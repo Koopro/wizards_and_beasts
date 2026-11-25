@@ -242,6 +242,15 @@ public abstract class Spell {
         if (family == SpellFamily.LIGHT) {
             return ModSounds.SPELL_CAST_CHARM.get();
         }
+        // No bespoke sound: the category picks one (audio kit A2) — a duelling jet tears the air, a shield blooms.
+        if (configured == ModSounds.SPELL_CAST_GENERIC.get()) {
+            if (category == SpellCategory.COMBAT) {
+                return ModSounds.SPELL_CAST_COMBAT.get();
+            }
+            if (category == SpellCategory.DEFENSE) {
+                return ModSounds.SPELL_CAST_DEFENSE.get();
+            }
+        }
         return configured;
     }
 

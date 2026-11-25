@@ -47,5 +47,11 @@
         "note": "a barn owl, as the post office keeps"
       }
     ]
+  },
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.owl.ambient",
+      "hurt": "wizards_and_beasts:entity.owl.hurt"
+    }
   }
 }

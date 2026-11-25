@@ -428,7 +428,8 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                 if (!filled.isEmpty()) {
                     Block.popResource(level, pos.above(), filled);
                 }
-                level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
+                level.playSound(null, pos, at.koopro.wizardsandbeasts.registry.ModSounds.BREW_BOTTLE.get(),
+                        SoundSource.BLOCKS, 0.8f, 1.0f);
                 PlayerFeedback.toast(player, NoticeKind.SUCCESS,
                         Component.translatable("brew.wizards_and_beasts.cauldron.bottled"),
                         Component.translatable(brew.displayName()));
@@ -467,7 +468,8 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
             if (!filled.isEmpty()) {
                 Block.popResource(level, pos.above(), filled);
             }
-            level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 0.7f);
+            level.playSound(null, pos, at.koopro.wizardsandbeasts.registry.ModSounds.BREW_BOTTLE.get(),
+                    SoundSource.BLOCKS, 0.8f, 0.7f);
             say(player, "brew.wizards_and_beasts.cauldron.bottled_ruined");
         } else {
             say(player, "brew.wizards_and_beasts.cauldron.poured_away");
@@ -566,6 +568,11 @@ public class WizardingCauldronBlock extends BaseEntityBlock {
                 }
                 if (random.nextInt(8) == 0) {
                     level.addParticle(ParticleTypes.BUBBLE_POP, cx, cy, cz, 0, 0.02, 0);
+                }
+                // The pot blubs while it brews (audio kit A2); a 2.4 s clip about once per clip length.
+                if (random.nextInt(50) == 0) {
+                    level.playLocalSound(cx, cy, cz, at.koopro.wizardsandbeasts.registry.ModSounds.BREW_BUBBLE.get(),
+                            SoundSource.BLOCKS, 0.45f, 0.9f + random.nextFloat() * 0.2f, false);
                 }
             }
             case DONE -> {

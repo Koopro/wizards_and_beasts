@@ -251,10 +251,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_impact_expelliarmus",
     "sounds": [
       {
-        "name": "minecraft:entity.player.attack.strong",
-        "volume": 0.5,
-        "pitch": 1.15,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/impact_expelliarmus_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_expelliarmus_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_expelliarmus_3",
+        "volume": 0.9
       }
     ]
   },
@@ -279,10 +285,16 @@
     "subtitle": "subtitles.wizards_and_beasts.spell_impact_avada",
     "sounds": [
       {
-        "name": "minecraft:entity.evoker.prepare_summon",
-        "volume": 0.8,
-        "pitch": 0.5,
-        "type": "event"
+        "name": "wizards_and_beasts:spell/impact_avada_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_avada_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:spell/impact_avada_3",
+        "volume": 1.0
       }
     ]
   },
@@ -307,9 +319,16 @@
     "subtitle": "subtitles.wizards_and_beasts.wand_equip",
     "sounds": [
       {
-        "name": "minecraft:item/armor/equip_leather1",
-        "volume": 0.85,
-        "pitch": 1.15
+        "name": "wizards_and_beasts:wand/draw_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:wand/draw_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:wand/draw_3",
+        "volume": 0.7
       }
     ]
   },
@@ -317,10 +336,16 @@
     "subtitle": "subtitles.wizards_and_beasts.wand_unequip",
     "sounds": [
       {
-        "name": "minecraft:block.bamboo_wood_fence_gate.open",
-        "volume": 0.65,
-        "pitch": 1.08,
-        "type": "event"
+        "name": "wizards_and_beasts:wand/sheathe_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:wand/sheathe_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:wand/sheathe_3",
+        "volume": 0.7
       }
     ]
   },
@@ -328,10 +353,16 @@
     "subtitle": "subtitles.wizards_and_beasts.wand_swing",
     "sounds": [
       {
-        "name": "minecraft:entity.player.attack.sweep",
-        "volume": 0.5,
-        "pitch": 1.2,
-        "type": "event"
+        "name": "wizards_and_beasts:wand/swish_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:wand/swish_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:wand/swish_3",
+        "volume": 0.7
       }
     ]
   },
@@ -543,10 +574,16 @@
     "subtitle": "subtitles.wizards_and_beasts.entity.niffler.ambient",
     "sounds": [
       {
-        "name": "minecraft:entity.fox.screech",
-        "volume": 0.4,
-        "pitch": 1.6,
-        "type": "event"
+        "name": "wizards_and_beasts:creature/niffler_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/niffler_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/niffler_ambient_3",
+        "volume": 0.8
       }
     ]
   },
@@ -554,10 +591,16 @@
     "subtitle": "subtitles.wizards_and_beasts.entity.niffler.hurt",
     "sounds": [
       {
-        "name": "minecraft:entity.fox.hurt",
-        "volume": 0.6,
-        "pitch": 1.4,
-        "type": "event"
+        "name": "wizards_and_beasts:creature/niffler_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/niffler_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/niffler_hurt_3",
+        "volume": 0.9
       }
     ]
   },
@@ -631,10 +674,16 @@
     "subtitle": "subtitles.wizards_and_beasts.entity.baby_niffler.ambient",
     "sounds": [
       {
-        "name": "minecraft:entity.fox.screech",
-        "volume": 0.3,
-        "pitch": 2.0,
-        "type": "event"
+        "name": "wizards_and_beasts:creature/niffler_baby_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/niffler_baby_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/niffler_baby_3",
+        "volume": 0.8
       }
     ]
   },
@@ -693,10 +742,16 @@
     "subtitle": "subtitles.wizards_and_beasts.deluminator_absorb",
     "sounds": [
       {
-        "name": "minecraft:block.candle.extinguish",
-        "type": "event",
-        "volume": 1.0,
-        "pitch": 0.8
+        "name": "wizards_and_beasts:artefact/deluminator_absorb_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:artefact/deluminator_absorb_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:artefact/deluminator_absorb_3",
+        "volume": 0.8
       }
     ]
   },
@@ -704,10 +759,16 @@
     "subtitle": "subtitles.wizards_and_beasts.deluminator_restore",
     "sounds": [
       {
-        "name": "minecraft:item.flintandsteel.use",
-        "type": "event",
-        "volume": 1.0,
-        "pitch": 1.1
+        "name": "wizards_and_beasts:artefact/deluminator_restore_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:artefact/deluminator_restore_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:artefact/deluminator_restore_3",
+        "volume": 0.8
       }
     ]
   },
@@ -726,10 +787,16 @@
     "subtitle": "subtitles.wizards_and_beasts.horcrux_shatter",
     "sounds": [
       {
-        "name": "minecraft:block.glass.break",
-        "type": "event",
-        "volume": 1.0,
-        "pitch": 0.6
+        "name": "wizards_and_beasts:artefact/horcrux_shatter_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:artefact/horcrux_shatter_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:artefact/horcrux_shatter_3",
+        "volume": 1.0
       }
     ]
   },
@@ -972,16 +1039,16 @@
     "subtitle": "subtitles.wizards_and_beasts.apparition_crack_muffled",
     "sounds": [
       {
-        "name": "minecraft:entity.firework_rocket.blast_far",
-        "volume": 0.3,
-        "pitch": 1.3,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/crack_muffled_1",
+        "volume": 0.9
       },
       {
-        "name": "minecraft:entity.generic.explode",
-        "volume": 0.25,
-        "pitch": 1.2,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/crack_muffled_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:apparition/crack_muffled_3",
+        "volume": 0.9
       }
     ]
   },
@@ -989,16 +1056,16 @@
     "subtitle": "subtitles.wizards_and_beasts.apparition_splinch",
     "sounds": [
       {
-        "name": "minecraft:block.slime_block.break",
-        "volume": 0.8,
-        "pitch": 0.6,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/splinch_1",
+        "volume": 1.0
       },
       {
-        "name": "minecraft:block.wood.break",
-        "volume": 0.7,
-        "pitch": 0.5,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/splinch_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:apparition/splinch_3",
+        "volume": 1.0
       }
     ]
   },
@@ -1063,16 +1130,16 @@
     "subtitle": "subtitles.wizards_and_beasts.apparition_windup",
     "sounds": [
       {
-        "name": "minecraft:item.firecharge.use",
-        "volume": 0.5,
-        "pitch": 0.9,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/windup_1",
+        "volume": 0.8
       },
       {
-        "name": "minecraft:entity.phantom.flap",
-        "volume": 0.5,
-        "pitch": 0.6,
-        "type": "event"
+        "name": "wizards_and_beasts:apparition/windup_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:apparition/windup_3",
+        "volume": 0.8
       }
     ]
   },
@@ -1641,8 +1708,407 @@
     "subtitle": "subtitles.wizards_and_beasts.house_cup_feast",
     "sounds": [
       {
-        "name": "minecraft:ui.toast.challenge_complete",
-        "volume": 0.6
+        "name": "wizards_and_beasts:house/cup_feast_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:house/cup_feast_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:house/cup_feast_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "spell_cast_combat": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_cast_combat",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:spell/cast_combat_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_combat_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_combat_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "spell_cast_defense": {
+    "subtitle": "subtitles.wizards_and_beasts.spell_cast_defense",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:spell/cast_defense_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_defense_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:spell/cast_defense_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "brew_bubble": {
+    "subtitle": "subtitles.wizards_and_beasts.brew_bubble",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:brew/bubble_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:brew/bubble_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:brew/bubble_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "brew_bottle": {
+    "subtitle": "subtitles.wizards_and_beasts.brew_bottle",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:brew/bottle_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:brew/bottle_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:brew/bottle_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "brew_boil_over": {
+    "subtitle": "subtitles.wizards_and_beasts.brew_boil_over",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:brew/boil_over_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:brew/boil_over_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:brew/boil_over_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "vault_coin": {
+    "subtitle": "subtitles.wizards_and_beasts.vault_coin",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:gringotts/coin_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:gringotts/coin_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:gringotts/coin_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "owl_post_arrive": {
+    "subtitle": "subtitles.wizards_and_beasts.owl_post_arrive",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:owl/post_arrive_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:owl/post_arrive_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:owl/post_arrive_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "sorting_hat_speech": {
+    "subtitle": "subtitles.wizards_and_beasts.sorting_hat_speech",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:house/sorting_hat_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:house/sorting_hat_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:house/sorting_hat_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "howler_shout": {
+    "subtitle": "subtitles.wizards_and_beasts.howler_shout",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:howler/shout_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:howler/shout_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:howler/shout_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.owl.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.owl.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/owl_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/owl_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/owl_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.owl.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.owl.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/owl_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/owl_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/owl_hurt_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.hippogriff.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.hippogriff.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/hippogriff_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/hippogriff_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/hippogriff_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.hippogriff.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.hippogriff.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/hippogriff_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/hippogriff_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/hippogriff_hurt_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.gnome.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.gnome.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/gnome_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/gnome_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/gnome_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.gnome.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.gnome.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/gnome_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/gnome_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/gnome_hurt_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.kappa.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.kappa.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/kappa_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/kappa_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/kappa_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.kappa.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.kappa.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/kappa_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/kappa_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/kappa_hurt_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.zouwu.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.zouwu.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/zouwu_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/zouwu_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/zouwu_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.zouwu.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.zouwu.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/zouwu_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/zouwu_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/zouwu_hurt_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.qilin.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.qilin.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/qilin_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/qilin_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/qilin_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.qilin.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.qilin.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/qilin_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/qilin_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/qilin_hurt_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.ghost.ambient": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.ghost.ambient",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/ghost_ambient_1",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/ghost_ambient_2",
+        "volume": 0.8
+      },
+      {
+        "name": "wizards_and_beasts:creature/ghost_ambient_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.ghost.hurt": {
+    "subtitle": "subtitles.wizards_and_beasts.entity.ghost.hurt",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:creature/ghost_hurt_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/ghost_hurt_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:creature/ghost_hurt_3",
+        "volume": 0.9
       }
     ]
   }

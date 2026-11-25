@@ -68,8 +68,8 @@ public final class BrewMishap {
                 return true;
             }
             case BOIL_OVER -> {
-                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 0.7f);
-                level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8f, 0.5f);
+                level.playSound(null, pos, at.koopro.wizardsandbeasts.registry.ModSounds.BREW_BOIL_OVER.get(),
+                        SoundSource.BLOCKS, 0.9f, 1.0f);
                 level.sendParticles(tinted, x, y, z, 40, 0.8, 0.3, 0.8, 0.0);
                 level.sendParticles(ParticleTypes.SPLASH, x, y, z, 40, 0.8, 0.2, 0.8, 0.2);
                 splash(level, pos, 1.0f);

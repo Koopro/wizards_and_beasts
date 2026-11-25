@@ -133,7 +133,8 @@ public class HowlerItem extends Item implements AnimatedItem {
         double x = holder.getX();
         double y = holder.getEyeY() + 0.3;
         double z = holder.getZ();
-        level.playSound(null, x, y, z, SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0f, 1.6f);
+        level.playSound(null, x, y, z, at.koopro.wizardsandbeasts.registry.ModSounds.HOWLER_SHOUT.get(),
+                SoundSource.PLAYERS, 2.0f, 1.0f);
         level.playSound(null, x, y, z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0f, 1.0f);
         level.sendParticles(ParticleTypes.FLAME, x, y, z, 24, 0.25, 0.25, 0.25, 0.02);
         level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 12, 0.25, 0.25, 0.25, 0.02);

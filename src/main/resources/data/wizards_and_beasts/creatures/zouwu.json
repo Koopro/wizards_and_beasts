@@ -48,5 +48,11 @@
     "shake",
     "lie_down",
     "wake"
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.zouwu.ambient",
+      "hurt": "wizards_and_beasts:entity.zouwu.hurt"
+    }
+  }
 }

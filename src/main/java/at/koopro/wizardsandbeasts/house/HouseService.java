@@ -94,6 +94,9 @@ public final class HouseService {
         boolean sure = lean.get(order[0]) - lean.get(order[1]) > SortingRules.PLEA_LIMIT;
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 new SortingOfferS2CPayload(order[0].id(), sure));
+        // The Hat murmurs while it considers (audio kit A2): a voice bed under the screen's words.
+        player.level().playSound(null, player.blockPosition(),
+                at.koopro.wizardsandbeasts.registry.ModSounds.SORTING_HAT_SPEECH.get(), SoundSource.PLAYERS, 0.7f, 1.0f);
     }
 
     /** The wizard answered the Hat. Does nothing for one already sorted. */

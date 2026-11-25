@@ -273,6 +273,55 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> HOUSE_CUP_FEAST =
             register("house_cup_feast");
 
+    // Audio kit (systems audit A2, tools/sound_kit.py): self-made, 48 kHz mono; film references in AUDIO_KIT.md.
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CAST_COMBAT =
+            register("spell_cast_combat");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_CAST_DEFENSE =
+            register("spell_cast_defense");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BREW_BUBBLE =
+            register("brew_bubble");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BREW_BOTTLE =
+            register("brew_bottle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BREW_BOIL_OVER =
+            register("brew_boil_over");
+    public static final DeferredHolder<SoundEvent, SoundEvent> VAULT_COIN =
+            register("vault_coin");
+    public static final DeferredHolder<SoundEvent, SoundEvent> OWL_POST_ARRIVE =
+            register("owl_post_arrive");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SORTING_HAT_SPEECH =
+            register("sorting_hat_speech");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HOWLER_SHOUT =
+            register("howler_shout");
+    // Creature voices for the signature dozen, named in each creature's behaviour.sounds by id.
+    public static final DeferredHolder<SoundEvent, SoundEvent> OWL_AMBIENT =
+            register("entity.owl.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> OWL_HURT =
+            register("entity.owl.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HIPPOGRIFF_AMBIENT =
+            register("entity.hippogriff.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HIPPOGRIFF_HURT =
+            register("entity.hippogriff.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GNOME_AMBIENT =
+            register("entity.gnome.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GNOME_HURT =
+            register("entity.gnome.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KAPPA_AMBIENT =
+            register("entity.kappa.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> KAPPA_HURT =
+            register("entity.kappa.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ZOUWU_AMBIENT =
+            register("entity.zouwu.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ZOUWU_HURT =
+            register("entity.zouwu.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> QILIN_AMBIENT =
+            register("entity.qilin.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> QILIN_HURT =
+            register("entity.qilin.hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GHOST_AMBIENT =
+            register("entity.ghost.ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GHOST_HURT =
+            register("entity.ghost.hurt");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
         return SOUND_EVENTS.register(path, () ->
                 SoundEvent.createVariableRangeEvent(

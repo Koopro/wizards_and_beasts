@@ -28,5 +28,11 @@
       "pulse_color": "#80D6E6F8",
       "period_ticks": 80
     }
-  ]
+  ],
+  "behaviour": {
+    "sounds": {
+      "ambient": "wizards_and_beasts:entity.ghost.ambient",
+      "hurt": "wizards_and_beasts:entity.ghost.hurt"
+    }
+  }
 }

@@ -123,6 +123,10 @@ public final class GringottsBilling {
     private static void settle(ServerPlayer player, MoneyFlow flow, long knuts, boolean reversal) {
         book(player, flow, knuts, reversal);
         VaultSyncS2CPayload.syncToPlayer(player);
+        // Coins chink at every till, counter and vault (audio kit A2).
+        player.level().playSound(null, player.blockPosition(),
+                at.koopro.wizardsandbeasts.registry.ModSounds.VAULT_COIN.get(),
+                net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 0.95f + player.getRandom().nextFloat() * 0.1f);
     }
 
     /** The ledger's totals and the player's journal, kept in step: both see every movement or neither does. */
