@@ -269,6 +269,10 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> WEREWOLF_REVERT =
             register("werewolf_revert");
 
+    // The end-of-cycle feast (house.HouseCup): a short fanfare under the toast. Own .ogg from the audio kit.
+    public static final DeferredHolder<SoundEvent, SoundEvent> HOUSE_CUP_FEAST =
+            register("house_cup_feast");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
         return SOUND_EVENTS.register(path, () ->
                 SoundEvent.createVariableRangeEvent(

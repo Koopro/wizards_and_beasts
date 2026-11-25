@@ -1636,5 +1636,14 @@
         "volume": 1.0
       }
     ]
+  },
+  "house_cup_feast": {
+    "subtitle": "subtitles.wizards_and_beasts.house_cup_feast",
+    "sounds": [
+      {
+        "name": "minecraft:ui.toast.challenge_complete",
+        "volume": 0.6
+      }
+    ]
   }
 }

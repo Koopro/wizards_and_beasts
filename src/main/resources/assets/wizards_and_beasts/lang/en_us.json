@@ -9823,6 +9823,11 @@
   "house.wizards_and_beasts.hufflepuff": "Hufflepuff",
   "house.wizards_and_beasts.ravenclaw": "Ravenclaw",
   "house.wizards_and_beasts.slytherin": "Slytherin",
+  "house.wizards_and_beasts.cup.title": "%s wins the House Cup",
+  "house.wizards_and_beasts.cup.body": "%s points. The Great Hall is hung in their colours.",
+  "house.wizards_and_beasts.cup.feast": "The feast is laid and the banners change: %s wins the House Cup with %s points. Every house begins again.",
+  "prophet.wizards_and_beasts.story.house_cup": "HOUSE CUP: %s take the Cup with %s points; the banners in the Great Hall change at last.",
+  "subtitles.wizards_and_beasts.house_cup_feast": "House Cup feast",
   "house.wizards_and_beasts.sorted": "The Sorting Hat considers %s, and shouts: %s!",
   "house.wizards_and_beasts.cup": "House Cup:"
 }

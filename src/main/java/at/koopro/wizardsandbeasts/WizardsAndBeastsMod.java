@@ -201,6 +201,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "brew_recipe_source_reload_listener"),
                     new at.koopro.wizardsandbeasts.brew.knowledge.RecipeSources.Loader());
+            // House Cup cycle length (house/HouseCup).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "house_cup_reload_listener"),
+                    new at.koopro.wizardsandbeasts.house.HouseCup.Loader());
             // Mirror of Erised: what the Mirror can show, and to whom (artefact/erised/).
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "erised_vision_reload_listener"),
