@@ -141,6 +141,89 @@ public final class SettlementWorldProbe {
 
     private SettlementWorldProbe() {}
 
+    /**
+     * {@code places} (post-canon D3): the three small canon places, found by the real generator from spawn. For each:
+     * where the nearest one is, its biome, and whether its signature blocks stand inside the generated start.
+     */
+    private static void places(ServerLevel level) {
+        say("seed " + level.getSeed());
+        BlockPos spawn = level.getRespawnData().pos();
+        Map<String, Block> signature = Map.of(
+                "portkey_hill", net.minecraft.world.level.block.Blocks.ANDESITE,      // counted as its boot instead
+                "gaunt_shack", net.minecraft.world.level.block.Blocks.CHEST,
+                "rook_house", net.minecraft.world.level.block.Blocks.POLISHED_BLACKSTONE_BRICKS);
+        for (String name : List.of("portkey_hill", "gaunt_shack", "rook_house")) {
+            Holder<Structure> holder = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(
+                    ResourceKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, name)));
+            // A one-per-world place has exactly one chunk, which vanilla's locate cannot see; the rest are searched.
+            BlockPos at = null;
+            ChunkGeneratorStructureState state = level.getChunkSource().getGeneratorState();
+            for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
+                if (placement instanceof at.koopro.wizardsandbeasts.azkaban.structure.OnePerWorldPlacement one) {
+                    at = one.target(state).getMiddleBlockPosition(64);
+                }
+            }
+            if (at == null) {
+                var found = level.getChunkSource().getGenerator().findNearestMapStructure(level,
+                        net.minecraft.core.HolderSet.direct(holder), spawn, 100, false);
+                at = found == null ? null : found.getFirst();
+            }
+            if (at == null) {
+                say(name + ": none within 100 chunks of spawn " + spawn.toShortString());
+                continue;
+            }
+            ChunkPos startChunk = new ChunkPos(at);
+            for (int dx = -2; dx <= 2; dx++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    level.getChunk(startChunk.x + dx, startChunk.z + dz);   // generated in full
+                }
+            }
+            var start = level.getChunk(startChunk.x, startChunk.z).getStartForStructure(holder.value());
+            if (start == null || !start.isValid()) {
+                int surface = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE_WG,
+                        at.getX(), at.getZ());
+                say(name + ": located at " + at.toShortString() + " but no valid start there; biome at y64 "
+                        + level.getBiome(at.atY(64)).unwrapKey().map(k -> k.identifier().getPath()).orElse("?")
+                        + ", at the surface (" + surface + ") " + level.getBiome(at.atY(surface)).unwrapKey()
+                        .map(k -> k.identifier().getPath()).orElse("?"));
+                continue;
+            }
+            var box = start.getBoundingBox();
+            int hits = 0;
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            for (int x = box.minX(); x <= box.maxX(); x++) {
+                for (int y = box.minY(); y <= box.maxY(); y++) {
+                    for (int z = box.minZ(); z <= box.maxZ(); z++) {
+                        if (level.getBlockState(pos.set(x, y, z)).is(signature.get(name))) {
+                            hits++;
+                        }
+                    }
+                }
+            }
+            if ("portkey_hill".equals(name)) {
+                hits = level.getEntitiesOfClass(net.minecraft.world.entity.Display.ItemDisplay.class,
+                        net.minecraft.world.phys.AABB.of(box).inflate(1)).size();
+            }
+            // The start's box is grown for terrain adaptation; the template itself is the first piece's box. Its ground
+            // layer is y0, so the land around it should stand at y0 + 1 (heights two blocks outside each corner).
+            var piece = start.getPieces().get(0).getBoundingBox();
+            StringBuilder ground = new StringBuilder();
+            for (int[] c : new int[][]{{piece.minX() - 2, piece.minZ() - 2}, {piece.maxX() + 2, piece.minZ() - 2},
+                    {piece.minX() - 2, piece.maxZ() + 2}, {piece.maxX() + 2, piece.maxZ() + 2}}) {
+                int h = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, c[0], c[1]);
+                ground.append(h - (piece.minY() + 1)).append(' ');
+            }
+            say("  " + name + " template y0 " + piece.minY() + ", land outside its corners vs its ground: " + ground);
+            BlockPos centre = box.getCenter();
+            String biome = level.getBiome(centre).unwrapKey().map(k -> k.identifier().toString()).orElse("?");
+            say(name + ": at " + box.minX() + "," + box.minY() + "," + box.minZ() + " (" + (int) Math.sqrt(
+                    centre.distSqr(spawn)) + " blocks from spawn), biome " + biome + ", " + hits + " "
+                    + signature.get(name).getName().getString() + " in its box, ground at centre "
+                    + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, centre.getX(),
+                    centre.getZ()));
+        }
+    }
+
     private static void say(String line) {
         lines.add(line);
         LOGGER.info("[SettlementProbe] {}", line);
@@ -163,6 +246,16 @@ public final class SettlementWorldProbe {
     @SubscribeEvent
     public static void onStarted(ServerStartedEvent event) {
         if (MODE == null) {
+            return;
+        }
+        if (MODE.equals("places")) {
+            try {
+                places(event.getServer().overworld());
+                write();
+            } catch (IOException e) {
+                LOGGER.error("Settlement probe failed", e);
+            }
+            event.getServer().halt(false);
             return;
         }
         try {

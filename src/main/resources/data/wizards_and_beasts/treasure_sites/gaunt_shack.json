@@ -1,0 +1,27 @@
+{
+  "_comment": "The chest under the Gaunts' floorboards (HBP ch.23: the ring Dumbledore found there was cursed). Copied from desert_tomb.json except that the chest is always warded: canon never leaves it clean. The ring itself is not placed here (a balance call for the owner).",
+  "structures": "wizards_and_beasts:treasure_site/gaunt_shack",
+  "loot_tables": [
+    "wizards_and_beasts:chests/gaunt_shack"
+  ],
+  "chance": 1.0,
+  "expedition_chance": 1.0,
+  "value": {
+    "min": 290,
+    "max": 870
+  },
+  "layers": {
+    "min": 1,
+    "max": 2
+  },
+  "curses": [
+    "jinx",
+    "sealing",
+    "flagrante"
+  ],
+  "artefacts": [
+    "wizards_and_beasts:ancient_goblet",
+    "wizards_and_beasts:sealed_casket",
+    "wizards_and_beasts:tomb_medallion"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "#wizards_and_beasts:has_structure/portkey_hill",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "start_pool": "wizards_and_beasts:places/portkey_hill",
+  "size": 1,
+  "start_height": {
+    "type": "minecraft:constant",
+    "value": {
+      "absolute": -1
+    }
+  },
+  "use_expansion_hack": false,
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 32,
+  "liquid_settings": "ignore_waterlogging"
+}
