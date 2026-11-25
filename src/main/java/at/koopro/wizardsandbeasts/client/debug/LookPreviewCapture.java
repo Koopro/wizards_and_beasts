@@ -43,10 +43,27 @@ public final class LookPreviewCapture {
 
     private record Step(String shot, int ticks, Consumer<ServerPlayer> server) {}
 
-    private static final List<Step> SCRIPT = List.of(
-            new Step("", 100, LookPreviewCapture::stage),
-            new Step("", 40, p -> look(p, 2.5, 0.6, -3.0, 0f, 10f)),
-            new Step("quidditch_balls", 10, p -> {}),
+    private static List<Step> script() {
+        List<Step> steps = new java.util.ArrayList<>();
+        steps.add(new Step("", 100, LookPreviewCapture::stage));
+        // The Quidditch balls after the owner's concept sheet: a hero shot, then four views of each ball.
+        steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -2.4, 0f, 0f)));
+        steps.add(new Step("quidditch_hero", 10, p -> {}));
+        for (int b = 0; b < BALLS.length; b++) {
+            for (int v = 0; v < VIEWS.length; v++) {
+                double x = viewX(b, v);
+                double back = VIEW_BACK[b];
+                // A three-quarter look from up and to one side, as the concept sheet draws its views.
+                steps.add(new Step("", 30, p -> eyeAt(p, x - 0.45 * back, VIEW_Y + 0.55 * back, VIEW_Z - back,
+                        x, VIEW_Y, VIEW_Z)));
+                steps.add(new Step(BALLS[b] + "_" + VIEWS[v], 10, p -> {}));
+            }
+        }
+        steps.addAll(OTHER_SCENES);
+        return steps;
+    }
+
+    private static final List<Step> OTHER_SCENES = List.of(
             new Step("", 40, p -> look(p, 8.5, 0.4, -2.2, 0f, 22f)),
             new Step("ridgeback_egg", 10, p -> {}),
             new Step("", 40, p -> look(p, 17.0, 0.7, -1.4, 0f, 6f)),
@@ -80,16 +97,7 @@ public final class LookPreviewCapture {
                 level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.POLISHED_DEEPSLATE.defaultBlockState());
             }
         }
-        // The balls at the size they are, beside a Seeker in Quidditch robes for scale: Quaffle, Snitch, Bludger.
-        level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack()
-                .withSuppressedOutput().withLevel(level), String.format(java.util.Locale.ROOT,
-                "summon minecraft:armor_stand %.1f %d %.1f {Rotation:[180f,0f],ShowArms:1b,"
-                        + "equipment:{chest:{id:\"wizards_and_beasts:quidditch_robes\",count:1},"
-                        + "mainhand:{id:\"wizards_and_beasts:beaters_bat\",count:1}}}",
-                base.getX() + 4.5, base.getY(), base.getZ() + 0.5));
-        display(level, base.offset(0, 0, 0), 1.25, "quaffle", 1.0f);
-        display(level, base.offset(1, 0, 0), 1.6, "golden_snitch", 1.0f);
-        display(level, base.offset(2, 0, 0), 1.2, "bludger", 1.0f);
+        quidditch(level);
         // Norbert's egg in Hagrid's fire.
         level.setBlockAndUpdate(base.offset(8, 0, 0), Blocks.CAMPFIRE.defaultBlockState());
         display(level, base.offset(8, 0, 0), 0.95, "norwegian_ridgeback_egg", 1.0f);
@@ -123,6 +131,105 @@ public final class LookPreviewCapture {
                 base.getX() + 28, base.getY() + 2, base.getZ() + 2));
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
+    }
+
+    /** West of the other scenes, so none of them stands in the background. */
+    private static final double QX = -60;
+    private static final String[] BALLS = {"quaffle", "bludger", "golden_snitch"};
+    private static final String[] VIEWS = {"front", "side", "top", "bottom"};
+    /** Room per view (the Snitch's wings span two blocks) and the camera's distance back. */
+    private static final double[] BALL_SPACING = {2.2, 2.0, 3.2};
+    private static final double[] VIEW_BACK = {1.8, 1.6, 3.0};
+    private static final double VIEW_Y = 1.6;
+    /** Beyond the hoops and far east of the hero shot, so neither shows behind the other. */
+    private static final double VIEW_Z = 30;
+
+    private static double viewX(int ball, int view) {
+        double start = QX + 60 + 16 * ball;
+        return start + view * BALL_SPACING[ball];
+    }
+
+    /**
+     * The owner's concept sheet (2026-11-25): the three balls at the sheet's sizes (model scale 1: Quaffle 14 units,
+     * Bludger 12, Snitch 7 with its wings) over a pitch with goal hoops, then each ball turned to show its front,
+     * side, top and bottom. Every display has a fixed daylight brightness.
+     */
+    private static void quidditch(ServerLevel level) {
+        for (int x = -12; x <= 112; x++) {
+            for (int z = -8; z <= 36; z++) {
+                level.setBlockAndUpdate(base.offset((int) QX + x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+        }
+        // Three goal hoops behind the hero shot: tall posts and thin gold rings, the middle one tallest.
+        int[][] hoops = {{-6, 9}, {2, 12}, {10, 9}};
+        for (int[] hoop : hoops) {
+            BlockPos foot = base.offset((int) QX + hoop[0], 0, 24);
+            for (int y = 0; y < hoop[1]; y++) {
+                level.setBlockAndUpdate(foot.above(y), Blocks.OAK_FENCE.defaultBlockState());
+            }
+            for (int dx = -4; dx <= 4; dx++) {
+                for (int dy = -4; dy <= 4; dy++) {
+                    double r = Math.sqrt(dx * dx + dy * dy);
+                    if (r > 2.5 && r < 3.5) {
+                        level.setBlockAndUpdate(foot.offset(dx, hoop[1] + 3 + dy, 0), Blocks.GOLD_BLOCK.defaultBlockState());
+                    }
+                }
+            }
+        }
+        // The hero shot: the balls in a row in the air, Quaffle on the left (+x is the left facing +z).
+        ball(level, QX + 3.5, 1.85, 0.5, "quaffle", 1.0, 8, NONE, 0);
+        ball(level, QX + 1.9, 1.85, 0.5, "bludger", 1.0, 8, NONE, 0);
+        ball(level, QX + 0.1, 2.15, 0.5, "golden_snitch", 1.0, 8, NONE, 0);
+        // Four views of each: as made, turned to show its east side, its top, its bottom.
+        for (int b = 0; b < BALLS.length; b++) {
+            for (int v = 0; v < VIEWS.length; v++) {
+                ball(level, viewX(b, v), VIEW_Y, VIEW_Z, BALLS[b], 1.0, 8, VIEW_TURN[v], v);
+            }
+        }
+    }
+
+    private static final float S45 = (float) Math.sqrt(0.5);
+    private static final float[] NONE = {0f, 0f, 0f, 1f};
+    /** front, side (east face to the camera), top (top to the camera), bottom. */
+    private static final float[][] VIEW_TURN = {NONE, {0f, S45, 0f, S45}, {-S45, 0f, 0f, S45}, {S45, 0f, 0f, S45}};
+
+    /**
+     * A ball whose centre lands at (x, centreY, z). A geo item's origin sits at the item's centre and the ball's
+     * centre {@code centreUnits} above it; the display is turned by quaternion {@code q} about its origin, so the
+     * translation moves the turned centre back onto the point (view 0 front/1 side keep it above, 2 top swings it
+     * toward -z, 3 bottom toward +z).
+     */
+    private static void ball(ServerLevel level, double x, double centreY, double z, String item, double scale,
+                             int centreUnits, float[] q, int view) {
+        double c = centreUnits / 16.0 * scale;
+        double tx = 0;
+        double ty = view <= 1 ? -c : 0;
+        double tz = view == 2 ? c : view == 3 ? -c : 0;
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:item_display %.3f %.3f %.3f {item:{id:\"%s:%s\",count:1},item_display:\"none\","
+                        + "brightness:{sky:15,block:0},"
+                        + "transformation:{left_rotation:[%.4ff,%.4ff,%.4ff,%.4ff],right_rotation:[0f,0f,0f,1f],"
+                        + "translation:[%.3ff,%.3ff,%.3ff],scale:[%.3ff,%.3ff,%.3ff]}}",
+                base.getX() + x, base.getY() + centreY, base.getZ() + z, WizardsAndBeastsMod.MODID, item,
+                q[0], q[1], q[2], q[3], tx, ty, tz, scale, scale, scale));
+    }
+
+    private static void command(ServerLevel level, String cmd) {
+        level.getServer().getCommands().performPrefixedCommand(
+                level.getServer().createCommandSourceStack().withSuppressedOutput().withLevel(level), cmd);
+    }
+
+    /** Places the eye at (ex, ey, ez) looking at (tx, ty, tz), all base-relative. */
+    private static void eyeAt(ServerPlayer p, double ex, double ey, double ez, double tx, double ty, double tz) {
+        double dx = tx - ex, dy = ty - ey, dz = tz - ez;
+        float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+        eye(p, ex, ey, ez, yaw, pitch);
+    }
+
+    /** Places the spectator so the eye, 1.62 above the feet, is at these base-relative coordinates. */
+    private static void eye(ServerPlayer p, double x, double y, double z, float yaw, float pitch) {
+        look(p, x, y - 1.62, z, yaw, pitch);
     }
 
     private static void display(ServerLevel level, BlockPos at, double up, String item, float scale) {
@@ -240,4 +347,7 @@ public final class LookPreviewCapture {
             }
         });
     }
+
+    /** Last, so every static it reads is already set (static fields initialise in textual order). */
+    private static final List<Step> SCRIPT = script();
 }
