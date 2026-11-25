@@ -161,7 +161,7 @@ wizardsandbeasts
 | Structures / placements | `AzkabanStructures` | Registers structure, piece and placement types. |
 | Features | `ModFeatures` | Custom tree `Feature<?>` registrations; configured/placed definitions are resource-driven. |
 | Villager content | `ModVillager` | POIs and professions. |
-| Recipes | `wand.recipe.WandmakingRecipeType`, `WandmakingRecipeSerializer` | Custom wandmaking recipe type/serializer. |
+| Pairing | `wand.making.WandmakingRules`, `WandmakingSpec`, `WoodMaking`, `CoreMaking` | Every wood pairs with every core by rule (difficulty, length, affinity from the `making` blocks of `wand_woods` / `wand_cores`); no recipe files since 2026-11-26. |
 | Spells | `spell.core.Spells` | An in-memory, hybrid registry: Java static registrations, addon event registrations, and reloadable JSON registrations. It is not a vanilla `Registry`. |
 | Skills / vocations | `skill.SkillTrees`, `skill.SkillNodeLoader`, `skill.vocation.VocationLoader` | Runtime collections rebuilt from datapacks; skills are not a vanilla registry. |
 | Wand modules | `wand.customization.WandModuleRegistry`, `WandModuleLoader` | Programmatic bootstrap plus reloadable definition path. |
@@ -465,7 +465,7 @@ The following high-leverage classes are the primary map for contributors (full n
 | `at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries` | Dynamic wand data registries | Wand |
 | `at.koopro.wizardsandbeasts.wand.allegiance.AllegianceSystem` | Wand ownership/allegiance | Wand |
 | `at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity` | Bench state | Wand |
-| `at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipeSerializer` | Custom recipe codec | Wand |
+| `at.koopro.wizardsandbeasts.wand.making.WandmakingRules` | Wood x core pairing rule | Wand |
 | `at.koopro.wizardsandbeasts.skill.SkillNodeLoader` | JSON skill rebuilding | Skills |
 | `at.koopro.wizardsandbeasts.skill.SkillSystemAPI` | Gameplay skill queries | Skills |
 | `at.koopro.wizardsandbeasts.skill.data.PlayerSkillData` | Player skill state | Skills |

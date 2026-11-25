@@ -5,7 +5,7 @@ import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.WandItemRegistry;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -25,18 +25,17 @@ import java.util.List;
 /**
  * Shows what the Wandmaker's Bench turns a blank and a core into.
  *
- * <p>{@code WandmakingRecipe} cannot assemble its own result — {@code matches} returns false and
- * {@code assemble} returns an empty stack, because the bench menu resolves the wand itself from the
- * player's bench tier and chosen flexibility. So this category builds the display stacks the same way the
- * menu does rather than calling the recipe. Length is shown at the low end of the recipe's range, since
- * the real value is rolled per craft and a viewer that implied a fixed length would be lying.
+ * <p>One entry per wood and core: every wood pairs with every core ({@code WandmakingRules}). The result is
+ * the pair's own {@link WandmakingSpec#createWand}, the bench's builder, with no flexibility and the low end
+ * of the pair's length range, since both are the maker's choice and a viewer that implied a fixed value would
+ * be lying.
  */
 @NullMarked
-public class WandmakingCategory implements IRecipeCategory<WandmakingRecipe> {
+public class WandmakingCategory implements IRecipeCategory<WandmakingSpec> {
 
-    public static final IRecipeType<WandmakingRecipe> TYPE = IRecipeType.create(
+    public static final IRecipeType<WandmakingSpec> TYPE = IRecipeType.create(
             Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "wandmaking"),
-            WandmakingRecipe.class);
+            WandmakingSpec.class);
 
     private final IDrawable icon;
 
@@ -45,7 +44,7 @@ public class WandmakingCategory implements IRecipeCategory<WandmakingRecipe> {
     }
 
     @Override
-    public IRecipeType<WandmakingRecipe> getRecipeType() {
+    public IRecipeType<WandmakingSpec> getRecipeType() {
         return TYPE;
     }
 
@@ -72,7 +71,7 @@ public class WandmakingCategory implements IRecipeCategory<WandmakingRecipe> {
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, WandmakingRecipe recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder, WandmakingSpec recipe, IFocusGroup focuses) {
         // Slot positions mirror WandmakersBenchMenu: blank, core, output.
         builder.addSlot(RecipeIngredientRole.INPUT, 1, 12)
                 .add(blankFor(recipe.woodKey()));
@@ -105,12 +104,12 @@ public class WandmakingCategory implements IRecipeCategory<WandmakingRecipe> {
      * viewer that implied a fixed value would be lying. The stack itself comes from the recipe now — this
      * category used to build its own and had drifted, missing the elder-wand marker.
      */
-    private static ItemStack resultFor(WandmakingRecipe recipe) {
-        return recipe.createWand(null, recipe.resultLengthMin());
+    private static ItemStack resultFor(WandmakingSpec recipe) {
+        return recipe.createWand(null, recipe.lengthMin());
     }
 
     /** The stacks this recipe names, for the hiding pass. */
-    static List<ItemStack> displayedStacks(WandmakingRecipe recipe) {
+    static List<ItemStack> displayedStacks(WandmakingSpec recipe) {
         return java.util.stream.Stream.concat(
                         java.util.stream.Stream.of(blankFor(recipe.woodKey()), resultFor(recipe)),
                         coresFor(recipe.coreKey()).stream())

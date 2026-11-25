@@ -21,5 +21,15 @@
     "glint": "#EEF4FF",
     "pattern": "steady",
     "strength": 0.65
+  },
+  "_making_canon": "Affinity +1 = a pairing a famous wand carried: ash: Cedric Diggory (GoF ch.18); hawthorn: Draco Malfoy (DH ch.24); willow: Ron Weasley's second wand (Pottermore)",
+  "making": {
+    "difficulty": 0.0,
+    "length_shift": 0.0,
+    "affinity": {
+      "wizards_and_beasts:ash": 1,
+      "wizards_and_beasts:hawthorn": 1,
+      "wizards_and_beasts:willow": 1
+    }
   }
 }

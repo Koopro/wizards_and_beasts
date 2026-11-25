@@ -9,7 +9,7 @@ import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
@@ -20,7 +20,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
@@ -45,7 +44,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
     public static final int STATUS_BLANK_UNSHAPED = 2;
     public static final int STATUS_NO_RECIPE = 3;
     public static final int STATUS_BENCH_TOO_PLAIN = 4;
-    /** A recipe pairs this wood and core, but the server has withdrawn the wood, the core or the pairing. */
+    /** The wood and core pair, but the server has withdrawn the wood, the core or the pairing. */
     public static final int STATUS_WITHDRAWN = 5;
 
     // ── Geometry, shared with WandmakersBenchScreen ─────────────────────────
@@ -178,7 +177,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
         return dataBacking[DATA_STATUS];
     }
 
-    /** Bench tier the pending recipe demands, ×100. Meaningful with {@link #STATUS_BENCH_TOO_PLAIN}. */
+    /** Bench tier the pending pairing demands (its difficulty), ×100. Meaningful with {@link #STATUS_BENCH_TOO_PLAIN}. */
     public int getRequiredTierScaled() {
         return dataBacking[DATA_REQUIRED_TIER];
     }
@@ -235,22 +234,22 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
             dataBacking[DATA_STATUS] = wood == null ? STATUS_BLANK_UNSHAPED : STATUS_NO_RECIPE;
             return;
         }
-        Optional<WandmakingRecipe> recipeOpt = findRecipe(wood, coreId);
+        Optional<WandmakingSpec> recipeOpt = findRecipe(wood, coreId);
         if (recipeOpt.isEmpty()) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             dataBacking[DATA_STATUS] = STATUS_NO_RECIPE;
             return;
         }
-        WandmakingRecipe recipe = recipeOpt.get();
+        WandmakingSpec recipe = recipeOpt.get();
         if (!WandRules.mayMake(wood, coreId)) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             dataBacking[DATA_STATUS] = STATUS_WITHDRAWN;
             return;
         }
-        if (bench.getCachedTierScore() < recipe.minimumBenchTier()) {
+        if (bench.getCachedTierScore() < recipe.difficulty()) {
             handler.set(2, ItemResource.of(ItemStack.EMPTY), 0);
             dataBacking[DATA_STATUS] = STATUS_BENCH_TOO_PLAIN;
-            dataBacking[DATA_REQUIRED_TIER] = (int) (recipe.minimumBenchTier() * 100.0f);
+            dataBacking[DATA_REQUIRED_TIER] = (int) (recipe.difficulty() * 100.0f);
             return;
         }
         dataBacking[DATA_STATUS] = STATUS_READY;
@@ -269,19 +268,19 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
             return 0;
         }
         float cheapest = Float.MAX_VALUE;
-        for (RecipeHolder<?> holder : serverLevel.getServer().getRecipeManager().getRecipes()) {
-            if (holder.value() instanceof WandmakingRecipe r && r.woodKey().equals(wood)) {
-                cheapest = Math.min(cheapest, r.minimumBenchTier());
+        for (WandmakingSpec r : at.koopro.wizardsandbeasts.wand.making.WandmakingRules.all(serverLevel.registryAccess())) {
+            if (r.woodKey().equals(wood)) {
+                cheapest = Math.min(cheapest, r.difficulty());
             }
         }
         return cheapest == Float.MAX_VALUE ? 0 : (int) (cheapest * 100.0f);
     }
 
-    private Optional<WandmakingRecipe> findRecipe(Identifier wood, Identifier core) {
+    private Optional<WandmakingSpec> findRecipe(Identifier wood, Identifier core) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return Optional.empty();
         }
-        return WandRulesService.recipeFor(serverLevel.getServer(), wood, core);
+        return WandRulesService.specFor(serverLevel.getServer(), wood, core);
     }
 
     @Override

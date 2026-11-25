@@ -22,5 +22,14 @@
     "glint": "#E8352B",
     "pattern": "heartbeat",
     "strength": 0.85
+  },
+  "_making_canon": "Affinity +1 = a pairing a famous wand carried: vine: Hermione Granger (Pottermore); walnut: Bellatrix Lestrange (DH ch.24)",
+  "making": {
+    "difficulty": 1.3,
+    "length_shift": 1.0,
+    "affinity": {
+      "wizards_and_beasts:vine": 1,
+      "wizards_and_beasts:walnut": 1
+    }
   }
 }

@@ -1,4 +1,4 @@
-package at.koopro.wizardsandbeasts.wand.recipe;
+package at.koopro.wizardsandbeasts.wand.making;
 
 import at.koopro.wizardsandbeasts.creature.AlphaRoster;
 import com.google.gson.JsonArray;
@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Every core a wandmaking recipe asks for can actually be had in survival -- not merely "appears in some loot table".
+ * Every wand core can actually be had in survival -- not merely "appears in some loot table".
  *
- * <p>That weaker check is what let a third of the recipes die: thunderbird, troll and wampus cat cores had loot
+ * <p>That weaker check is what let a third of the old per-pair recipes die: thunderbird, troll and wampus cat cores had loot
  * tables and harvest rules, on creatures that never spawn. A core counts as reachable here only if a trader sells it,
  * a chest loot table holds it, or a creature that really spawns (on the alpha roster or progression-critical, with a
  * spawn biome modifier) drops, sheds or gives it (2026-10-22).
@@ -36,18 +36,16 @@ class WandCoreReachabilityTest {
     private static final Path DATA = Path.of("src/main/resources/data/wizards_and_beasts");
 
     @Test
-    void everyRecipeCoreHasALiveSource() throws IOException {
+    void everyCoreHasALiveSource() throws IOException {
+        // Every core pairs with every wood (WandmakingRules), so every defined core is one a maker may ask for.
         Set<String> cores = new TreeSet<>();
-        int recipes = 0;
-        try (Stream<Path> files = Files.list(DATA.resolve("recipe"))) {
-            for (Path f : files.filter(p -> p.getFileName().toString().startsWith("wandmaking_")).toList()) {
-                JsonObject recipe = read(f).getAsJsonObject();
-                cores.add(recipe.get("core_key").getAsString().substring(NS.length()));
-                recipes++;
+        try (Stream<Path> files = Files.list(DATA.resolve("wizards_and_beasts/wand_cores"))) {
+            for (Path f : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+                String name = f.getFileName().toString();
+                cores.add(name.substring(0, name.length() - ".json".length()));
             }
         }
-        assertEquals(100, recipes, "10 woods x 10 cores");
-        assertEquals(10, cores.size(), "cores named by recipes: " + cores);
+        assertEquals(10, cores.size(), "shipped cores: " + cores);
 
         Set<String> sold = soldItems();
         String chests = textOf(DATA.resolve("loot_table/chests"));

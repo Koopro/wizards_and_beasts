@@ -21,5 +21,10 @@
     "glint": "#6FD8C8",
     "pattern": "pulse",
     "strength": 0.6
+  },
+  "_making_canon": "No canon wand pairs this core; every wood is neutral.",
+  "making": {
+    "difficulty": 3.1,
+    "length_shift": 1.0
   }
 }

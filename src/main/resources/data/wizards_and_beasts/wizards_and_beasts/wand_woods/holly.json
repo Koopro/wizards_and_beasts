@@ -39,5 +39,10 @@
         "ornament": "wizards_and_beasts:spiral_inlay"
       }
     ]
+  },
+  "making": {
+    "difficulty": 2.0,
+    "length_min": 9.0,
+    "length_max": 12.5
   }
 }

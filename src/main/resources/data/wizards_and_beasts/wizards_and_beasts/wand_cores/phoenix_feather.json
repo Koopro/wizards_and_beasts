@@ -22,5 +22,14 @@
     "glint": "#FF9A4A",
     "pattern": "ember",
     "strength": 0.85
+  },
+  "_making_canon": "Affinity +1 = a pairing a famous wand carried: holly: Harry Potter (PS ch.5); yew: Voldemort (PS ch.5)",
+  "making": {
+    "difficulty": 0.5,
+    "length_shift": 0.5,
+    "affinity": {
+      "wizards_and_beasts:holly": 1,
+      "wizards_and_beasts:yew": 1
+    }
   }
 }

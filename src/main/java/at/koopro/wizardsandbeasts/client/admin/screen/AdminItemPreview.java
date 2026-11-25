@@ -4,7 +4,7 @@ import at.koopro.wizardsandbeasts.item.broom.BroomItem;
 import at.koopro.wizardsandbeasts.registry.ModDataComponents;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandPresetRegistry;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,7 +21,7 @@ import java.util.Locale;
 
 /**
  * Display stacks for the Wands and Travel previews, drawn by the game's own item renderers — no second rendering
- * path. A wand is made by {@link WandmakingRecipe#createWand}, the bench's own routine, so the preview carries exactly
+ * path. A wand is made by {@link WandmakingSpec#createWand}, the bench's own routine, so the preview carries exactly
  * the components a crafted wand would; a broom is its registered item with its definition component.
  */
 @NullMarked
@@ -43,7 +43,7 @@ final class AdminItemPreview {
             }
         }
         // Recipes are not synced to clients; a throwaway recipe runs the bench's own assembly for these ids.
-        ItemStack stack = new WandmakingRecipe(woodId, coreId, 0f, length, length, 1f).createWand(flex, length);
+        ItemStack stack = new WandmakingSpec(woodId, coreId, 0f, length, length, 0).createWand(flex, length);
         Identifier presetId = preset.isEmpty() ? null : Identifier.tryParse(preset);
         if (presetId != null) {
             WandPresetRegistry.get(presetId).ifPresent(p -> stack.set(WandComponents.WAND_CONFIGURATION.get(), p.configuration()));

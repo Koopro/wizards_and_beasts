@@ -7,6 +7,9 @@ import net.minecraft.network.chat.ComponentSerialization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import at.koopro.wizardsandbeasts.wand.making.WoodMaking;
 
 /**
  * @param spellModifiers keyed by magical school ({@code healing}, {@code divination}, …). Read by
@@ -17,6 +20,9 @@ import java.util.Map;
  * @param temperament    how the wood behaves toward its wielder — see {@link WandTemperament}. Absent means neutral.
  * @param appearance     the wand's colour and silhouette — see {@link WandWoodAppearance}. Absent means
  *                       a derived colour and the base wand's shape.
+ * @param making         how hard the wood is to work and the lengths it is turned to — see
+ *                       {@link at.koopro.wizardsandbeasts.wand.making.WoodMaking}. Absent means the stand-in for its
+ *                       rarity, so a datapack wood pairs with every core without authoring anything.
  */
 public record WandWoodDefinition(
         Component displayName,
@@ -27,7 +33,8 @@ public record WandWoodDefinition(
         float refuseThreshold,
         WandCastModifiers castModifiers,
         WandTemperament temperament,
-        WandWoodAppearance appearance) {
+        WandWoodAppearance appearance,
+        Optional<WoodMaking> making) {
     public static final Codec<WandWoodDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ComponentSerialization.CODEC.fieldOf("display_name").forGetter(WandWoodDefinition::displayName),
             Codec.STRING.listOf().fieldOf("affinity_tags").forGetter(WandWoodDefinition::affinityTags),
@@ -40,6 +47,16 @@ public record WandWoodDefinition(
             WandTemperament.CODEC.optionalFieldOf("temperament", WandTemperament.NEUTRAL)
                     .forGetter(WandWoodDefinition::temperament),
             WandWoodAppearance.CODEC.optionalFieldOf("appearance", WandWoodAppearance.NONE)
-                    .forGetter(WandWoodDefinition::appearance)
+                    .forGetter(WandWoodDefinition::appearance),
+            WoodMaking.CODEC.optionalFieldOf("making").forGetter(WandWoodDefinition::making)
     ).apply(instance, WandWoodDefinition::new));
+
+    /** A wood with no {@code making} block: it is made at the stand-in for its rarity. */
+    public WandWoodDefinition(Component displayName, List<String> affinityTags, Map<String, Float> spellModifiers,
+                              List<String> personalityAffinity, String rarity, float refuseThreshold,
+                              WandCastModifiers castModifiers, WandTemperament temperament,
+                              WandWoodAppearance appearance) {
+        this(displayName, affinityTags, spellModifiers, personalityAffinity, rarity, refuseThreshold, castModifiers,
+                temperament, appearance, Optional.empty());
+    }
 }

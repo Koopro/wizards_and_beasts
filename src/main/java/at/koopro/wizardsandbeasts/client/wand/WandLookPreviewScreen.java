@@ -5,7 +5,7 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.wand.visual.WandBondLook;
@@ -37,7 +37,7 @@ import java.util.function.IntConsumer;
  * resolved to.
  *
  * <p>Nothing here is a second rendering path. The wand on screen is a stack built by the wandmaker's
- * bench's own routine ({@link WandmakingRecipe#createWand}) and drawn with {@code GuiGraphics.renderItem},
+ * bench's own routine ({@link WandmakingSpec#createWand}) and drawn with {@code GuiGraphics.renderItem},
  * so it goes through {@link WandRenderer} exactly as a wand in an inventory does; the bond is set by
  * writing a master and a bond score onto that stack, the way allegiance does. Client-only, never sent
  * anywhere. Opened from the Control Center's Visuals → Debug panel.
@@ -190,7 +190,7 @@ public final class WandLookPreviewScreen extends Screen {
             return;
         }
         float inches = LENGTHS[length] + make * MAKE_STEP;
-        stack = new WandmakingRecipe(woods.get(wood), cores.get(core), 0f, inches, inches, 1f)
+        stack = new WandmakingSpec(woods.get(wood), cores.get(core), 0f, inches, inches, 0)
                 .createWand(WandFlexibility.values()[flexibility], inches);
         WandBondLook state = WandBondLook.values()[bond];
         Optional<UUID> master = switch (state) {

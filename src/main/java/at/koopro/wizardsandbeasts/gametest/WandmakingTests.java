@@ -6,7 +6,7 @@ import at.koopro.wizardsandbeasts.spell.core.SpellCategory;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import at.koopro.wizardsandbeasts.wand.rules.WandRulesService;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -31,7 +31,7 @@ public final class WandmakingTests {
     static void contribute(WizardTestSupport.Registrar tests) {
         tests.add("wandmaking_rare_and_imported_cores_make_wands",
                 "wandmaking: rougarou hair, White River Monster spine and the three imported cores are bench cores "
-                        + "with a recipe, and the wand made carries the core",
+                        + "that pair with holly, and the wand made carries the core",
                 WandmakingTests::rareCoresMakeWands);
     }
 
@@ -43,8 +43,8 @@ public final class WandmakingTests {
             ItemStack material = new ItemStack(item.get());
             check(helper, WandCoreMaterialItem.isBenchCore(material), () -> item.getId() + " is not a bench core");
             Identifier core = item.getId();
-            Optional<WandmakingRecipe> recipe = WandRulesService.makeable(server, HOLLY, core);
-            check(helper, recipe.isPresent(), () -> "no holly recipe for " + core);
+            Optional<WandmakingSpec> recipe = WandRulesService.makeable(server, HOLLY, core);
+            check(helper, recipe.isPresent(), () -> "holly does not pair with " + core);
             ItemStack wand = recipe.get().createWand(WandFlexibility.PLIANT, 11.0f);
             check(helper, core.equals(WandComponents.getCore(wand)), () -> "the wand made does not carry " + core);
         }

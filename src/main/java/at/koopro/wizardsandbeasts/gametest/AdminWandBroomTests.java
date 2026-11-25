@@ -48,7 +48,7 @@ import java.util.UUID;
 import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
 
 /**
- * The Wands and Travel sections' server boundary against the live wand registries, wandmaking recipes, broom
+ * The Wands and Travel sections' server boundary against the live wand registries and pairing rule, broom
  * definitions and the real bench/Ollivander/broom paths. Every change is restored through the same service.
  */
 public final class AdminWandBroomTests {
@@ -59,14 +59,14 @@ public final class AdminWandBroomTests {
     private static final Identifier PHOENIX = Identifier.fromNamespaceAndPath(NS, "phoenix_feather");
     private static final Identifier UNICORN = Identifier.fromNamespaceAndPath(NS, "unicorn_hair");
     /**
-     * A core no holly recipe uses, if the loaded data has one. Rougarou hair served until 2026-10-22, when it and the
-     * White River Monster spine became cores and the shipped grid went full (10 woods x 10 cores); the "no recipe"
-     * branch is still real for a datapack that adds a core without recipes.
+     * A core that does not pair with holly, if the loaded data has one. Since 2026-11-26 every defined core pairs
+     * with every defined wood by rule ({@code WandmakingRules}), so this is always empty; the lookup stays so the
+     * test notices if pairing ever becomes partial again.
      */
     private static java.util.Optional<Identifier> unpairedCore(MinecraftServer server) {
         return server.registryAccess().lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY).listElementIds()
                 .map(key -> key.identifier())
-                .filter(core -> WandRulesService.recipeFor(server, HOLLY, core).isEmpty())
+                .filter(core -> WandRulesService.specFor(server, HOLLY, core).isEmpty())
                 .sorted(java.util.Comparator.comparing(Identifier::toString))
                 .findFirst();
     }
@@ -167,7 +167,7 @@ public final class AdminWandBroomTests {
             String problem = WandAdminService.problem(server, make(HOLLY, PHOENIX, 11f, "SUPPLE", ""));
             check(helper, "withdrawn".equals(problem), () -> "a withdrawn pairing previewed as " + problem);
             check(helper, WandRulesService.makeable(server, HOLLY, PHOENIX).isEmpty(), () -> "a withdrawn pairing is still makeable");
-            check(helper, WandRulesService.recipeFor(server, HOLLY, PHOENIX).isPresent(), () -> "withdrawing deleted the recipe itself");
+            check(helper, WandRulesService.specFor(server, HOLLY, PHOENIX).isPresent(), () -> "withdrawing deleted the pairing itself");
         } finally {
             service().reset(CONSOLE, pair, true);
         }

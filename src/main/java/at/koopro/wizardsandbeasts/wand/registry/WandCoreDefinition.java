@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import at.koopro.wizardsandbeasts.wand.making.CoreMaking;
 
 /**
  * @param castModifiers what the core contributes to a cast. Absent means neutral. Same shared
@@ -19,6 +20,8 @@ import net.minecraft.network.chat.ComponentSerialization;
  *                      2026-10-22, and a datapack that still carries them is read without error.
  * @param appearance    how the core shows through the wand — see {@link WandCoreAppearance}. Absent means a
  *                      muted light derived from the core's id. Looks only; nothing in a cast reads it.
+ * @param making        how hard the core is to marry, how it shifts the length, which woods it suits — see
+ *                      {@link CoreMaking}. Absent means {@link CoreMaking#DEFAULT}.
  */
 public record WandCoreDefinition(
         Component displayName,
@@ -28,7 +31,8 @@ public record WandCoreDefinition(
         float darkAffinity,
         WandCastModifiers castModifiers,
         WandTemperament temperament,
-        WandCoreAppearance appearance) {
+        WandCoreAppearance appearance,
+        CoreMaking making) {
     public static final Codec<WandCoreDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ComponentSerialization.CODEC.fieldOf("display_name").forGetter(WandCoreDefinition::displayName),
             Codec.STRING.fieldOf("source_key").forGetter(WandCoreDefinition::sourceKey),
@@ -40,6 +44,7 @@ public record WandCoreDefinition(
             WandTemperament.CODEC.optionalFieldOf("temperament", WandTemperament.NEUTRAL)
                     .forGetter(WandCoreDefinition::temperament),
             WandCoreAppearance.CODEC.optionalFieldOf("appearance", WandCoreAppearance.NONE)
-                    .forGetter(WandCoreDefinition::appearance)
+                    .forGetter(WandCoreDefinition::appearance),
+            CoreMaking.CODEC.optionalFieldOf("making", CoreMaking.DEFAULT).forGetter(WandCoreDefinition::making)
     ).apply(instance, WandCoreDefinition::new));
 }

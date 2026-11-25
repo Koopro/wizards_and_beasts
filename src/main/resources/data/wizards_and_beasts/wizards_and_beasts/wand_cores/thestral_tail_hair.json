@@ -20,5 +20,13 @@
     "glint": "#7E6AA8",
     "pattern": "smoke",
     "strength": 0.6
+  },
+  "_making_canon": "Affinity +1 = a pairing a famous wand carried: elder: the Elder Wand (Tales of Beedle the Bard)",
+  "making": {
+    "difficulty": 1.6,
+    "length_shift": 1.0,
+    "affinity": {
+      "wizards_and_beasts:elder": 1
+    }
   }
 }
