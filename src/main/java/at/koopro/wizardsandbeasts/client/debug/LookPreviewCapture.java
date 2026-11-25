@@ -59,6 +59,10 @@ public final class LookPreviewCapture {
             steps.addAll(KAPPA_SCENES);
             return steps;
         }
+        if ("qilin".equals(System.getenv("WB_LOOK_ONLY"))) {
+            steps.addAll(QILIN_SCENES);
+            return steps;
+        }
         // The Quidditch balls in vanilla style: a hero shot, then four views of each ball.
         steps.add(new Step("", 40, p -> eye(p, QX + 1.9, 1.95, -1.2, 0f, 4f)));
         steps.add(new Step("quidditch_hero", 10, p -> {}));
@@ -161,6 +165,58 @@ public final class LookPreviewCapture {
             new Step("kappa_three_quarter", 10, p -> {}),
             new Step("", 40, p -> eyeAt(p, KX + 0.2, 2.1, -0.5, KX, 1.15, 0.45)),
             new Step("kappa_dish", 10, p -> {}));
+
+    /** Where the Qilin stands, east of the Kappa's pond. */
+    private static final double QLX = 95.5;
+
+    /**
+     * The Qilin (A1), Mojang style, the film's golden equine dragon (The Secrets of Dumbledore): in a meadow with a
+     * rare pale one behind and a person for scale, then front, side, three-quarter and its head close up.
+     */
+    private static final List<Step> QILIN_SCENES = List.of(
+            new Step("", 40, p -> eyeAt(p, QLX + 0.6, 2.2, -4.2, QLX + 0.6, 0.9, 1.0)),
+            new Step("qilin_meadow", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, QLX, 1.3, -2.4, QLX, 0.9, 0.5)),
+            new Step("qilin_front", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, QLX + 2.8, 1.0, 0.3, QLX, 0.8, 0.3)),
+            new Step("qilin_side", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, QLX + 1.8, 1.7, -1.8, QLX, 0.9, 0.4)),
+            new Step("qilin_three_quarter", 10, p -> {}),
+            new Step("", 40, p -> eyeAt(p, QLX + 0.7, 1.35, -1.4, QLX, 1.15, -0.2)),
+            new Step("qilin_head", 10, p -> {}));
+
+    private static void qilinMeadow(ServerLevel level) {
+        for (int x = 91; x <= 101; x++) {
+            for (int z = -6; z <= 5; z++) {
+                level.setBlockAndUpdate(base.offset(x, -1, z), Blocks.GRASS_BLOCK.defaultBlockState());
+            }
+        }
+        level.setBlockAndUpdate(base.offset(93, 0, 3), Blocks.TALL_GRASS.defaultBlockState());
+        level.setBlockAndUpdate(base.offset(98, 0, 4), Blocks.OXEYE_DAISY.defaultBlockState());
+        command(level, "kill @e[type=wizards_and_beasts:qilin]");
+        spawnQilin(level, QLX, 0.5, 180f, null);
+        spawnQilin(level, QLX - 2.2, 3.2, 150f, "pale");
+        command(level, String.format(java.util.Locale.ROOT,
+                "summon minecraft:mannequin %.2f %.2f %.2f {Rotation:[180f,0f],immovable:1b,hide_description:1b}",
+                base.getX() + QLX + 2.2, (double) base.getY(), base.getZ() + 1.0));
+    }
+
+    private static void spawnQilin(ServerLevel level, double x, double z, float yaw, @org.jspecify.annotations.Nullable String coat) {
+        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "qilin"));
+        if (type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND)
+                instanceof net.minecraft.world.entity.Mob qilin) {
+            qilin.snapTo(base.getX() + x, base.getY(), base.getZ() + z, yaw, 0f);
+            qilin.setYHeadRot(yaw);
+            qilin.setYBodyRot(yaw);
+            qilin.setNoAi(true);
+            qilin.setPersistenceRequired();
+            if (qilin instanceof at.koopro.wizardsandbeasts.entity.creature.GenericBeastEntity beast) {
+                beast.applyVariant(coat == null ? "base" : coat);
+            }
+            level.addFreshEntity(qilin);
+        }
+    }
 
     private static void kappaPond(ServerLevel level) {
         for (int x = 76; x <= 85; x++) {
@@ -370,6 +426,7 @@ public final class LookPreviewCapture {
         gnomeGarden(level);
         nifflerFamily(level);
         kappaPond(level);
+        qilinMeadow(level);
         p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         markLit = true;
     }
