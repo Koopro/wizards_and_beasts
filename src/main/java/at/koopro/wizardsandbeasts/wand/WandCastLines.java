@@ -48,7 +48,16 @@ public final class WandCastLines {
      * than one that uses a plain hyphen.
      */
     public static void append(WandStats stats, Consumer<Component> lines) {
-        for (Component line : build(stats)) {
+        append(stats, 1.0f, lines);
+    }
+
+    /**
+     * As {@link #append(WandStats, Consumer)}, plus the wand's condition as a stability row.
+     *
+     * @param stability {@code WandCastContribution.stability} — the same multiplier a cast applies
+     */
+    public static void append(WandStats stats, float stability, Consumer<Component> lines) {
+        for (Component line : build(stats, stability)) {
             lines.accept(line);
         }
     }
@@ -77,25 +86,37 @@ public final class WandCastLines {
      * two omission rules cannot drift.
      */
     public static List<Line> lines(WandStats stats) {
+        return lines(stats, 1.0f);
+    }
+
+    /** As {@link #lines(WandStats)}, with the wand's condition as a stability row after damage. */
+    public static List<Line> lines(WandStats stats, float stability) {
         List<Line> out = new ArrayList<>();
-        collect(stats, out);
+        collect(stats, stability, out);
         return out;
     }
 
     /** Visible for testing: the lines this would append, in order. */
     public static List<Component> build(WandStats stats) {
+        return build(stats, 1.0f);
+    }
+
+    /** Visible for testing: as {@link #build(WandStats)} with a stability row. */
+    public static List<Component> build(WandStats stats, float stability) {
         List<Component> out = new ArrayList<>();
-        for (Line line : lines(stats)) {
+        for (Line line : lines(stats, stability)) {
             out.add(line.text().copy().withStyle(tone(line.beneficial())));
         }
         return out;
     }
 
-    private static void collect(WandStats stats, List<Line> out) {
+    private static void collect(WandStats stats, float stability, List<Line> out) {
 
         // Multipliers, as a percentage away from 1.0. Higher damage and range are good; a higher
         // cooldown means waiting longer, so its sign is read the other way round.
         addMultiplier(out, stats.damageMultiplier(), "wandcraft.tooltip.cast.damage", true);
+        // A cracked or corrupted wand casts weaker: the cast multiplies damage by this (WandCastContribution).
+        addMultiplier(out, stability, "wandcraft.tooltip.cast.stability", true);
         addMultiplier(out, stats.cooldownMultiplier(), "wandcraft.tooltip.cast.cooldown", false);
         addMultiplier(out, stats.rangeMultiplier(), "wandcraft.tooltip.cast.range", true);
 

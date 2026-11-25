@@ -275,7 +275,8 @@ public final class WandTab extends ScrollingTab {
         }
         cached = new Derived(stack.getHoverName(), WandLoreNames.wood(registries, WandComponents.getWood(stack)),
                 WandLoreNames.core(registries, WandComponents.getCore(stack)),
-                WandCastLines.lines(WandStatsResolver.resolve(stack, registries)), character,
+                WandCastLines.lines(WandStatsResolver.resolve(stack, registries),
+                        at.koopro.wizardsandbeasts.wand.cast.WandCastContribution.stability(stack, player.level().registryAccess())), character,
                 WandEligibility.evaluate(player, stack), WandAllegianceService.powerMultiplier(player, stack, registries),
                 WandAllegianceService.cooldownMultiplier(player, stack, registries));
         derived = cached;

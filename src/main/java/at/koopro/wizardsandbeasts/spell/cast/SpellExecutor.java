@@ -56,15 +56,15 @@ public final class SpellExecutor {
         WandStats wand = ctx.wandStats();
         if (ModuleManager.isEnabled(Module.WANDS) && wandStack.getItem() instanceof WandItem) {
             WandCorruptionSystem.onSpellCast(caster, wandStack, spell.getCategory());
-            float corruptIntegrity = WandCorruptionSystem.getEffectivePowerMultiplier(wandStack, spell.getCategory(), level.registryAccess());
-            ctx.modifiers().multiplyDamage(corruptIntegrity, "wand_corruption_integrity");
         }
         // The two named channels, each set once by its owner. Everything else on the stack is
         // situational and multiplies in freely. See SpellPower for why the split matters.
         SkillSystemAPI.applySkillModifiers(ctx.modifiers(), caster, spell);
         ctx.modifiers().setProficiency(
                 ctx.scalingProfile().damageMult(), ctx.scalingProfile().cooldownMult());
-        WandStatsResolver.applyToStack(ctx.modifiers(), wand, spell);
+        // Condition (integrity, corruption) and resolved stats in one call, the same one the tooltip reads.
+        at.koopro.wizardsandbeasts.wand.cast.WandCastContribution.applyTo(
+                ctx.modifiers(), wandStack, wand, spell, level.registryAccess());
         ObscurialCombatRules.applyCastModifiers(ctx.modifiers(), caster);
         at.koopro.wizardsandbeasts.skill.vocation.VocationAbilityHooks.applyCastModifiers(ctx.modifiers(), caster, spell);
         at.koopro.wizardsandbeasts.entity.niffler.HappinessSpellPower.applyCastModifiers(ctx.modifiers(), caster);

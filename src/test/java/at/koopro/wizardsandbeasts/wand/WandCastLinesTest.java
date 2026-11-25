@@ -91,6 +91,16 @@ class WandCastLinesTest {
                 "wandcraft.tooltip.cast.misfire +4%"), lines);
     }
 
+    /** A cracked wand casts weaker; the tooltip says so right after damage, as a loss. */
+    @Test
+    void aWornWandShowsItsStabilityAfterDamage() {
+        List<WandCastLines.Line> lines = WandCastLines.lines(stats(1.10f, 1.0f, 1.0f, 0.0f, Map.of()), 0.75f);
+        assertEquals(List.of("wandcraft.tooltip.cast.damage +10%", "wandcraft.tooltip.cast.stability -25%"),
+                lines.stream().map(l -> rendered(l.text())).toList());
+        assertEquals(false, lines.get(1).beneficial(), "a weaker wand is not good news");
+        assertEquals(List.of(), WandCastLines.build(WandStats.NEUTRAL, 1.0f), "a whole wand prints no stability row");
+    }
+
     /** Elder's real authored values, as a spot-check that the table survives the arithmetic. */
     @Test
     void elderWoodReadsAsAuthored() {

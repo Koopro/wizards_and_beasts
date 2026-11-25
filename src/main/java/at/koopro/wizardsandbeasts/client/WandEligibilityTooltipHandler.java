@@ -82,7 +82,8 @@ public final class WandEligibilityTooltipHandler {
             // What it adds to a spell, for anyone who has learned to read the figures — beneath its
             // character, not above it.
             if (readsFigures) {
-                WandCastLines.append(WandStatsResolver.resolve(wand, registries), tooltip::add);
+                WandCastLines.append(WandStatsResolver.resolve(wand, registries),
+                        at.koopro.wizardsandbeasts.wand.cast.WandCastContribution.stability(wand, registries), tooltip::add);
             }
         } else {
             tooltip.add(Component.translatable("wandcraft.tooltip.character.hint").withStyle(ChatFormatting.DARK_GRAY));
