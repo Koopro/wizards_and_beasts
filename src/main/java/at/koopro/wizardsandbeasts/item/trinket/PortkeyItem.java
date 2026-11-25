@@ -54,7 +54,8 @@ public class PortkeyItem extends Item implements AnimatedItem {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (!ModuleManager.isEnabled(Module.ARTEFACTS) || player.isShiftKeyDown()
-                || player.getItemInHand(hand).get(ModDataComponents.PORTKEY_TARGET.get()) == null) {
+                || (player.getItemInHand(hand).get(ModDataComponents.PORTKEY_TARGET.get()) == null
+                && PortkeyService.landmark(player.getItemInHand(hand)).isEmpty())) {
             return InteractionResult.PASS;
         }
         player.startUsingItem(hand);
@@ -87,6 +88,14 @@ public class PortkeyItem extends Item implements AnimatedItem {
         if (target != null) {
             tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.portkey.linked",
                             target.getX(), target.getY(), target.getZ())
+                    .withStyle(ChatFormatting.DARK_AQUA));
+            tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.portkey.rule")
+                    .withStyle(ChatFormatting.GRAY));
+        } else if (PortkeyService.landmark(stack).isPresent()) {
+            // Left set for a place (Stoatshead Hill's boot): named, not given as coordinates.
+            var place = PortkeyService.landmark(stack).get();
+            tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.portkey.landmark",
+                            Component.translatable("portkey." + place.getNamespace() + ".landmark." + place.getPath()))
                     .withStyle(ChatFormatting.DARK_AQUA));
             tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.portkey.rule")
                     .withStyle(ChatFormatting.GRAY));

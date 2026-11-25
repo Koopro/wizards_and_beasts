@@ -1,5 +1,5 @@
 {
-  "_comment": "The chest under the Gaunts' floorboards (HBP ch.23: the ring Dumbledore found there was cursed). Copied from desert_tomb.json except that the chest is always warded: canon never leaves it clean. The ring itself is not placed here (a balance call for the owner).",
+  "_comment": "The chest under the Gaunts' floorboards (HBP ch.23: the ring Dumbledore found there was cursed). Copied from desert_tomb.json except that the chest is always warded: canon never leaves it clean. Marvolo Gaunt's ring lies in it (owner 2026-11-25); the shack is one per world, so is the ring.",
   "structures": "wizards_and_beasts:treasure_site/gaunt_shack",
   "loot_tables": [
     "wizards_and_beasts:chests/gaunt_shack"

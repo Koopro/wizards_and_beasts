@@ -2,6 +2,15 @@
   "type": "minecraft:chest",
   "pools": [
     {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "wizards_and_beasts:marvolo_gaunts_ring"
+        }
+      ]
+    },
+    {
       "rolls": {
         "type": "minecraft:uniform",
         "min": 1,

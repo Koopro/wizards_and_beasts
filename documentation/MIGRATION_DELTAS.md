@@ -4270,3 +4270,24 @@ world its only Gaunt shack (seen on seed 3). The Gaunt chest is a treasure site 
 hidden cache's coin pool. Marvolo Gaunt's ring is **not** placed (a balance call left to the owner). The boot is
 decoration, not a working Portkey. Probe: `WB_SETTLEMENT_PROBE=places` on `runSettlementProbe` found all three on five
 seeds, most within 0-2 blocks of the land around them. Pinned by `CanonPlacesDataTest`.
+
+---
+
+# Canon places, round two: the ring, the boot, the snake, the eggshell (2026-11-25, `feat/places-finds`)
+
+Owner answers 2026-11-25: the ring in the Gaunt chest (yes), the Occamy's eggshell as a gift (yes, rate left to me),
+the Portkey boot working (yes), the door snake (make it).
+
+- **Marvolo Gaunt's ring** is now the first pool of `chests/gaunt_shack` (one roll). The shack is one per world, so is
+  the ring; the chest stays a warded treasure site. Before, the ring could not be found anywhere.
+- **The Occamy** gives an `occamy_eggshell` from bond 60 every 2400 s, the Thestral's rare-material gift rate (its tail
+  hair, a wand core), not a number of my own.
+- **Stoatshead Hill's boot** is a Portkey (`portkey/PortkeyBoot`): an invisible vanilla interaction entity sits over the
+  boot's display, both tagged `wizards_and_beasts.portkey_boot`. Using it runs `PortkeyService.travel` with a Portkey set
+  for the Leaky Cauldron: the toucher and everyone touching them land a few blocks south of its template, on the surface,
+  and the boot leaves the hill. A Portkey may now carry `custom_data.portkey_landmark` (a structure id) instead of a
+  target; the first use resolves it (`resolveLandmark`: a one-per-world place's own chunk, else the nearest start) and
+  sets it. Where the world has no such place (the flat GameTest world) nothing happens and nothing is spent. Pinned by
+  GameTest `artefact_portkey_boot_takes_its_toucher_to_the_leaky_cauldron`; the landing was checked on three real seeds.
+- **The dead snake on the Gaunt door** is a 16x16 sprite (`textures/item/gaunt_door_snake.png`, `tools/gaunt_door_snake.py`)
+  shown by an item display through `minecraft:item_model`; no item is registered for it.

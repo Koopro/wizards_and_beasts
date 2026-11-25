@@ -147,6 +147,11 @@ public final class SettlementWorldProbe {
      */
     private static void places(ServerLevel level) {
         say("seed " + level.getSeed());
+        BlockPos leaky = at.koopro.wizardsandbeasts.portkey.PortkeyService.resolveLandmark(level,
+                at.koopro.wizardsandbeasts.portkey.PortkeyBoot.LANDMARK);
+        say("the hill's boot goes to " + (leaky == null ? "nowhere" : leaky.toShortString() + ", standing on "
+                + level.getBlockState(leaky).getBlock().getName().getString() + ", air above: "
+                + (level.getBlockState(leaky.above()).isAir() && level.getBlockState(leaky.above(2)).isAir())));
         BlockPos spawn = level.getRespawnData().pos();
         Map<String, Block> signature = Map.of(
                 "portkey_hill", net.minecraft.world.level.block.Blocks.ANDESITE,      // counted as its boot instead
@@ -202,7 +207,9 @@ public final class SettlementWorldProbe {
             }
             if ("portkey_hill".equals(name)) {
                 hits = level.getEntitiesOfClass(net.minecraft.world.entity.Display.ItemDisplay.class,
-                        net.minecraft.world.phys.AABB.of(box).inflate(1)).size();
+                        net.minecraft.world.phys.AABB.of(box).inflate(1)).size() * 10
+                        + level.getEntitiesOfClass(net.minecraft.world.entity.Interaction.class,
+                        net.minecraft.world.phys.AABB.of(box).inflate(1)).size();      // 11 = the boot and its touch box
             }
             // The start's box is grown for terrain adaptation; the template itself is the first piece's box. Its ground
             // layer is y0, so the land around it should stand at y0 + 1 (heights two blocks outside each corner).
