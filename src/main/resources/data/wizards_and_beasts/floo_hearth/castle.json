@@ -1,0 +1,57 @@
+{
+  "__comment": "Gryffindor common room (GoF/OotP films; CANON.md): a large carved stone fireplace, 3 x 3 walk-in opening in a 5-wide breast two blocks taller than the cottage's, carved stones at the mantel's ends, a chimney stack. Layers bottom to top, rows back to front (room side last), read left to right from the room.",
+  "opening_width": 3,
+  "opening_height": 3,
+  "key": {
+    "S": "#wizards_and_beasts:hearth_stone",
+    "C": "#wizards_and_beasts:hearth_carved",
+    "M": "#wizards_and_beasts:hearth_stone"
+  },
+  "layers": [
+    [
+      "     ",
+      " SSS ",
+      "SSSSS"
+    ],
+    [
+      "SSSSS",
+      "S.G.S",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "S...S",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "S...S",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "CMMMC",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "SSSSS",
+      "     "
+    ],
+    [
+      " SSS ",
+      " SSS ",
+      "     "
+    ],
+    [
+      " SSS ",
+      " SSS ",
+      "     "
+    ]
+  ],
+  "example": {
+    "S": "minecraft:stone_bricks",
+    "C": "minecraft:chiseled_stone_bricks",
+    "M": "minecraft:smooth_stone"
+  }
+}

@@ -42,7 +42,8 @@ public final class HearthStamp {
             BlockState state = switch (cell.symbol()) {
                 case HearthPattern.GRATE -> ModBlocks.FLOO_GRATE.get().defaultBlockState().setValue(FlooGrateBlock.FACING, facing);
                 case HearthPattern.OPEN -> Blocks.AIR.defaultBlockState();
-                default -> first(pattern.get().key().getOrDefault(String.valueOf(cell.symbol()), "minecraft:stone"));
+                default -> first(pattern.get().example().getOrDefault(String.valueOf(cell.symbol()),
+                        pattern.get().key().getOrDefault(String.valueOf(cell.symbol()), "minecraft:stone")));
             };
             if (state.hasProperty(BlockStateProperties.AXIS)) {
                 state = state.setValue(BlockStateProperties.AXIS, across);

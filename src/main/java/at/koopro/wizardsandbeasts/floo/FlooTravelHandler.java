@@ -130,7 +130,7 @@ public final class FlooTravelHandler {
      *   <li><b>Renamed fireplace</b> — a re-registration retires the old address; see
      *       {@link FlooNetworkManager#register}. One block holds one address, so a renamed hearth
      *       stops answering to what it used to be called.</li>
-     *   <li><b>Broken fireplace</b> — {@code FlooFireplaceBlock.affectNeighborsAfterRemoval} purges
+     *   <li><b>Broken fireplace</b> — {@code FlooGrateBlock.affectNeighborsAfterRemoval} purges
      *       the entry by position, so the network never lists a hearth that is not there. A player
      *       who breaks their own destination loses it, which is the honest outcome.</li>
      *   <li><b>Unloaded destination chunk</b> — nothing is pre-loaded and no chunk ticket is held.

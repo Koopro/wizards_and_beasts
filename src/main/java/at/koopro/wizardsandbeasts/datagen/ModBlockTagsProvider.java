@@ -216,8 +216,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 FurnitureBlocks.EMERALD_CRYSTAL_CLUSTER.get(), FurnitureBlocks.SAPPHIRE_CRYSTAL_CLUSTER.get(),
                 FurnitureBlocks.MOONSTONE_CRYSTAL_CLUSTER.get(), FurnitureBlocks.GOLDEN_TROPHY_CUP.get(),
                 FurnitureBlocks.SILVER_TROPHY_CUP.get(), FurnitureBlocks.OWL_STATUE.get(), FurnitureBlocks.GARGOYLE_STATUE.get(),
-                FurnitureBlocks.WIZARD_STATUE.get(), FurnitureBlocks.HOGWARTS_FIREPLACE.get(),
-                FurnitureBlocks.MINISTRY_FIREPLACE.get(), FurnitureBlocks.KNOCKTURN_FIREPLACE.get(),
+                FurnitureBlocks.WIZARD_STATUE.get(),
                 FurnitureBlocks.GLOWING_RUNESTONE.get());
         tag(BlockTags.MINEABLE_WITH_AXE).add(FurnitureBlocks.ENCHANTED_MIRROR.get(), FurnitureBlocks.DARK_MIRROR.get(),
                 FurnitureBlocks.GRANDFATHER_CLOCK.get(), FurnitureBlocks.HERALDIC_SHIELD.get());

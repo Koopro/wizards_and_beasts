@@ -47,8 +47,10 @@ public final class HearthPatterns extends SimpleJsonResourceReloadListener<Heart
     @Override
     protected void apply(Map<Identifier, HearthPattern> loaded, ResourceManager resources, ProfilerFiller profiler) {
         SERVER.clear();
+        // Most specific first: a castle build also satisfies the cottage's looser pattern, and should be called a castle.
         loaded.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(Comparator.comparing(Identifier::toString)))
+                .sorted(Comparator.<Map.Entry<Identifier, HearthPattern>>comparingInt(e -> -cellCount(e.getValue()))
+                        .thenComparing(e -> e.getKey().toString()))
                 .forEach(e -> {
                     List<String> problems = e.getValue().problems();
                     if (problems.isEmpty()) {
@@ -58,6 +60,10 @@ public final class HearthPatterns extends SimpleJsonResourceReloadListener<Heart
                     }
                 });
         LOGGER.info("Loaded {} Floo hearth styles", SERVER.size());
+    }
+
+    private static int cellCount(HearthPattern pattern) {
+        return pattern.problems().isEmpty() ? pattern.cells().size() : 0;
     }
 
     public static Map<Identifier, HearthPattern> all() {

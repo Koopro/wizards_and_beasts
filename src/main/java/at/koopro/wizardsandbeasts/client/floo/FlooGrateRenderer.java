@@ -108,8 +108,12 @@ public class FlooGrateRenderer implements BlockEntityRenderer<FlooGrateBlockEnti
             // overlaps), counted down from its top so the top edge is always flame tips. While the roar rises the
             // stack slides up out of the hearth floor, which hides what is still below it: nothing is ever clipped.
             float across = width / 3.0F;
+            // An even opening (the shop's two) has its middle half a block to the grate's right as seen from the room,
+            // which in this frame (front toward -z) is -x: +x is the viewer's left (11-26 capture: +0.5 hid the roar
+            // inside the left jamb).
+            float middle = width % 2 == 0 ? -0.5F : 0.0F;
             for (int i = 0; i < SHEETS.length; i++) {
-                float z = SHEETS[i][0], x = SHEETS[i][1] * across, h = SHEETS[i][2] * height * eased;
+                float z = SHEETS[i][0], x = SHEETS[i][1] * across + middle, h = SHEETS[i][2] * height * eased;
                 int n = 0;
                 for (float y = h - 1.0F; y > -1.0F; y -= STEP, n++) {
                     plane(pose, vc, x, y, 1.0F, 0.0F, z, 1.0F, z, ((n + i) & 1) == 0 ? a : b, ((n + i * 3) & 2) != 0);

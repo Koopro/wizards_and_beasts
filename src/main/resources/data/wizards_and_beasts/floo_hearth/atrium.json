@@ -1,0 +1,50 @@
+{
+  "__comment": "Ministry of Magic, Atrium (OotP ch.7, OotP/DH1 films; CANON.md): a gilded fireplace in black-and-green tile, 3 wide x 4 high opening, gilded jambs and lintel, no chimney (the Atrium is underground). Layers bottom to top, rows back to front, read left to right from the room.",
+  "opening_width": 3,
+  "opening_height": 4,
+  "key": {
+    "T": "#wizards_and_beasts:hearth_atrium_tile",
+    "L": "#wizards_and_beasts:hearth_gilt"
+  },
+  "layers": [
+    [
+      "     ",
+      " TTT ",
+      "TTTTT"
+    ],
+    [
+      "TTTTT",
+      "L.G.L",
+      "     "
+    ],
+    [
+      "TTTTT",
+      "L...L",
+      "     "
+    ],
+    [
+      "TTTTT",
+      "L...L",
+      "     "
+    ],
+    [
+      "TTTTT",
+      "L...L",
+      "     "
+    ],
+    [
+      "TTTTT",
+      "LLLLL",
+      "     "
+    ],
+    [
+      "TTTTT",
+      "TTTTT",
+      "     "
+    ]
+  ],
+  "example": {
+    "T": "wizards_and_beasts:ministry_floor_tile",
+    "L": "minecraft:gilded_blackstone"
+  }
+}

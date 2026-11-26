@@ -25,10 +25,13 @@ import java.util.Optional;
  *   <li>{@code .} must be open (nothing a body bumps into): the opening a traveller walks into;</li>
  *   <li>{@code ' '} (space) anything.</li>
  * </ul>
- * Every other symbol names an entry in {@code key}: {@code "#namespace:tag"} or a block id.
+ * Every other symbol names an entry in {@code key}: {@code "#namespace:tag"} or a block id. The optional
+ * {@code example} maps a symbol to the one block the mod uses when it builds this style itself (captures, structures):
+ * the tag says what a player may use, the example says what the style looks like.
  */
 @NullMarked
-public record HearthPattern(int openingWidth, int openingHeight, List<List<String>> layers, Map<String, String> key) {
+public record HearthPattern(int openingWidth, int openingHeight, List<List<String>> layers, Map<String, String> key,
+                            Map<String, String> example) {
 
     public static final char GRATE = 'G';
     public static final char OPEN = '.';
@@ -38,8 +41,15 @@ public record HearthPattern(int openingWidth, int openingHeight, List<List<Strin
             Codec.INT.fieldOf("opening_width").forGetter(HearthPattern::openingWidth),
             Codec.INT.fieldOf("opening_height").forGetter(HearthPattern::openingHeight),
             Codec.STRING.listOf().listOf().fieldOf("layers").forGetter(HearthPattern::layers),
-            Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("key").forGetter(HearthPattern::key)
+            Codec.unboundedMap(Codec.STRING, Codec.STRING).fieldOf("key").forGetter(HearthPattern::key),
+            Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("example", Map.of())
+                    .forGetter(HearthPattern::example)
     ).apply(i, HearthPattern::new));
+
+    /** Without an example palette. */
+    public HearthPattern(int openingWidth, int openingHeight, List<List<String>> layers, Map<String, String> key) {
+        this(openingWidth, openingHeight, layers, key, Map.of());
+    }
 
     /** One required cell, relative to the grate: {@code right} as seen from the room, {@code up}, {@code front}. */
     public record Cell(int right, int up, int front, char symbol) {}

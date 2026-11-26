@@ -99,6 +99,34 @@ class HearthPatternTest {
     }
 
     @Test
+    void everyStyleIsRecognisedInEveryFacingAndWalkInAble() throws IOException {
+        for (Path file : files()) {
+            HearthPattern pattern = parse(file);
+            BlockPos grate = new BlockPos(-3, 70, 12);
+            for (Direction facing : Direction.Plane.HORIZONTAL) {
+                Map<BlockPos, Character> world = stamp(pattern, grate, facing);
+                assertEquals(Optional.empty(), pattern.firstMismatch(grate, facing, reading(world)),
+                        file.getFileName() + " " + facing);
+            }
+            assertTrue(pattern.openingWidth() >= 2 && pattern.openingHeight() >= 3,
+                    file.getFileName() + ": body travel needs at least a 2 x 3 opening (CANON.md)");
+            for (String symbol : pattern.example().keySet()) {
+                assertTrue(pattern.key().containsKey(symbol), file.getFileName() + ": example for unknown symbol " + symbol);
+            }
+        }
+    }
+
+    @Test
+    void aCastleIsTheMoreSpecificReadingOfACastleBuild() throws IOException {
+        // A castle build also satisfies the cottage's looser pattern (the cottage leaves the castle's extra cells
+        // free); the loader tries the style with more cells first so it is called a castle. Pinned here so a
+        // future style cannot silently make that order matter the other way.
+        HearthPattern castle = parse(DIR.resolve("castle.json"));
+        HearthPattern cottage = parse(DIR.resolve("cottage.json"));
+        assertTrue(castle.cells().size() > cottage.cells().size());
+    }
+
+    @Test
     void aBuildIsNotRecognisedTurnedTheWrongWay() throws IOException {
         HearthPattern pattern = cottage();
         BlockPos grate = BlockPos.ZERO;

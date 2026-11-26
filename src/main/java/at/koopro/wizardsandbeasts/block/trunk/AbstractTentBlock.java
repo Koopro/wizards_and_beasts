@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * Shared shell for the two tent preview blocks — see the Tent Models (Exterior Geometry) prompt. Everything
  * here is identical between {@code tent_canvas} and {@code tent_grand}; each subclass supplies only its own
  * {@link TentBlockEntity} (registered under its own {@link BlockEntityType}) and {@code MapCodec}, matching
- * how {@code FlooFireplaceBlock}/{@code PocketConfiguratorBlock} are each one small concrete class rather
+ * how {@code FlooGrateBlock}/{@code PocketConfiguratorBlock} are each one small concrete class rather
  * than a shared factory-injected one.
  *
  * <p>Deliberately minimal: no gameplay, no pocket-space linkage. Collision/outline are the vanilla default

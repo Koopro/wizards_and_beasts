@@ -47,7 +47,7 @@ public class FlooPowderItem extends Item {
             }
             // Crouching with powder in hand at a burning grate is kneeling to put your head in it.
             // The gesture is on the powder rather than on an empty hand because an empty hand at a
-            // lit hearth already means something else — see FlooFireplaceBlock.useWithoutItem — and
+            // lit hearth already means something else — see FlooGrateBlock.useWithoutItem — and
             // a call is the one Floo interaction that plausibly costs a pinch either way.
             // The pinch thrown into the fire is the grate's own business (FlooGrateBlock.useItemOn); crouching skips
             // the block, so only the call arrives here.

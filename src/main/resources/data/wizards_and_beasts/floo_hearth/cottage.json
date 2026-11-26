@@ -7,12 +7,44 @@
     "M": "#wizards_and_beasts:hearth_mantel"
   },
   "layers": [
-    ["     ", " SSS ", "SSSSS"],
-    ["SSSSS", "S.G.S", "     "],
-    ["SSSSS", "S...S", "     "],
-    ["SSSSS", "S...S", "     "],
-    ["SSSSS", "MMMMM", "     "],
-    [" SSS ", " SSS ", "     "],
-    [" SSS ", " SSS ", "     "]
-  ]
+    [
+      "     ",
+      " SSS ",
+      "SSSSS"
+    ],
+    [
+      "SSSSS",
+      "S.G.S",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "S...S",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "S...S",
+      "     "
+    ],
+    [
+      "SSSSS",
+      "MMMMM",
+      "     "
+    ],
+    [
+      " SSS ",
+      " SSS ",
+      "     "
+    ],
+    [
+      " SSS ",
+      " SSS ",
+      "     "
+    ]
+  ],
+  "example": {
+    "S": "minecraft:cobblestone",
+    "M": "minecraft:stripped_spruce_log"
+  }
 }

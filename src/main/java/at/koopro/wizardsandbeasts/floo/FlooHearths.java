@@ -45,7 +45,8 @@ public final class FlooHearths {
         Vec3 centre = Vec3.atBottomCenterOf(grate);
         Vec3 d = at.subtract(centre);
         Direction across = facing.getCounterClockWise();
-        double side = d.x * across.getStepX() + d.z * across.getStepZ();
+        // An even opening's middle is half a block to the grate's right as seen from the room (the shop's two).
+        double side = d.x * across.getStepX() + d.z * across.getStepZ() - (width % 2 == 0 ? 0.5 : 0.0);
         double front = d.x * facing.getStepX() + d.z * facing.getStepZ();
         return Math.abs(side) <= width / 2.0 && front > -0.5 && front < 0.9 && d.y > -0.5 && d.y < height;
     }

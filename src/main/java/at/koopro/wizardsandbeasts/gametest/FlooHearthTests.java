@@ -51,6 +51,10 @@ final class FlooHearthTests {
         tests.addAlone("floo_hearth_cold_grate_refuses_a_pinch",
                 "floo: a pinch only takes in an ordinary fire; a cold grate and a green one refuse it",
                 FlooHearthTests::coldGrateRefusesAPinch);
+        tests.addAlone("floo_hearth_templates_hold_real_hearths",
+                "floo: the Leaky Cauldron and the showcase hall, placed from their generated templates, each hold a "
+                        + "grate the game recognises as the style the generator built",
+                FlooHearthTests::templatesHoldRealHearths);
         tests.addAlone("floo_hearth_mined_grate_takes_its_address",
                 "floo: breaking the grate removes the hearth's address from the network",
                 FlooHearthTests::minedGrateTakesItsAddress);
@@ -177,5 +181,39 @@ final class FlooHearthTests {
         } finally {
             FlooNetworkManager.get(level).unregister(name);
         }
+    }
+
+    /** Grate offsets in each generated template and the style each must read as (tools/floo_hearths.py placed them). */
+    private static void templatesHoldRealHearths(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        record Expect(String template, BlockPos grate, String style) {}
+        java.util.List<Expect> expects = java.util.List.of(
+                new Expect("diagon_alley/leaky_cauldron/a", new BlockPos(5, 1, 1), "cottage"),
+                new Expect("showcase/magic/a", new BlockPos(5, 1, 1), "castle"),
+                new Expect("showcase/magic/a", new BlockPos(13, 1, 1), "atrium"),
+                new Expect("showcase/magic/a", new BlockPos(20, 1, 1), "shop"));
+        BlockPos origin = site(helper, 0, 0);
+        String placedTemplate = "";
+        for (Expect e : expects) {
+            if (!e.template().equals(placedTemplate)) {
+                var template = level.getStructureManager()
+                        .get(Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, e.template()));
+                check(helper, template.isPresent(), () -> "no template " + e.template());
+                template.get().placeInWorld(level, origin, origin,
+                        new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings(),
+                        level.getRandom(), 2);
+                placedTemplate = e.template();
+            }
+            BlockPos spot = origin.offset(e.grate());
+            check(helper, level.getBlockState(spot).is(at.koopro.wizardsandbeasts.registry.ModBlocks.FLOO_GRATE.get()),
+                    () -> e.template() + ": no grate at " + e.grate() + " but " + level.getBlockState(spot));
+            FlooGrateBlockEntity be = (FlooGrateBlockEntity) level.getBlockEntity(spot);
+            check(helper, be != null && be.recheck(level, level.getBlockState(spot)),
+                    () -> e.template() + ": the hearth at " + e.grate() + " is not a finished build");
+            String style = be.style().map(Identifier::getPath).orElse("none");
+            check(helper, style.equals(e.style()),
+                    () -> e.template() + ": the hearth at " + e.grate() + " reads as " + style + ", not " + e.style());
+        }
+        helper.succeed();
     }
 }
