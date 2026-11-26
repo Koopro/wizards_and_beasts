@@ -155,7 +155,14 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropOther(ModBlocks.UNLIT_GLOWSTONE.get(), Blocks.GLOWSTONE);
 
         // Existing blocks that were missing loot entries — fixed alongside location blocks.
-        dropSelf(ModBlocks.WANDMAKERS_BENCH.get());
+        // Two blocks wide: pays out once, from the working part (main or solo); the side half drops nothing.
+        add(ModBlocks.WANDMAKERS_BENCH.get(), block -> LootTable.lootTable().withPool(applyExplosionCondition(block,
+                LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add(LootItem.lootTableItem(block)
+                        .when(net.minecraft.world.level.storage.loot.predicates.InvertedLootItemCondition.invert(
+                                LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+                                        .setProperties(net.minecraft.advancements.criterion.StatePropertiesPredicate.Builder.properties()
+                                                .hasProperty(at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlock.PART,
+                                                        at.koopro.wizardsandbeasts.wand.bench.BenchPart.SIDE))))))));
         dropSelf(ModBlocks.WARDING_STONE.get());
         dropSelf(ModBlocks.POCKET_CONFIGURATOR.get());
         dropSelf(ModBlocks.FLOO_FIREPLACE.get());

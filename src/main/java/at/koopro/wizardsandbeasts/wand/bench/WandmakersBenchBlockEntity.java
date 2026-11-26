@@ -7,6 +7,7 @@ import at.koopro.wizardsandbeasts.wand.registry.BenchEnhancerDefinition;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
 import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceConfigLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -37,6 +38,12 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
 
     /** How often the server rechecks whether there is work on the bench. Twice a second is plenty. */
     private static final int WORK_CHECK_INTERVAL = 10;
+
+    /** How often a cramped (solo) bench looks again for room to grow its side half. Every five seconds. */
+    private static final int GROW_RETRY_INTERVAL = 100;
+
+    /** Whether this solo bench has looked for room since it loaded; the first look is immediate. */
+    private boolean growTried;
 
     private final ItemStacksResourceHandler inventory = new ItemStacksResourceHandler(3);
     private float cachedTierScore = 0.0f;
@@ -78,6 +85,13 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
      */
     public static void serverTick(Level level, BlockPos pos, BlockState state,
                                   WandmakersBenchBlockEntity bench) {
+        if (state.getValue(WandmakersBenchBlock.PART) == BenchPart.SOLO
+                && (!bench.growTried || level.getGameTime() % GROW_RETRY_INTERVAL == 0)) {
+            bench.growTried = true;
+            if (tryGrow(level, pos, state)) {
+                return;
+            }
+        }
         if (level.getGameTime() % WORK_CHECK_INTERVAL != 0) {
             return;
         }
@@ -88,6 +102,31 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         bench.working = wanted;
         bench.setChanged();
         level.sendBlockUpdated(pos, state, state, 3);
+    }
+
+    /**
+     * Turns a solo bench into a pair when one of its four sides has room: its own facing first, so a bench that was
+     * placed facing a room keeps facing it, then clockwise. The working part keeps its block entity and contents
+     * (a state change of the same block keeps it). Returns whether it grew.
+     */
+    static boolean tryGrow(Level level, BlockPos pos, BlockState state) {
+        Direction facing = state.getValue(WandmakersBenchBlock.FACING);
+        for (int turn = 0; turn < 4; turn++) {
+            Direction f = facing;
+            for (int i = 0; i < turn; i++) {
+                f = f.getClockWise();
+            }
+            BlockPos side = WandmakersBenchBlock.sideOf(pos, f);
+            if (!level.isLoaded(side) || !level.getWorldBorder().isWithinBounds(side)
+                    || !level.getBlockState(side).canBeReplaced()) {
+                continue;
+            }
+            BlockState main = state.setValue(WandmakersBenchBlock.FACING, f).setValue(WandmakersBenchBlock.PART, BenchPart.MAIN);
+            level.setBlock(pos, main, 3);
+            level.setBlock(side, main.setValue(WandmakersBenchBlock.PART, BenchPart.SIDE), 3);
+            return true;
+        }
+        return false;
     }
 
     /** A blank or a core in the input slots. The output slot does not count — that job is finished. */

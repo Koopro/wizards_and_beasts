@@ -133,6 +133,7 @@ public final class WizardsAndBeastsGameTests {
         ChamberTests.contribute(registrar);
         SettlementTests.contribute(registrar);
         BenchPersistenceTests.contribute(registrar);
+        BenchTwoWideTests.contribute(registrar);
         CuratedSpellTests.contribute(registrar);
         DisguiseTests.contribute(registrar);
         LeviosaThrowTests.contribute(registrar);
