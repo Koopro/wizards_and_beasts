@@ -249,15 +249,6 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
             return InteractionResult.SUCCESS;
         }
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-            bench.recalcTierScore();
-            List<Identifier> enhIds = new ArrayList<>();
-            for (BlockPos ep : bench.getDetectedEnhancers()) {
-                Identifier bid = BuiltInRegistries.BLOCK.getKey(level.getBlockState(ep).getBlock());
-                if (bid != null) {
-                    enhIds.add(bid);
-                }
-            }
-            List<Identifier> enhSnapshot = List.copyOf(enhIds);
             MenuProvider provider = new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
@@ -266,26 +257,13 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
 
                 @Override
                 public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player p) {
-                    return new WandmakersBenchMenu(syncId, inv, bench, enhSnapshot);
+                    return new WandmakersBenchMenu(syncId, inv, bench);
                 }
             };
             BlockPos main = bench.getBlockPos();
-            serverPlayer.openMenu(provider, buf -> {
-                buf.writeBlockPos(main);
-                buf.writeVarInt(enhSnapshot.size());
-                for (Identifier id : enhSnapshot) {
-                    buf.writeUtf(id.toString(), 320);
-                }
-            });
+            serverPlayer.openMenu(provider, buf -> buf.writeBlockPos(main));
         }
         return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean isMoving) {
-        if (level.getBlockEntity(pos) instanceof WandmakersBenchBlockEntity bench) {
-            bench.recalcTierScore();
-        }
     }
 
     /** Only the working part has a block entity: the side half is furniture. */
@@ -316,29 +294,6 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
             return createTickerHelper(type, ModBlockEntities.WANDMAKERS_BENCH.get(),
                     WandmakersBenchBlockEntity::serverTick);
         }
-        return (tickerLevel, tickerPos, tickerState, blockEntity) -> {
-            if (!(blockEntity instanceof WandmakersBenchBlockEntity bench)) {
-                return;
-            }
-            if (tickerLevel.getGameTime() % 10 != 0) {
-                return;
-            }
-            if (bench.getDetectedEnhancers().isEmpty()) {
-                return;
-            }
-            RandomSource random = tickerLevel.getRandom();
-            for (BlockPos enhancerPos : bench.getDetectedEnhancers()) {
-                double startX = enhancerPos.getX() + 0.5;
-                double startY = enhancerPos.getY() + 0.75;
-                double startZ = enhancerPos.getZ() + 0.5;
-                double targetX = tickerPos.getX() + 0.5;
-                double targetY = tickerPos.getY() + 0.8;
-                double targetZ = tickerPos.getZ() + 0.5;
-                double velocityX = (targetX - startX) * 0.05 + (random.nextDouble() - 0.5) * 0.01;
-                double velocityY = (targetY - startY) * 0.05 + 0.01;
-                double velocityZ = (targetZ - startZ) * 0.05 + (random.nextDouble() - 0.5) * 0.01;
-                tickerLevel.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(), startX, startY, startZ, velocityX, velocityY, velocityZ);
-            }
-        };
+        return null;
     }
 }

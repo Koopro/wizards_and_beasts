@@ -22,11 +22,17 @@
     "strength": 0.6
   },
   "_making_canon": "Affinity +1 = a pairing a famous wand carried: elder: the Elder Wand (Tales of Beedle the Bard)",
+  "_pulse_canon": "thestral tail hair (the Elder Wand) answers only one who has faced death (Pottermore): slow, but it wanders",
   "making": {
     "difficulty": 1.6,
     "length_shift": 1.0,
     "affinity": {
       "wizards_and_beasts:elder": 1
+    },
+    "pulse": {
+      "tempo": 16,
+      "jitter": 0.25,
+      "drift": 0.45
     }
   }
 }

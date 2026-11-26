@@ -55,9 +55,8 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
     private static final int ACTION_ROW_Y = 76;
     private static final int ACTION_ROW_H = 18;
     private static final int STATUS_Y = 98;
-    private static final int TIER_Y = 122;
-    private static final int TIER_BAR_H = 6;
-    private static final float TIER_FULL = 300.0f;
+    /** The bench's tools row. */
+    private static final int TOOLS_Y = 110;
 
     private CyclerWidget<Action> actionCycler;
 
@@ -113,7 +112,7 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
         Ui.divider(g, S, x + SIDE - 4, y + INVENTORY_RULE_Y, imageWidth - 2 * (SIDE - 4));
 
         renderStation(g, x, y);
-        renderTier(g, x, y);
+        BenchToolsRow.render(g, font, S, x + SIDE, x + imageWidth - SIDE, y + TOOLS_Y, menu.toolMask());
 
         List<int[]> origins = WandmakersBenchMenu.slotOrigins();
         for (int i = 3; i < origins.size(); i++) {
@@ -151,20 +150,6 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
         UiText.drawCentered(g, font, S, Component.translatable(key), cx, top + SLOT_LABEL_Y, S.ink2());
     }
 
-    /** The bench's tier row, read the same way as on the making side. */
-    private void renderTier(GuiGraphics g, int x, int y) {
-        float t = Math.min(1.0f, menu.tierScaled() / TIER_FULL);
-        Component caption = Component.translatable("wandcraft.bench.tier_label");
-        String value = String.format(Locale.ROOT, "%.2f", menu.tierScaled() / 100.0f);
-        int left = x + SIDE;
-        int right = x + imageWidth - SIDE;
-        UiText.draw(g, font, S, caption, left, y + TIER_Y, S.ink2());
-        UiText.drawRight(g, font, S, Component.literal(value), right, y + TIER_Y, S.ink());
-        int from = left + font.width(caption) + 6;
-        int to = right - font.width("0.00") - 6;
-        Ui.bar(g, S, from, y + TIER_Y + 1, Math.max(8, to - from), TIER_BAR_H, t, WizardsPalette.GILT_DARK, -1.0f);
-    }
-
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, titleLabelX, titleLabelY, WizardsPalette.PAGE_INK, false);
@@ -175,6 +160,7 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         renderTooltip(g, mouseX, mouseY);
+        BenchToolsRow.tooltip(g, font, leftPos + imageWidth - SIDE, topPos + TOOLS_Y, menu.toolMask(), mouseX, mouseY);
         UiText.draw(g, font, S, Component.translatable(KEY + "action"), leftPos + SIDE, topPos + ACTION_LABEL_Y, S.ink2());
         actionCycler.renderLabel(g);
         Component status = statusMessage();
@@ -191,8 +177,8 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
         Component material = Component.translatable(KEY + "material." + action.name().toLowerCase(Locale.ROOT));
         return switch (status) {
             case READY -> Component.translatable(status.key(), material);
-            case TOO_PLAIN -> Component.translatable(status.key(), menu.requiredTierScaled() / 100.0f,
-                    menu.tierScaled() / 100.0f);
+            case NEEDS_TOOL -> Component.translatable(status.key(), menu.requiredTool() == null
+                    ? Component.empty() : BenchToolsRow.stack(menu.requiredTool()).getHoverName());
             case NO_MATERIAL, WRONG_MATERIAL -> Component.translatable(status.key(), material);
             default -> Component.translatable(status.key());
         };

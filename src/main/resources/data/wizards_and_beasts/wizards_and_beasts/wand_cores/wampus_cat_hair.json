@@ -19,8 +19,14 @@
     "strength": 0.6
   },
   "_making_canon": "No canon wand pairs this core; every wood is neutral.",
+  "_pulse_canon": "Wampus hair wands are strong and resist other hands (Ilvermorny, Pottermore): firm, a little restless",
   "making": {
     "difficulty": 0.9,
-    "length_shift": 0.9
+    "length_shift": 0.9,
+    "pulse": {
+      "tempo": 14,
+      "jitter": 0.3,
+      "drift": 0.15
+    }
   }
 }

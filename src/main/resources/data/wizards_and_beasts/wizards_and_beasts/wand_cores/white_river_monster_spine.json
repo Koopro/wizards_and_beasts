@@ -23,8 +23,14 @@
     "strength": 0.6
   },
   "_making_canon": "No canon wand pairs this core; every wood is neutral.",
+  "_pulse_canon": "White River Monster spine makes 'strong, elegant magic' (Shikoba Wolfe, Pottermore): smooth, slowly wandering",
   "making": {
     "difficulty": 3.1,
-    "length_shift": 1.0
+    "length_shift": 1.0,
+    "pulse": {
+      "tempo": 15,
+      "jitter": 0.15,
+      "drift": 0.2
+    }
   }
 }

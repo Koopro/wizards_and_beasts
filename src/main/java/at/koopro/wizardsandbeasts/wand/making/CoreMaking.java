@@ -21,7 +21,7 @@ import java.util.Map;
  *                    call none impossible.
  */
 @NullMarked
-public record CoreMaking(float difficulty, float lengthShift, Map<Identifier, Integer> affinity) {
+public record CoreMaking(float difficulty, float lengthShift, Map<Identifier, Integer> affinity, Pulse pulse) {
 
     public static final CoreMaking DEFAULT = new CoreMaking(1.0f, 0.5f, Map.of());
 
@@ -29,8 +29,41 @@ public record CoreMaking(float difficulty, float lengthShift, Map<Identifier, In
             Codec.FLOAT.fieldOf("difficulty").forGetter(CoreMaking::difficulty),
             Codec.FLOAT.optionalFieldOf("length_shift", 0.0f).forGetter(CoreMaking::lengthShift),
             Codec.unboundedMap(Identifier.CODEC, Codec.INT).optionalFieldOf("affinity", Map.of())
-                    .forGetter(CoreMaking::affinity)
+                    .forGetter(CoreMaking::affinity),
+            Pulse.CODEC.optionalFieldOf("pulse", Pulse.DEFAULT).forGetter(CoreMaking::pulse)
     ).apply(i, CoreMaking::new));
+
+    /** A core with the {@link Pulse#DEFAULT} rhythm. */
+    public CoreMaking(float difficulty, float lengthShift, Map<Identifier, Integer> affinity) {
+        this(difficulty, lengthShift, affinity, Pulse.DEFAULT);
+    }
+
+    /**
+     * The rhythm a core beats with while it is married to the wood, played as the marrying minigame
+     * ({@link BenchCraft.Act#MARRY}): press on each pulse. Ollivander's core notes give the canon three:
+     * unicorn hair "the most consistent" (slow and steady), dragon heartstring "somewhat temperamental" and prone
+     * to accidents (flares: high jitter), phoenix feather "the hardest to tame" (fast, its tempo shifting: high
+     * drift).
+     *
+     * @param tempo  ticks between pulses
+     * @param jitter 0 to 1: how far a single pulse may come early or late
+     * @param drift  0 to 1: how far the tempo wanders over the act
+     */
+    public record Pulse(int tempo, float jitter, float drift) {
+        public static final Pulse DEFAULT = new Pulse(14, 0.3f, 0.2f);
+
+        public static final Codec<Pulse> CODEC = RecordCodecBuilder.create(i -> i.group(
+                Codec.intRange(6, 40).fieldOf("tempo").forGetter(Pulse::tempo),
+                Codec.floatRange(0f, 1f).optionalFieldOf("jitter", 0f).forGetter(Pulse::jitter),
+                Codec.floatRange(0f, 1f).optionalFieldOf("drift", 0f).forGetter(Pulse::drift)
+        ).apply(i, Pulse::new));
+
+        /** Complementary woods calm a core: each point of affinity takes 30% off its jitter and drift. */
+        public Pulse calmedBy(int affinity) {
+            float k = Math.max(0f, Math.min(2f, 1f - 0.3f * affinity));
+            return new Pulse(tempo, Math.min(1f, jitter * k), Math.min(1f, drift * k));
+        }
+    }
 
     public int affinityWith(Identifier wood) {
         return affinity.getOrDefault(wood, 0);

@@ -115,8 +115,6 @@ public final class ArtefactShowcaseCapture {
         level.setBlock(erised(), mirror.setValue(VanishingCabinetBlock.HALF, DoubleBlockHalf.LOWER), 3);
         level.setBlock(erised().above(), mirror.setValue(VanishingCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
         level.setBlock(benchAt(), at.koopro.wizardsandbeasts.registry.ModBlocks.WANDMAKERS_BENCH.get().defaultBlockState(), 3);
-        level.setBlock(benchAt().offset(1, 0, 0), at.koopro.wizardsandbeasts.registry.ModBlocks.SPELL_TEACHER.get().defaultBlockState(), 3);
-        level.setBlock(benchAt().offset(-1, 0, 0), at.koopro.wizardsandbeasts.registry.ModBlocks.PEWTER_CAULDRON.get().defaultBlockState(), 3);
         p.setData(at.koopro.wizardsandbeasts.registry.ModAttachments.ERISED_HISTORY.get(),
                 at.koopro.wizardsandbeasts.artefact.erised.ErisedHistory.EMPTY);
         look(p, 0.5, 0.5, 180f, 8f);
@@ -196,6 +194,10 @@ public final class ArtefactShowcaseCapture {
         BlockPos benchAt = benchAt();
         if (!(level.getBlockEntity(benchAt) instanceof at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity bench)) {
             return;
+        }
+        // Furnished with its tools (the bench's tier went in the 2026-11-26 remake): the varnish pot strengthens polish.
+        for (at.koopro.wizardsandbeasts.wand.bench.BenchTool tool : at.koopro.wizardsandbeasts.wand.bench.BenchTool.values()) {
+            bench.placeTool(tool);
         }
         p.openMenu(new net.minecraft.world.SimpleMenuProvider(
                 (id, inventory, player) -> new at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu(id, inventory, bench),

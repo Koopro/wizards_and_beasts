@@ -24,8 +24,8 @@ import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
 
 /**
  * The bench's tools: one item per {@link BenchTool}, each laid on the bench at most once, kept across a save, given
- * back as items, and dropped with the blank and the core when the bench is broken. The output slot (a preview of a
- * wand not yet made) is never dropped.
+ * back as items, and dropped with the blank, the core and a finished wand when the bench is broken. (Before the P4
+ * making, the output slot held a preview of a wand not yet made and was never dropped.)
  */
 public final class BenchToolTests {
 
@@ -41,8 +41,8 @@ public final class BenchToolTests {
                 "bench tools: a tool is laid once (a second copy is refused), the set survives a save, and taking "
                         + "them back returns one item per tool and leaves the bench bare",
                 BenchToolTests::layKeepTake);
-        tests.add("bench_broken_drops_tools_and_work_not_the_preview",
-                "bench tools: breaking the bench drops its tools, its blank and its core, never the output preview",
+        tests.add("bench_broken_drops_tools_work_and_wand",
+                "bench tools: breaking the bench drops its tools, its blank, its core and a finished wand",
                 BenchToolTests::brokenDrops);
     }
 
@@ -101,7 +101,7 @@ public final class BenchToolTests {
             check(helper, count(drops, WandItemRegistry.CARVING_KNIFE.get()) == 1, () -> "the knife was not dropped");
             check(helper, count(drops, WandItemRegistry.VARNISH_POT.get()) == 1, () -> "the varnish pot was not dropped");
             check(helper, count(drops, WandItemRegistry.WAND_BLANK.get()) == 1, () -> "the blank was not dropped");
-            check(helper, count(drops, WandItemRegistry.WAND.get()) == 0, () -> "the output preview dropped as a free wand");
+            check(helper, count(drops, WandItemRegistry.WAND.get()) == 1, () -> "the finished wand was not dropped");
             check(helper, count(drops, ModBlocks.WANDMAKERS_BENCH_ITEM.get()) == 1, () -> "the bench itself was not dropped once");
             helper.succeed();
         });

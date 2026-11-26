@@ -3,9 +3,8 @@ package at.koopro.wizardsandbeasts.wand.bench;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import at.koopro.wizardsandbeasts.registry.ModBlockEntities;
 import com.mojang.serialization.Codec;
-import at.koopro.wizardsandbeasts.wand.registry.BenchEnhancerDefinition;
-import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
-import at.koopro.wizardsandbeasts.wand.resonance.WandResonanceConfigLoader;
+import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
+import at.koopro.wizardsandbeasts.wand.making.BenchCraft.Stage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -13,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -33,6 +32,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockEntity {
 
@@ -46,8 +47,6 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
     private boolean growTried;
 
     private final ItemStacksResourceHandler inventory = new ItemStacksResourceHandler(3);
-    private float cachedTierScore = 0.0f;
-    private List<BlockPos> detectedEnhancers = new ArrayList<>();
     private int selectedFlexibilityOrdinal = WandFlexibility.PLIANT.ordinal();
 
     /**
@@ -67,6 +66,23 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
     private int tools;
 
     private static final int ALL_TOOLS = (1 << BenchTool.values().length) - 1;
+
+    // -- the making (BenchCraft) ------------------------------------------------------------------
+    // Saved. A making survives the world closing between two acts; an act being played does not (see pending).
+
+    private Stage stage = Stage.NONE;
+    private @Nullable Identifier jobWood;
+    private @Nullable Identifier jobCore;
+    private float scoreSum;
+    private int scoredActs;
+
+    /**
+     * An act begun and being played on a player's client, waiting for its performance. Not saved: after a reload the
+     * act simply was not done, and the making stays at its stage.
+     */
+    public record PendingAct(UUID player, BenchCraft.Odds odds, long seed, long startTick, int duration) {}
+
+    private @Nullable PendingAct pending;
 
     private final AnimatableInstanceCache animatableCache = GeckoLibUtil.createInstanceCache(this);
 
@@ -163,26 +179,6 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    @Override
-    public void onLoad() {
-        super.onLoad();
-        recalcTierScore();
-    }
-
-    public void recalcTierScore() {
-        Level level = getLevel();
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
-        HolderLookup.RegistryLookup<BenchEnhancerDefinition> lookup =
-                serverLevel.registryAccess().lookupOrThrow(WandDatapackRegistries.BENCH_ENHANCER_REGISTRY);
-        int radius = WandResonanceConfigLoader.getConfig(serverLevel.registryAccess()).scanRadius();
-        BenchMultiblockScanner.ScanResult result =
-                BenchMultiblockScanner.scanEnhancersWithPositions(serverLevel, worldPosition, lookup, radius);
-        this.cachedTierScore = result.tierScore();
-        this.detectedEnhancers = result.enhancers();
-    }
-
     // -- tools ------------------------------------------------------------------------------------
 
     public boolean hasTool(BenchTool tool) {
@@ -232,15 +228,16 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
     }
 
     /**
-     * The bench is coming down: what is on it falls to the floor. The blank, the core and the tools fall. The output
-     * slot is not dropped, because it is the preview of a wand not yet made, and dropping it would make a free wand.
+     * The bench is coming down: what is on it falls to the floor. The blank, the core, a finished wand and the tools
+     * fall. A making in progress is lost with it: the blank falls as a blank, and a core already married into it is
+     * gone. (Until the 2026-11-26 remake the output slot held a preview of a wand not yet made and was never dropped.)
      */
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null || level.isClientSide()) {
             return;
         }
-        for (int slot = 0; slot < 2; slot++) {
+        for (int slot = 0; slot < 3; slot++) {
             ItemStack stack = getSlotStack(slot);
             if (!stack.isEmpty()) {
                 net.minecraft.world.Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
@@ -263,12 +260,113 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         setChanged();
     }
 
-    public float getCachedTierScore() {
-        return cachedTierScore;
+    // -- the making ---------------------------------------------------------------------------------
+
+    public Stage stage() {
+        return stage;
     }
 
-    public List<BlockPos> getDetectedEnhancers() {
-        return detectedEnhancers;
+    public @Nullable Identifier jobWood() {
+        return jobWood;
+    }
+
+    public @Nullable Identifier jobCore() {
+        return jobCore;
+    }
+
+    public @Nullable PendingAct pending() {
+        return pending;
+    }
+
+    /** Whether the pending act's player has had their chance to answer and the bench may take another. */
+    public boolean pendingExpired(long gameTime) {
+        return pending == null || gameTime - pending.startTick() > pending.duration() + BenchMaking.RESULT_GRACE;
+    }
+
+    void setPending(@Nullable PendingAct pending) {
+        this.pending = pending;
+    }
+
+    /** The mean score of the acts done so far, 0 to 1; 0 before any. */
+    public float meanScore() {
+        return scoredActs == 0 ? 0f : scoreSum / scoredActs;
+    }
+
+    /** A blank of this wood is seated: the making begins, and the blank slot is locked until it ends. */
+    void seat(Identifier wood) {
+        stage = Stage.SEATED;
+        jobWood = wood;
+        jobCore = null;
+        scoreSum = 0f;
+        scoredActs = 0;
+        changed();
+    }
+
+    /** An act is done: its score counts, and the making moves on a stage. */
+    void scoreAct(float score) {
+        Stage next = BenchCraft.Act.next(stage).to();
+        scoreSum += score;
+        scoredActs++;
+        if (next != null) {
+            stage = next;
+        }
+        changed();
+    }
+
+    /** The core is taken into the wood: one core is used up, and this making's core is fixed. */
+    void marry(Identifier core) {
+        take(1);
+        jobCore = core;
+    }
+
+    /** The blank split: it is lost and the making ends. The core, not yet married, stays on the bench. */
+    void crack() {
+        take(0);
+        clearJob();
+    }
+
+    /** The core did not take: it is spent. The bored blank waits for another. */
+    void loseCore() {
+        take(1);
+        changed();
+    }
+
+    /** The wand is made: the blank is used up and the wand lies in the output slot. */
+    void finish(ItemStack wand) {
+        take(0);
+        setSlotStack(2, wand);
+        clearJob();
+    }
+
+    void clearJob() {
+        stage = Stage.NONE;
+        jobWood = null;
+        jobCore = null;
+        scoreSum = 0f;
+        scoredActs = 0;
+        pending = null;
+        changed();
+    }
+
+    /** What is in a bench slot: 0 the blank, 1 the core, 2 the finished wand. */
+    public ItemStack slot(int slot) {
+        return getSlotStack(slot);
+    }
+
+    private void take(int slot) {
+        ItemStack stack = getSlotStack(slot);
+        if (!stack.isEmpty()) {
+            stack.shrink(1);
+            setSlotStack(slot, stack);
+        }
+    }
+
+    /** Saves and tells clients: the stage shows on the screen and, in P6, on the rig. */
+    private void changed() {
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     public ItemStacksResourceHandler getInventory() {
@@ -288,9 +386,35 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
             // save and update packet. An absent slot reads back as empty, which is also how the client learns of it.
             ItemStack stack = getSlotStack(i);
             if (!stack.isEmpty()) {
-                output.store("slot_" + i, ItemStack.CODEC, stack);
+                output.store(slotKey(i), ItemStack.CODEC, stack);
             }
         }
+        if (stage != Stage.NONE && jobWood != null) {
+            output.store("job_stage", Codec.STRING, stage.name().toLowerCase(Locale.ROOT));
+            output.store("job_wood", Identifier.CODEC, jobWood);
+            if (jobCore != null) {
+                output.store("job_core", Identifier.CODEC, jobCore);
+            }
+            output.store("job_score", Codec.FLOAT, scoreSum);
+            output.store("job_acts", Codec.INT, scoredActs);
+        }
+    }
+
+    /**
+     * The key a slot is saved under. The output is {@code made}, not {@code slot_2}: until the 2026-11-26 remake that
+     * slot held a preview of a wand not yet made, and a bench saved then must not load it as a finished wand.
+     */
+    private static String slotKey(int slot) {
+        return slot == 2 ? "made" : "slot_" + slot;
+    }
+
+    private static Stage readStage(String name) {
+        for (Stage s : Stage.values()) {
+            if (s.name().toLowerCase(Locale.ROOT).equals(name)) {
+                return s;
+            }
+        }
+        return Stage.NONE;
     }
 
     @Override
@@ -298,8 +422,15 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         super.loadAdditional(input);
         selectedFlexibilityOrdinal = input.read("flexibility_ordinal", Codec.INT).orElse(WandFlexibility.PLIANT.ordinal());
         for (int i = 0; i < 3; i++) {
-            setSlotStack(i, input.read("slot_" + i, ItemStack.CODEC).orElse(ItemStack.EMPTY));
+            setSlotStack(i, input.read(slotKey(i), ItemStack.CODEC).orElse(ItemStack.EMPTY));
         }
+        Identifier wood = input.read("job_wood", Identifier.CODEC).orElse(null);
+        stage = wood == null ? Stage.NONE : readStage(input.read("job_stage", Codec.STRING).orElse(""));
+        boolean job = stage != Stage.NONE;
+        jobWood = job ? wood : null;
+        jobCore = job ? input.read("job_core", Identifier.CODEC).orElse(null) : null;
+        scoreSum = job ? input.read("job_score", Codec.FLOAT).orElse(0f) : 0f;
+        scoredActs = job ? input.read("job_acts", Codec.INT).orElse(0) : 0;
         // Derived, not stored. getUpdateTag ships the slots anyway, so putting `working` on the wire
         // as well would be a second copy of the same fact — and the copy is what goes stale. This way
         // a client cannot disagree with the server about whether the bench is busy.

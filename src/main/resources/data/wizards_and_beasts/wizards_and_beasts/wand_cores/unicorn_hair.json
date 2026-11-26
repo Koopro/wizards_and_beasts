@@ -23,6 +23,7 @@
     "strength": 0.65
   },
   "_making_canon": "Affinity +1 = a pairing a famous wand carried: ash: Cedric Diggory (GoF ch.18); hawthorn: Draco Malfoy (DH ch.24); willow: Ron Weasley's second wand (Pottermore)",
+  "_pulse_canon": "unicorn hair gives 'the most consistent magic', least subject to 'fluctuations and blockages' (harrypotter.com, Wand cores): slow and steady",
   "making": {
     "difficulty": 0.0,
     "length_shift": 0.0,
@@ -30,6 +31,11 @@
       "wizards_and_beasts:ash": 1,
       "wizards_and_beasts:hawthorn": 1,
       "wizards_and_beasts:willow": 1
+    },
+    "pulse": {
+      "tempo": 18,
+      "jitter": 0.0,
+      "drift": 0.0
     }
   }
 }

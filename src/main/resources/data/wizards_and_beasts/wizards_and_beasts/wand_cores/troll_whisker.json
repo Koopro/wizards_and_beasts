@@ -22,8 +22,14 @@
     "strength": 0.25
   },
   "_making_canon": "No canon wand pairs this core; every wood is neutral.",
+  "_pulse_canon": "troll whisker: a crude core (no canon notes); slow and dull, barely uneven",
   "making": {
     "difficulty": 0.4,
-    "length_shift": 0.4
+    "length_shift": 0.4,
+    "pulse": {
+      "tempo": 20,
+      "jitter": 0.2,
+      "drift": 0.0
+    }
   }
 }

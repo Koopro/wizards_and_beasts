@@ -57,6 +57,19 @@ public final class WandmakingRules {
     }
 
     /** Every wood with every core, ordered by wood, then core. */
+    /** A registered wood's making values, or empty for a wood the registry does not know. */
+    public static Optional<WoodMaking> woodMaking(HolderLookup.Provider registries, Identifier wood) {
+        return registries.lookupOrThrow(WandDatapackRegistries.WAND_WOOD_REGISTRY)
+                .get(ResourceKey.create(WandDatapackRegistries.WAND_WOOD_REGISTRY, wood)).map(h -> woodMaking(h.value()));
+    }
+
+    /** A registered core's making values, or {@link CoreMaking#DEFAULT} for a core the registry does not know. */
+    public static CoreMaking coreMaking(HolderLookup.Provider registries, Identifier core) {
+        return registries.lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY)
+                .get(ResourceKey.create(WandDatapackRegistries.WAND_CORE_REGISTRY, core))
+                .map(h -> h.value().making()).orElse(CoreMaking.DEFAULT);
+    }
+
     public static List<WandmakingSpec> all(HolderLookup.Provider registries) {
         List<WandmakingSpec> out = new ArrayList<>();
         var woods = registries.lookupOrThrow(WandDatapackRegistries.WAND_WOOD_REGISTRY).listElements()

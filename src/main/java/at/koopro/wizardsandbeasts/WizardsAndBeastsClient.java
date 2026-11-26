@@ -218,6 +218,9 @@ public class WizardsAndBeastsClient {
                 at.koopro.wizardsandbeasts.client.heritage.hud.BloodBarRenderer.ID,
                 at.koopro.wizardsandbeasts.client.heritage.hud.BloodBarRenderer::render);
         event.registerAboveAll(SpellDiamondOverlay.ID, SpellDiamondOverlay::render);
+        // The bench's act beat: its own layer, never part of the spell HUD (frozen).
+        event.registerAboveAll(at.koopro.wizardsandbeasts.client.wand.BenchBeatClient.ID,
+                at.koopro.wizardsandbeasts.client.wand.BenchBeatClient::render);
         event.registerAboveAll(at.koopro.wizardsandbeasts.client.travel.TimeTrialClient.ID,
                 at.koopro.wizardsandbeasts.client.travel.TimeTrialClient::render);
         event.registerAboveAll(ObscurusOverlay.ID, ObscurusOverlay::render);

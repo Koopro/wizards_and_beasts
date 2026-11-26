@@ -15,7 +15,7 @@ import java.util.Locale;
  */
 @NullMarked
 public enum BenchTool implements StringRepresentable {
-    /** Carving the blank against its log. */
+    /** Paring the blank before it is turned: helps the turning a little, beside the chisel. */
     KNIFE("carving_knife", "tool_knife"),
     /** Turning the blank on the lathe. */
     CHISEL("lathe_chisel", "tool_chisel"),

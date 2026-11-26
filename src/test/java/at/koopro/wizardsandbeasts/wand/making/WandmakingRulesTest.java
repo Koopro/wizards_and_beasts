@@ -156,4 +156,24 @@ class WandmakingRulesTest {
                 .filter(w -> !woods.contains(w)).forEach(w -> unknown.add(core + " -> " + w)));
         assertTrue(unknown.isEmpty(), "affinity for unknown woods: " + unknown);
     }
+
+    /**
+     * Ollivander's core notes, as the marrying plays them: unicorn the steadiest of all, dragon the one that flares
+     * most (jitter), phoenix the fastest and the most shifting (drift). Every shipped core authors its pulse.
+     */
+    @Test
+    void corePulsesFollowOllivandersNotes() throws IOException {
+        var cores = cores();
+        json("wand_cores").forEach((k, v) -> assertTrue(v.getAsJsonObject("making").has("pulse"), k + " has no pulse"));
+        CoreMaking.Pulse unicorn = cores.get(id("unicorn_hair")).making().pulse();
+        CoreMaking.Pulse dragon = cores.get(id("dragon_heartstring")).making().pulse();
+        CoreMaking.Pulse phoenix = cores.get(id("phoenix_feather")).making().pulse();
+        for (WandCoreDefinition def : cores.values()) {
+            CoreMaking.Pulse p = def.making().pulse();
+            assertTrue(unicorn.jitter() <= p.jitter() && unicorn.drift() <= p.drift(), "unicorn is the steadiest");
+            assertTrue(dragon.jitter() >= p.jitter(), "dragon flares most");
+            assertTrue(phoenix.drift() >= p.drift(), "phoenix shifts most");
+            assertTrue(phoenix.tempo() <= p.tempo(), "phoenix is the fastest");
+        }
+    }
 }

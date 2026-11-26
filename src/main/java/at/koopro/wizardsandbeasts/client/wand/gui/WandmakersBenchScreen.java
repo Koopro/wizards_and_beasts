@@ -7,13 +7,17 @@ import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
 import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
+import at.koopro.wizardsandbeasts.network.wand.BenchActPayload;
 import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
+import at.koopro.wizardsandbeasts.wand.bench.BenchMaking;
+import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -22,7 +26,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.BLANK_X;
 import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.CORE_X;
@@ -31,7 +34,8 @@ import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.STATION_Y;
 
 /**
  * The wandmaker's bench: a station row (blank + core → wand), the flexibility the bench will shape for,
- * what it is waiting for, how well-equipped the workshop is, and the player's inventory.
+ * the next act with its odds and the button that begins it, the tools on the bench, and the player's inventory.
+ * The act itself is played in the world ({@code BenchBeatClient}); P5 remakes this screen as Make / Mend / Restyle.
  *
  * <p>Drawn on the shared parchment, procedurally, from {@link WandmakersBenchMenu}'s own geometry
  * ({@code GUI_W}, {@code GUI_H}, the slot origins): the frames are placed by the same numbers as the
@@ -59,17 +63,15 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     private static final int FLEX_LABEL_Y = 66;
     private static final int FLEX_ROW_Y = 76;
     private static final int FLEX_ROW_H = 18;
-    /** What the bench is waiting for: up to two lines, so a full sentence is read rather than cut. */
-    private static final int STATUS_Y = 98;
-    private static final int STATUS_LINES = 2;
-    /** Bench tier row: caption, bar, value. */
-    private static final int TIER_Y = 122;
-    private static final int TIER_BAR_H = 6;
-
-    /** Full marks on the tier scale, scaled by 100 the way the menu reports it. */
-    private static final float TIER_FULL = 300.0f;
+    /** What the bench is waiting for, or the next act's odds: one fitted line. */
+    private static final int STATUS_Y = 97;
+    /** The act button (left) and the tool wells (right). */
+    private static final int ACT_Y = 108;
+    private static final int ACT_W = 60;
+    private static final int ACT_H = 18;
 
     private CyclerWidget<WandFlexibility> flexCycler;
+    private @Nullable Button actButton;
 
     public WandmakersBenchScreen(WandmakersBenchMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -104,6 +106,13 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
                 flexibility -> flexibility.label().getString(), this::chooseFlexibility);
         flexCycler.setBounds(leftPos + SIDE, topPos + FLEX_ROW_Y, imageWidth - 2 * SIDE, FLEX_ROW_H);
         flexCycler.buttons().forEach(this::addRenderableWidget);
+        actButton = Button.builder(actLabel(), b -> ClientPacketDistributor.sendToServer(new BenchActPayload(menu.containerId)))
+                .bounds(leftPos + SIDE, topPos + ACT_Y, ACT_W, ACT_H).build();
+        addRenderableWidget(actButton);
+    }
+
+    private Component actLabel() {
+        return Component.translatable(menu.getNextAct().key() + ".short");
     }
 
     /**
@@ -121,6 +130,10 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         if (flexCycler != null && flexCycler.selected().ordinal() != menu.getFlexibilityOrdinal()) {
             rebuildCycler();
         }
+        if (actButton != null) {
+            actButton.active = menu.getStatus() == BenchMaking.Status.READY;
+            actButton.setMessage(actLabel());
+        }
     }
 
     // ── painting ─────────────────────────────────────────────────────────────
@@ -134,7 +147,7 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         Ui.divider(g, S, x + SIDE - 4, y + INVENTORY_RULE_Y, imageWidth - 2 * (SIDE - 4));
 
         renderStation(g, x, y);
-        renderTier(g, x, y);
+        BenchToolsRow.wells(g, x + imageWidth - SIDE, y + ACT_Y, menu.getToolMask());
 
         // Inventory wells, at the menu's own slot origins (3.. are the player's).
         List<int[]> origins = WandmakersBenchMenu.slotOrigins();
@@ -183,72 +196,32 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         UiText.drawCentered(g, font, S, Component.translatable(key), cx, top + SLOT_LABEL_Y, S.ink2());
     }
 
-    /**
-     * The workshop tier: a caption, the bar over its real range (0 to {@link #TIER_FULL}), the value.
-     * The bar's colour climbs grey → gold → violet: semantic, not thematic — how far up the ladder this
-     * bench is — so it keeps its own ramp rather than a palette ink.
-     */
-    private void renderTier(GuiGraphics g, int x, int y) {
-        int tier = menu.getTierScoreScaled();
-        float t = Math.min(1.0f, tier / TIER_FULL);
-        int barColor = t < 0.5f
-                ? interpolateColor(0xFF888888, 0xFFD4A020, t * 2.0f)
-                : interpolateColor(0xFFD4A020, 0xFF8040C0, (t - 0.5f) * 2.0f);
-        Component caption = Component.translatable("wandcraft.bench.tier_label");
-        String value = String.format(Locale.ROOT, "%.2f", tier / 100.0f);
-        int left = x + SIDE;
-        int right = x + imageWidth - SIDE;
-        UiText.draw(g, font, S, caption, left, y + TIER_Y, S.ink2());
-        UiText.drawRight(g, font, S, Component.literal(value), right, y + TIER_Y, S.ink());
-        Ui.Rect bar = tierBar(x, y);
-        Ui.bar(g, S, bar.x(), bar.y(), bar.w(), bar.h(), t, barColor, -1.0f);
-    }
-
-    /** The bar between the caption and the value. Shared by the painting and the tooltip hit-test. */
-    private Ui.Rect tierBar(int x, int y) {
-        int from = x + SIDE + font.width(Component.translatable("wandcraft.bench.tier_label")) + 6;
-        int to = x + imageWidth - SIDE - font.width("0.00") - 6;
-        return new Ui.Rect(from, y + TIER_Y + 1, Math.max(8, to - from), TIER_BAR_H);
-    }
-
-    /** The whole tier row: caption, bar and value all explain themselves on hover. */
-    private Ui.Rect tierRow(int x, int y) {
-        return new Ui.Rect(x + SIDE, y + TIER_Y - 1, imageWidth - 2 * SIDE, 10);
-    }
-
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.PAGE_INK, false);
+        if (menu.getStage() != BenchCraft.Stage.NONE) {
+            Component stage = Component.translatable(menu.getStage().key());
+            g.drawString(font, stage, imageWidth - SIDE - font.width(stage), this.titleLabelY, WizardsPalette.GILT_DARK, false);
+        }
         g.drawString(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY,
                 WizardsPalette.PAGE_INK_2, false);
     }
 
-    /** What the bench is waiting for, or {@code null} while it has nothing to say. */
-    private @Nullable Component statusMessage() {
-        return switch (menu.getStatus()) {
-            // With a shaped blank seated the bench knows the cheapest thing that wood can become, so
-            // it can name the tier system before the player has found both ingredients.
-            case WandmakersBenchMenu.STATUS_MISSING_INPUT -> menu.getRequiredTierScaled() > 0
-                    ? Component.translatable("wandcraft.bench.needs_core",
-                            menu.getRequiredTierScaled() / 100.0f, menu.getTierScoreScaled() / 100.0f)
-                    : Component.translatable("wandcraft.bench.needs_input");
-            case WandmakersBenchMenu.STATUS_BLANK_UNSHAPED -> Component.translatable("wandcraft.bench.blank_unshaped");
-            case WandmakersBenchMenu.STATUS_NO_RECIPE -> Component.translatable("wandcraft.bench.no_recipe");
-            case WandmakersBenchMenu.STATUS_WITHDRAWN -> Component.translatable("wandcraft.bench.status.withdrawn");
-            case WandmakersBenchMenu.STATUS_BENCH_TOO_PLAIN -> Component.translatable("wandcraft.bench.tier_too_low",
-                    menu.getRequiredTierScaled() / 100.0f, menu.getTierScoreScaled() / 100.0f);
-            default -> null;
-        };
-    }
-
-    private static int interpolateColor(int a, int b, float t) {
-        t = Math.max(0, Math.min(1, t));
-        int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF;
-        int br = (b >> 16) & 0xFF, bg = (b >> 8) & 0xFF, bb = b & 0xFF;
-        int r = (int) (ar + (br - ar) * t);
-        int g = (int) (ag + (bg - ag) * t);
-        int bl = (int) (ab + (bb - ab) * t);
-        return 0xFF000000 | (r << 16) | (g << 8) | bl;
+    /** What the bench is waiting for, or the next act's odds when it can begin. */
+    private Component statusMessage() {
+        BenchMaking.Status status = menu.getStatus();
+        if (status != BenchMaking.Status.READY || menu.getRiskPermille() < 0) {
+            return Component.translatable(status.key());
+        }
+        BenchCraft.Act act = menu.getNextAct();
+        String risk = String.format(Locale.ROOT, "%.0f", menu.getRiskPermille() / 10.0f);
+        Component odds = act.risk() == BenchCraft.Risk.NONE
+                ? Component.translatable("wandcraft.bench.odds.safe", menu.getWindow())
+                : Component.translatable("wandcraft.bench.odds." + act.risk().name().toLowerCase(Locale.ROOT),
+                        risk, menu.getWindow());
+        return menu.getForgive() > 0
+                ? Component.translatable("wandcraft.bench.odds.forgive", odds, menu.getForgive())
+                : odds;
     }
 
     @Override
@@ -260,36 +233,12 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
         flexCycler.renderLabel(g);
         renderStatus(g);
         renderTooltip(g, mouseX, mouseY);
-        renderTierTooltip(g, mouseX, mouseY);
+        BenchToolsRow.tooltip(g, font, leftPos + imageWidth - SIDE, topPos + ACT_Y, menu.getToolMask(), mouseX, mouseY);
     }
 
-    /**
-     * Why nothing is coming out. Drawn only while the output is empty: with a wand sitting there the
-     * bench has said everything it has to say, and the wand's tooltip carries the rest. Wrapped to two
-     * lines, so the sentence is read rather than cut.
-     */
+    /** One fitted line: what the bench waits for, or the odds of the next act. */
     private void renderStatus(GuiGraphics g) {
-        if (menu.getBench().getInventory().getAmountAsLong(2) > 0) {
-            return;
-        }
-        Component reason = statusMessage();
-        if (reason == null) {
-            return;
-        }
-        UiText.drawWrapped(g, font, S, UiText.Role.LABEL, reason, leftPos + SIDE, topPos + STATUS_Y,
-                imageWidth - 2 * SIDE, STATUS_LINES);
-    }
-
-    /** What the tier means, on the shared tooltip card, anywhere on the tier row. */
-    private void renderTierTooltip(GuiGraphics g, int mouseX, int mouseY) {
-        if (!tierRow(leftPos, topPos).contains(mouseX, mouseY)) {
-            return;
-        }
-        List<Identifier> enhancers = menu.getEnhancerBlockIds();
-        g.setTooltipForNextFrame(font, List.of(
-                Component.translatable("wandcraft.gui.tier_score", menu.getTierScoreScaled() / 100.0f),
-                Component.translatable("wandcraft.gui.enhancers", enhancers.size()),
-                Component.translatable("wandcraft.gui.tier_hint")
-        ), Optional.empty(), mouseX, mouseY);
+        GuiText.drawFitted(g, font, statusMessage().getString(), leftPos + SIDE, topPos + STATUS_Y,
+                imageWidth - 2 * SIDE, S.ink2());
     }
 }

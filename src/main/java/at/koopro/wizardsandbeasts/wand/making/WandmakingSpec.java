@@ -21,8 +21,8 @@ import java.util.Optional;
  * difficulty and length were a per-wood value plus a per-core value. Those values moved onto the definitions unchanged,
  * and the pairs became a rule.
  *
- * @param difficulty what the bench and the maker are measured against. Until the remade bench lands, the old bench
- *                   uses it as its tier requirement, with the same numbers.
+ * @param difficulty how hard the pair is, wood plus core. The bench's acts measure the maker against the wood's and
+ *                   the core's halves of it separately ({@link BenchCraft#odds}).
  * @param affinity   {@link CoreMaking#affinityWith}: above 0 the wood and core suit each other, below 0 they fight
  */
 @NullMarked
