@@ -160,8 +160,7 @@ public class FlooGrateBlock extends BaseEntityBlock {
     /**
      * Logs, a light, a pinch, a name tag. Every item the ritual uses is answered here; anything else falls through to
      * the empty-hand answer. Crouching with powder never reaches this ({@code ServerPlayerGameMode} skips block use for
-     * a sneaking player holding an item), which leaves crouch + powder to {@code FlooPowderItem} as the
-     * head-in-the-fire call.
+     * a sneaking player holding an item): a crouched pinch does nothing at a grate.
      */
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
@@ -314,7 +313,7 @@ public class FlooGrateBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
         if (fire == HearthFire.FLOO && grate.isRegistered() && grate.isEnabled()) {
-            FlooAccess.openPicker(sp, FlooNetworkManager.get(server), grate.getNetworkAddress(), false);
+            FlooAccess.openPicker(sp, FlooNetworkManager.get(server), grate.getNetworkAddress());
             return InteractionResult.SUCCESS;
         }
         say(sp, !grate.isRegistered() ? "floo.wizards_and_beasts.fail.unregistered"
@@ -420,7 +419,7 @@ public class FlooGrateBlock extends BaseEntityBlock {
                     say(player, "floo.wizards_and_beasts.fail.sealed");
                     FlooCues.sealed(player);
                 } else {
-                    FlooAccess.openPicker(player, FlooNetworkManager.get(server), grate.getNetworkAddress(), false);
+                    FlooAccess.openPicker(player, FlooNetworkManager.get(server), grate.getNetworkAddress());
                 }
             }
         } else if (fire == HearthFire.WARM && !living.hasEffect(ModEffects.FLOO_PROTECTED)) {

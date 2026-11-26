@@ -41,11 +41,6 @@
     {
       "type": "recipe",
       "recipe_id": "wizards_and_beasts:floo_powder"
-    },
-    {
-      "type": "text",
-      "heading": "handbook.wizards_and_beasts.floo.page3.heading",
-      "body": "handbook.wizards_and_beasts.floo.page3.body"
     }
   ]
 }

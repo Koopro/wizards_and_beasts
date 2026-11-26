@@ -4,12 +4,10 @@ import at.koopro.wizardsandbeasts.client.gui.McStylePanel;
 import at.koopro.wizardsandbeasts.client.gui.WizardsMetrics;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette.GuiSkin;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiScaleHelper;
-import at.koopro.wizardsandbeasts.client.gui.util.UiContrast;
 import at.koopro.wizardsandbeasts.client.gui.widget.ScrollList;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
 import at.koopro.wizardsandbeasts.client.gui.widget.ThemedTextField;
 import at.koopro.wizardsandbeasts.floo.FlooDestinationDto;
-import at.koopro.wizardsandbeasts.network.floo.FlooCallRequestC2SPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTravelRequestC2SPayload;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.client.Minecraft;
@@ -44,12 +42,6 @@ import java.util.List;
  *
  * <p>The tab is remembered for the session in {@link #lastSpeakMode}, because a player who prefers
  * one door prefers it every time.
- *
- * <h2>Head in the fire</h2>
- * <p>A call is not a journey and does not get the list. You have knelt at a grate and pushed your
- * face into it to talk to somebody; you do that because you know who you are calling. Forcing SPEAK
- * is the mechanical expression of that, and it is also why the frame goes dark — the screen should
- * not look like the one that moves you.
  *
  * <h2>What this screen is not allowed to decide</h2>
  * <p>Nothing. Every refusal is the server's: whether an address exists, whether it is sealed, whether
@@ -94,19 +86,6 @@ public class FlooNetworkScreen extends Screen {
     private static final int COL_SELECTED_WASH = 0x5521B342;
     /** Hovered row: a breath of soot, so hover never competes with the green of a selection. */
     private static final int COL_HOVER_WASH = 0x221E1A18;
-    /**
-     * A call is not a journey: the light goes out of the sheet. Soot at a sixth, not the old 40%
-     * black -- the sheet has to stay light enough for its ink to read.
-     */
-    private static final int COL_CALL_DIM = 0x2A1E1A18;
-    /** {@code SKIN.base()} under {@link #COL_CALL_DIM}: the face a head-in-fire call is read on. */
-    private static final int CALL_SHEET = 0xFFA59C8A;
-    /**
-     * The same green as ink: the line spoken by the fire itself, and a row the cursor is over.
-     * Pure emerald is 2 : 1 on the soot sheet, so it is taken down to text contrast with its hue kept
-     * -- measured on {@link #CALL_SHEET}, the darker of the two grounds it is read on.
-     */
-    private static final int COL_FIRE_INK = UiContrast.readableOn(COL_EMERALD, CALL_SHEET);
 
     private static boolean lastSpeakMode = false;
 
@@ -134,7 +113,6 @@ public class FlooNetworkScreen extends Screen {
     private Shelf shelf = lastShelf;
     private final java.util.EnumMap<Shelf, ThemedButton> shelfTabs = new java.util.EnumMap<>(Shelf.class);
     private final String originAddress;
-    private final boolean headInFire;
 
     private int selectedIndex = -1;
     private int scrollOffset = 0;
@@ -155,17 +133,12 @@ public class FlooNetworkScreen extends Screen {
     private final ScrollList scrollbar = new ScrollList(ENTRY_H);
 
     public FlooNetworkScreen(@NonNull List<FlooDestinationDto> destinations,
-                             @NonNull String originAddress, boolean headInFire) {
-        super(Component.translatable(headInFire
-                ? "floo.wizards_and_beasts.gui.title.call"
-                : "floo.wizards_and_beasts.gui.title.network"));
+                             @NonNull String originAddress) {
+        super(Component.translatable("floo.wizards_and_beasts.gui.title.network"));
         this.all = List.copyOf(destinations);
         this.destinations = shelved(this.all, shelf);
         this.originAddress = originAddress;
-        this.headInFire = headInFire;
-        // A call is always spoken. Forced rather than defaulted, so no path through this screen can
-        // send a call built from a list row.
-        this.speakMode = headInFire || lastSpeakMode;
+        this.speakMode = lastSpeakMode;
     }
 
     @Override
@@ -177,7 +150,7 @@ public class FlooNetworkScreen extends Screen {
         int panelW = layout.panelW();
         int panelH = layout.panelH();
 
-        if (!headInFire) {
+        {
             int gap = layout.s(4);
             int tabW = (panelW - 2 * layout.s(EDGE) - gap) / 2;
             int tabH = Math.max(MIN_SKINNED, layout.s(16));
@@ -187,7 +160,7 @@ public class FlooNetworkScreen extends Screen {
                     tabW, tabH, "floo.wizards_and_beasts.gui.tab.speak", () -> setSpeakMode(true)));
         }
 
-        if (!headInFire) {
+        {
             int gap = layout.s(3);
             int shelfW = (panelW - LIST_PADDING * 2 - 3 * gap) / 4;
             int x = px + LIST_PADDING;
@@ -214,8 +187,7 @@ public class FlooNetworkScreen extends Screen {
         int btnH = Math.max(MIN_SKINNED, layout.s(18));
         confirmButton = addRenderableWidget(hearthButton(
                 px + panelW / 2 - btnW - layout.s(3), btnY, btnW, btnH,
-                headInFire ? "floo.wizards_and_beasts.gui.button.call"
-                        : "floo.wizards_and_beasts.gui.button.travel",
+                "floo.wizards_and_beasts.gui.button.travel",
                 this::onConfirm));
 
         addRenderableWidget(hearthButton(px + panelW / 2 + layout.s(3), btnY, btnW, btnH,
@@ -330,16 +302,11 @@ public class FlooNetworkScreen extends Screen {
                     px + panelW / 2, py + layout.s(21), SKIN.muted());
         }
 
-        int contentTop = speakMode || headInFire ? py + layout.s(headInFire ? 36 : 54) : listTop();
+        int contentTop = speakMode ? py + layout.s(54) : listTop();
 
         if (speakMode) {
-            if (headInFire) {
-                drawWrapped(graphics, Component.translatable("floo.wizards_and_beasts.gui.head_in_fire"),
-                        px + LIST_PADDING, contentTop, panelW - LIST_PADDING * 2, COL_FIRE_INK);
-            } else {
-                drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.speak.prompt"),
-                        px + panelW / 2, contentTop, SKIN.ink());
-            }
+            drawCentred(graphics, Component.translatable("floo.wizards_and_beasts.gui.speak.prompt"),
+                    px + panelW / 2, contentTop, SKIN.ink());
         } else if (destinations.isEmpty()) {
             // An empty network has exactly one cause and one cure, so the empty state says both.
             // "No connected fireplaces found" alone reads as a fault; it is actually the starting
@@ -373,11 +340,6 @@ public class FlooNetworkScreen extends Screen {
      */
     private void drawHearthFrame(GuiGraphics graphics, int px, int py, int w, int h) {
         McStylePanel.drawSkinPanel(graphics, SKIN, px, py, w, h);
-        if (headInFire) {
-            // A call is not a journey and should not look like the screen that moves you. The
-            // material carries the soot; this is the light going out of it.
-            graphics.fill(px + FRAME, py + FRAME, px + w - FRAME, py + h - FRAME, COL_CALL_DIM);
-        }
 
         drawFloorFire(graphics, px, py, w, h);
 
@@ -525,7 +487,7 @@ public class FlooNetworkScreen extends Screen {
     }
 
     private int listTop() {
-        return layout.panelY() + layout.s(headInFire ? 36 : 74);
+        return layout.panelY() + layout.s(74);
     }
 
     // -- input -----------------------------------------------------------------------------------
@@ -642,11 +604,7 @@ public class FlooNetworkScreen extends Screen {
             address = dto.networkAddress();
         }
 
-        if (headInFire) {
-            ClientPacketDistributor.sendToServer(new FlooCallRequestC2SPayload(address));
-        } else {
-            ClientPacketDistributor.sendToServer(new FlooTravelRequestC2SPayload(address, spoken));
-        }
+        ClientPacketDistributor.sendToServer(new FlooTravelRequestC2SPayload(address, spoken));
         predictSwirl();
         onClose();
     }

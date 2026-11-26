@@ -219,7 +219,7 @@ public final class UiScreenCapture {
                                         at.koopro.wizardsandbeasts.floo.FlooDestinationDto.PUBLIC | at.koopro.wizardsandbeasts.floo.FlooDestinationDto.VISITED),
                                 new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Hogsmeade, Three Broomsticks", "Overworld", false, 5,
                                         at.koopro.wizardsandbeasts.floo.FlooDestinationDto.PUBLIC)),
-                        "Home", false))),
+                        "Home"))),
                 Step.client("floo_registration", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooRegistrationScreen(
                         Minecraft.getInstance().player.blockPosition(), "Home", 10))),
                 Step.client("marauders_map", () -> open(new at.koopro.wizardsandbeasts.client.map.MaraudersMapScreen())),

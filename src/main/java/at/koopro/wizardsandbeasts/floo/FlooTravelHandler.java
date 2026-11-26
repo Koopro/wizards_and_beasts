@@ -5,7 +5,6 @@ import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
-import at.koopro.wizardsandbeasts.floo.call.FlooCallService;
 import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
@@ -154,11 +153,6 @@ public final class FlooTravelHandler {
         // click in silence. Every other refusal below says why; this one has to as well.
         if (!ModuleManager.isEnabled(Module.FLOO_NETWORK)) {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.module_off"));
-            return;
-        }
-
-        if (FlooCallService.isInCall(player.getUUID())) {
-            PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.in_call"));
             return;
         }
 

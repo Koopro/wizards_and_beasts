@@ -24,6 +24,7 @@ All notable changes to this project are documented in this file.
   by layer, with what each layer takes.
 - **Changed:** the Leaky Cauldron has a real cottage hearth, and travellers can now leave Diagon Alley by Floo as well as
   arrive.
+- **Removed:** Floo calls (kneeling with your head in the fire to talk to another hearth), for now.
 - **Removed:** the one-block Floo fireplace and its separate green flames, and the three furniture fireplaces (Hogwarts,
   Ministry, Knockturn); they are hearth styles now. Hearths registered with the old fireplace are not carried over.
 
