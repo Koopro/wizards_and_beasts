@@ -59,7 +59,7 @@ public final class BlockShowcaseCapture {
     /** Block ids per set, placed left to right facing the camera. */
     private static final Map<String, List<String>> SETS = Map.of(
             "trunks", List.of("enchanted_trunk", "expanded_trunk", "masters_trunk", "moodys_trunk", "newts_case_item"),
-            "stations", List.of("floo_fireplace", "vanishing_cabinet", "settlement_post", "broom_rack",
+            "stations", List.of("floo_grate", "vanishing_cabinet", "settlement_post", "broom_rack",
                     "pocket_configurator"),
             "cabinet", List.of("vanishing_cabinet"),
             // Set dressing, batch 1; "#n" places a pile at count n. The hotbar holds the same, to judge the items.
@@ -268,9 +268,10 @@ public final class BlockShowcaseCapture {
                     net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER), 3);
             return;
         }
-        if (state.getBlock() instanceof at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock) {
-            level.setBlock(pos, state.setValue(at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock.LIT, true), 3);
-            at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock.light(level, pos, Direction.SOUTH);
+        if (state.getBlock() instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock) {
+            level.setBlock(pos, state.setValue(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FUEL, true)
+                    .setValue(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FIRE,
+                            at.koopro.wizardsandbeasts.block.floo.HearthFire.WARM), 3);
             return;
         }
         level.setBlock(pos, state, 3);
@@ -295,8 +296,6 @@ public final class BlockShowcaseCapture {
                 }
             } else if (open && be instanceof at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlockEntity cabinet) {
                 cabinet.play(at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlockEntity.CLIP_PASS);
-            } else if (open && be instanceof at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity hearth) {
-                hearth.play(at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity.CLIP_ROAR);
             } else if (open && be instanceof at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity focus) {
                 focus.play(at.koopro.wizardsandbeasts.block.ExpansionFocusBlockEntity.CLIP_ATTUNE);
             }

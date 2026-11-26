@@ -85,14 +85,17 @@ public final class FlooHearthOverlay {
     }
 
     private static boolean inFlooFire(Minecraft mc, LocalPlayer player) {
-        BlockPos feet = player.blockPosition();
-        if (isFlames(mc, feet)) {
-            return true;
+        if (mc.level == null) {
+            return false;
         }
-        return isFlames(mc, BlockPos.containing(player.getX(), player.getEyeY(), player.getZ()));
-    }
-
-    private static boolean isFlames(Minecraft mc, BlockPos pos) {
-        return mc.level != null && mc.level.getBlockState(pos).is(ModBlocks.FLOO_FLAMES.get());
+        BlockPos feet = player.blockPosition();
+        for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-2, -1, -2), feet.offset(2, 0, 2))) {
+            if (at.koopro.wizardsandbeasts.floo.FlooHearths.isGreen(mc.level, pos)
+                    && mc.level.getBlockEntity(pos) instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity grate
+                    && at.koopro.wizardsandbeasts.floo.FlooHearths.inOpening(grate, player.position())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

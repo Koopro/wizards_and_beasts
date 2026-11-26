@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.floo.command;
 
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity;
 import at.koopro.wizardsandbeasts.floo.FlooAccess;
 import at.koopro.wizardsandbeasts.floo.FlooAddress;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
@@ -106,11 +105,11 @@ public final class FlooCommands {
             return 0;
         }
         BlockPos pos = ((BlockHitResult) hit).getBlockPos();
-        if (!(player.level().getBlockState(pos).getBlock() instanceof FlooFireplaceBlock)) {
+        if (!(player.level().getBlockState(pos).getBlock() instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock)) {
             source.sendFailure(Component.translatable(KEY + "command.not_fireplace"));
             return 0;
         }
-        if (!(player.level().getBlockEntity(pos) instanceof FlooFireplaceBlockEntity be)) {
+        if (!(player.level().getBlockEntity(pos) instanceof FlooGrateBlockEntity be)) {
             source.sendFailure(Component.translatable(KEY + "command.no_block_entity"));
             return 0;
         }
@@ -206,7 +205,7 @@ public final class FlooCommands {
         ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, entry.dimension());
         ServerLevel entryLevel = source.getServer().getLevel(dimKey);
         if (entryLevel != null && entryLevel.isLoaded(entry.blockPos())) {
-            if (entryLevel.getBlockEntity(entry.blockPos()) instanceof FlooFireplaceBlockEntity be) {
+            if (entryLevel.getBlockEntity(entry.blockPos()) instanceof FlooGrateBlockEntity be) {
                 be.setRegistered(false);
                 be.setNetworkAddress("");
             }
@@ -263,7 +262,7 @@ public final class FlooCommands {
         ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, entry.dimension());
         ServerLevel entryLevel = source.getServer().getLevel(dimKey);
         if (entryLevel != null && entryLevel.isLoaded(entry.blockPos())) {
-            if (entryLevel.getBlockEntity(entry.blockPos()) instanceof FlooFireplaceBlockEntity be) {
+            if (entryLevel.getBlockEntity(entry.blockPos()) instanceof FlooGrateBlockEntity be) {
                 be.setEnabled(enabled);
             }
         }

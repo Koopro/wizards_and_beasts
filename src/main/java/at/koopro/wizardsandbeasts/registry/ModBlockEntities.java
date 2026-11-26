@@ -7,7 +7,6 @@ import at.koopro.wizardsandbeasts.block.HouseBannerBlockEntity;
 import at.koopro.wizardsandbeasts.block.brew.CauldronBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TentBlockEntity;
 import at.koopro.wizardsandbeasts.block.trunk.TrunkBlockEntity;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -31,10 +30,6 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity>> FLOO_GRATE =
             BLOCK_ENTITY_TYPES.register("floo_grate", () ->
                     new BlockEntityType<>(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity::new, Set.of(ModBlocks.FLOO_GRATE.get())));
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FlooFireplaceBlockEntity>> FLOO_FIREPLACE =
-            BLOCK_ENTITY_TYPES.register("floo_fireplace", () ->
-                    new BlockEntityType<>(FlooFireplaceBlockEntity::new, Set.of(ModBlocks.FLOO_FIREPLACE.get())));
 
     /**
      * All three cauldron metals share one block entity type.

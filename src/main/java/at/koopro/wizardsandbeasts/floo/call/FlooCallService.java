@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.floo.call;
 
 import at.koopro.wizardsandbeasts.util.PlayerScopedState;
 
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.floo.FlooAccess;
 import at.koopro.wizardsandbeasts.floo.FlooAddress;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
@@ -63,7 +62,7 @@ public final class FlooCallService {
     public static void startCall(@NonNull ServerPlayer caller, @NonNull String address) {
         if (!ModuleManager.isEnabled(Module.FLOO_NETWORK)) return;
 
-        var origin = FlooTravelHandler.findNearbyLitFireplace(caller);
+        var origin = at.koopro.wizardsandbeasts.floo.FlooHearths.burningHearthAround(caller);
         if (origin == null) {
             caller.displayClientMessage(
                     Component.translatable("floo.wizards_and_beasts.fail.no_fireplace"), true);
@@ -139,7 +138,8 @@ public final class FlooCallService {
 
         // Origin grate must stay lit.
         var state = player.level().getBlockState(call.originPos);
-        if (!state.hasProperty(FlooFireplaceBlock.LIT) || !state.getValue(FlooFireplaceBlock.LIT)) {
+        if (!state.hasProperty(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FIRE)
+                || !state.getValue(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FIRE).burning()) {
             endCall(server, player.getUUID(),
                     Component.translatable("floo.wizards_and_beasts.call.end.doused"));
             return;

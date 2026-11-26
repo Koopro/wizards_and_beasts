@@ -1,8 +1,8 @@
 package at.koopro.wizardsandbeasts.floo;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity;
 import at.koopro.wizardsandbeasts.currency.billing.GringottsBilling;
 import at.koopro.wizardsandbeasts.currency.billing.MoneyFlow;
 import at.koopro.wizardsandbeasts.currency.vault.CurrencyHelper;
@@ -81,12 +81,16 @@ public final class FlooRegistrationService {
      */
     public static boolean canOpenAt(ServerPlayer player, ServerLevel level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        if (!state.is(ModBlocks.FLOO_FIREPLACE.get())) {
+        if (!state.is(ModBlocks.FLOO_GRATE.get())) {
             return false;
         }
-        // A lit hearth is a travel prompt. Registering one would mean writing an address onto a fire
+        // A green hearth is a travel prompt. Registering one would mean writing an address onto a fire
         // somebody might be standing in, and the name-tag path already refuses it for the same reason.
-        if (state.getValue(FlooFireplaceBlock.LIT)) {
+        if (state.getValue(FlooGrateBlock.FIRE) == at.koopro.wizardsandbeasts.block.floo.HearthFire.FLOO) {
+            return false;
+        }
+        // Only a finished hearth goes on the network: a lone grate is somewhere to burn logs, not an address.
+        if (!(level.getBlockEntity(pos) instanceof FlooGrateBlockEntity grate) || !grate.recheck(level, state)) {
             return false;
         }
         FlooRegistryEntry existing = FlooNetworkManager.get(level)
@@ -115,12 +119,12 @@ public final class FlooRegistrationService {
         }
         if (!canOpenAt(player, level, pos)) {
             BlockState state = level.getBlockState(pos);
-            return state.is(ModBlocks.FLOO_FIREPLACE.get()) ? Outcome.NOT_OWNER : Outcome.NOT_A_HEARTH;
+            return state.is(ModBlocks.FLOO_GRATE.get()) ? Outcome.NOT_OWNER : Outcome.NOT_A_HEARTH;
         }
         if (!FlooAddress.isValid(rawAddress)) {
             return Outcome.INVALID_ADDRESS;
         }
-        if (!(level.getBlockEntity(pos) instanceof FlooFireplaceBlockEntity be)) {
+        if (!(level.getBlockEntity(pos) instanceof FlooGrateBlockEntity be)) {
             return Outcome.NOT_A_HEARTH;
         }
 

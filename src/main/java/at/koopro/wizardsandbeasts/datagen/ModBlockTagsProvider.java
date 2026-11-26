@@ -120,7 +120,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 ModBlocks.SPELL_TEACHER.get());
 
         tag(ModuleTags.blocks(Module.FLOO_NETWORK)).add(
-                ModBlocks.FLOO_GRATE.get(), ModBlocks.FLOO_FIREPLACE.get(), ModBlocks.FLOO_FLAMES.get());
+                ModBlocks.FLOO_GRATE.get(), ModBlocks.FLOO_POWDER_POT.get());
 
         tag(ModuleTags.blocks(Module.WANDS)).add(ModBlocks.WANDMAKERS_BENCH.get());
         tag(ModuleTags.blocks(Module.OWLS)).add(ModBlocks.EXAMINATION_DESK.get());

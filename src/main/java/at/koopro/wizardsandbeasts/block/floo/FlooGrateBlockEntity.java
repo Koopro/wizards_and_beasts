@@ -36,11 +36,22 @@ public class FlooGrateBlockEntity extends BlockEntity {
 
     /** Burrow hearth (CANON.md): a 3 x 3 walk-in opening. */
     public static final int DEFAULT_OPENING = 3;
+    /** How long a thrown pinch keeps the fire green if nobody steps in: thirty seconds. */
+    public static final int PINCH_TICKS = 600;
+    /** How long a hearth flares green when somebody arrives out of it: four seconds. */
+    public static final int ARRIVAL_FLARE_TICKS = 80;
 
     private int openingWidth = DEFAULT_OPENING;
     private int openingHeight = DEFAULT_OPENING;
     private long roarSince;
     private @Nullable Identifier style;
+    /** Network side (moved here from the retired 1x1 hearth): the address this hearth answers to. */
+    private String networkAddress = "";
+    private boolean registered;
+    private boolean enabled = true;
+    /** Ticks the green fire has left, and the fire it falls back to when they run out. */
+    private int greenTicks;
+    private HearthFire after = HearthFire.WARM;
 
     public FlooGrateBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FLOO_GRATE.get(), pos, state);
@@ -68,7 +79,14 @@ public class FlooGrateBlockEntity extends BlockEntity {
     }
 
     public static void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, FlooGrateBlockEntity grate) {
-        if (level instanceof ServerLevel server && Math.floorMod(server.getGameTime() + pos.asLong(), 20L) == 0L) {
+        if (!(level instanceof ServerLevel server)) {
+            return;
+        }
+        if (state.getValue(FlooGrateBlock.FIRE) == HearthFire.FLOO && grate.greenTicks > 0 && --grate.greenTicks == 0) {
+            grate.fallBack(server);
+            return;
+        }
+        if (Math.floorMod(server.getGameTime() + pos.asLong(), 20L) == 0L) {
             grate.recheck(server, state);
         }
     }
@@ -86,9 +104,85 @@ public class FlooGrateBlockEntity extends BlockEntity {
             changed();
         }
         if (now == null && state.getValue(FlooGrateBlock.FIRE) == HearthFire.FLOO) {
-            level.setBlock(worldPosition, state.setValue(FlooGrateBlock.FIRE, HearthFire.WARM), 3);
+            after = HearthFire.WARM;
+            fallBack(level);
         }
         return now != null;
+    }
+
+    public String getNetworkAddress() {
+        return networkAddress;
+    }
+
+    public void setNetworkAddress(String address) {
+        networkAddress = address;
+        changed();
+    }
+
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
+        changed();
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        changed();
+    }
+
+    public int greenTicks() {
+        return greenTicks;
+    }
+
+    /**
+     * A pinch thrown into the ordinary fire: it roars emerald for one traveller (CoS ch. 4), then falls back to the
+     * ordinary fire. Only from {@link HearthFire#WARM}; returns whether it took.
+     */
+    public boolean throwPinch(ServerLevel level) {
+        BlockState state = getBlockState();
+        if (state.getValue(FlooGrateBlock.FIRE) != HearthFire.WARM) {
+            return false;
+        }
+        goGreen(level, state, PINCH_TICKS, HearthFire.WARM);
+        return true;
+    }
+
+    /** Somebody arrives out of this hearth: it flares green whatever it was doing, then returns to that. */
+    public void flareForArrival(ServerLevel level) {
+        BlockState state = getBlockState();
+        HearthFire was = state.getValue(FlooGrateBlock.FIRE);
+        goGreen(level, state, ARRIVAL_FLARE_TICKS, was == HearthFire.FLOO ? after : was);
+    }
+
+    /** The traveller has gone: the pinch is spent and the fire falls back at once. */
+    public void spendPinch(ServerLevel level) {
+        greenTicks = 0;
+        fallBack(level);
+    }
+
+    private void goGreen(ServerLevel level, BlockState state, int ticks, HearthFire fallBackTo) {
+        greenTicks = ticks;
+        after = fallBackTo;
+        roarSince = level.getGameTime();
+        level.setBlock(worldPosition, state.setValue(FlooGrateBlock.FIRE, HearthFire.FLOO), 3);
+        changed();
+    }
+
+    private void fallBack(ServerLevel level) {
+        BlockState state = level.getBlockState(worldPosition);
+        if (state.is(getBlockState().getBlock()) && state.getValue(FlooGrateBlock.FIRE) == HearthFire.FLOO) {
+            HearthFire to = after == HearthFire.WARM && !state.getValue(FlooGrateBlock.FUEL) ? HearthFire.NONE : after;
+            level.setBlock(worldPosition, state.setValue(FlooGrateBlock.FIRE, to), 3);
+        }
+        at.koopro.wizardsandbeasts.floo.FlooDeparture.cancelAllFrom(level, worldPosition);
+        changed();
     }
 
     /** The green roar starts now: the renderer grows the flames from this tick. */
@@ -113,6 +207,11 @@ public class FlooGrateBlockEntity extends BlockEntity {
         if (style != null) {
             output.store("style", Identifier.CODEC, style);
         }
+        output.store("network_address", Codec.STRING, networkAddress);
+        output.store("registered", Codec.BOOL, registered);
+        output.store("enabled", Codec.BOOL, enabled);
+        output.store("green_ticks", Codec.INT, greenTicks);
+        output.store("after", Codec.STRING, after.getSerializedName());
     }
 
     @Override
@@ -122,6 +221,13 @@ public class FlooGrateBlockEntity extends BlockEntity {
         openingHeight = input.read("opening_height", Codec.INT).orElse(DEFAULT_OPENING);
         roarSince = input.read("roar_since", Codec.LONG).orElse(0L);
         style = input.read("style", Identifier.CODEC).orElse(null);
+        networkAddress = input.read("network_address", Codec.STRING).orElse("");
+        registered = input.read("registered", Codec.BOOL).orElse(false);
+        enabled = input.read("enabled", Codec.BOOL).orElse(true);
+        greenTicks = input.read("green_ticks", Codec.INT).orElse(0);
+        String afterName = input.read("after", Codec.STRING).orElse("warm");
+        after = java.util.Arrays.stream(HearthFire.values()).filter(f -> f.getSerializedName().equals(afterName))
+                .findFirst().orElse(HearthFire.WARM);
     }
 
     @Override

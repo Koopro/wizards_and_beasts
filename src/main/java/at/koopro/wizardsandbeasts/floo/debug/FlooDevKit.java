@@ -34,15 +34,18 @@ public final class FlooDevKit implements FeatureDevKit {
 
     @Override
     public String summary() {
-        return "Powder and two fireplaces - one grate is not a network you can travel on.";
+        return "Powder, two grates, logs, flint and steel, a powder pot - build two hearths (see the handbook).";
     }
 
     @Override
     public void kit(ServerPlayer target, DevLog log) {
         target.getInventory().add(new ItemStack(MiscItemRegistry.FLOO_POWDER.get(), POWDER));
         log.changed("floo powder", POWDER);
-        target.getInventory().add(new ItemStack(ModBlocks.FLOO_FIREPLACE_ITEM.get(), FIREPLACES));
-        log.changed("fireplaces", FIREPLACES + " - place both, then /wandb world floo register");
+        target.getInventory().add(new ItemStack(ModBlocks.FLOO_GRATE_ITEM.get(), FIREPLACES));
+        target.getInventory().add(new ItemStack(net.minecraft.world.item.Items.OAK_LOG, 16));
+        target.getInventory().add(new ItemStack(net.minecraft.world.item.Items.FLINT_AND_STEEL));
+        target.getInventory().add(new ItemStack(ModBlocks.FLOO_POWDER_POT_ITEM.get()));
+        log.changed("grates", FIREPLACES + " - build each into a hearth, lay logs, light, name with a name tag");
     }
 
     /**

@@ -1,7 +1,7 @@
 package at.koopro.wizardsandbeasts.item;
 
 import at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity;
 import at.koopro.wizardsandbeasts.floo.FlooRegistrationService;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.network.floo.OpenFlooRegistrationS2CPayload;
@@ -50,7 +50,7 @@ public final class MinistryHandbookItem extends Item implements AnimatedItem {
             return super.useOn(context);
         }
         BlockPos pos = context.getClickedPos();
-        if (!level.getBlockState(pos).is(ModBlocks.FLOO_FIREPLACE.get())) {
+        if (!level.getBlockState(pos).is(ModBlocks.FLOO_GRATE.get())) {
             return super.useOn(context);
         }
         if (level.isClientSide()) {
@@ -67,7 +67,7 @@ public final class MinistryHandbookItem extends Item implements AnimatedItem {
                     Component.translatable("floo.wizards_and_beasts.fail.cannot_register"), true);
             return InteractionResult.SUCCESS;
         }
-        String current = serverLevel.getBlockEntity(pos) instanceof FlooFireplaceBlockEntity be
+        String current = serverLevel.getBlockEntity(pos) instanceof FlooGrateBlockEntity be
                 ? be.getNetworkAddress() : "";
         OpenFlooRegistrationS2CPayload.send(sp, pos, current, FlooRegistrationService.feeFor(sp));
         return InteractionResult.SUCCESS;

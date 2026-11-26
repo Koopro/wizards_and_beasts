@@ -4,8 +4,6 @@ import at.koopro.wizardsandbeasts.block.OccamyEggshellBlock;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlock;
 import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock;
 import at.koopro.wizardsandbeasts.block.MandrakeCropBlock;
 import at.koopro.wizardsandbeasts.block.trunk.PocketConfiguratorBlock;
 import at.koopro.wizardsandbeasts.block.trunk.TentCanvasBlock;
@@ -347,45 +345,6 @@ public class ModBlocks {
     public static final DeferredItem<BlockItem> FLOO_POWDER_POT_ITEM =
             ModItems.ITEMS.registerSimpleBlockItem("floo_powder_pot", FLOO_POWDER_POT);
 
-
-    public static final DeferredBlock<FlooFireplaceBlock> FLOO_FIREPLACE =
-            BLOCKS.registerBlock("floo_fireplace", FlooFireplaceBlock::new,
-                    () -> BlockBehaviour.Properties.of().strength(3.5f, 10.0f).sound(SoundType.STONE)
-                            .requiresCorrectToolForDrops()
-                            .noOcclusion()
-                            .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0));
-
-    public static final DeferredItem<BlockItem> FLOO_FIREPLACE_ITEM =
-            ModItems.ITEMS.registerSimpleBlockItem("floo_fireplace", FLOO_FIREPLACE);
-
-    /**
-     * The green fire a wizard steps into. Placed by Floo Powder in front of a hearth, never by hand.
-     *
-     * <p><b>No block item on purpose.</b> Flames are a state of a hearth, not a thing you carry, and a
-     * placeable one would let a player put green fire anywhere with no fireplace behind it — which is
-     * exactly the orphan {@code FlooFlamesBlock.updateShape} exists to clean up.
-     *
-     * <p>{@code noCollision} so a player can walk in, {@code replaceable} so building over them is not
-     * blocked by fire nobody can mine, {@code noLootTable} and {@code instabreak} so they yield nothing
-     * and cost nothing if they ever are broken, and light 12 — bright enough to read as fire, one under
-     * a torch so a Floo hearth is not the best light source in the game.
-     *
-     * <p>The block also draws no outline at all ({@code FlooFlamesBlock.getShape}), which is what keeps
-     * it out of the way of the hearth's own right-click. Deliberately <em>not</em> a {@code FireBlock}
-     * and deliberately outside the {@code #minecraft:fire} tag: see the class note for why that is the
-     * safety design rather than an implementation detail.
-     */
-    public static final DeferredBlock<FlooFlamesBlock> FLOO_FLAMES =
-            BLOCKS.registerBlock("floo_flames", FlooFlamesBlock::new,
-                    () -> BlockBehaviour.Properties.of()
-                            .noCollision()
-                            .noOcclusion()
-                            .instabreak()
-                            .noLootTable()
-                            .replaceable()
-                            .sound(SoundType.WOOL)
-                            .pushReaction(PushReaction.DESTROY)
-                            .lightLevel(state -> 12));
 
     // --- Hogwarts structure blocks ---
 

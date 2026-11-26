@@ -133,6 +133,17 @@ public record HearthPattern(int openingWidth, int openingHeight, List<List<Strin
                 right.getStepZ() * cell.right() + facing.getStepZ() * cell.front());
     }
 
+    /** Every cell the world does not satisfy, in layer order (bottom first): what is still to build. */
+    public List<Cell> mismatches(BlockPos grate, Direction facing, CellCheck check) {
+        List<Cell> out = new ArrayList<>();
+        for (Cell cell : cells()) {
+            if (!check.matches(cell.symbol(), place(grate, facing, cell))) {
+                out.add(cell);
+            }
+        }
+        return out;
+    }
+
     /** The first cell the world does not satisfy, or empty when the build is complete. */
     public Optional<Cell> firstMismatch(BlockPos grate, Direction facing, CellCheck check) {
         for (Cell cell : cells()) {

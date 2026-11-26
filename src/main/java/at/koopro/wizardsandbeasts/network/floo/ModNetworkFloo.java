@@ -22,10 +22,6 @@ public final class ModNetworkFloo {
                 FlooArrivalEffectsS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleFlooArrivalEffects);
         registrar.playToClient(
-                FlooBlockSyncS2CPayload.TYPE,
-                FlooBlockSyncS2CPayload.STREAM_CODEC,
-                ClientPayloadHandlers::handleFlooBlockSync);
-        registrar.playToClient(
                 FlooTransitS2CPayload.TYPE,
                 FlooTransitS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleFlooTransit);

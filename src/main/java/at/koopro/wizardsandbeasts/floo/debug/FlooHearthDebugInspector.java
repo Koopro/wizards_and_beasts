@@ -1,8 +1,7 @@
 package at.koopro.wizardsandbeasts.floo.debug;
 
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
-import at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity;
 import at.koopro.wizardsandbeasts.command.debug.inspect.DebugInspector;
 import at.koopro.wizardsandbeasts.command.debug.report.DebugReport;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
@@ -35,39 +34,28 @@ public final class FlooHearthDebugInspector implements DebugInspector.OfBlock {
 
     @Override
     public String summary() {
-        return "Fireplace / green flames: address, registry entry, charges, your travel cooldown.";
+        return "Floo grate: hearth style, fire, address, registry entry, your travel cooldown.";
     }
 
     @Override
     public boolean matches(ServerLevel level, BlockPos pos, BlockState state) {
-        return state.getBlock() instanceof FlooFireplaceBlock
-                || state.getBlock() instanceof FlooFlamesBlock;
+        return state.getBlock() instanceof FlooGrateBlock;
     }
 
     @Override
     public DebugReport inspect(ServerLevel level, BlockPos pos, BlockState state, ServerPlayer viewer) {
         DebugReport report = DebugReport.of("Floo hearth @ " + pos.toShortString());
 
-        if (state.getBlock() instanceof FlooFlamesBlock) {
-            report.row("block", "green flames");
-            if (state.hasProperty(FlooFlamesBlock.CHARGES)) {
-                report.row("charges", state.getValue(FlooFlamesBlock.CHARGES)
-                        + " / " + FlooFlamesBlock.MAX_CHARGES);
-            }
-            if (state.hasProperty(FlooFlamesBlock.FACING)) {
-                report.row("facing", state.getValue(FlooFlamesBlock.FACING).getSerializedName());
-            }
-            report.row("ticks per charge", FlooFlamesBlock.TICKS_PER_CHARGE);
-        } else {
-            report.row("block", "fireplace");
-        }
-
-        // The block entity's own idea of itself. It may sit under either block: the flames burn in
-        // the same column as the grate.
-        FlooFireplaceBlockEntity be = findFireplace(level, pos);
+        FlooGrateBlockEntity be = level.getBlockEntity(pos) instanceof FlooGrateBlockEntity g ? g : null;
+        report.row("fire", state.getValue(FlooGrateBlock.FIRE).getSerializedName()
+                + (state.getValue(FlooGrateBlock.FUEL) ? ", logs laid" : ", no logs"));
+        report.row("facing", state.getValue(FlooGrateBlock.FACING).getSerializedName());
         if (be == null) {
-            report.note("no fireplace block entity at or below this position");
+            report.note("no grate block entity here");
         } else {
+            report.row("hearth", be.style().map(Object::toString).orElse("not a finished hearth"));
+            report.row("opening", be.openingWidth() + " x " + be.openingHeight());
+            report.row("green ticks left", be.greenTicks());
             report.section("block entity");
             report.row("  address", be.getNetworkAddress().isEmpty() ? "(unset)" : be.getNetworkAddress());
             report.flag("  registered", be.isRegistered());
@@ -103,18 +91,5 @@ public final class FlooHearthDebugInspector implements DebugInspector.OfBlock {
         return report;
     }
 
-    /**
-     * The grate for this column.
-     *
-     * <p>Flames are their own block sitting in the hearth, so a look at the fire hits a position the
-     * block entity is not at. One step down finds it; anything further would start reporting a
-     * different fireplace.
-     */
-    private static @Nullable FlooFireplaceBlockEntity findFireplace(ServerLevel level, BlockPos pos) {
-        if (level.getBlockEntity(pos) instanceof FlooFireplaceBlockEntity here) {
-            return here;
-        }
-        return level.getBlockEntity(pos.below()) instanceof FlooFireplaceBlockEntity below
-                ? below : null;
-    }
+
 }

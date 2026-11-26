@@ -1,8 +1,6 @@
 package at.koopro.wizardsandbeasts.client.network;
 
 import at.koopro.wizardsandbeasts.azkaban.attachment.AzkabanTrespasserData;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
 import at.koopro.wizardsandbeasts.client.ability.state.ClientAbilityCache;
 import at.koopro.wizardsandbeasts.client.apparition.state.ClientApparitionWardState;
 import at.koopro.wizardsandbeasts.client.bestiary.ClientBestiaryCache;
@@ -48,7 +46,6 @@ import at.koopro.wizardsandbeasts.network.bloodpact.SUpdateVialPayload;
 import at.koopro.wizardsandbeasts.network.currency.GringottsOpenS2CPayload;
 import at.koopro.wizardsandbeasts.network.currency.VaultSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
-import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.OpenFlooGuiS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.DebugOverlayToggleS2CPayload;
 import at.koopro.wizardsandbeasts.network.form.FormSyncS2CPayload;
@@ -280,20 +277,6 @@ public final class ClientPayloadHandlers {
         context.enqueueWork(() ->
                 at.koopro.wizardsandbeasts.client.floo.FlooTransitOverlay.trigger(
                         packet.durationTicks(), packet.sootTicks()));
-    }
-
-    public static void handleFlooBlockSync(FlooBlockSyncS2CPayload packet, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level == null) return;
-            if (mc.level.getBlockEntity(packet.pos()) instanceof FlooFireplaceBlockEntity be) {
-                be.setLitTicksRemaining(packet.litTicksRemaining());
-            }
-            BlockState state = mc.level.getBlockState(packet.pos());
-            if (state.hasProperty(FlooFireplaceBlock.LIT) && state.getValue(FlooFireplaceBlock.LIT) != packet.isLit()) {
-                mc.level.setBlock(packet.pos(), state.setValue(FlooFireplaceBlock.LIT, packet.isLit()), 11);
-            }
-        });
     }
 
     public static void handleOpenFlooRegistration(

@@ -165,7 +165,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                                                         at.koopro.wizardsandbeasts.wand.bench.BenchPart.SIDE))))))));
         dropSelf(ModBlocks.WARDING_STONE.get());
         dropSelf(ModBlocks.POCKET_CONFIGURATOR.get());
-        dropSelf(ModBlocks.FLOO_FIREPLACE.get());
+        dropSelf(ModBlocks.FLOO_POWDER_POT.get());
         dropSelf(ModBlocks.EXAMINATION_DESK.get());
         dropSelf(ModBlocks.BROOM_RACK.get());
         // Both tents were registered without a loot entry, which hard-failed the whole datagen run

@@ -90,13 +90,16 @@ class FlooDiscoveryAndTollTest {
         String handler = Files.readString(HANDLER);
         int warded = handler.split("isWarded\\(player, destLevel, dest\\)", -1).length - 1;
         assertEquals(2, warded, "the ward check must run at the start and again at the commit");
+        // The pinch is the fare and is spent in the fire (Floo remake 2026-11-26): toll, then the pinch, then the
+        // hop, with no way to be refused once the toll is taken, so a refused hop never costs a toll.
         int toll = handler.indexOf("FlooTolls.charge(player, dest)");
-        int powder = handler.indexOf("if (!consumeOnePowder(player))");
+        int pinch = handler.indexOf("originGrate.spendPinch(originLevel)");
         int teleport = handler.indexOf("player.teleport(transition);");
-        assertTrue(toll > 0 && toll < powder && powder < teleport,
-                "toll before powder before teleport, so a refused hop costs neither");
+        assertTrue(toll > 0 && toll < pinch && pinch < teleport, "toll before pinch before teleport");
+        String afterToll = handler.substring(handler.indexOf("if (toll < 0)"), teleport);
+        assertEquals(1, afterToll.split("return;", -1).length - 1,
+                "the only refusal after the toll is the unpaid toll itself");
         assertTrue(handler.contains("wasMisfire ? 0L : FlooTolls.charge"), "a misfire owes no toll");
-        assertTrue(handler.contains("FlooTolls.refund(player, toll)"), "a toll taken for a failed hop comes back");
         assertTrue(handler.contains("FlooAccess.isListed(player, entry)"),
                 "a picked row must come from the address book, not merely the network");
         assertTrue(handler.contains("FlooAccess.reachableBy(player, manager)"),

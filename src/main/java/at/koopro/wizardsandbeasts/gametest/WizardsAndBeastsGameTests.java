@@ -142,6 +142,7 @@ public final class WizardsAndBeastsGameTests {
         LeviosaThrowTests.contribute(registrar);
         BroomRideTests.contribute(registrar);
         TravelTests.contribute(registrar);
+        FlooHearthTests.contribute(registrar);
         AguamentiTests.contribute(registrar);
         SpellClashTests.contribute(registrar);
         ProtegoShieldTests.contribute(registrar);

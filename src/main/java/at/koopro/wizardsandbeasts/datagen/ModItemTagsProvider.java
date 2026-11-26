@@ -157,7 +157,7 @@ public class ModItemTagsProvider extends BlockTagCopyingItemTagProvider {
 
         add(Module.FLOO_NETWORK,
                 MiscItemRegistry.FLOO_POWDER.get(), ModBlocks.FLOO_GRATE_ITEM.get(),
-                ModBlocks.FLOO_FIREPLACE_ITEM.get());
+                ModBlocks.FLOO_POWDER_POT_ITEM.get());
 
         add(Module.HANDBOOK, MiscItemRegistry.MINISTRY_HANDBOOK.get());
         add(Module.BESTIARY, MiscItemRegistry.BESTIARY.get());

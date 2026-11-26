@@ -547,8 +547,6 @@ public class ModModelProvider extends ModelProvider {
         blockModels.createTrivialBlock(ModBlocks.TENT_GRAND.get(), TexturedModel.LEAVES);
 
         blockModels.createTrivialBlock(ModBlocks.WANDMAKERS_BENCH.get(), TexturedModel.LEAVES);
-        createFlooFireplace(blockModels, ModBlocks.FLOO_FIREPLACE.get());
-        createFlooFlames(blockModels, ModBlocks.FLOO_FLAMES.get());
         propBlock(blockModels, ModBlocks.EXAMINATION_DESK.get(), deskModel(),
                 sideTop(ModBlocks.EXAMINATION_DESK.get(), "")
                         .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(ModBlocks.EXAMINATION_DESK.get(), "_paper"))
@@ -911,47 +909,6 @@ public class ModModelProvider extends ModelProvider {
     }
 
     /**
-     * Hearth you can see into: back wall, two jambs, a lintel and a raised floor, leaving a
-     * recess open to the north. The model's front is north because that is the face
-     * {@link BlockModelGenerators#ROTATION_HORIZONTAL_FACING} treats as unrotated.
-     */
-    private static ExtendedModelTemplate fireplaceModel() {
-        return prop(TextureSlot.PARTICLE, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.TOP, TextureSlot.BACK)
-                .element(e -> e.from(0, 0, 13).to(16, 16, 16)
-                        .textureAll(TextureSlot.SIDE)
-                        // The inner face of the back wall is the fire you look at.
-                        .face(Direction.NORTH, f -> f.texture(TextureSlot.FRONT))
-                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.SIDE).cullface(Direction.SOUTH)))
-                .element(e -> e.from(0, 0, 0).to(3, 16, 13)
-                        .textureAll(TextureSlot.SIDE)
-                        .face(Direction.WEST, f -> f.texture(TextureSlot.SIDE).cullface(Direction.WEST)))
-                .element(e -> e.from(13, 0, 0).to(16, 16, 13)
-                        .textureAll(TextureSlot.SIDE)
-                        .face(Direction.EAST, f -> f.texture(TextureSlot.SIDE).cullface(Direction.EAST)))
-                .element(e -> e.from(3, 13, 0).to(13, 16, 13)
-                        .textureAll(TextureSlot.SIDE)
-                        .face(Direction.UP, f -> f.texture(TextureSlot.TOP).cullface(Direction.UP)))
-                .element(e -> e.from(3, 0, 0).to(13, 2, 13)
-                        .textureAll(TextureSlot.SIDE)
-                        .face(Direction.DOWN, f -> f.texture(TextureSlot.SIDE).cullface(Direction.DOWN)))
-                // A mantel shelf proud of the breast, so the block reads as a fireplace and not a dark box.
-                .element(e -> e.from(-1, 13, -2).to(17, 14, 2)
-                        .textureAll(TextureSlot.TOP))
-                // Corbels under the shelf's ends, and the pot of Floo powder on it: the one object that
-                // says which fireplace this is before the green fire does.
-                .element(e -> e.from(0, 11, -1).to(2, 13, 0).textureAll(TextureSlot.TOP))
-                .element(e -> e.from(14, 11, -1).to(16, 13, 0).textureAll(TextureSlot.TOP))
-                .element(e -> e.from(11, 14, -1.5F).to(13.5F, 16.5F, 1).textureAll(TextureSlot.BACK))
-                .element(e -> e.from(11.5F, 16.5F, -1).to(13, 17, 0.5F).textureAll(TextureSlot.TOP))
-                // The hearthstone, run out under the flames that burn in the block in front: they stand on the
-                // hearth instead of on bare floor.
-                .element(e -> e.from(-1, 0, -5).to(17, 1, 0)
-                        .textureAll(TextureSlot.TOP)
-                        .face(Direction.DOWN, f -> f.texture(TextureSlot.TOP).cullface(Direction.DOWN)))
-                .build();
-    }
-
-    /**
      * Emits a custom-geometry model, its blockstate (rotated to follow HORIZONTAL_FACING
      * when the block has that property) and the matching item model.
      *
@@ -1247,97 +1204,6 @@ public class ModModelProvider extends ModelProvider {
         return new TextureMapping()
                 .put(TextureSlot.TEXTURE, texture)
                 .put(TextureSlot.PARTICLE, texture);
-    }
-
-    /**
-     * The hearth, dispatched on LIT and HORIZONTAL_FACING.
-     *
-     * <p>Deliberately not vanilla's {@code createFurnace}, which is otherwise the same
-     * shape: that helper hardcodes a {@code <block>_front_on} texture name, while the lit
-     * hearth already ships as {@code floo_fireplace_lit.png} — an eight-frame animated
-     * strip owned by {@code tools/animate_textures.py}. Pointing at it directly keeps the
-     * animation rather than renaming an asset another generator regenerates.
-     */
-    private void createFlooFireplace(BlockModelGenerators blockModels, Block block) {
-        ExtendedModelTemplate template = fireplaceModel();
-        Identifier surround = TextureMapping.getBlockTexture(block, "_side");
-        TextureMapping unlit = new TextureMapping()
-                .put(TextureSlot.PARTICLE, surround)
-                .put(TextureSlot.SIDE, surround)
-                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(block))
-                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top"))
-                .put(TextureSlot.BACK, Identifier.withDefaultNamespace("block/flower_pot"));
-
-        Identifier off = template.create(block, unlit, blockModels.modelOutput);
-        Identifier on = template.createWithSuffix(block, "_lit",
-                unlit.copyAndUpdate(TextureSlot.FRONT, TextureMapping.getBlockTexture(block, "_lit")),
-                blockModels.modelOutput);
-
-        blockModels.blockStateOutput.accept(
-                MultiVariantGenerator.dispatch(block)
-                        .with(BlockModelGenerators.createBooleanModelDispatch(
-                                BlockStateProperties.LIT,
-                                BlockModelGenerators.plainVariant(on),
-                                BlockModelGenerators.plainVariant(off)))
-                        .with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
-        blockModels.registerSimpleItemModel(block, off);
-    }
-
-    /**
-     * Green fire, drawn the way vanilla draws fire: four planes leaning inward from the block's
-     * faces, unshaded, with ambient occlusion off.
-     *
-     * <p>Copying that geometry rather than inventing one is the point. Crossed quads — the obvious
-     * alternative — read as a plant from every angle, and fire is the one shape a player already
-     * knows on sight; borrowing it is how these say "fire" before the colour says "Floo". The lean
-     * plus {@code rescale} is what makes the flames widen toward the top instead of standing flat.
-     *
-     * <p>Shorter than vanilla's, though: vanilla fire runs to 22.4 pixels and licks up past the block
-     * it sits in, which is right for something spreading and wrong for something burning in a
-     * fireplace. Sixteen keeps it inside its own cube.
-     */
-    private static ExtendedModelTemplate flamesModel() {
-        return prop(TextureSlot.PARTICLE, TextureSlot.TEXTURE)
-                .renderType("minecraft:cutout")
-                .ambientOcclusion(false)
-                .element(e -> e.from(0, 0, 8.8F).to(16, 16, 8.8F).shade(false)
-                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.X, -22.5F).rescale(true))
-                        .face(Direction.SOUTH, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
-                .element(e -> e.from(0, 0, 7.2F).to(16, 16, 7.2F).shade(false)
-                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.X, 22.5F).rescale(true))
-                        .face(Direction.NORTH, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
-                .element(e -> e.from(8.8F, 0, 0).to(8.8F, 16, 16).shade(false)
-                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.Z, -22.5F).rescale(true))
-                        .face(Direction.WEST, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
-                .element(e -> e.from(7.2F, 0, 0).to(7.2F, 16, 16).shade(false)
-                        .rotation(r -> r.origin(8, 8, 8).singleAxis(Direction.Axis.Z, 22.5F).rescale(true))
-                        .face(Direction.EAST, f -> f.texture(TextureSlot.TEXTURE).uvs(0, 0, 16, 16)))
-                .build();
-    }
-
-    /**
-     * One model for every state of the flames, and no item model.
-     *
-     * <p>No dispatch on {@code FACING}: the shape is symmetric under the four horizontal rotations,
-     * so rotating it would emit three more variants that render identically. The property is on the
-     * block because the flames use it to find their hearth, not because they look different facing
-     * one way or another.
-     *
-     * <p>No dispatch on {@code CHARGES} either — a blockstate variant matches on the properties it
-     * names and ignores the rest, so this one variant covers all three. How much fire is left shows
-     * in the particle density instead ({@code FlooFlamesBlock.animateTick}).
-     *
-     * <p>{@code registerSimpleItemModel} is deliberately not called: flames have no {@code BlockItem}
-     * (they are placed by Floo Powder, never carried), and for an item-less block {@code asItem()}
-     * resolves to {@code minecraft:air} — the same trap {@link #createLanternWithoutItem} documents.
-     */
-    private void createFlooFlames(BlockModelGenerators blockModels, Block block) {
-        Identifier texture = TextureMapping.getBlockTexture(block);
-        Identifier model = flamesModel().create(block, new TextureMapping()
-                .put(TextureSlot.TEXTURE, texture)
-                .put(TextureSlot.PARTICLE, texture), blockModels.modelOutput);
-        blockModels.blockStateOutput.accept(
-                MultiVariantGenerator.dispatch(block, BlockModelGenerators.plainVariant(model)));
     }
 
     /**

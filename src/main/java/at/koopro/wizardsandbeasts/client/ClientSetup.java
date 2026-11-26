@@ -111,8 +111,6 @@ public class ClientSetup {
                 GeoRendererHelper.simpleBlock(GeoRendererHelper.rig("vanishing_cabinet", "vanishing_cabinet_rig"), 2.0));
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.FLOO_GRATE.get(),
                 at.koopro.wizardsandbeasts.client.floo.FlooGrateRenderer::new);
-        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.FLOO_FIREPLACE.get(),
-                GeoRendererHelper.glowingBlock(GeoRendererHelper.rig("floo_roar", "floo_roar"), 2.0));
 
         // Generic data-driven creatures: one simple GeckoLib renderer per creature, keyed by id.
         // The ten dragon breeds get the breed-aware DragonRenderer (render-state scale + flame tint).
