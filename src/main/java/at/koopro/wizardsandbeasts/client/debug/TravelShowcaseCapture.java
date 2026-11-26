@@ -172,6 +172,9 @@ public final class TravelShowcaseCapture {
             from.throwPinch(level);
         }
         BlockPos stand = FLOO_FROM;
+        // The scene starts the departure itself rather than pressing Travel, so the list that stepping into the fire
+        // offers would never be closed and would hide the whole hop: hold the offer back while the player is staged.
+        at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.suppressOfferFor(p.getUUID(), level.getGameTime() + 400L);
         p.teleportTo(level, stand.getX() + 0.5, stand.getY() + 0.25, stand.getZ() + 0.5, Set.of(), 0.0F, 0.0F, true);
         Minecraft.getInstance().execute(() -> {
             lookYaw = 0.0F;
