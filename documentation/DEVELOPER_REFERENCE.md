@@ -96,7 +96,7 @@ wizardsandbeasts
 ├── event
 │   ├── ability, apparition, bestiary (niffler), bloodpact, brew, broom, cloak,
 │   ├── floo, form, heritage, item, memory, skill, spell, stats, trunk, wand
-├── floo (call, command)
+├── floo (command, hearth)
 ├── form
 ├── handbook
 ├── heritage (command, data, obscurial, profession)

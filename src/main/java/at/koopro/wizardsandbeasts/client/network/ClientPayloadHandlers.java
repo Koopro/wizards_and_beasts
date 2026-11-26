@@ -317,8 +317,7 @@ public final class ClientPayloadHandlers {
         context.enqueueWork(() ->
                 ClientScreenHooksInvoker.invoke("openFlooNetworkScreen",
                         List.class, packet.destinations(),
-                        String.class, packet.originAddress(),
-                        boolean.class, packet.headInFire()));
+                        String.class, packet.originAddress()));
     }
 
     // --- form ---

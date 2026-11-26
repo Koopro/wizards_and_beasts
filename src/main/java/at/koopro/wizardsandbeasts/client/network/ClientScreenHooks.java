@@ -26,9 +26,9 @@ public final class ClientScreenHooks {
      *  {@link at.koopro.wizardsandbeasts.network.ClientScreenHooksInvoker}, so the
      *  {@code FlooNetworkScreen} reference never loads server-side. */
     public static void openFlooNetworkScreen(List<FlooDestinationDto> destinations,
-                                             String originAddress, boolean headInFire) {
+                                             String originAddress) {
         Minecraft.getInstance().setScreen(
-                new FlooNetworkScreen(destinations, originAddress, headInFire));
+                new FlooNetworkScreen(destinations, originAddress));
     }
 
     /** Opens the Ministry registration form. Reflectively invoked, like the network screen. */

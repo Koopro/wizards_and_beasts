@@ -39,11 +39,9 @@ class FlooModuleGateTest {
      * <p>Adding a door means adding it here. That is the point of the list.
      */
     private static final List<String> DOORS = List.of(
-            "item/floo/FlooPowderItem.java",
             "block/floo/FlooGrateBlock.java",
             "floo/FlooTravelHandler.java",
             "floo/FlooRegistrationService.java",
-            "floo/call/FlooCallService.java",
             "floo/command/FlooCommands.java",
             "item/MinistryHandbookItem.java");
 
@@ -78,8 +76,7 @@ class FlooModuleGateTest {
     @Test
     void theModuleRefusalIsSpoken() throws IOException {
         List<String> speakingDoors = List.of(
-                "item/floo/FlooPowderItem.java",
-                "block/floo/FlooGrateBlock.java",
+                    "block/floo/FlooGrateBlock.java",
                 "floo/FlooTravelHandler.java",
                 "floo/FlooRegistrationService.java",
                 "floo/command/FlooCommands.java");

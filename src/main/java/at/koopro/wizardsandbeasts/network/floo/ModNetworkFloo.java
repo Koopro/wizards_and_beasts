@@ -38,9 +38,5 @@ public final class ModNetworkFloo {
                 FlooRegisterRequestC2SPayload.TYPE,
                 FlooRegisterRequestC2SPayload.STREAM_CODEC,
                 FlooRegisterRequestC2SPayload::handleServer);
-        registrar.playToServer(
-                FlooCallRequestC2SPayload.TYPE,
-                FlooCallRequestC2SPayload.STREAM_CODEC,
-                FlooCallRequestC2SPayload::handleServer);
     }
 }

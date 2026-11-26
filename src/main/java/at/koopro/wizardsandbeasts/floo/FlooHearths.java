@@ -73,23 +73,6 @@ public final class FlooHearths {
     }
 
     /**
-     * A registered, open, burning hearth (ordinary or green) within kneeling reach of this player: where a
-     * head-in-the-fire call is made from (crouch + powder at the grate).
-     */
-    public static @Nullable FlooGrateBlockEntity burningHearthAround(ServerPlayer player) {
-        BlockPos centre = player.blockPosition();
-        for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-2, -1, -2), centre.offset(2, 1, 2))) {
-            BlockState state = player.level().getBlockState(pos);
-            if (state.is(ModBlocks.FLOO_GRATE.get()) && state.getValue(FlooGrateBlock.FIRE).burning()
-                    && grate(player.level(), pos) instanceof FlooGrateBlockEntity grate
-                    && grate.formed() && grate.isRegistered() && grate.isEnabled()) {
-                return grate;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Where a traveller lands: tumbled out of the fire onto the hearthstone in front of the opening (Harry "fell out
      * of the grate", CoS ch. 4), so they do not land back in the fire they came through. Null when the hearth is no
      * longer a finished hearth or the spot in front is built over.

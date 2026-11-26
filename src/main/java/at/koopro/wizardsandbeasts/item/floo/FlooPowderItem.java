@@ -41,19 +41,8 @@ public class FlooPowderItem extends Item {
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
 
+        // The grate answers powder itself (FlooGrateBlock.useItemOn: a pinch into its fire).
         if (state.is(ModBlocks.FLOO_GRATE.get())) {
-            if (level.isClientSide()) {
-                return InteractionResult.SUCCESS;
-            }
-            // Crouching with powder in hand at a burning grate is kneeling to put your head in it.
-            // The gesture is on the powder rather than on an empty hand because an empty hand at a
-            // lit hearth already means something else — see FlooGrateBlock.useWithoutItem — and
-            // a call is the one Floo interaction that plausibly costs a pinch either way.
-            // The pinch thrown into the fire is the grate's own business (FlooGrateBlock.useItemOn); crouching skips
-            // the block, so only the call arrives here.
-            if (player.isShiftKeyDown() && state.getValue(FlooGrateBlock.FIRE).burning()) {
-                return openCall((ServerLevel) level, pos, player);
-            }
             return InteractionResult.PASS;
         }
 
@@ -90,37 +79,5 @@ public class FlooPowderItem extends Item {
         }
 
         return InteractionResult.PASS;
-    }
-
-    /**
-     * Offer the "head in the fire" call picker at a lit, registered hearth.
-     *
-     * <p>Costs nothing by itself: {@link at.koopro.wizardsandbeasts.floo.call.FlooCallService} runs
-     * the call, and this only asks who to call. A refusal here therefore has to be free too, which is
-     * why the checks mirror the ignite path rather than sharing its powder deduction.
-     */
-    private static InteractionResult openCall(ServerLevel level, BlockPos pos, Player player) {
-        if (!ModuleManager.isEnabled(Module.FLOO_NETWORK)) {
-            player.displayClientMessage(
-                    Component.translatable("floo.wizards_and_beasts.fail.module_off"), true);
-            return InteractionResult.SUCCESS;
-        }
-        if (!(level.getBlockEntity(pos) instanceof FlooGrateBlockEntity be) || !be.formed() || !be.isRegistered()) {
-            player.displayClientMessage(
-                    Component.translatable("floo.wizards_and_beasts.fail.unregistered"), true);
-            return InteractionResult.SUCCESS;
-        }
-        if (!be.isEnabled()) {
-            player.displayClientMessage(
-                    Component.translatable("floo.wizards_and_beasts.fail.sealed"), true);
-            if (player instanceof ServerPlayer sealedFor) {
-                FlooCues.sealed(sealedFor);
-            }
-            return InteractionResult.SUCCESS;
-        }
-        if (player instanceof ServerPlayer sp) {
-            FlooAccess.openPicker(sp, FlooNetworkManager.get(level), be.getNetworkAddress(), true);
-        }
-        return InteractionResult.SUCCESS;
     }
 }

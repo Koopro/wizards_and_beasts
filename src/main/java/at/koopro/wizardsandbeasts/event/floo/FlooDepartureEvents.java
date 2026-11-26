@@ -14,7 +14,7 @@ import org.jspecify.annotations.NullMarked;
 /**
  * Drives the departure window: the countdown, and the two ways it has to end early.
  *
- * <p>Separate from {@link FlooCallEvents} rather than folded into its player tick. The two systems
+ * <p>Separate from the old call events (removed 2026-11-27) rather than folded into its player tick. The two systems
  * share a keyword and nothing else — a call is a conversation held from where you are standing, a
  * departure is a journey about to happen — and one subscriber ticking both would mean a change to
  * either one's cadence silently changing the other's.

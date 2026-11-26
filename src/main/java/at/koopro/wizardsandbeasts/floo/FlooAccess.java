@@ -246,9 +246,9 @@ public final class FlooAccess {
         return bestDistance <= tolerance ? best : null;
     }
 
-    /** Open the travel or call picker at {@code hearth} for {@code player}. */
+    /** Open the travel picker at {@code hearth} for {@code player}. */
     public static void openPicker(ServerPlayer player, FlooNetworkManager manager,
-                                  String hearthAddress, boolean headInFire) {
+                                  String hearthAddress) {
         // Standing at a lit hearth is finding it: the grate you travel from is in your book from now on.
         if (manager.getEntry(hearthAddress) != null) {
             discover(player, hearthAddress);
@@ -261,7 +261,7 @@ public final class FlooAccess {
                                 | (e.isOwnedBy(player.getUUID()) ? FlooDestinationDto.MINE : 0)
                                 | (hasVisited(player, e.networkAddress()) ? FlooDestinationDto.VISITED : 0)))
                 .toList();
-        OpenFlooGuiS2CPayload.send(player, destinations, hearthAddress, headInFire);
+        OpenFlooGuiS2CPayload.send(player, destinations, hearthAddress);
     }
 
     /**
