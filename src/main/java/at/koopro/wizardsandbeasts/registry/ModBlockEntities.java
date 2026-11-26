@@ -28,6 +28,10 @@ public final class ModBlockEntities {
             BLOCK_ENTITY_TYPES.register("pocket_configurator", () ->
                     new BlockEntityType<>(ExpansionFocusBlockEntity::new, Set.of(ModBlocks.POCKET_CONFIGURATOR.get())));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity>> FLOO_GRATE =
+            BLOCK_ENTITY_TYPES.register("floo_grate", () ->
+                    new BlockEntityType<>(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity::new, Set.of(ModBlocks.FLOO_GRATE.get())));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FlooFireplaceBlockEntity>> FLOO_FIREPLACE =
             BLOCK_ENTITY_TYPES.register("floo_fireplace", () ->
                     new BlockEntityType<>(FlooFireplaceBlockEntity::new, Set.of(ModBlocks.FLOO_FIREPLACE.get())));

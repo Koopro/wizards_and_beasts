@@ -1,0 +1,18 @@
+{
+  "__comment": "The Burrow's kitchen hearth (CoS film/book; docs/floo/CANON.md): a 3 x 3 walk-in opening in a 5-wide stone breast, a mantel beam over it, a chimney stack above, a hearthstone floor and apron. Layers bottom to top, rows back to front (room side last), read left to right from the room.",
+  "opening_width": 3,
+  "opening_height": 3,
+  "key": {
+    "S": "#wizards_and_beasts:hearth_stone",
+    "M": "#wizards_and_beasts:hearth_mantel"
+  },
+  "layers": [
+    ["     ", " SSS ", "SSSSS"],
+    ["SSSSS", "S.G.S", "     "],
+    ["SSSSS", "S...S", "     "],
+    ["SSSSS", "S...S", "     "],
+    ["SSSSS", "MMMMM", "     "],
+    [" SSS ", " SSS ", "     "],
+    [" SSS ", " SSS ", "     "]
+  ]
+}

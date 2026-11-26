@@ -142,12 +142,6 @@ public class ModBlocks {
     public static final DeferredBlock<? extends Block> BRASS_CAULDRON = WizardingWorldBlockRegistry.BRASS_CAULDRON;
     public static final DeferredBlock<? extends Block> WIZARDING_COPPER_CAULDRON = WizardingWorldBlockRegistry.WIZARDING_COPPER_CAULDRON;
     public static final DeferredBlock<? extends Block> PEWTER_CAULDRON = WizardingWorldBlockRegistry.PEWTER_CAULDRON;
-    /**
-     * @deprecated Decorative prop only — no travel logic. Use {@link #FLOO_FIREPLACE}.
-     *             Will be removed in beta.
-     */
-    @Deprecated
-    public static final DeferredBlock<? extends Block> FLOO_GRATE = WizardingWorldBlockRegistry.FLOO_GRATE;
     public static final DeferredBlock<? extends Block> SPELL_TEACHER = WizardingWorldBlockRegistry.SPELL_TEACHER;
     public static final DeferredBlock<? extends Block> WANDMAKERS_BENCH = WizardingWorldBlockRegistry.WANDMAKERS_BENCH;
 
@@ -161,7 +155,6 @@ public class ModBlocks {
     public static final DeferredItem<BlockItem> BRASS_CAULDRON_ITEM = WizardingWorldBlockRegistry.BRASS_CAULDRON_ITEM;
     public static final DeferredItem<BlockItem> WIZARDING_COPPER_CAULDRON_ITEM = WizardingWorldBlockRegistry.WIZARDING_COPPER_CAULDRON_ITEM;
     public static final DeferredItem<BlockItem> PEWTER_CAULDRON_ITEM = WizardingWorldBlockRegistry.PEWTER_CAULDRON_ITEM;
-    public static final DeferredItem<BlockItem> FLOO_GRATE_ITEM = WizardingWorldBlockRegistry.FLOO_GRATE_ITEM;
     public static final DeferredItem<BlockItem> SPELL_TEACHER_ITEM = WizardingWorldBlockRegistry.SPELL_TEACHER_ITEM;
     public static final DeferredItem<BlockItem> WANDMAKERS_BENCH_ITEM = WizardingWorldBlockRegistry.WANDMAKERS_BENCH_ITEM;
 
@@ -335,6 +328,25 @@ public class ModBlocks {
                     () -> BlockBehaviour.Properties.of().strength(1.0f).sound(SoundType.WOOL).noOcclusion());
 
     // --- Floo Network ---
+
+    /** The grate a player-built hearth burns on (Floo remake 2026-11-26); light follows the fire on it. */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock> FLOO_GRATE =
+            BLOCKS.registerBlock("floo_grate", at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock::new,
+                    () -> BlockBehaviour.Properties.of().strength(3.0f, 6.0f).sound(SoundType.CHAIN)
+                            .requiresCorrectToolForDrops().noOcclusion()
+                            .lightLevel(state -> state.getValue(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FIRE).light()));
+
+    public static final DeferredItem<BlockItem> FLOO_GRATE_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("floo_grate", FLOO_GRATE);
+
+    /** The pot of Floo Powder on the mantel (the Burrow's flowerpot). */
+    public static final DeferredBlock<at.koopro.wizardsandbeasts.block.floo.FlooPowderPotBlock> FLOO_POWDER_POT =
+            BLOCKS.registerBlock("floo_powder_pot", at.koopro.wizardsandbeasts.block.floo.FlooPowderPotBlock::new,
+                    () -> BlockBehaviour.Properties.of().instabreak().sound(SoundType.DECORATED_POT).noOcclusion());
+
+    public static final DeferredItem<BlockItem> FLOO_POWDER_POT_ITEM =
+            ModItems.ITEMS.registerSimpleBlockItem("floo_powder_pot", FLOO_POWDER_POT);
+
 
     public static final DeferredBlock<FlooFireplaceBlock> FLOO_FIREPLACE =
             BLOCKS.registerBlock("floo_fireplace", FlooFireplaceBlock::new,

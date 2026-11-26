@@ -124,6 +124,8 @@ public class ModModelProvider extends ModelProvider {
         blocks.add(ModBlocks.LEAKY_CAULDRON_DOOR.get());
         blocks.add(ModBlocks.DIAGON_ARCHWAY.get());
         blocks.add(ModBlocks.DIAGON_ARCHWAY_MOVING.get());
+        blocks.add(ModBlocks.FLOO_GRATE.get());
+        blocks.add(ModBlocks.FLOO_POWDER_POT.get());
         return blocks;
     }
 
@@ -440,7 +442,6 @@ public class ModModelProvider extends ModelProvider {
         }
 
         eggshellBlock(blockModels);
-        blockModels.createTrivialBlock(ModBlocks.FLOO_GRATE.get(), TexturedModel.LEAVES);
         propBlock(blockModels, ModBlocks.SPELL_TEACHER.get(), lecternModel(),
                 sideTop(ModBlocks.SPELL_TEACHER.get(), "")
                         .put(TextureSlot.FRONT, modLoc("block/examination_desk_paper")), true);

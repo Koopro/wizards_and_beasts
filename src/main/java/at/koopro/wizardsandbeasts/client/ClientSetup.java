@@ -109,6 +109,8 @@ public class ClientSetup {
                 GeoRendererHelper.simpleBlock(GeoRendererHelper.rig("pocket_configurator", "pocket_configurator_rig"), 1.0));
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.VANISHING_CABINET.get(),
                 GeoRendererHelper.simpleBlock(GeoRendererHelper.rig("vanishing_cabinet", "vanishing_cabinet_rig"), 2.0));
+        event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.FLOO_GRATE.get(),
+                at.koopro.wizardsandbeasts.client.floo.FlooGrateRenderer::new);
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.FLOO_FIREPLACE.get(),
                 GeoRendererHelper.glowingBlock(GeoRendererHelper.rig("floo_roar", "floo_roar"), 2.0));
 
