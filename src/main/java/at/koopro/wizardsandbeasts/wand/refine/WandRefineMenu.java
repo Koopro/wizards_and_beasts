@@ -13,7 +13,7 @@ import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
 import at.koopro.wizardsandbeasts.wand.customization.WandModule;
 import at.koopro.wizardsandbeasts.wand.customization.WandModuleRegistry;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
-import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
+import at.koopro.wizardsandbeasts.wand.gui.BenchSheet;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action;
 import at.koopro.wizardsandbeasts.skill.vocation.VocationHelper;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Material;
@@ -80,7 +80,7 @@ public class WandRefineMenu extends AbstractContainerMenu {
         this.access = ContainerLevelAccess.create(level, bench.getBlockPos());
 
         // The bench's own geometry, so both roles of the one bench sit on the same sheet.
-        List<int[]> origins = WandmakersBenchMenu.slotOrigins();
+        List<int[]> origins = BenchSheet.slotOrigins();
         addSlot(new Slot(inputs, 0, origins.get(0)[0], origins.get(0)[1]) {
             @Override public boolean mayPlace(ItemStack stack) { return isFinishedWand(stack); }
             @Override public int getMaxStackSize() { return 1; }

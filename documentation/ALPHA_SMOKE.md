@@ -297,8 +297,8 @@ Manual. Survival world, a bench, a shaped blank (a blank used on a log takes its
 
 1. Place the bench: it takes two blocks. Lay the five tools on it (use each on the bench); they show on the rig.
    Sneak with an empty hand: they come back.
-2. Put the blank and the core in. The screen shows the next act ("Turn") and its odds: "Crack risk up to N% ·
-   window ±N". Lay the chisel and the number falls.
+2. Put the blank and the core in. The screen shows the next act ("Turn") and its odds: "Crack ≤ N% ·
+   forgives N". Lay the chisel and the number falls.
 3. Press Turn: the screen closes and a parchment strip above the hotbar shows marks sliding to a line. Press use
    on each. Use does not open the bench while it plays. At the end: "Turning the blank: done (N%)".
 4. Bore: hold use to keep the bit inside the moving band. Marry: press on the core's pulse (unicorn steady,

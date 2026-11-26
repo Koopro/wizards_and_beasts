@@ -1,23 +1,29 @@
 package at.koopro.wizardsandbeasts.client.wand.gui;
 
+import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
-import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
 import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
-import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.network.wand.BenchActPayload;
 import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
 import at.koopro.wizardsandbeasts.wand.bench.BenchMaking;
-import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
+import at.koopro.wizardsandbeasts.wand.bench.BenchTool;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
+import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.ActiveTextCollector;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -28,111 +34,91 @@ import java.util.List;
 import java.util.Locale;
 
 import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.BLANK_X;
+import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.BLANK_Y;
 import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.CORE_X;
-import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.OUTPUT_X;
-import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.STATION_Y;
+import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.CORE_Y;
+import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.TOP_H;
 
 /**
- * The wandmaker's bench: a station row (blank + core → wand), the flexibility the bench will shape for,
- * the next act with its odds and the button that begins it, the tools on the bench, and the player's inventory.
- * The act itself is played in the world ({@code BenchBeatClient}); P5 remakes this screen as Make / Mend / Restyle.
+ * The wandmaker's bench, seen from above: an artefact screen, as Hermione's bag is a bag (owner, 2026-11-12). The
+ * blank lies between the lathe's centres, the core in a glass dish, the finished wand in an open Ollivanders wand box
+ * (PS ch.5, "narrow boxes"). The tools sit in a leather roll, the stages are marked on a boxwood rule, the act's
+ * odds and the flexibility are written on a pinned slip, and the act is begun by pressing the red wax seal.
  *
- * <p>Drawn on the shared parchment, procedurally, from {@link WandmakersBenchMenu}'s own geometry
- * ({@code GUI_W}, {@code GUI_H}, the slot origins): the frames are placed by the same numbers as the
- * slots, so no artwork can sit off one. It used to be a 176x196 generated sheet whose wells had to be
- * kept in step with the menu by hand, with an unlabelled tier bar under the hotbar and a status line cut
- * to one line ("Place a shaped blank and…").
+ * <p>Art: {@code tools/bench_screen.py} ({@code container/wandmakers_bench/bench_top}); every well in it is placed at
+ * {@link WandmakersBenchMenu}'s numbers, which the slots use too. The player's inventory is a parchment strip under
+ * the bench's front edge.
  *
- * <p>The flexibility picker shows one of Ollivander's five words and asks the server for a change; it
- * never shows a value the server has not confirmed.
+ * <p>P5 look gate: the Make tag is live; Mend and Restyle are drawn and wait for the owner's verdict on this look.
  */
 public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBenchMenu> {
 
-    private static final UiSurface S = UiSurface.PAGE;
+    private static final Identifier TOP = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
+            "textures/gui/container/wandmakers_bench/bench_top.png");
+    private static final Identifier TAG = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
+            "textures/gui/container/wandmakers_bench/tag.png");
+    private static final UiSurface PAGE = UiSurface.PAGE;
 
-    /** Under the title, and between the station and the inventory. */
-    private static final int TITLE_Y = 10;
-    private static final int TITLE_RULE_Y = 19;
-    private static final int INVENTORY_RULE_Y = 130;
-    /** The finished wand's frame is this much wider than a slot on each side. */
-    private static final int OUTPUT_PAD = 4;
-    /** The small captions under the station slots. */
-    private static final int SLOT_LABEL_Y = STATION_Y + 16 + OUTPUT_PAD + 4;
+    // Mirrored from tools/bench_screen.py.
+    private static final int PLATE_X = 6, PLATE_Y = 4;
+    /** Tags hang over the back edge: the open one in front of it, the others behind. */
+    private static final int TAG_X = 86, TAG_STEP = 48, TAG_W = 46, TAG_H = 16, TAG_Y_OPEN = -12, TAG_Y_SHUT = -10;
+    private static final int TOOL_X0 = 11, TOOL_STEP = 21, TOOL_Y = 25;
+    private static final int RULE_X0 = 6, RULE_Y0 = 82, RULE_X1 = 226, RULE_Y1 = 94;
+    private static final int SLIP_X0 = 6, SLIP_Y0 = 100, SLIP_X1 = 152;
+    private static final int SEAL_X = 194, SEAL_Y = 120, SEAL_R = 19;
+    /** The strip overlaps the bench's front edge by a few pixels, as the bag hangs over its strip. */
+    private static final int STRIP_Y = TOP_H - 6;
 
-    private static final int SIDE = 14;
-    private static final int FLEX_LABEL_Y = 66;
-    private static final int FLEX_ROW_Y = 76;
-    private static final int FLEX_ROW_H = 18;
-    /** What the bench is waiting for, or the next act's odds: one fitted line. */
-    private static final int STATUS_Y = 97;
-    /** The act button (left) and the tool wells (right). */
-    private static final int ACT_Y = 108;
-    private static final int ACT_W = 60;
-    private static final int ACT_H = 18;
+    /** The rule's five marks: the four stages a making passes, then sealed. */
+    private static final String[] RULE_KEYS = {"seated", "turned", "bored", "married", "sealed"};
+    private static final String[] TAGS = {"make", "mend", "restyle"};
 
-    private CyclerWidget<WandFlexibility> flexCycler;
-    private @Nullable Button actButton;
+    private @Nullable CyclerWidget<WandFlexibility> flexCycler;
+    private @Nullable SealButton seal;
 
     public WandmakersBenchScreen(WandmakersBenchMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = WandmakersBenchMenu.GUI_W;
         this.imageHeight = WandmakersBenchMenu.GUI_H;
-        this.titleLabelX = WandmakersBenchMenu.INV_X;
-        // Clear of the sheet's frame rules (4 and 6px in), which vanilla's y 6 sat on.
-        this.titleLabelY = TITLE_Y;
+        this.titleLabelX = PLATE_X + 5;
+        this.titleLabelY = PLATE_Y + 3;
         this.inventoryLabelX = WandmakersBenchMenu.INV_X;
-        this.inventoryLabelY = WandmakersBenchMenu.INV_Y - 10;
+        this.inventoryLabelY = WandmakersBenchMenu.INV_Y - 11;
     }
 
     @Override
     protected void init() {
         super.init();
-        rebuildCycler();
+        rebuildWidgets();
     }
 
     /**
-     * (Re)builds the flexibility cycler at the menu's current value.
-     *
-     * <p>Rebuilt rather than mutated because {@link CyclerWidget} holds its own index: the menu is
-     * the authority here and it can change under us — another player at the same bench, or the
-     * server correcting a value — so the cycler is re-seeded from {@code menu} each time rather
-     * than trusted to still agree with it.
+     * (Re)builds the flexibility cycler at the menu's value, and the seal. Rebuilt rather than mutated: the menu is the
+     * authority and can change under us (another player, the server correcting a value).
      */
-    private void rebuildCycler() {
+    @Override
+    protected void rebuildWidgets() {
         clearWidgets();
         List<WandFlexibility> values = Arrays.asList(WandFlexibility.values());
         WandFlexibility current = values.get(Math.floorMod(menu.getFlexibilityOrdinal(), values.size()));
-        flexCycler = new CyclerWidget<>(values, current,
-                flexibility -> flexibility.label().getString(), this::chooseFlexibility);
-        flexCycler.setBounds(leftPos + SIDE, topPos + FLEX_ROW_Y, imageWidth - 2 * SIDE, FLEX_ROW_H);
+        flexCycler = new CyclerWidget<>(values, current, f -> f.label().getString(),
+                f -> ClientPacketDistributor.sendToServer(new SetFlexibilityPayload(menu.containerId, f.ordinal())));
+        flexCycler.setBounds(leftPos + SLIP_X0 + 62, topPos + SLIP_Y0 + 26, SLIP_X1 - SLIP_X0 - 68, 13);
         flexCycler.buttons().forEach(this::addRenderableWidget);
-        actButton = Button.builder(actLabel(), b -> ClientPacketDistributor.sendToServer(new BenchActPayload(menu.containerId)))
-                .bounds(leftPos + SIDE, topPos + ACT_Y, ACT_W, ACT_H).build();
-        addRenderableWidget(actButton);
-    }
-
-    private Component actLabel() {
-        return Component.translatable(menu.getNextAct().key() + ".short");
-    }
-
-    /**
-     * Tells the server which flexibility the bench should shape for. The cycler is <em>not</em> moved
-     * optimistically: the value shown is the menu's synced value, re-seeded in {@link #containerTick}.
-     */
-    private void chooseFlexibility(WandFlexibility flexibility) {
-        ClientPacketDistributor.sendToServer(new SetFlexibilityPayload(menu.containerId, flexibility.ordinal()));
+        seal = new SealButton(leftPos + SEAL_X - SEAL_R, topPos + SEAL_Y - SEAL_R, 2 * SEAL_R,
+                () -> ClientPacketDistributor.sendToServer(new BenchActPayload(menu.containerId)));
+        addRenderableWidget(seal);
     }
 
     @Override
     protected void containerTick() {
         super.containerTick();
-        // Re-seed when the server's value moves, including when it rejects what we asked for.
         if (flexCycler != null && flexCycler.selected().ordinal() != menu.getFlexibilityOrdinal()) {
-            rebuildCycler();
+            rebuildWidgets();
         }
-        if (actButton != null) {
-            actButton.active = menu.getStatus() == BenchMaking.Status.READY;
-            actButton.setMessage(actLabel());
+        if (seal != null) {
+            seal.active = menu.getStatus() == BenchMaking.Status.READY;
         }
     }
 
@@ -142,103 +128,198 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
-        Ui.panel(g, S, x, y, imageWidth, imageHeight);
-        Ui.divider(g, S, x + SIDE - 4, y + TITLE_RULE_Y, imageWidth - 2 * (SIDE - 4));
-        Ui.divider(g, S, x + SIDE - 4, y + INVENTORY_RULE_Y, imageWidth - 2 * (SIDE - 4));
-
-        renderStation(g, x, y);
-        BenchToolsRow.wells(g, x + imageWidth - SIDE, y + ACT_Y, menu.getToolMask());
-
-        // Inventory wells, at the menu's own slot origins (3.. are the player's).
+        // The strip and the shut tags first: the bench's edges lie over them.
+        Ui.panel(g, PAGE, x, y + STRIP_Y, imageWidth, imageHeight - STRIP_Y);
+        for (int i = 1; i < TAGS.length; i++) {
+            g.blit(RenderPipelines.GUI_TEXTURED, TAG, x + TAG_X + i * TAG_STEP, y + TAG_Y_SHUT, 0f, 0f, TAG_W, TAG_H, TAG_W, TAG_H);
+        }
+        g.nextStratum();
+        g.blit(RenderPipelines.GUI_TEXTURED, TOP, x, y, 0f, 0f, imageWidth, TOP_H, imageWidth, TOP_H);
+        g.blit(RenderPipelines.GUI_TEXTURED, TAG, x + TAG_X, y + TAG_Y_OPEN, 0f, 0f, TAG_W, TAG_H, TAG_W, TAG_H);
+        // A new stratum, or the fills below would be batched under the bench art.
+        g.nextStratum();
         List<int[]> origins = WandmakersBenchMenu.slotOrigins();
         for (int i = 3; i < origins.size(); i++) {
             Ui.slot(g, x + origins.get(i)[0], y + origins.get(i)[1]);
         }
+        renderTools(g, x, y);
+        renderRule(g, x, y);
+        renderCarriedTarget(g, x, y);
+    }
+
+    /** The tags' names; the open one bright, with a gilt stitch under it. */
+    private void renderTagLabels(GuiGraphics g) {
+        for (int i = 0; i < TAGS.length; i++) {
+            int tx = TAG_X + i * TAG_STEP;
+            boolean open = i == 0;
+            int ty = open ? TAG_Y_OPEN : TAG_Y_SHUT;
+            Component name = Component.translatable("wandcraft.bench.tab." + TAGS[i]);
+            int colour = open ? WizardsPalette.BRASS_HI : WizardsPalette.TEXT_DIM;
+            g.drawString(font, name, tx + 4 + (TAG_W - 4 - font.width(name)) / 2, ty + 3, colour, open);
+            if (open) {
+                g.fill(tx + 6, ty + 12, tx + TAG_W - 4, ty + 13, WizardsPalette.GILT);
+            }
+        }
+    }
+
+    /** Each tool that lies on the bench sits in its pocket of the roll. */
+    private void renderTools(GuiGraphics g, int x, int y) {
+        int mask = menu.getToolMask();
+        for (BenchTool tool : BenchTool.values()) {
+            if ((mask & tool.bit()) != 0) {
+                g.renderItem(BenchToolsRow.stack(tool), x + TOOL_X0 + tool.ordinal() * TOOL_STEP, y + TOOL_Y);
+            }
+        }
     }
 
     /**
-     * Blank + core → wand. The station slots are captioned (they were three blank squares), the wand's
-     * frame is larger and ringed, and while the player carries a blank or a core the slot that takes it
-     * is outlined.
+     * The boxwood rule: one mark per stage. A stage the making has passed is burnt dark; the one the next act reaches
+     * is ringed in brass.
      */
-    private void renderStation(GuiGraphics g, int x, int y) {
-        Ui.slot(g, x + BLANK_X, y + STATION_Y);
-        Ui.slot(g, x + CORE_X, y + STATION_Y);
-        Ui.resultSlot(g, x + OUTPUT_X, y + STATION_Y, OUTPUT_PAD);
-
-        ItemStack carried = menu.getCarried();
-        if (carried.getItem() instanceof WandBlankItem) {
-            Ui.slotTarget(g, x + BLANK_X, y + STATION_Y, 0, WizardsPalette.GILT_DARK);
-        } else if (WandCoreMaterialItem.isBenchCore(carried)) {
-            Ui.slotTarget(g, x + CORE_X, y + STATION_Y, 0, WizardsPalette.GILT_DARK);
+    private void renderRule(GuiGraphics g, int x, int y) {
+        int seg = (RULE_X1 - RULE_X0) / RULE_KEYS.length;
+        int reached = menu.getStage().ordinal();           // NONE 0, SEATED 1 ... MARRIED 4
+        int next = menu.getStage() == BenchCraft.Stage.NONE ? -1 : menu.getNextAct().ordinal() + 1;
+        for (int i = 0; i < RULE_KEYS.length; i++) {
+            int sx = x + RULE_X0 + i * seg;
+            boolean burnt = i < reached;
+            if (burnt) {
+                g.fill(sx + 2, y + RULE_Y0 + 3, sx + seg - 1, y + RULE_Y1 - 1, 0xB04A2E16);
+            }
+            if (i == next) {
+                outline(g, sx + 1, y + RULE_Y0 + 1, seg - 1, RULE_Y1 - RULE_Y0 - 1, WizardsPalette.GILT);
+            }
+            Component label = Component.translatable("wandcraft.bench.stage." + RULE_KEYS[i]);
+            int lx = sx + (seg - font.width(label)) / 2 + 1;
+            g.drawString(font, label, lx, y + RULE_Y0 + 3, burnt ? WizardsPalette.PAGE_LIGHT : WizardsPalette.PAGE_INK_2, false);
         }
-
-        int midY = y + STATION_Y + 8;
-        // "+" between the two inputs.
-        int plusX = x + (BLANK_X + 17 + CORE_X - 1) / 2;
-        g.fill(plusX - 3, midY, plusX + 4, midY + 1, S.ink3());
-        g.fill(plusX, midY - 3, plusX + 1, midY + 4, S.ink3());
-
-        // The arrow: ink while the bench waits, gilt once a wand sits in the output.
-        boolean made = menu.getBench().getInventory().getAmountAsLong(2) > 0;
-        int arrow = made ? WizardsPalette.GILT_DARK : S.ink2();
-        int shaftFrom = x + CORE_X + 17 + 6;
-        int tipX = x + OUTPUT_X - 1 - OUTPUT_PAD - 2 - 6 - Ui.ARROW;
-        g.fill(shaftFrom, midY - 1, tipX + 2, midY + 2, arrow);
-        Ui.arrow(g, 1, tipX, midY - 3, arrow);
-
-        caption(g, "wandcraft.bench.slot.blank", x + BLANK_X + 8, y);
-        caption(g, "wandcraft.bench.slot.core", x + CORE_X + 8, y);
-        caption(g, "wandcraft.bench.slot.wand", x + OUTPUT_X + 8, y);
     }
 
-    private void caption(GuiGraphics g, String key, int cx, int top) {
-        UiText.drawCentered(g, font, S, Component.translatable(key), cx, top + SLOT_LABEL_Y, S.ink2());
+    /** While a blank or a core is carried, its place on the bench is ringed. */
+    private void renderCarriedTarget(GuiGraphics g, int x, int y) {
+        ItemStack carried = menu.getCarried();
+        if (carried.getItem() instanceof WandBlankItem) {
+            Ui.slotTarget(g, x + BLANK_X, y + BLANK_Y, 0, WizardsPalette.GILT_LIGHT);
+        } else if (WandCoreMaterialItem.isBenchCore(carried)) {
+            Ui.slotTarget(g, x + CORE_X, y + CORE_Y, 0, WizardsPalette.GILT_LIGHT);
+        }
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, this.title, this.titleLabelX, this.titleLabelY, WizardsPalette.PAGE_INK, false);
-        if (menu.getStage() != BenchCraft.Stage.NONE) {
-            Component stage = Component.translatable(menu.getStage().key());
-            g.drawString(font, stage, imageWidth - SIDE - font.width(stage), this.titleLabelY, WizardsPalette.GILT_DARK, false);
+        // Engraved on the brass plate, and the inventory caption on the strip.
+        g.drawString(font, title, titleLabelX, titleLabelY, WizardsPalette.PAGE_INK, false);
+        g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, WizardsPalette.PAGE_INK_2, false);
+        renderTagLabels(g);
+        renderSlip(g);
+        renderSealLabel(g);
+    }
+
+    /** The pinned slip: the act (or why there is none), its odds, and the flexibility row. */
+    private void renderSlip(GuiGraphics g) {
+        int tx = SLIP_X0 + 12;
+        int w = SLIP_X1 - tx - 4;
+        BenchMaking.Status status = menu.getStatus();
+        if (status == BenchMaking.Status.READY && menu.getRiskPermille() >= 0) {
+            BenchCraft.Act act = menu.getNextAct();
+            GuiText.drawFitted(g, font, Component.translatable(act.key()).getString(), tx, SLIP_Y0 + 4, w, WizardsPalette.PAGE_INK);
+            GuiText.drawFitted(g, font, odds(act).getString(), SLIP_X0 + 5, SLIP_Y0 + 15, SLIP_X1 - SLIP_X0 - 9,
+                    act.risk() == BenchCraft.Risk.NONE ? WizardsPalette.PAGE_INK_2 : WizardsPalette.PAGE_RUBRIC);
+        } else {
+            // What the bench waits for gets both lines: a sentence is read, not cut.
+            at.koopro.wizardsandbeasts.client.gui.ui.UiText.drawWrapped(g, font, PAGE,
+                    at.koopro.wizardsandbeasts.client.gui.ui.UiText.Role.LABEL,
+                    Component.translatable(status.key()), tx, SLIP_Y0 + 4, w, 2);
         }
-        g.drawString(font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY,
+        g.drawString(font, Component.translatable("wandcraft.bench.flexibility"), SLIP_X0 + 5, SLIP_Y0 + 29,
                 WizardsPalette.PAGE_INK_2, false);
     }
 
-    /** What the bench is waiting for, or the next act's odds when it can begin. */
-    private Component statusMessage() {
-        BenchMaking.Status status = menu.getStatus();
-        if (status != BenchMaking.Status.READY || menu.getRiskPermille() < 0) {
-            return Component.translatable(status.key());
-        }
-        BenchCraft.Act act = menu.getNextAct();
+    private Component odds(BenchCraft.Act act) {
         String risk = String.format(Locale.ROOT, "%.0f", menu.getRiskPermille() / 10.0f);
+        // The window is felt at the bench, not read: the slip says what can be lost and what is forgiven.
         Component odds = act.risk() == BenchCraft.Risk.NONE
-                ? Component.translatable("wandcraft.bench.odds.safe", menu.getWindow())
-                : Component.translatable("wandcraft.bench.odds." + act.risk().name().toLowerCase(Locale.ROOT),
-                        risk, menu.getWindow());
-        return menu.getForgive() > 0
-                ? Component.translatable("wandcraft.bench.odds.forgive", odds, menu.getForgive())
-                : odds;
+                ? Component.translatable("wandcraft.bench.odds.safe")
+                : Component.translatable("wandcraft.bench.odds." + act.risk().name().toLowerCase(Locale.ROOT), risk);
+        return menu.getForgive() > 0 ? Component.translatable("wandcraft.bench.odds.forgive", odds, menu.getForgive()) : odds;
+    }
+
+    /** The act's name pressed into the wax: bright while it can begin, sunk while the bench waits. */
+    private void renderSealLabel(GuiGraphics g) {
+        Component label = Component.translatable(menu.getNextAct().key() + ".short");
+        boolean live = seal != null && seal.active;
+        boolean hot = live && seal.isHoveredOrFocused();
+        int colour = !live ? 0xFF5A1414 : hot ? WizardsPalette.GILT_LIGHT : WizardsPalette.TEXT;
+        g.drawString(font, label, SEAL_X - font.width(label) / 2 + 1, SEAL_Y - 4, colour, live);
     }
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
-        UiText.draw(g, font, S, Component.translatable("wandcraft.bench.flexibility"),
-                leftPos + SIDE, topPos + FLEX_LABEL_Y, S.ink2());
-        // The cycler draws only its label plate; its arrows are registered widgets.
-        flexCycler.renderLabel(g);
-        renderStatus(g);
+        if (flexCycler != null) {
+            flexCycler.renderLabel(g);
+        }
         renderTooltip(g, mouseX, mouseY);
-        BenchToolsRow.tooltip(g, font, leftPos + imageWidth - SIDE, topPos + ACT_Y, menu.getToolMask(), mouseX, mouseY);
+        renderToolTooltip(g, mouseX, mouseY);
     }
 
-    /** One fitted line: what the bench waits for, or the odds of the next act. */
-    private void renderStatus(GuiGraphics g) {
-        GuiText.drawFitted(g, font, statusMessage().getString(), leftPos + SIDE, topPos + STATUS_Y,
-                imageWidth - 2 * SIDE, S.ink2());
+    private void renderToolTooltip(GuiGraphics g, int mouseX, int mouseY) {
+        int mask = menu.getToolMask();
+        for (BenchTool tool : BenchTool.values()) {
+            int tx = leftPos + TOOL_X0 + tool.ordinal() * TOOL_STEP;
+            int ty = topPos + TOOL_Y;
+            if (mouseX >= tx - 1 && mouseX < tx + 17 && mouseY >= ty - 1 && mouseY < ty + 17) {
+                boolean here = (mask & tool.bit()) != 0;
+                g.setTooltipForNextFrame(font, List.of(
+                        BenchToolsRow.stack(tool).getHoverName(),
+                        Component.translatable("item.wizards_and_beasts.bench_tool.stage." + tool.getSerializedName()),
+                        Component.translatable(here ? "wandcraft.bench.tool_here" : "wandcraft.bench.tool_missing")
+                ), java.util.Optional.empty(), mouseX, mouseY);
+                return;
+            }
+        }
+    }
+
+    private static void outline(GuiGraphics g, int x, int y, int w, int h, int colour) {
+        g.fill(x, y, x + w, y + 1, colour);
+        g.fill(x, y + h - 1, x + w, y + h, colour);
+        g.fill(x, y + 1, x + 1, y + h - 1, colour);
+        g.fill(x + w - 1, y + 1, x + w, y + h - 1, colour);
+    }
+
+    /** The wax seal as a button: the disc is painted in the bench art, the label by the screen. */
+    private static final class SealButton extends AbstractButton {
+        private final Runnable action;
+
+        SealButton(int x, int y, int size, Runnable action) {
+            super(x, y, size, size, Component.translatable("wandcraft.bench.seal"));
+            this.action = action;
+        }
+
+        @Override
+        public void onPress(InputWithModifiers input) {
+            action.run();
+        }
+
+        @Override
+        protected void renderContents(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            // The disc is in the art; only a pressed-in rim while hovered.
+            if (active && isHoveredOrFocused()) {
+                int r = getWidth() / 2;
+                int cx = getX() + r;
+                int cy = getY() + r;
+                g.fill(cx - r + 4, cy + r - 5, cx + r - 4, cy + r - 4, 0x60FFE0A0);
+            }
+        }
+
+        @Override
+        protected void renderDefaultLabel(ActiveTextCollector collector) {
+            // The screen presses the label into the wax.
+        }
+
+        @Override
+        protected void updateWidgetNarration(NarrationElementOutput output) {
+            defaultButtonNarrationText(output);
+        }
     }
 }

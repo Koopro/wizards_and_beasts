@@ -7,7 +7,7 @@ import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
-import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
+import at.koopro.wizardsandbeasts.wand.gui.BenchSheet;
 import at.koopro.wizardsandbeasts.wand.refine.SetRefineActionPayload;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action;
@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.BLANK_X;
-import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.CORE_X;
-import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.OUTPUT_X;
-import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.STATION_Y;
+import static at.koopro.wizardsandbeasts.wand.gui.BenchSheet.BLANK_X;
+import static at.koopro.wizardsandbeasts.wand.gui.BenchSheet.CORE_X;
+import static at.koopro.wizardsandbeasts.wand.gui.BenchSheet.OUTPUT_X;
+import static at.koopro.wizardsandbeasts.wand.gui.BenchSheet.STATION_Y;
 
 /**
  * The bench's second role: refining a finished wand. The same bench and the same paper as making one -- the wand
@@ -34,7 +34,7 @@ import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.STATION_Y;
  * refined wand in the output slot -- so the two roles read as one craft. The server decides everything
  * ({@link WandRefineMenu}); this shows the action and why nothing is coming out.
  *
- * <p>Drawn procedurally on {@link WandmakersBenchMenu}'s geometry, as {@link WandmakersBenchScreen} is. It used to
+ * <p>Drawn procedurally on {@link BenchSheet}'s geometry, as the making side was until the 2026-11-26 remake. It used to
  * bind the bench's old generated sheet, which was retired with the bench's redraw and left this screen drawing the
  * missing-texture checkerboard.
  */
@@ -62,12 +62,12 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
 
     public WandRefineScreen(WandRefineMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth = WandmakersBenchMenu.GUI_W;
-        this.imageHeight = WandmakersBenchMenu.GUI_H;
-        this.titleLabelX = WandmakersBenchMenu.INV_X;
+        this.imageWidth = BenchSheet.GUI_W;
+        this.imageHeight = BenchSheet.GUI_H;
+        this.titleLabelX = BenchSheet.INV_X;
         this.titleLabelY = TITLE_Y;
-        this.inventoryLabelX = WandmakersBenchMenu.INV_X;
-        this.inventoryLabelY = WandmakersBenchMenu.INV_Y - 10;
+        this.inventoryLabelX = BenchSheet.INV_X;
+        this.inventoryLabelY = BenchSheet.INV_Y - 10;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class WandRefineScreen extends AbstractContainerScreen<WandRefineMenu> {
         renderStation(g, x, y);
         BenchToolsRow.render(g, font, S, x + SIDE, x + imageWidth - SIDE, y + TOOLS_Y, menu.toolMask());
 
-        List<int[]> origins = WandmakersBenchMenu.slotOrigins();
+        List<int[]> origins = BenchSheet.slotOrigins();
         for (int i = 3; i < origins.size(); i++) {
             Ui.slot(g, x + origins.get(i)[0], y + origins.get(i)[1]);
         }
