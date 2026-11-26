@@ -10,7 +10,6 @@ import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
-import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTransitS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;

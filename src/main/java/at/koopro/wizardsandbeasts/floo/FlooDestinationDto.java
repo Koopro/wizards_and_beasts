@@ -12,11 +12,24 @@ public record FlooDestinationDto(
         @NonNull String networkAddress,
         @NonNull String dimensionName,
         boolean isEnabled,
-        int tollKnuts
+        int tollKnuts,
+        int marks
 ) {
+    /** {@link #marks} bits: a public address, one this player owns, one they have travelled to. */
+    public static final int PUBLIC = 1, MINE = 2, VISITED = 4;
+
     /** A row with no toll. */
     public FlooDestinationDto(@NonNull String networkAddress, @NonNull String dimensionName, boolean isEnabled) {
-        this(networkAddress, dimensionName, isEnabled, 0);
+        this(networkAddress, dimensionName, isEnabled, 0, PUBLIC);
+    }
+
+    public FlooDestinationDto(@NonNull String networkAddress, @NonNull String dimensionName, boolean isEnabled,
+                              int tollKnuts) {
+        this(networkAddress, dimensionName, isEnabled, tollKnuts, PUBLIC);
+    }
+
+    public boolean has(int mark) {
+        return (marks & mark) != 0;
     }
 
     public static final StreamCodec<ByteBuf, FlooDestinationDto> STREAM_CODEC = StreamCodec.of(
@@ -25,11 +38,13 @@ public record FlooDestinationDto(
                 ByteBufCodecs.STRING_UTF8.encode(buf, dto.dimensionName);
                 ByteBufCodecs.BOOL.encode(buf, dto.isEnabled);
                 ByteBufCodecs.VAR_INT.encode(buf, dto.tollKnuts);
+                ByteBufCodecs.VAR_INT.encode(buf, dto.marks);
             },
             buf -> new FlooDestinationDto(
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.STRING_UTF8.decode(buf),
                     ByteBufCodecs.BOOL.decode(buf),
+                    ByteBufCodecs.VAR_INT.decode(buf),
                     ByteBufCodecs.VAR_INT.decode(buf)
             )
     );

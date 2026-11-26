@@ -170,6 +170,12 @@ public final class WizardsPalette {
          * rather than theme, so the material is built around it instead of beside it.
          */
         HEARTH("hearth", 0xFFC6B99C, 0xFF1E1A18, 0xFF1E1A18, 0xFF21B342, 0xFF3E3830),
+        /**
+         * The Floo screen as the fireplace itself (Floo remake P5, 2026-11-26): a sooty brick surround round
+         * hearthstone flags, the blackened firebox for the list, brass name plates for the rows, the mantel beam
+         * as the divider. Text stays soot ink on stone and brass (dark-on-light, as the owner keeps choosing).
+         */
+        FLOO("floo", 0xFFB9AF9B, 0xFF1E1A18, 0xFF1E1A18, 0xFF21B342, 0xFF4A4238),
         /** The Howler's red envelope, a black-red wax seal (the films' scarlet letter). */
         HOWLER("howler", 0xFFD25A48, 0xFF1C0606, 0xFF1C0606, 0xFFC9973A, 0xFF3E100C),
         /** Godric's hat: old tan leather, patched, frayed and stitched. */

@@ -203,10 +203,18 @@ public final class UiScreenCapture {
                 Step.client("gringotts", () -> open(new at.koopro.wizardsandbeasts.client.currency.gui.GringottsScreen())),
                 Step.server("gringotts_filled", UiScreenCapture::openGringottsFilled),
                 Step.client("floo_network", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooNetworkScreen(
-                        List.of(new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Diagon Alley", "Overworld", true, 0),
-                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("The Burrow", "Overworld", true, 3),
-                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Ministry of Magic, Atrium", "Overworld", true, 12),
-                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Hogsmeade, Three Broomsticks", "Overworld", false, 5)),
+                        // One row per shelf: public landmarks, the player's own hearth, a friend's private one they
+                        // have visited, and a sealed public one.
+                        List.of(new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Diagon Alley", "Overworld", true, 0,
+                                        at.koopro.wizardsandbeasts.floo.FlooDestinationDto.PUBLIC),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("The Burrow", "Overworld", true, 3,
+                                        at.koopro.wizardsandbeasts.floo.FlooDestinationDto.VISITED),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("My Cottage", "Overworld", true, 0,
+                                        at.koopro.wizardsandbeasts.floo.FlooDestinationDto.MINE),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Ministry of Magic, Atrium", "Overworld", true, 12,
+                                        at.koopro.wizardsandbeasts.floo.FlooDestinationDto.PUBLIC | at.koopro.wizardsandbeasts.floo.FlooDestinationDto.VISITED),
+                                new at.koopro.wizardsandbeasts.floo.FlooDestinationDto("Hogsmeade, Three Broomsticks", "Overworld", false, 5,
+                                        at.koopro.wizardsandbeasts.floo.FlooDestinationDto.PUBLIC)),
                         "Home", false))),
                 Step.client("floo_registration", () -> open(new at.koopro.wizardsandbeasts.client.floo.gui.FlooRegistrationScreen(
                         Minecraft.getInstance().player.blockPosition(), "Home", 10))),
