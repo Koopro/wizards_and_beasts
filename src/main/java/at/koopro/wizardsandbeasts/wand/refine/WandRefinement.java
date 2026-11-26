@@ -1,15 +1,14 @@
 package at.koopro.wizardsandbeasts.wand.refine;
 
-import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.resources.Identifier;
+import at.koopro.wizardsandbeasts.wand.bench.BenchTool;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * The bench's second role, as rules: what can be done to a finished wand, what each asks of the bench and the
@@ -19,15 +18,15 @@ import java.util.Set;
  * <p>User decision (2026-10-22): limited customisation, never risky. Nothing is ever destroyed, and wood, core and
  * the wand's bond with its master never change.
  * <ul>
- *   <li><b>Polish</b> restores integrity (honeycomb wax): +0.25, or +0.40 with a pewter cauldron among the bench's
- *       enhancers. A snapped wand (integrity 0.10 or less) cannot be polished back; that is the Elder Wand's
- *       alone.</li>
- *   <li><b>Re-fit</b> moves flexibility one step stiffer or suppler (a log of the wand's own wood). It needs a
- *       well-furnished bench and knowledge of the grain (Wandlore, "The Grain of the Wood") -- or a spell
- *       teacher's lectern at the bench, whose texts stand in for it.</li>
+ *   <li><b>Polish</b> restores integrity (honeycomb wax): +0.25, or +0.40 with the varnish pot on the bench. A
+ *       snapped wand (integrity 0.10 or less) cannot be polished back; that is the Elder Wand's alone.</li>
+ *   <li><b>Re-fit</b> moves flexibility one step stiffer or suppler (a log of the wand's own wood). It needs the
+ *       lathe chisel on the bench and knowledge of the grain (Wandlore, "The Grain of the Wood").</li>
  *   <li><b>Re-handle, re-tip, ornament</b> change the look only (any log): the next handle, tip or ornament.</li>
  * </ul>
- * Tier unlocks: looks at any bench of tier 1, polish at 2, re-fit at 4.
+ * The bench's tools are what it asks for (2026-11-26 remake). Until then a bench was graded by a tier, summed from
+ * the bookshelves, candles and cauldrons around it: polish asked tier 2, re-fit tier 4, and a lectern stood in for
+ * the grain.
  *
  * <p><b>Whose wand</b> (systems audit B5, Wandmaker, 2026-11-25): a wizard cares only for a wand that answers to
  * them, or to no one. A wand that answers to somebody else is a Wandmaker's work (vocation flag
@@ -38,18 +37,11 @@ import java.util.Set;
 @NullMarked
 public final class WandRefinement {
 
-    public static final float POLISH_TIER = 2.0f;
-    public static final float REFIT_TIER = 4.0f;
-    public static final float LOOK_TIER = 1.0f;
     public static final float POLISH = 0.25f;
-    public static final float POLISH_WITH_CAULDRON = 0.40f;
+    public static final float POLISH_WITH_VARNISH = 0.40f;
     /** At or below this a wand is snapped: polish cannot bring it back. */
     public static final float SNAPPED = 0.10f;
 
-    /** The enhancer whose presence makes polish stronger: a bath of varnish. */
-    public static final Identifier CAULDRON = id("pewter_cauldron");
-    /** The enhancer whose texts stand in for knowing the grain. */
-    public static final Identifier LECTERN = id("spell_teacher");
     /** The Wandlore node a re-fit asks for. */
     public static final String GRAIN_NODE = "wandwood_grain";
     /** Vocation flag: may refine a wand that answers to someone else, and polish cleanses. */
@@ -74,32 +66,35 @@ public final class WandRefinement {
             return this == HANDLE || this == ORNAMENT;
         }
 
-        public float requiredTier() {
-            return this == POLISH ? POLISH_TIER : refit() ? REFIT_TIER : LOOK_TIER;
+        /** The tool this action needs on the bench, or {@code null}. A re-fit re-turns the wood: the chisel. */
+        public @Nullable BenchTool requiredTool() {
+            return refit() ? BenchTool.CHISEL : null;
         }
     }
 
     /** What the bench says about the action chosen; READY means the output slot holds the result. */
     public enum Status {
-        READY, NO_WAND, NO_MATERIAL, WRONG_MATERIAL, TOO_PLAIN, NEEDS_GRAIN, SNAPPED, NOTHING_TO_DO, NOT_YOURS;
+        READY, NO_WAND, NO_MATERIAL, WRONG_MATERIAL, NEEDS_TOOL, NEEDS_GRAIN, SNAPPED, NOTHING_TO_DO, NOT_YOURS;
 
         public String key() {
             return "gui.wizards_and_beasts.wand_refine.status." + name().toLowerCase(Locale.ROOT);
         }
     }
 
-    /** The bench as the rules see it: its tier and which enhancer blocks stand around it. */
-    public record Bench(float tier, Set<Identifier> enhancers) {}
+    /** The bench as the rules see it: the tools on it, as {@link BenchTool#bit()}s. */
+    public record Bench(int tools) {
+        public static final Bench BARE = new Bench(0);
+
+        public boolean has(BenchTool tool) {
+            return (tools & tool.bit()) != 0;
+        }
+    }
 
     /** What the material slot holds, as the rules need it. */
     public enum Material { NONE, HONEYCOMB, OWN_WOOD_LOG, OTHER_LOG, OTHER }
 
     public static float polishAmount(Bench bench) {
-        return bench.enhancers().contains(CAULDRON) ? POLISH_WITH_CAULDRON : POLISH;
-    }
-
-    public static boolean needsGrain(Bench bench) {
-        return !bench.enhancers().contains(LECTERN);
+        return bench.has(BenchTool.VARNISH) ? POLISH_WITH_VARNISH : POLISH;
     }
 
     /** One step stiffer or suppler, or empty at the end of the scale (or for an action that is not a re-fit). */
@@ -140,7 +135,7 @@ public final class WandRefinement {
     }
 
     /**
-     * What the bench says. Checked in the order a wandmaker would meet them: a wand, the bench's furnishing, the
+     * What the bench says. Checked in the order a wandmaker would meet them: a wand, the bench's tools, the
      * knowledge, the material, and whether the action would change anything.
      */
     public static Status check(Action action, Bench bench, boolean wand, boolean knowsGrain, Material material,
@@ -167,10 +162,11 @@ public final class WandRefinement {
         if (hands.anothersWand() && !hands.wandmaker()) {
             return Status.NOT_YOURS;
         }
-        if (bench.tier() < action.requiredTier()) {
-            return Status.TOO_PLAIN;
+        BenchTool tool = action.requiredTool();
+        if (tool != null && !bench.has(tool)) {
+            return Status.NEEDS_TOOL;
         }
-        if (action.refit() && needsGrain(bench) && !knowsGrain) {
+        if (action.refit() && !knowsGrain) {
             return Status.NEEDS_GRAIN;
         }
         if (action == Action.POLISH && integrity <= SNAPPED) {
@@ -189,9 +185,5 @@ public final class WandRefinement {
             return Status.NOTHING_TO_DO;
         }
         return Status.READY;
-    }
-
-    private static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, path);
     }
 }

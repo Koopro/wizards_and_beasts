@@ -4,11 +4,10 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.brew.BrewingRecipe;
 import at.koopro.wizardsandbeasts.client.brew.ClientBrewData;
 import at.koopro.wizardsandbeasts.client.module.ClientModuleState;
-import at.koopro.wizardsandbeasts.client.recipe.ClientSyncedRecipes;
 import at.koopro.wizardsandbeasts.integration.viewer.ViewerContentFilter;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipeType;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingRules;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import com.mojang.logging.LogUtils;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -138,7 +137,7 @@ public class WizardsAndBeastsJeiPlugin implements IModPlugin {
 
         // includeHidden() is essential: without it, a recipe hidden by a previous pass is not returned and
         // so can never be unhidden when its module comes back.
-        List<WandmakingRecipe> allWandmaking = recipes.createRecipeLookup(WandmakingCategory.TYPE)
+        List<WandmakingSpec> allWandmaking = recipes.createRecipeLookup(WandmakingCategory.TYPE)
                 .includeHidden().get().toList();
         recipes.unhideRecipes(WandmakingCategory.TYPE, allWandmaking);
         recipes.hideRecipes(WandmakingCategory.TYPE, allWandmaking.stream()
@@ -154,13 +153,12 @@ public class WizardsAndBeastsJeiPlugin implements IModPlugin {
     }
 
     /**
-     * The wandmaking recipes the client actually has.
-     *
-     * <p>They arrive only because {@code RecipeDataSyncEvents} asks NeoForge to send that type; vanilla
-     * has not synced full recipes since 1.21.2. An empty list here means that request did not happen, not
-     * that no recipes are defined.
+     * Every wood with every core, from the client's copy of the synced wood and core registries
+     * ({@link WandmakingRules#all}). Empty before a server is joined.
      */
-    private static List<WandmakingRecipe> wandmakingRecipes() {
-        return ClientSyncedRecipes.byType(WandmakingRecipeType.INSTANCE.get());
+    private static List<WandmakingSpec> wandmakingRecipes() {
+        // The connection's registries, not the level's: JEI can start before the client level exists.
+        var connection = net.minecraft.client.Minecraft.getInstance().getConnection();
+        return connection == null ? List.of() : WandmakingRules.all(connection.registryAccess());
     }
 }

@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.registry.ModMenuTypes;
 import at.koopro.wizardsandbeasts.skill.SkillSystemAPI;
 import at.koopro.wizardsandbeasts.wand.WandAppearance;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
+import at.koopro.wizardsandbeasts.wand.bench.BenchTool;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.wand.customization.WandConfiguration;
@@ -19,7 +20,6 @@ import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Material;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Status;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,10 +37,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Refining a finished wand at the bench: the wand where a blank would go, the material where a core would go, the
@@ -50,10 +48,10 @@ import java.util.Set;
  */
 public class WandRefineMenu extends AbstractContainerMenu {
 
-    private static final int DATA_TIER = 0;
+    private static final int DATA_TOOLS = 0;
     private static final int DATA_ACTION = 1;
     private static final int DATA_STATUS = 2;
-    private static final int DATA_REQUIRED_TIER = 3;
+    private static final int DATA_REQUIRED_TOOL = 3;
 
     private final WandmakersBenchBlockEntity bench;
     private final Level level;
@@ -81,7 +79,7 @@ public class WandRefineMenu extends AbstractContainerMenu {
         this.level = player.level();
         this.access = ContainerLevelAccess.create(level, bench.getBlockPos());
 
-        // The bench's own geometry, so both roles of the one bench sit on the same sheet.
+        // The making side's geometry: the wand where the blank lies, the material in the core's dish, the result in the box.
         List<int[]> origins = WandmakersBenchMenu.slotOrigins();
         addSlot(new Slot(inputs, 0, origins.get(0)[0], origins.get(0)[1]) {
             @Override public boolean mayPlace(ItemStack stack) { return isFinishedWand(stack); }
@@ -134,10 +132,15 @@ public class WandRefineMenu extends AbstractContainerMenu {
 
     // ── synced state, for the screen ──────────────────────────────────────
 
-    public int tierScaled() { return data[DATA_TIER]; }
+    /** The tools on the bench, as {@link BenchTool#bit()}s. */
+    public int toolMask() { return data[DATA_TOOLS]; }
     public Action action() { return Action.values()[Math.floorMod(data[DATA_ACTION], Action.values().length)]; }
     public Status status() { return Status.values()[Math.floorMod(data[DATA_STATUS], Status.values().length)]; }
-    public int requiredTierScaled() { return data[DATA_REQUIRED_TIER]; }
+    /** The tool the chosen action needs, or {@code null}. */
+    public @org.jspecify.annotations.Nullable BenchTool requiredTool() {
+        int i = data[DATA_REQUIRED_TOOL] - 1;
+        return i >= 0 && i < BenchTool.values().length ? BenchTool.values()[i] : null;
+    }
 
     /** The client chose an action; the server holds it (the screen never assumes it was accepted). */
     public void chooseAction(int ordinal) {
@@ -160,8 +163,7 @@ public class WandRefineMenu extends AbstractContainerMenu {
         if (level.isClientSide()) {
             return;
         }
-        bench.recalcTierScore();
-        WandRefinement.Bench rules = new WandRefinement.Bench(bench.getCachedTierScore(), enhancers());
+        WandRefinement.Bench rules = new WandRefinement.Bench(bench.toolMask());
         Action action = action();
         ItemStack wand = inputs.getItem(0);
         ItemStack material = inputs.getItem(1);
@@ -179,19 +181,12 @@ public class WandRefineMenu extends AbstractContainerMenu {
                 status = Status.NOTHING_TO_DO;
             }
         }
-        data[DATA_TIER] = (int) (rules.tier() * 100.0f);
+        data[DATA_TOOLS] = rules.tools();
         data[DATA_STATUS] = status.ordinal();
-        data[DATA_REQUIRED_TIER] = (int) (action.requiredTier() * 100.0f);
+        BenchTool needed = action.requiredTool();
+        data[DATA_REQUIRED_TOOL] = needed == null ? 0 : needed.ordinal() + 1;
         result.setItem(0, out);
         broadcastChanges();
-    }
-
-    private Set<Identifier> enhancers() {
-        Set<Identifier> ids = new HashSet<>();
-        for (BlockPos pos : bench.getDetectedEnhancers()) {
-            ids.add(BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()));
-        }
-        return ids;
     }
 
     static Material classify(ItemStack material, ItemStack wand) {

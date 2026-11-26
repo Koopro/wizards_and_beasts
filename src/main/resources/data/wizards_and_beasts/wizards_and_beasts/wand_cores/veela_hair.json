@@ -17,5 +17,16 @@
     "glint": "#FFE7A0",
     "pattern": "shimmer",
     "strength": 0.75
+  },
+  "_making_canon": "No canon wand pairs this core; every wood is neutral.",
+  "_pulse_canon": "Ollivander: Veela hair 'makes for rather temperamental wands' (GoF ch.18): flares",
+  "making": {
+    "difficulty": 0.7,
+    "length_shift": 0.7,
+    "pulse": {
+      "tempo": 12,
+      "jitter": 0.55,
+      "drift": 0.25
+    }
   }
 }

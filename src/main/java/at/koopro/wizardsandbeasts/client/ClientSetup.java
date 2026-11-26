@@ -88,11 +88,10 @@ public class ClientSetup {
         event.registerBlockEntityRenderer(at.koopro.wizardsandbeasts.registry.ModBlockEntities.HOUSE_BANNER.get(),
                 context -> new at.koopro.wizardsandbeasts.client.banner.HouseBannerRenderer());
 
-        // The bench rig is `wandmakers_bench_rig`, not `wandmakers_bench`: the bare name would
-        // resolve its texture to the flat block sprite the item still uses. See tools/bench_model.py.
+        // The two-block bench, drawn whole from its working part; a cramped (solo) bench without its side half.
         event.registerBlockEntityRenderer(
                 at.koopro.wizardsandbeasts.registry.ModBlockEntities.WANDMAKERS_BENCH.get(),
-                GeoRendererHelper.simpleBlock("wandmakers_bench_rig", 1.0));
+                context -> new at.koopro.wizardsandbeasts.client.wand.WandmakersBenchRenderer<>());
 
         // Trunks and Newt's Case: two rigs and five sheets behind one block entity type, picked per block, as
         // the cauldron's metals are. The block is RenderShape.INVISIBLE; one margin block clears the open lid.

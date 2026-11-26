@@ -19,7 +19,7 @@ and the broom sync keep reading the stores they read before. What changes is wha
 |---|---|
 | Woods, cores | Datapack registries `wand_woods` / `wand_cores` (`WandDatapackRegistries`), 10 each, synced by vanilla. Each JSON also carries a `_lore` note the codec ignores. |
 | Pairings | The 80 `wandmaking` recipes (10 woods × 8 cores; `rougarou_hair` and `white_river_monster_spine` have none). |
-| Making a wand | `WandmakersBenchMenu` (recipe → `WandmakingRecipe.createWand`). Ollivander offers trial wands from `ollivander_pool`. |
+| Making a wand | `WandmakersBenchMenu` (pairing → `WandmakingSpec.createWand`). Ollivander offers trial wands from `ollivander_pool`. |
 | Stack | Components: wood, core, flexibility, length, integrity, master, bond, configuration (appearance modules). |
 | Appearance | Per-wood `appearance` (tint and modules); named looks in `WandPresetRegistry`. |
 | Stats | `WandStatsResolver.resolve`, the one accessor a cast uses. |
@@ -144,7 +144,7 @@ The list marks ✕ for withdrawn and • for a withdrawn pairing.
 - flexibility (the five `WandFlexibility` values);
 - appearance: the wood's own, or a preset.
 
-**The model** is the game's item renderer drawing a stack built by `WandmakingRecipe.createWand`, the bench's own
+**The model** is the game's item renderer drawing a stack built by `WandmakingSpec.createWand`, the bench's own
 assembly (`AdminItemPreview`). There is no second renderer.
 
 **The verdict and numbers** come from the server (`AdminWandPayloads.PreviewRequest`, debounced 4 ticks), including

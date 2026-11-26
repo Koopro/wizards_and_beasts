@@ -1,7 +1,9 @@
 package at.koopro.wizardsandbeasts.registry;
 
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
+import at.koopro.wizardsandbeasts.item.wand.BenchToolItem;
 import at.koopro.wizardsandbeasts.item.wand.DebugWandItem;
+import at.koopro.wizardsandbeasts.wand.bench.BenchTool;
 import at.koopro.wizardsandbeasts.item.wand.MorphWandItem;
 import at.koopro.wizardsandbeasts.item.wand.WandBlankItem;
 import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
@@ -19,6 +21,17 @@ public final class WandItemRegistry {
 
     public static final DeferredItem<WandBlankItem> WAND_BLANK =
             ModItems.ITEMS.registerItem("wand_blank", props -> new WandBlankItem(props.stacksTo(1)));
+
+    // --- Wandmaker's bench tools (one per stage of a making; see BenchTool) ---
+    public static final DeferredItem<BenchToolItem> CARVING_KNIFE = benchTool(BenchTool.KNIFE);
+    public static final DeferredItem<BenchToolItem> LATHE_CHISEL = benchTool(BenchTool.CHISEL);
+    public static final DeferredItem<BenchToolItem> BORING_BRACE = benchTool(BenchTool.BRACE);
+    public static final DeferredItem<BenchToolItem> CORE_TONGS = benchTool(BenchTool.TONGS);
+    public static final DeferredItem<BenchToolItem> VARNISH_POT = benchTool(BenchTool.VARNISH);
+
+    private static DeferredItem<BenchToolItem> benchTool(BenchTool tool) {
+        return ModItems.ITEMS.registerItem(tool.itemId(), props -> new BenchToolItem(props, tool));
+    }
 
     public static final DeferredItem<DebugWandItem> DEBUG_WAND =
             ModItems.ITEMS.registerItem("debug_wand", props -> new DebugWandItem(props.stacksTo(1)));

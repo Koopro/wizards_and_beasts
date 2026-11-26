@@ -43,5 +43,10 @@
         "ornament": "wizards_and_beasts:gem_inlay"
       }
     ]
+  },
+  "making": {
+    "difficulty": 3.6,
+    "length_min": 10.0,
+    "length_max": 13.5
   }
 }

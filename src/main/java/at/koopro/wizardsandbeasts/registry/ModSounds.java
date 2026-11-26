@@ -67,6 +67,28 @@ public class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SPELL_FIZZLE =
             register("spell_fizzle");
 
+    // The wandmaker's bench (P6 of the bench remake, 2026-11-26): tools/sound_kit.py bench/*.
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_KNOCK =
+            register("bench_knock");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_CUT =
+            register("bench_cut");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_BORE =
+            register("bench_bore");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_PULSE =
+            register("bench_pulse");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_TAKE =
+            register("bench_take");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_BRUSH =
+            register("bench_brush");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_CRACK =
+            register("bench_crack");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_CORE_LOST =
+            register("bench_core_lost");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_SPARKS =
+            register("bench_sparks");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BENCH_FIZZLE =
+            register("bench_fizzle");
+
     public static final DeferredHolder<SoundEvent, SoundEvent> WAND_EQUIP =
             register("wand_equip");
     public static final DeferredHolder<SoundEvent, SoundEvent> WAND_UNEQUIP =

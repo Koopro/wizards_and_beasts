@@ -40,5 +40,10 @@
         "handle": "wizards_and_beasts:talon"
       }
     ]
+  },
+  "making": {
+    "difficulty": 3.9,
+    "length_min": 10.5,
+    "length_max": 13.8
   }
 }

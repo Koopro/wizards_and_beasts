@@ -3,11 +3,11 @@ package at.koopro.wizardsandbeasts.wand.rules;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.network.PayloadBroadcast;
 import at.koopro.wizardsandbeasts.network.wand.WandGlobalsSyncS2CPayload;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingRules;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * The server side of the wand rules: the only writer of {@link WandRulesData}, the publisher of {@link WandGlobals}
- * (from {@code Config}), and the one recipe lookup every wand-making path shares ({@link #recipeFor}).
+ * (from {@code Config}), and the one pairing lookup every wand-making path shares ({@link #specFor}).
  */
 @NullMarked
 @EventBusSubscriber(modid = WizardsAndBeastsMod.MODID)
@@ -54,33 +54,27 @@ public final class WandRulesService {
     }
 
     /**
-     * The wandmaking recipe that pairs this wood and core, or empty when none does. The one lookup the bench, the
-     * Ollivander trial and the admin tools use; it ignores the withdrawal rules, which {@link #makeable} adds.
+     * This wood married to this core, or empty when either is not defined. Every defined wood pairs with every
+     * defined core ({@link WandmakingRules}). The bench, Ollivander's commissions and the admin tools all use this
+     * lookup. It ignores the withdrawal rules, which {@link #makeable} adds.
      */
-    public static Optional<WandmakingRecipe> recipeFor(MinecraftServer server, Identifier wood, Identifier core) {
-        for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
-            if (holder.value() instanceof WandmakingRecipe recipe && recipe.woodKey().equals(wood) && recipe.coreKey().equals(core)) {
-                return Optional.of(recipe);
-            }
-        }
-        return Optional.empty();
+    public static Optional<WandmakingSpec> specFor(MinecraftServer server, Identifier wood, Identifier core) {
+        return WandmakingRules.spec(server.registryAccess(), wood, core);
     }
 
-    /** A pairing that a recipe allows and no rule withdraws. */
-    public static Optional<WandmakingRecipe> makeable(MinecraftServer server, @Nullable Identifier wood, @Nullable Identifier core) {
+    /** A pairing whose wood and core are defined and that no rule withdraws. */
+    public static Optional<WandmakingSpec> makeable(MinecraftServer server, @Nullable Identifier wood, @Nullable Identifier core) {
         if (wood == null || core == null || !WandRules.mayMake(wood, core)) {
             return Optional.empty();
         }
-        return recipeFor(server, wood, core);
+        return specFor(server, wood, core);
     }
 
-    /** Every pairing a recipe allows, as {@code wood|core} keys. */
-    public static Set<String> recipePairs(MinecraftServer server) {
+    /** Every pairing (every wood with every core), as {@code wood|core} keys. */
+    public static Set<String> pairs(MinecraftServer server) {
         java.util.Set<String> out = new java.util.LinkedHashSet<>();
-        for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
-            if (holder.value() instanceof WandmakingRecipe recipe) {
-                out.add(WandRules.pairKey(recipe.woodKey(), recipe.coreKey()));
-            }
+        for (WandmakingSpec spec : WandmakingRules.all(server.registryAccess())) {
+            out.add(WandRules.pairKey(spec.woodKey(), spec.coreKey()));
         }
         return out;
     }

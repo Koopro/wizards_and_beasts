@@ -7,18 +7,16 @@ import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiText;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.client.gui.widget.CyclerWidget;
-import at.koopro.wizardsandbeasts.client.gui.widget.ThemedButton;
-import at.koopro.wizardsandbeasts.wand.style.SwitchBenchRolePayload;
 import at.koopro.wizardsandbeasts.wand.style.WandRestyle;
 import at.koopro.wizardsandbeasts.wand.style.WandRestyle.Aspect;
 import at.koopro.wizardsandbeasts.wand.style.WandRestyle.Cost;
+import at.koopro.wizardsandbeasts.wand.bench.BenchRole;
 import at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
@@ -43,22 +41,18 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
     private static final String KEY = "gui.wizards_and_beasts.wand_restyle.";
 
     private static final int SIDE = 10;
-    private static final int TITLE_Y = 8;
     private static final int PREVIEW_X = 10;
     private static final int PREVIEW_Y = 22;
     private static final int PREVIEW_W = 96;
     private static final int PREVIEW_H = 120;
     private static final float PREVIEW_SCALE = 6.0f;
-    private static final int ROWS_X = 112;
+    private static final int ROWS_X = 115;
     private static final int ROWS_Y = 24;
-    private static final int ROW_H = 16;
+    private static final int ROW_H = 15;
     private static final int LABEL_W = 56;
     private static final int CYCLER_H = 14;
-    private static final int COST_X = 112;
-    private static final int COST_Y = 140;
-    /** Mid tone behind the wand: black swallowed the dark woods, parchment the pale ones. */
-    private static final int STAGE = 0xFF857A6B;
-    private static final int STAGE_EDGE = 0xFF5E5547;
+    private static final int COST_X = 115;
+    private static final int COST_Y = 133;
 
     private final List<CyclerWidget<Integer>> cyclers = new ArrayList<>();
     private int[] shown = new int[0];
@@ -67,8 +61,9 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
         super(menu, playerInventory, title);
         this.imageWidth = WandRestyleMenu.GUI_W;
         this.imageHeight = WandRestyleMenu.GUI_H;
-        this.titleLabelX = SIDE;
-        this.titleLabelY = TITLE_Y;
+        // Engraved on the brass plate (tools/bench_screen.py).
+        this.titleLabelX = 11;
+        this.titleLabelY = 7;
     }
 
     @Override
@@ -91,10 +86,6 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
             cycler.buttons().forEach(this::addRenderableWidget);
             cyclers.add(cycler);
         }
-        addRenderableWidget(ThemedButton.skinned(leftPos + imageWidth - SIDE - 56, topPos + 5, 56, 12,
-                Component.translatable(KEY + "to_refine"),
-                () -> ClientPacketDistributor.sendToServer(new SwitchBenchRolePayload(menu.containerId, false)),
-                SKIN));
     }
 
     /** Applies the choice here at once, for the preview, and asks the server to do the same. */
@@ -123,36 +114,28 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
-        Ui.panel(g, S, x, y, imageWidth, imageHeight);
-        Ui.divider(g, S, x + SIDE - 4, y + 18, imageWidth - 2 * (SIDE - 4));
-
-        // The stage the wand is shown on.
-        g.fill(x + PREVIEW_X - 1, y + PREVIEW_Y - 1, x + PREVIEW_X + PREVIEW_W + 1, y + PREVIEW_Y + PREVIEW_H + 1,
-                STAGE_EDGE);
-        g.fill(x + PREVIEW_X, y + PREVIEW_Y, x + PREVIEW_X + PREVIEW_W, y + PREVIEW_Y + PREVIEW_H, STAGE);
-
-        Ui.slot(g, x + WandRestyleMenu.WAND_X, y + WandRestyleMenu.STATION_Y);
-        Ui.resultSlot(g, x + WandRestyleMenu.RESULT_X, y + WandRestyleMenu.STATION_Y, 4);
-        int midY = y + WandRestyleMenu.STATION_Y + 8;
-        int arrow = menu.status() == WandRestyleMenu.Status.READY ? WizardsPalette.GILT_DARK : S.ink2();
-        int from = x + WandRestyleMenu.WAND_X + 22;
-        int tip = x + WandRestyleMenu.RESULT_X - 12 - Ui.ARROW;
-        g.fill(from, midY - 1, tip + 2, midY + 2, arrow);
-        Ui.arrow(g, 1, tip, midY - 3, arrow);
-
+        // The restyle bench (tools/bench_screen.py): the wand turns on the baize, the choices are on the slip, the
+        // wand goes in on the pad and comes out in the box.
+        java.util.List<int[]> inventory = new ArrayList<>();
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                Ui.slot(g, x + WandRestyleMenu.INV_X + col * 18, y + WandRestyleMenu.INV_Y + row * 18);
+                inventory.add(new int[]{WandRestyleMenu.INV_X + col * 18, WandRestyleMenu.INV_Y + row * 18});
             }
         }
         for (int col = 0; col < 9; col++) {
-            Ui.slot(g, x + WandRestyleMenu.INV_X + col * 18, y + WandRestyleMenu.HOTBAR_Y);
+            inventory.add(new int[]{WandRestyleMenu.INV_X + col * 18, WandRestyleMenu.HOTBAR_Y});
+        }
+        BenchChrome.back(g, x, y, imageWidth, WandRestyleMenu.TOP_H, imageHeight, BenchChrome.TOP_RESTYLE,
+                BenchRole.RESTYLE, inventory);
+        if (menu.status() == WandRestyleMenu.Status.READY) {
+            Ui.slotTarget(g, x + WandRestyleMenu.RESULT_X, y + WandRestyleMenu.STATION_Y, 0, WizardsPalette.GILT_LIGHT);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, titleLabelX, titleLabelY, WizardsPalette.PAGE_INK, false);
+        BenchChrome.tagLabels(g, font, imageWidth, BenchRole.RESTYLE);
         int[] pick = menu.selection();
         for (Aspect aspect : Aspect.values()) {
             int rowY = ROWS_Y + aspect.ordinal() * ROW_H;
@@ -232,6 +215,10 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
 
     @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0 && BenchChrome.clickTag(event.x(), event.y(), leftPos, topPos, imageWidth,
+                BenchRole.RESTYLE, menu.containerId)) {
+            return true;
+        }
         if (event.button() == 0 && overStage(event.x(), event.y()) && !menu.wand().isEmpty()) {
             yawBase = yaw();
             dragging = true;
@@ -288,13 +275,17 @@ public class WandRestyleScreen extends AbstractContainerScreen<WandRestyleMenu> 
         for (int i = 0; i < inv.getContainerSize(); i++) {
             items.add(inv.getItem(i));
         }
+        // One column of four; past four, two columns, so every aspect changed at once still fits on the slip.
         List<Cost> costs = WandRestyle.cost(menu.selection());
+        int perColumn = 4;
+        int column = costs.size() <= 4 ? width - 8 : (width - 8) / 2;
         for (int i = 0; i < costs.size(); i++) {
             Cost cost = costs.get(i);
             boolean have = free || WandRestyle.held(items, cost) >= cost.count();
-            int lineY = y + i * 9;
-            g.drawString(font, have ? "✔" : "✖", x, lineY, have ? 0xFF3E7A3A : 0xFFA03228, false);
-            GuiText.drawFitted(g, font, cost.label().getString(), x + 10, lineY, width - 10,
+            int lineX = x + (i / perColumn) * column;
+            int lineY = y + (i % perColumn) * 9;
+            g.drawString(font, have ? "✔" : "✖", lineX, lineY, have ? 0xFF3E7A3A : 0xFFA03228, false);
+            GuiText.drawFitted(g, font, cost.label().getString(), lineX + 9, lineY, column - 11,
                     have ? S.ink() : 0xFFA03228);
         }
     }

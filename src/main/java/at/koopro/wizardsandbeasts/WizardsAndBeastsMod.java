@@ -57,8 +57,6 @@ import at.koopro.wizardsandbeasts.registry.ModVillager;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.wand.WandAttachments;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipeSerializer;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipeType;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
 
 // The value here should match the entry in META-INF/neoforge.mods.toml
@@ -119,8 +117,6 @@ public class WizardsAndBeastsMod {
         AzkabanStructures.STRUCTURE_PLACEMENT_TYPES.register(modEventBus);
         ChamberOfSecretsStructures.STRUCTURE_TYPES.register(modEventBus);
         SettlementStructures.STRUCTURE_TYPES.register(modEventBus);
-        WandmakingRecipeType.RECIPE_TYPES.register(modEventBus);
-        WandmakingRecipeSerializer.RECIPE_SERIALIZERS.register(modEventBus);
         at.koopro.wizardsandbeasts.loot.ModLootModifiers.GLOBAL_LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
 
         modEventBus.addListener(ModNetwork::register);

@@ -38,5 +38,10 @@
         "ornament": "wizards_and_beasts:vine_wrap"
       }
     ]
+  },
+  "making": {
+    "difficulty": 2.6,
+    "length_min": 9.5,
+    "length_max": 12.5
   }
 }

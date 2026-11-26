@@ -68,7 +68,8 @@ public final class ApprenticePathService {
 
     /** Recipes unlocked on arrival. Ones a datapack removed are skipped. */
     static final List<String> ARRIVAL_RECIPES = List.of("wandmakers_bench", "wand_blank", "ministry_handbook",
-            "blank_book_of_spells", "duelling_dummy", "pewter_cauldron");
+            "blank_book_of_spells", "duelling_dummy", "pewter_cauldron",
+            "carving_knife", "lathe_chisel", "boring_brace", "core_tongs", "varnish_pot");
 
     /** More steps than this met at once (an old save, a long absence) get one toast, not a stack of them. */
     private static final int SEPARATE_TOASTS = 2;

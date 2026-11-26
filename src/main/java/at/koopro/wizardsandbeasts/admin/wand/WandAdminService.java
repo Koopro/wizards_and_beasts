@@ -14,7 +14,7 @@ import at.koopro.wizardsandbeasts.wand.cast.WandStats;
 import at.koopro.wizardsandbeasts.wand.cast.WandStatsResolver;
 import at.koopro.wizardsandbeasts.wand.customization.WandPreset;
 import at.koopro.wizardsandbeasts.wand.customization.WandPresetRegistry;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import at.koopro.wizardsandbeasts.wand.registry.WandCastModifiers;
 import at.koopro.wizardsandbeasts.wand.registry.WandCoreDefinition;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
@@ -47,11 +47,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Reads the wand registries, recipes and presets for the Wands section, and makes the one kind of wand an
+ * Reads the wand registries, pairings and presets for the Wands section, and makes the one kind of wand an
  * administrator may ask for: a test wand of a pairing the server allows.
  *
  * <p>Everything shown is read, when asked, from what the game itself uses: the {@code wand_woods} and
- * {@code wand_cores} datapack registries, the {@code wandmaking} recipes (the pairings), the presets
+ * {@code wand_cores} datapack registries (every wood pairs with every core, {@code WandmakingRules}), the presets
  * ({@code WandPresetRegistry}), and — for a previewed wand's numbers — {@link WandStatsResolver}, the same resolver a
  * cast uses. Each wood's and core's canonical lore is the {@code _lore} note in its own datapack file, shown as
  * written.
@@ -92,7 +92,7 @@ public final class WandAdminService {
             cores.add(coreInfo(server, id, entry.getValue()));
             add(settings, WandSettingProvider.coreId(id), viewer);
         }
-        List<String> pairs = new ArrayList<>(WandRulesService.recipePairs(server));
+        List<String> pairs = new ArrayList<>(WandRulesService.pairs(server));
         pairs.sort(String::compareTo);
         for (String pair : pairs) {
             String[] halves = pair.split("\\|", 2);
@@ -222,7 +222,7 @@ public final class WandAdminService {
     public record Request(String wood, String core, float lengthInches, String flexibility, String preset) {}
 
     /**
-     * Checks a requested wand against the server: the wood and core exist, a recipe pairs them, no rule withdraws them,
+     * Checks a requested wand against the server: the wood and core exist (and so pair), no rule withdraws them,
      * the length is a wand's, the flexibility and preset are real. Returns the reason key when it is not makeable.
      */
     public static @Nullable String problem(MinecraftServer server, Request request) {
@@ -234,7 +234,7 @@ public final class WandAdminService {
         if (core == null || server.registryAccess().lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY).getValue(core) == null) {
             return "unknown_core";
         }
-        if (WandRulesService.recipeFor(server, wood, core).isEmpty()) {
+        if (WandRulesService.specFor(server, wood, core).isEmpty()) {
             return "no_recipe";
         }
         if (!WandRules.mayMake(wood, core)) {
@@ -266,9 +266,9 @@ public final class WandAdminService {
         return parsed == null ? Optional.empty() : WandPresetRegistry.get(parsed);
     }
 
-    /** The wand a valid request makes: the recipe's own {@code createWand}, unbonded, with the preset's look if any. */
+    /** The wand a valid request makes: the pairing's own {@code createWand}, unbonded, with the preset's look if any. */
     static ItemStack build(MinecraftServer server, Request request) {
-        WandmakingRecipe recipe = WandRulesService.recipeFor(server, Identifier.parse(request.wood()), Identifier.parse(request.core()))
+        WandmakingSpec recipe = WandRulesService.specFor(server, Identifier.parse(request.wood()), Identifier.parse(request.core()))
                 .orElseThrow();
         ItemStack wand = recipe.createWand(flexibility(request.flexibility()), request.lengthInches());
         preset(request.preset()).ifPresent(p -> wand.set(WandComponents.WAND_CONFIGURATION.get(), p.configuration()));
@@ -294,10 +294,10 @@ public final class WandAdminService {
             bonuses.sort(String::compareTo);
             facts.add(text("stat_categories", String.join(", ", bonuses)));
         }
-        WandRulesService.recipeFor(server, Identifier.parse(request.wood()), Identifier.parse(request.core())).ifPresent(recipe ->
-                facts.add(text("bench", String.format(Locale.ROOT, "bench tier %s · %s–%s in · integrity %s",
-                        format(recipe.minimumBenchTier()), format(recipe.resultLengthMin()), format(recipe.resultLengthMax()),
-                        format(recipe.resultIntegrity())))));
+        WandRulesService.specFor(server, Identifier.parse(request.wood()), Identifier.parse(request.core())).ifPresent(recipe ->
+                facts.add(text("bench", String.format(Locale.ROOT, "difficulty %s · %s–%s in · affinity %s",
+                        format(recipe.difficulty()), format(recipe.lengthMin()), format(recipe.lengthMax()),
+                        signed(recipe.affinity())))));
         return new Preview(true, KEY + "valid", List.copyOf(facts));
     }
 

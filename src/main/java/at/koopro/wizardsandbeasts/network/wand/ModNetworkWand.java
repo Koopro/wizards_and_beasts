@@ -14,6 +14,18 @@ public final class ModNetworkWand {
                 SetFlexibilityPayload.STREAM_CODEC,
                 SetFlexibilityPayload::handle);
         registrar.playToServer(
+                BenchActPayload.TYPE,
+                BenchActPayload.STREAM_CODEC,
+                BenchActPayload::handle);
+        registrar.playToServer(
+                BenchBeatResultPayload.TYPE,
+                BenchBeatResultPayload.STREAM_CODEC,
+                BenchBeatResultPayload::handle);
+        registrar.playToClient(
+                BenchBeatStartPayload.TYPE,
+                BenchBeatStartPayload.STREAM_CODEC,
+                BenchBeatStartPayload::handleClient);
+        registrar.playToServer(
                 at.koopro.wizardsandbeasts.wand.refine.SetRefineActionPayload.TYPE,
                 at.koopro.wizardsandbeasts.wand.refine.SetRefineActionPayload.STREAM_CODEC,
                 at.koopro.wizardsandbeasts.wand.refine.SetRefineActionPayload::handle);

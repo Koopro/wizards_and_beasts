@@ -276,19 +276,40 @@ Manual. You need a survival world and `/give @s wizards_and_beasts:sorting_hat`.
 
 ## Wandmaking (2026-10-22, `feat/wandmaking`)
 
-Manual. You need a survival world, a bench and a few enhancers.
+Manual. You need a survival world and a bench. (Since 2026-11-26 the bench has no tier: making is act by act,
+see "Wandmaker's bench" below; refining asks for the bench's tools.)
 
 1. Ollivanders, at the wandmaker's friend tier: thunderbird tail feather, wampus cat hair, troll whisker and
    White River Monster spine are for sale. Knockturn (trusted contact) sells the first three and rougarou hair.
-2. Make a holly + rougarou hair wand at a bench of tier 4.6 or more. Its tooltip shows a Dark Arts bonus and
+2. Make a holly + rougarou hair wand at the bench. Its tooltip shows a Dark Arts bonus and
    extra misfire. A holly + unicorn hair wand shows a Dark Arts penalty and −misfire in green.
-3. Right-click the bench holding a finished wand: "Refining a Wand" opens (plain right-click still opens the
+3. Right-click the bench holding a finished wand: "Mending a Wand" opens (plain right-click still opens the
    bench). Polish with honeycomb: the output wand's integrity rises. Take it: the honeycomb and the old wand are
-   spent.
-4. Re-fit stiffer with a log of the wand's own wood (spruce for holly). Without Wandlore's "Grain of the Wood"
-   and with no lectern by the bench it says "Needs Grain of the Wood".
+   spent. With the varnish pot on the bench the polish is stronger.
+4. Re-fit stiffer with a log of the wand's own wood (spruce for holly). Without the lathe chisel on the bench it
+   says "Needs the Lathe Chisel on the bench"; without Wandlore's "Grain of the Wood" it says "Needs Grain of the Wood".
 5. "New handle" with any log: the wand's handle changes, and nothing else does.
 6. Find a rougarou in a swamp (default spawn setting): it drops rougarou hair.
+
+## Wandmaker's bench (2026-11-26, `feat/wandmakers-bench`)
+
+Manual. Survival world, a bench, a shaped blank (a blank used on a log takes its wood) and a unicorn hair.
+
+1. Place the bench: it takes two blocks. Lay the five tools on it (use each on the bench); they show on the rig.
+   Sneak with an empty hand: they come back.
+2. Put the blank and the core in. The screen shows the next act ("Turn") and its odds: "Crack ≤ N% ·
+   forgives N". Lay the chisel and the number falls.
+3. Press Turn: the screen closes and a parchment strip above the hotbar shows marks sliding to a line. Press use
+   on each. Use does not open the bench while it plays. At the end: "Turning the blank: done (N%)".
+4. Bore: hold use to keep the bit inside the moving band. Marry: press on the core's pulse (unicorn steady,
+   dragon uneven, phoenix fast and shifting). Seal: four slow strokes.
+5. After the seal, sparks fly and the wand lies in the output slot. A poor making: "a flawed wand (integrity N%)".
+6. Miss every stroke of a turn a few times: the blank can split ("The blank splits along the grain"); the core
+   stays. Miss a marrying: the core can be lost; the blank stays bored, and another core can be tried.
+7. Close the world mid-making and reopen: the stage rule on the screen shows the same stages burnt.
+8. The screen is the bench top seen from above. Press the "Mend" and "Restyle" leather tags over its back edge:
+   each opens on the same bench (a wand left in one comes back to the inventory). In Mend, press a work on the
+   rule (Polish, Stiffer, Suppler, Handle, Adorn) to choose it. In Restyle, drag the wand on the baize to turn it.
 
 ## Learning spells (2026-10-23, `feat/spell-acquisition`)
 

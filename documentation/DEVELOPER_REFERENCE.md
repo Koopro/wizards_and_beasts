@@ -161,7 +161,9 @@ wizardsandbeasts
 | Structures / placements | `AzkabanStructures` | Registers structure, piece and placement types. |
 | Features | `ModFeatures` | Custom tree `Feature<?>` registrations; configured/placed definitions are resource-driven. |
 | Villager content | `ModVillager` | POIs and professions. |
-| Recipes | `wand.recipe.WandmakingRecipeType`, `WandmakingRecipeSerializer` | Custom wandmaking recipe type/serializer. |
+| Pairing | `wand.making.WandmakingRules`, `WandmakingSpec`, `WoodMaking`, `CoreMaking` | Every wood pairs with every core by rule (difficulty, length, affinity and the core's marrying `pulse` from the `making` blocks of `wand_woods` / `wand_cores`); no recipe files since 2026-11-26. |
+| Making at the bench | `wand.making.BenchCraft` (pure), `wand.bench.BenchMaking`, `client.wand.BenchBeatClient` | A wand is made act by act: turn, bore, marry, seal, then first sparks. Each act is a timing beat the server seeds and the client plays (`BenchBeatStartPayload` / `BenchBeatResultPayload`); the server rebuilds the beat, scores the ticks the use key was pressed or held on, and rolls the act's risk (blank cracks, core does not take). Odds = Wandlore vocation, Wandmaker career, Wandlore nodes, the act's tool on the bench, wood/core hardness and affinity. The mean score sets the wand's integrity. The bench tier (enhancer blocks) is gone since 2026-11-26; refine asks for tools instead. |
+| Bench block and screens | `wand.bench.WandmakersBenchBlock` (BenchPart SOLO/MAIN/SIDE), `BenchTool`, `BenchRole`, `client.wand.gui.BenchChrome`, `WandmakersBenchScreen` / `WandRefineScreen` / `WandRestyleScreen` | Two blocks wide like a bed; a solo bench (old saves, templates) grows its side half when there is room. Five tools are laid on it and drawn by the rig. The three screens are the bench top seen from above (`tools/bench_screen.py`); leather tags switch make / mend / restyle (`SwitchBenchRolePayload`). The rig plays one clip per act from a synced `acting` state; sounds are `bench_*` (`tools/sound_kit.py`). |
 | Spells | `spell.core.Spells` | An in-memory, hybrid registry: Java static registrations, addon event registrations, and reloadable JSON registrations. It is not a vanilla `Registry`. |
 | Skills / vocations | `skill.SkillTrees`, `skill.SkillNodeLoader`, `skill.vocation.VocationLoader` | Runtime collections rebuilt from datapacks; skills are not a vanilla registry. |
 | Wand modules | `wand.customization.WandModuleRegistry`, `WandModuleLoader` | Programmatic bootstrap plus reloadable definition path. |
@@ -184,7 +186,7 @@ Do not call `DeferredHolder#get()` during static initialisation unless the API e
 
 | System | Purpose and main classes | Data / persistence / client / extension |
 |---|---|---|
-| Wand | `WandItem`, `WandCast*`, `WandComponents`, `WandAttachments`, allegiance/corruption/integrity/resonance packages | Stack components hold wood, core, flexibility, master, bond, bond history, integrity, corruption and config — a wand's allegiance lives on the stack, never on a player; only the Elder Wand's master is also held in `ElderWandSavedData`, which wins over the stack. `WandAllegianceRules` (pure) decides states, power, transfers and backfires; `WandAllegianceService` applies them. Wood/core `temperament` blocks tune the rules per datapack. Extensible through datapack woods, cores, bench enhancers and `WandModule`. |
+| Wand | `WandItem`, `WandCast*`, `WandComponents`, `WandAttachments`, allegiance/corruption/integrity/resonance packages | Stack components hold wood, core, flexibility, master, bond, bond history, integrity, corruption and config — a wand's allegiance lives on the stack, never on a player; only the Elder Wand's master is also held in `ElderWandSavedData`, which wins over the stack. `WandAllegianceRules` (pure) decides states, power, transfers and backfires; `WandAllegianceService` applies them. Wood/core `temperament` blocks tune the rules per datapack. Extensible through datapack woods, cores and `WandModule`. |
 | Spells | `spell.core.Spell`, `Spells`, `SpellProperties`, `SpellExecutor`, `spell.cast.*`, `SpellProjectileEntity` | Player loadout/known spells/cooldowns/cast counts live in `PlayerSpellData`. JSON spells reload; Java spells cover bespoke behaviour. C2S cast packets are validated before execution; HUD reads synced state. |
 | Skills | `SkillNodeLoader`, `SkillSystemAPI`, `PlayerSkillData`, `SkillEffectCache` | 161 JSON nodes form tree branches. They grant spell learning, damage/cooldown modifiers and abilities. Skill data is attached/synchronised. |
 | Heritage/profession | `heritage.*`, `PlayerHeritageData`, `PlayerProfessionData` | Selection, type-specific rules and profession state; synced to client UI. The attachment registry preserves the legacy `type_data` ID for saves. |
@@ -225,7 +227,6 @@ The mod uses two patterns. **Custom dynamic registries** are registered in `Wand
 |---|---|---|---|
 | Wand woods | `wizards_and_beasts/wizards_and_beasts/wand_woods/*.json` | `WandWoodDefinition.CODEC`; dynamic registry | `wand_woods/rowan.json` |
 | Wand cores | `wizards_and_beasts/wizards_and_beasts/wand_cores/*.json` | `WandCoreDefinition.CODEC`; dynamic registry | `wand_cores/phoenix_feather.json` |
-| Bench enhancers | `wizards_and_beasts/wizards_and_beasts/bench_enhancers/*.json` | `BenchEnhancerDefinition.CODEC`; dynamic registry | `bench_enhancers/*` |
 | Spells | `wizards_and_beasts/spells/*.json` | `SpellDefinition.CODEC` → `SpellReloadListener` → `Spells.registerJson` | `spells/accio.json` |
 | Brews | `wizards_and_beasts/brews/*.json` | `BrewDefinition.CODEC` → `BrewReloadListener` | `brews/wiggenweld_potion.json` (legacy list), `brews/veritaserum.json` (components) |
 | Brewing recipes | `wizards_and_beasts/brewing_recipes/*.json` | `BrewingRecipeDefinition.CODEC` → `BrewingRecipeReloadListener` | `brewing_recipes/wiggenweld_potion.json` |
@@ -465,7 +466,7 @@ The following high-leverage classes are the primary map for contributors (full n
 | `at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries` | Dynamic wand data registries | Wand |
 | `at.koopro.wizardsandbeasts.wand.allegiance.AllegianceSystem` | Wand ownership/allegiance | Wand |
 | `at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity` | Bench state | Wand |
-| `at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipeSerializer` | Custom recipe codec | Wand |
+| `at.koopro.wizardsandbeasts.wand.making.WandmakingRules` | Wood x core pairing rule | Wand |
 | `at.koopro.wizardsandbeasts.skill.SkillNodeLoader` | JSON skill rebuilding | Skills |
 | `at.koopro.wizardsandbeasts.skill.SkillSystemAPI` | Gameplay skill queries | Skills |
 | `at.koopro.wizardsandbeasts.skill.data.PlayerSkillData` | Player skill state | Skills |

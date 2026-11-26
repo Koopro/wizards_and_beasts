@@ -19,20 +19,20 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * Resolves the wandmaking rules as admin settings, from the live datapack registries and recipes:
+ * Resolves the wandmaking rules as admin settings, from the live datapack registries:
  * <pre>
  * wand_wood/&lt;ns&gt;/&lt;wood&gt;/enabled
  * wand_core/&lt;ns&gt;/&lt;core&gt;/enabled
- * wand_pair/&lt;wood ns&gt;/&lt;wood&gt;/&lt;core ns&gt;/&lt;core&gt;/enabled     (only for pairs a wandmaking recipe allows)
+ * wand_pair/&lt;wood ns&gt;/&lt;wood&gt;/&lt;core ns&gt;/&lt;core&gt;/enabled     (every wood with every core)
  * </pre>
- * A wood, core or recipe added by any datapack gets its setting with no code. Every change goes through
+ * A wood or core added by any datapack gets its setting with no code. Every change goes through
  * {@code AdminSettingService}; withdrawing anything asks for confirmation, and nothing may withdraw the last pairing a
  * wand can still be made from.
  */
 @NullMarked
 public final class WandSettingProvider implements AdminSettingProvider {
 
-    /** Every wood, core and recipe pairing switch, for profiles and snapshots. Needs the server's wand registries. */
+    /** Every wood, core and pairing switch, for profiles and snapshots. Needs the server's wand registries. */
     @Override
     public java.util.Collection<Identifier> enumerate(@Nullable MinecraftServer server) {
         java.util.List<Identifier> out = new java.util.ArrayList<>();
@@ -41,7 +41,7 @@ public final class WandSettingProvider implements AdminSettingProvider {
         }
         server.registryAccess().lookupOrThrow(WandDatapackRegistries.WAND_WOOD_REGISTRY).keySet().forEach(id -> out.add(woodId(id)));
         server.registryAccess().lookupOrThrow(WandDatapackRegistries.WAND_CORE_REGISTRY).keySet().forEach(id -> out.add(coreId(id)));
-        for (String pair : WandRulesService.recipePairs(server)) {
+        for (String pair : WandRulesService.pairs(server)) {
             String[] halves = pair.split("\\|", 2);
             Identifier wood = Identifier.tryParse(halves[0]);
             Identifier core = halves.length > 1 ? Identifier.tryParse(halves[1]) : null;
@@ -107,7 +107,7 @@ public final class WandSettingProvider implements AdminSettingProvider {
         if (path.startsWith(PAIR) && parts.length == 6) {
             Identifier wood = Identifier.fromNamespaceAndPath(parts[1], parts[2]);
             Identifier core = Identifier.fromNamespaceAndPath(parts[3], parts[4]);
-            if (WandRulesService.recipeFor(server, wood, core).isEmpty()) {
+            if (WandRulesService.specFor(server, wood, core).isEmpty()) {
                 return null;
             }
             String key = WandRules.pairKey(wood, core);
@@ -126,11 +126,11 @@ public final class WandSettingProvider implements AdminSettingProvider {
     }
 
     /**
-     * Whether some recipe pairing stays makeable once the pairs {@code keep} rejects are also withdrawn. The Ollivander
+     * Whether some pairing stays makeable once the pairs {@code keep} rejects are also withdrawn. The Ollivander
      * trial always has its fallback, but the bench would be dead: refuse the change that leaves nothing to make.
      */
     private static boolean survivesWithout(MinecraftServer server, Predicate<String> keep) {
-        for (String pair : WandRulesService.recipePairs(server)) {
+        for (String pair : WandRulesService.pairs(server)) {
             String[] halves = pair.split("\\|", 2);
             if (keep.test(pair) && WandRules.mayMake(Identifier.parse(halves[0]), Identifier.parse(halves[1]))) {
                 return true;

@@ -12,6 +12,7 @@ import at.koopro.wizardsandbeasts.wand.WandComponents;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlockEntity;
 import at.koopro.wizardsandbeasts.wand.customization.WandSlot;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu;
+import at.koopro.wizardsandbeasts.wand.refine.WandRefinement;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Action;
 import at.koopro.wizardsandbeasts.wand.refine.WandRefinement.Status;
 import at.koopro.wizardsandbeasts.wand.stat.WandCore;
@@ -38,15 +39,15 @@ import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
  */
 public final class WandRefineTests {
 
-    /** Bench and enhancers inside the scenario's own column (x/z 0..4). */
+    /** The bench inside the scenario's own column (x/z 0..4); its side half grows into x 3. */
     private static final BlockPos BENCH = new BlockPos(2, 1, 2);
 
     private WandRefineTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
         tests.add("wandmaking_refine_polish_refit_rehandle",
-                "wandmaking: at a furnished bench a wand is polished (stronger with a cauldron), re-fitted a step "
-                        + "(a lectern stands in for Wandlore) and given a new handle; material spent, bond untouched",
+                "wandmaking: at a bench with its tools a wand is polished (stronger with the varnish pot), re-fitted "
+                        + "a step (chisel + the grain node) and given a new handle; material spent, bond untouched",
                 WandRefineTests::refine);
         tests.add("wandmaking_wandmaker_mends_anothers_wand",
                 "wandmaking: another wizard's wand is refused to a stranger; a Wandmaker polishes it, cleanses its "
@@ -61,8 +62,6 @@ public final class WandRefineTests {
             WizardTestSupport.parkAtOrigin(helper, stranger);
             WizardTestSupport.parkAtOrigin(helper, maker);
             helper.setBlock(BENCH, ModBlocks.WANDMAKERS_BENCH.get());
-            helper.setBlock(new BlockPos(0, 1, 4), ModBlocks.SPELL_TEACHER.get());
-            helper.setBlock(new BlockPos(4, 1, 4), ModBlocks.SPELL_TEACHER.get());
             WandmakersBenchBlockEntity bench = (WandmakersBenchBlockEntity) helper.getLevel()
                     .getBlockEntity(helper.absolutePos(BENCH));
             check(helper, bench != null, () -> "setup: no bench");
@@ -109,13 +108,13 @@ public final class WandRefineTests {
         try {
             WizardTestSupport.parkAtOrigin(helper, maker);
             helper.setBlock(BENCH, ModBlocks.WANDMAKERS_BENCH.get());
-            // Two lecterns (2.0 each) for the re-fit tier and the grain, one pewter cauldron for a stronger polish.
-            helper.setBlock(new BlockPos(0, 1, 4), ModBlocks.SPELL_TEACHER.get());
-            helper.setBlock(new BlockPos(4, 1, 4), ModBlocks.SPELL_TEACHER.get());
-            helper.setBlock(new BlockPos(0, 1, 0), ModBlocks.PEWTER_CAULDRON.get());
             WandmakersBenchBlockEntity bench = (WandmakersBenchBlockEntity) helper.getLevel()
                     .getBlockEntity(helper.absolutePos(BENCH));
             check(helper, bench != null, () -> "setup: no bench");
+            // The varnish pot for a stronger polish, the chisel and the grain node for a re-fit.
+            bench.placeTool(at.koopro.wizardsandbeasts.wand.bench.BenchTool.VARNISH);
+            bench.placeTool(at.koopro.wizardsandbeasts.wand.bench.BenchTool.CHISEL);
+            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(maker, WandRefinement.GRAIN_NODE);
             WandRefineMenu menu = new WandRefineMenu(0, maker.getInventory(), bench);
 
             ItemStack wand = WandItem.createWand(WandWood.HOLLY, WandCore.PHOENIX_FEATHER, WandLength.values()[0],
@@ -123,7 +122,7 @@ public final class WandRefineTests {
             wand.set(WandComponents.WAND_INTEGRITY.get(), 0.5f);
             float bond = WandComponents.getAllegianceScore(wand);
 
-            // Polish: honeycomb, +0.40 with the cauldron.
+            // Polish: honeycomb, +0.40 with the varnish pot.
             ItemStack polished = run(helper, menu, maker, wand, new ItemStack(Items.HONEYCOMB), Action.POLISH);
             check(helper, Math.abs(WandComponents.getIntegrity(polished) - 0.9f) < 1e-4f,
                     () -> "polish gave integrity " + WandComponents.getIntegrity(polished));

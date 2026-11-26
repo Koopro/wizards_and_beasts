@@ -46,5 +46,10 @@
         "handle": "wizards_and_beasts:carved"
       }
     ]
+  },
+  "making": {
+    "difficulty": 2.5,
+    "length_min": 9.0,
+    "length_max": 12.0
   }
 }

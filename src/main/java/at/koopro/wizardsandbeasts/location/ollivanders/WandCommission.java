@@ -13,7 +13,7 @@ import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.spell.proficiency.SpellPractice;
 import at.koopro.wizardsandbeasts.util.InventoryHandover;
 import at.koopro.wizardsandbeasts.wand.WandComponents;
-import at.koopro.wizardsandbeasts.wand.recipe.WandmakingRecipe;
+import at.koopro.wizardsandbeasts.wand.making.WandmakingSpec;
 import at.koopro.wizardsandbeasts.wand.registry.WandCoreDefinition;
 import at.koopro.wizardsandbeasts.wand.registry.WandDatapackRegistries;
 import at.koopro.wizardsandbeasts.wand.registry.WandWoodDefinition;
@@ -127,7 +127,7 @@ public final class WandCommission implements LocationService {
             return Component.translatable(KEY + "not_to_order", woodName(player.registryAccess(), materials.wood()));
         }
         if (!WandRules.mayMake(materials.wood(), materials.core())
-                || WandRulesService.recipeFor(player.level().getServer(), materials.wood(), materials.core()).isEmpty()) {
+                || WandRulesService.specFor(player.level().getServer(), materials.wood(), materials.core()).isEmpty()) {
             return Component.translatable(KEY + "no_pairing", woodName(player.registryAccess(), materials.wood()),
                     coreName(player.registryAccess(), materials.core()));
         }
@@ -200,16 +200,16 @@ public final class WandCommission implements LocationService {
     /** Hands over the finished wand, fitted to the customer, and closes the order. */
     private static boolean collect(ServerPlayer player, WandCommissionOrder.Order order) {
         RegistryAccess registries = player.registryAccess();
-        // The recipe as it stands today; a pairing a datapack has since removed is still finished to the
-        // same pattern a bench would use, because the customer paid for it.
-        WandmakingRecipe recipe = WandRulesService.recipeFor(player.level().getServer(), order.wood(), order.core())
-                .orElse(new WandmakingRecipe(order.wood(), order.core(), 0.0f, 9.0f, 14.0f, 1.0f));
+        // The pairing as it stands today. If a datapack has since removed the wood or the core, the wand is
+        // still finished to the pattern a bench would use, because the customer paid for it.
+        WandmakingSpec recipe = WandRulesService.specFor(player.level().getServer(), order.wood(), order.core())
+                .orElse(new WandmakingSpec(order.wood(), order.core(), 0.0f, 9.0f, 14.0f, 0));
         ItemStack best = ItemStack.EMPTY;
         float bestScore = -1.0f;
-        float span = recipe.resultLengthMax() - recipe.resultLengthMin();
+        float span = recipe.lengthMax() - recipe.lengthMin();
         for (WandFlexibility flexibility : WandFlexibility.values()) {
             for (int step = 0; step <= 4; step++) {
-                ItemStack candidate = recipe.createWand(flexibility, recipe.resultLengthMin() + span * step / 4.0f);
+                ItemStack candidate = recipe.createWand(flexibility, recipe.lengthMin() + span * step / 4.0f);
                 float score = WandResonanceSystem.computeResonance(player, candidate, registries);
                 if (score > bestScore) {
                     best = candidate;

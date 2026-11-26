@@ -25,8 +25,11 @@ public final class ModVillager {
 
     public static final DeferredHolder<PoiType, PoiType> OLLIVANDERS_BENCH = POI_TYPES.register("ollivanders_bench", () -> {
         ImmutableSet.Builder<BlockState> states = ImmutableSet.builder();
+        // The working part only: a two-block bench is one workstation, not two.
         for (BlockState state : ModBlocks.WANDMAKERS_BENCH.get().getStateDefinition().getPossibleStates()) {
-            states.add(state);
+            if (state.getValue(at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlock.PART).isWorking()) {
+                states.add(state);
+            }
         }
         return new PoiType(states.build(), 1, 1);
     });

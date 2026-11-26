@@ -46,7 +46,7 @@ public final class AdminSettings {
         CONTRIBUTORS.add(at.koopro.wizardsandbeasts.admin.creature.CreatureRuleSettings::contribute);
         // One setting per brew / recipe and property, resolved live so /reload never leaves a stale one behind.
         CONTRIBUTORS.add(registry -> registry.addProvider(new at.koopro.wizardsandbeasts.admin.brew.BrewSettingProvider()));
-        // Wood, core and pairing rules from the live wand registries and wandmaking recipes; broom flight numbers
+        // Wood, core and pairing rules from the live wand registries; broom flight numbers
         // from the authored broom definitions.
         CONTRIBUTORS.add(registry -> registry.addProvider(new at.koopro.wizardsandbeasts.admin.wand.WandSettingProvider()));
         CONTRIBUTORS.add(registry -> registry.addProvider(new at.koopro.wizardsandbeasts.admin.broom.BroomSettingProvider()));

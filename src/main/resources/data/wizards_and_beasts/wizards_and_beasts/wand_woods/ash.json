@@ -44,5 +44,10 @@
         "handle": "wizards_and_beasts:wrapped"
       }
     ]
+  },
+  "making": {
+    "difficulty": 3.0,
+    "length_min": 10.0,
+    "length_max": 13.5
   }
 }
