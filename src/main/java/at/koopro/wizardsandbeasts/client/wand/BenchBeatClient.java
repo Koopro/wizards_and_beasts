@@ -4,6 +4,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.client.gui.WizardsPalette;
 import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
+import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.network.wand.BenchBeatResultPayload;
 import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
 import net.minecraft.client.DeltaTracker;
@@ -46,8 +47,8 @@ public final class BenchBeatClient {
     /** Lane pixels per tick. */
     private static final float PX_PER_TICK = 3.0f;
 
-    private static final int W = 220;
-    private static final int H = 50;
+    private static final int W = 240;
+    private static final int H = 54;
 
     private record Play(BlockPos pos, long seed, BenchCraft.Odds odds, BenchCraft.Beat beat,
                         List<Integer> taps, boolean[] held) {}
@@ -75,6 +76,14 @@ public final class BenchBeatClient {
 
     public static boolean active() {
         return play != null;
+    }
+
+    /** What is playing, for a development capture that plays it: odds, seed, beat, the tick reached, holds so far. */
+    public record Snapshot(BenchCraft.Odds odds, long seed, BenchCraft.Beat beat, int tick, boolean[] held) {}
+
+    public static @Nullable Snapshot snapshot() {
+        Play p = play;
+        return p == null ? null : new Snapshot(p.odds, p.seed, p.beat, tick, p.held.clone());
     }
 
     @SubscribeEvent
@@ -145,17 +154,21 @@ public final class BenchBeatClient {
         Ui.panel(g, s, x, y, W, H);
 
         BenchCraft.Odds odds = p.odds;
-        g.drawString(font, Component.translatable(odds.act().key()), x + 8, y + 6, WizardsPalette.PAGE_INK, false);
+        // Clear of the panel's frame rules (4 and 6 px in).
+        int riskW = 0;
         if (odds.act().risk() != BenchCraft.Risk.NONE) {
             Component risk = Component.translatable("wandcraft.bench.beat.risk." + odds.act().risk().name().toLowerCase(Locale.ROOT),
                     String.format(Locale.ROOT, "%.0f", odds.risk() * 100f));
-            g.drawString(font, risk, x + W - 8 - font.width(risk), y + 6, WizardsPalette.PAGE_RUBRIC, false);
+            riskW = font.width(risk) + 6;
+            g.drawString(font, risk, x + W - 10 - font.width(risk), y + 9, WizardsPalette.PAGE_RUBRIC, false);
         }
+        GuiText.drawFitted(g, font, Component.translatable(odds.act().key()).getString(), x + 10, y + 9,
+                W - 20 - riskW, WizardsPalette.PAGE_INK);
 
         float now = p == play ? tick + delta.getGameTimeDeltaPartialTick(false) : p.beat.duration();
-        int laneX = x + 8;
-        int laneY = y + 18;
-        int laneW = W - 16;
+        int laneX = x + 10;
+        int laneY = y + 21;
+        int laneW = W - 20;
         int laneH = 12;
         g.fill(laneX, laneY, laneX + laneW, laneY + laneH, WizardsPalette.PAGE_SHADE);
         if (odds.act().kind() == BenchCraft.Kind.HOLD) {
@@ -174,7 +187,7 @@ public final class BenchBeatClient {
                     ? "wandcraft.bench.beat.hint_hold" : "wandcraft.bench.beat.hint_tap",
                     mc.options.keyUse.getTranslatedKeyMessage());
         }
-        g.drawString(font, foot, x + 8, y + H - 14, WizardsPalette.PAGE_INK_2, false);
+        GuiText.drawFitted(g, font, foot.getString(), x + 10, y + H - 17, W - 20, WizardsPalette.PAGE_INK_2);
     }
 
     /** Beats slide in from the right to the mark; a beat turns green once a tap has caught it, red once missed. */
