@@ -38,8 +38,10 @@ import java.util.List;
 @NullMarked
 public class WandRestyleMenu extends AbstractContainerMenu {
 
+    /** The restyle bench top (tools/bench_screen.py, 270 x 178) over the parchment inventory strip. */
     public static final int GUI_W = 270;
     public static final int GUI_H = 266;
+    public static final int TOP_H = 178;
     public static final int WAND_X = 14;
     public static final int RESULT_X = 88;
     public static final int STATION_Y = 150;

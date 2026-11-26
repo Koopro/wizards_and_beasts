@@ -47,7 +47,7 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
 
     /** The bench top (232 x 150) and the parchment inventory strip under its front edge. */
     public static final int GUI_W = 232;
-    public static final int GUI_H = 248;
+    public static final int GUI_H = 238;
     public static final int TOP_H = 150;
     public static final int BLANK_X = 54;
     public static final int BLANK_Y = 54;
@@ -55,9 +55,12 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
     public static final int CORE_Y = 54;
     public static final int OUTPUT_X = 186;
     public static final int OUTPUT_Y = 54;
-    /** Player inventory, centred on the strip; the hotbar a vanilla 4px gap below. */
+    /**
+     * Player inventory, centred on the strip; the hotbar a vanilla 4px gap below. No caption: the parchment strip is
+     * plainly the player's own, and without one the screen fits a 240px-tall window (720p at GUI scale 3).
+     */
     public static final int INV_X = 36;
-    public static final int INV_Y = 162;
+    public static final int INV_Y = 154;
     public static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
 
     /**
@@ -65,7 +68,19 @@ public class WandmakersBenchMenu extends AbstractContainerMenu {
      * slots. {@code quickMoveStack} relies on that order (0-2 bench, 3-29 inventory, 30-38 hotbar).
      */
     public static List<int[]> slotOrigins() {
-        return BenchSheet.origins(BLANK_X, BLANK_Y, CORE_X, CORE_Y, OUTPUT_X, OUTPUT_Y, INV_X, INV_Y, HOTBAR_Y);
+        List<int[]> out = new java.util.ArrayList<>(39);
+        out.add(new int[]{BLANK_X, BLANK_Y});
+        out.add(new int[]{CORE_X, CORE_Y});
+        out.add(new int[]{OUTPUT_X, OUTPUT_Y});
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
+                out.add(new int[]{INV_X + col * 18, INV_Y + row * 18});
+            }
+        }
+        for (int col = 0; col < 9; ++col) {
+            out.add(new int[]{INV_X + col * 18, HOTBAR_Y});
+        }
+        return out;
     }
 
     private static final int DATA_FLEXIBILITY = 0;

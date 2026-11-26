@@ -103,6 +103,52 @@ public final class BenchLookCapture {
         SCRIPT.add(new Step("sparks", 4, true, p -> {}));
         SCRIPT.add(new Step("", 30, true, BenchLookCapture::openBench));
         SCRIPT.add(new Step("screen_done", 10, true, p -> {}));
+        // The other two roles on the same bench, as their tags open them.
+        SCRIPT.add(new Step("", 30, true, BenchLookCapture::openMend));
+        SCRIPT.add(new Step("mend", 10, true, p -> {}));
+        SCRIPT.add(new Step("", 30, true, BenchLookCapture::openRestyle));
+        SCRIPT.add(new Step("restyle", 10, true, p -> {}));
+    }
+
+    /** Mending: a worn holly wand on the lathe, honeycomb in the dish, polish chosen. */
+    private static void openMend(ServerPlayer p) {
+        if (!(p.level().getBlockEntity(bench) instanceof WandmakersBenchBlockEntity be)) {
+            return;
+        }
+        at.koopro.wizardsandbeasts.wand.bench.BenchRole.MEND.open(p, be);
+        if (p.containerMenu instanceof at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu menu) {
+            ItemStack wand = worn();
+            menu.slots.get(0).set(wand);
+            menu.slots.get(1).set(new ItemStack(net.minecraft.world.item.Items.HONEYCOMB, 3));
+            menu.chooseAction(0);
+        }
+    }
+
+    /** Restyling: the same wand with a new look chosen (Talon handle, a dark stain, gold fittings, a blue light). */
+    private static void openRestyle(ServerPlayer p) {
+        if (!(p.level().getBlockEntity(bench) instanceof WandmakersBenchBlockEntity be)) {
+            return;
+        }
+        at.koopro.wizardsandbeasts.wand.bench.BenchRole.RESTYLE.open(p, be);
+        if (p.containerMenu instanceof at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu menu) {
+            menu.slots.get(0).set(worn());
+            int stride = at.koopro.wizardsandbeasts.wand.style.WandRestyleMenu.STRIDE;
+            int talon = 2 + at.koopro.wizardsandbeasts.wand.style.WandRestyle.modules(
+                    at.koopro.wizardsandbeasts.wand.customization.WandSlot.HANDLE).indexOf(
+                    Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "talon"));
+            menu.clickMenuButton(p, talon);
+            menu.clickMenuButton(p, 3 * stride + 2 + 8);
+            menu.clickMenuButton(p, 5 * stride + 2 + 2);
+            menu.clickMenuButton(p, 6 * stride + 2 + 4);
+        }
+    }
+
+    private static ItemStack worn() {
+        ItemStack wand = at.koopro.wizardsandbeasts.item.wand.WandItem.createWand(
+                at.koopro.wizardsandbeasts.wand.stat.WandWood.HOLLY, at.koopro.wizardsandbeasts.wand.stat.WandCore.PHOENIX_FEATHER,
+                at.koopro.wizardsandbeasts.wand.stat.WandLength.values()[2], at.koopro.wizardsandbeasts.wand.stat.WandFlexibility.SUPPLE);
+        wand.set(WandComponents.WAND_INTEGRITY.get(), 0.6f);
+        return wand;
     }
 
     /** Begins the next act and photographs its strip {@code at} ticks in. */

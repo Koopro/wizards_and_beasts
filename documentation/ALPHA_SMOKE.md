@@ -283,7 +283,7 @@ see "Wandmaker's bench" below; refining asks for the bench's tools.)
    White River Monster spine are for sale. Knockturn (trusted contact) sells the first three and rougarou hair.
 2. Make a holly + rougarou hair wand at the bench. Its tooltip shows a Dark Arts bonus and
    extra misfire. A holly + unicorn hair wand shows a Dark Arts penalty and −misfire in green.
-3. Right-click the bench holding a finished wand: "Refining a Wand" opens (plain right-click still opens the
+3. Right-click the bench holding a finished wand: "Mending a Wand" opens (plain right-click still opens the
    bench). Polish with honeycomb: the output wand's integrity rises. Take it: the honeycomb and the old wand are
    spent. With the varnish pot on the bench the polish is stronger.
 4. Re-fit stiffer with a log of the wand's own wood (spruce for holly). Without the lathe chisel on the bench it
@@ -306,7 +306,10 @@ Manual. Survival world, a bench, a shaped blank (a blank used on a log takes its
 5. After the seal, sparks fly and the wand lies in the output slot. A poor making: "a flawed wand (integrity N%)".
 6. Miss every stroke of a turn a few times: the blank can split ("The blank splits along the grain"); the core
    stays. Miss a marrying: the core can be lost; the blank stays bored, and another core can be tried.
-7. Close the world mid-making and reopen: the screen shows the same stage in its title line.
+7. Close the world mid-making and reopen: the stage rule on the screen shows the same stages burnt.
+8. The screen is the bench top seen from above. Press the "Mend" and "Restyle" leather tags over its back edge:
+   each opens on the same bench (a wand left in one comes back to the inventory). In Mend, press a work on the
+   rule (Polish, Stiffer, Suppler, Handle, Adorn) to choose it. In Restyle, drag the wand on the baize to turn it.
 
 ## Learning spells (2026-10-23, `feat/spell-acquisition`)
 

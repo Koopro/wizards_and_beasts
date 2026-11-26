@@ -11,6 +11,7 @@ import at.koopro.wizardsandbeasts.item.wand.WandCoreMaterialItem;
 import at.koopro.wizardsandbeasts.network.wand.BenchActPayload;
 import at.koopro.wizardsandbeasts.network.wand.SetFlexibilityPayload;
 import at.koopro.wizardsandbeasts.wand.bench.BenchMaking;
+import at.koopro.wizardsandbeasts.wand.bench.BenchRole;
 import at.koopro.wizardsandbeasts.wand.bench.BenchTool;
 import at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu;
 import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
@@ -49,30 +50,22 @@ import static at.koopro.wizardsandbeasts.wand.gui.WandmakersBenchMenu.TOP_H;
  * {@link WandmakersBenchMenu}'s numbers, which the slots use too. The player's inventory is a parchment strip under
  * the bench's front edge.
  *
- * <p>P5 look gate: the Make tag is live; Mend and Restyle are drawn and wait for the owner's verdict on this look.
+ * <p>Owner 2026-11-26: "i like it very much". The Mend and Restyle tags open those roles on the same bench
+ * ({@link BenchChrome}).
  */
 public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBenchMenu> {
 
-    private static final Identifier TOP = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
-            "textures/gui/container/wandmakers_bench/bench_top.png");
-    private static final Identifier TAG = Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID,
-            "textures/gui/container/wandmakers_bench/tag.png");
     private static final UiSurface PAGE = UiSurface.PAGE;
 
     // Mirrored from tools/bench_screen.py.
     private static final int PLATE_X = 6, PLATE_Y = 4;
-    /** Tags hang over the back edge: the open one in front of it, the others behind. */
-    private static final int TAG_X = 86, TAG_STEP = 48, TAG_W = 46, TAG_H = 16, TAG_Y_OPEN = -12, TAG_Y_SHUT = -10;
     private static final int TOOL_X0 = 11, TOOL_STEP = 21, TOOL_Y = 25;
     private static final int RULE_X0 = 6, RULE_Y0 = 82, RULE_X1 = 226, RULE_Y1 = 94;
     private static final int SLIP_X0 = 6, SLIP_Y0 = 100, SLIP_X1 = 152;
     private static final int SEAL_X = 194, SEAL_Y = 120, SEAL_R = 19;
-    /** The strip overlaps the bench's front edge by a few pixels, as the bag hangs over its strip. */
-    private static final int STRIP_Y = TOP_H - 6;
 
     /** The rule's five marks: the four stages a making passes, then sealed. */
     private static final String[] RULE_KEYS = {"seated", "turned", "bored", "married", "sealed"};
-    private static final String[] TAGS = {"make", "mend", "restyle"};
 
     private @Nullable CyclerWidget<WandFlexibility> flexCycler;
     private @Nullable SealButton seal;
@@ -128,38 +121,12 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
-        // The strip and the shut tags first: the bench's edges lie over them.
-        Ui.panel(g, PAGE, x, y + STRIP_Y, imageWidth, imageHeight - STRIP_Y);
-        for (int i = 1; i < TAGS.length; i++) {
-            g.blit(RenderPipelines.GUI_TEXTURED, TAG, x + TAG_X + i * TAG_STEP, y + TAG_Y_SHUT, 0f, 0f, TAG_W, TAG_H, TAG_W, TAG_H);
-        }
-        g.nextStratum();
-        g.blit(RenderPipelines.GUI_TEXTURED, TOP, x, y, 0f, 0f, imageWidth, TOP_H, imageWidth, TOP_H);
-        g.blit(RenderPipelines.GUI_TEXTURED, TAG, x + TAG_X, y + TAG_Y_OPEN, 0f, 0f, TAG_W, TAG_H, TAG_W, TAG_H);
-        // A new stratum, or the fills below would be batched under the bench art.
-        g.nextStratum();
         List<int[]> origins = WandmakersBenchMenu.slotOrigins();
-        for (int i = 3; i < origins.size(); i++) {
-            Ui.slot(g, x + origins.get(i)[0], y + origins.get(i)[1]);
-        }
+        BenchChrome.back(g, x, y, imageWidth, TOP_H, imageHeight, BenchChrome.TOP_MAKE, BenchRole.MAKE,
+                origins.subList(3, origins.size()));
         renderTools(g, x, y);
         renderRule(g, x, y);
         renderCarriedTarget(g, x, y);
-    }
-
-    /** The tags' names; the open one bright, with a gilt stitch under it. */
-    private void renderTagLabels(GuiGraphics g) {
-        for (int i = 0; i < TAGS.length; i++) {
-            int tx = TAG_X + i * TAG_STEP;
-            boolean open = i == 0;
-            int ty = open ? TAG_Y_OPEN : TAG_Y_SHUT;
-            Component name = Component.translatable("wandcraft.bench.tab." + TAGS[i]);
-            int colour = open ? WizardsPalette.BRASS_HI : WizardsPalette.TEXT_DIM;
-            g.drawString(font, name, tx + 4 + (TAG_W - 4 - font.width(name)) / 2, ty + 3, colour, open);
-            if (open) {
-                g.fill(tx + 6, ty + 12, tx + TAG_W - 4, ty + 13, WizardsPalette.GILT);
-            }
-        }
     }
 
     /** Each tool that lies on the bench sits in its pocket of the roll. */
@@ -209,8 +176,7 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         // Engraved on the brass plate, and the inventory caption on the strip.
         g.drawString(font, title, titleLabelX, titleLabelY, WizardsPalette.PAGE_INK, false);
-        g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, WizardsPalette.PAGE_INK_2, false);
-        renderTagLabels(g);
+        BenchChrome.tagLabels(g, font, imageWidth, BenchRole.MAKE);
         renderSlip(g);
         renderSealLabel(g);
     }
@@ -278,6 +244,15 @@ public class WandmakersBenchScreen extends AbstractContainerScreen<WandmakersBen
                 return;
             }
         }
+    }
+
+    @Override
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0 && BenchChrome.clickTag(event.x(), event.y(), leftPos, topPos, imageWidth,
+                BenchRole.MAKE, menu.containerId)) {
+            return true;
+        }
+        return super.mouseClicked(event, doubleClick);
     }
 
     private static void outline(GuiGraphics g, int x, int y, int w, int h, int colour) {
