@@ -4,6 +4,27 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### The wandmaker's bench, remade (2026-11-26)
+
+- **Changed:** a wand is made at the bench act by act: turn the blank, bore it, marry the core, seal it, and the first
+  sparks show how well it went. Each act is a short timing game in the world (press on the beat, or hold the bit in the
+  band). Missed strokes can crack the blank or lose the core; the bench shows the odds before each act. The making
+  survives the world closing between acts.
+- **Changed:** quality comes from skill, tools and affinity together. Wandmakers (Wandlore vocation, the career, Wandlore
+  skills) get wider windows and forgiven misses; anyone else can make a wand, but it is hard. Woods and cores that suit
+  each other calm the marrying; each core has its own pulse (unicorn steady, dragon uneven, phoenix fast and shifting).
+- **Changed:** every wood now pairs with every core by rule; the 100 recipe files are gone.
+- **Changed:** the bench is two blocks wide. Benches in existing worlds and structures grow their second half where there
+  is room and work as they are where there is not.
+- **Added:** five bench tools (carving knife, lathe chisel, boring brace, core tongs, varnish pot), laid on the bench and
+  shown on it. Breaking the bench drops them, with its blank, core and any finished wand.
+- **Removed:** the bench tier (bookshelves, candles, cauldrons and lecterns around it). Mending asks for tools instead: the
+  varnish pot strengthens polish, a re-fit needs the lathe chisel and the Grain of the Wood.
+- **Changed:** the bench screens (make, mend, restyle) are the bench top seen from above, switched by leather tags.
+- **Added:** ten bench sounds, a rig animation for each act, and the first sparks: a stream of red and gold for a clean
+  wand (PS ch.5), a sputter for a flawed one.
+
+
 ### Hamlets made dependable for a first human playtest (2026-11-03)
 
 - **Fixed:** someone struck down in a hamlet now returns at the next dawn, including a dawn reached by sleeping, by
