@@ -6,6 +6,7 @@ import at.koopro.wizardsandbeasts.client.gui.ui.Ui;
 import at.koopro.wizardsandbeasts.client.gui.ui.UiSurface;
 import at.koopro.wizardsandbeasts.client.gui.util.GuiText;
 import at.koopro.wizardsandbeasts.network.wand.BenchBeatResultPayload;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
 import at.koopro.wizardsandbeasts.wand.making.BenchCraft;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -122,11 +123,17 @@ public final class BenchBeatClient {
         while (mc.options.keyUse.consumeClick()) {
             if (mc.screen == null) {
                 p.taps.add(tick);
+                tapSound(mc, p);
             }
         }
+        beatSound(mc, p);
         int boreTick = tick - BenchCraft.LEAD;
         if (boreTick >= 0 && boreTick < p.held.length) {
             p.held[boreTick] = mc.screen == null && mc.options.keyUse.isDown();
+            // The brace grinds while it is driven: one second of grinding, renewed while the key stays down.
+            if (p.held[boreTick] && (boreTick == 0 || !p.held[boreTick - 1] || boreTick % 20 == 0)) {
+                play(mc, p, ModSounds.BENCH_BORE.get(), 0.6f, 1.0f);
+            }
         }
         tick++;
         if (tick >= p.beat.duration()) {
@@ -136,6 +143,58 @@ public final class BenchBeatClient {
             shown = p;
             shownFor = RESULT_HOLD;
             play = null;
+        }
+    }
+
+    // ── sounds: only the player at the bench hears the beat and their own strokes ──
+
+    /** The beat as sound: the treadle's knock for turning and sealing, the core's pulse for marrying. */
+    private static void beatSound(Minecraft mc, Play p) {
+        if (p.odds.act().kind() != BenchCraft.Kind.TAPS) {
+            return;
+        }
+        for (int b : p.beat.beats()) {
+            if (b == tick) {
+                if (p.odds.act() == BenchCraft.Act.MARRY) {
+                    // A fast core pulses high, a slow one low (unicorn 18 ticks, phoenix 10).
+                    float pitch = Math.max(0.7f, Math.min(1.5f, 14.0f / p.odds.pulse().tempo()));
+                    play(mc, p, ModSounds.BENCH_PULSE.get(), 0.7f, pitch);
+                    // The core glows through the wood on each pulse: a few motes rise from the lathe.
+                    if (mc.level != null) {
+                        var r = mc.level.getRandom();
+                        for (int i = 0; i < 4; i++) {
+                            mc.level.addParticle(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
+                                    p.pos.getX() + 0.3 + r.nextDouble() * 0.4, p.pos.getY() + 0.95,
+                                    p.pos.getZ() + 0.3 + r.nextDouble() * 0.4, 0.0, 0.02 + r.nextDouble() * 0.02, 0.0);
+                        }
+                    }
+                } else {
+                    play(mc, p, ModSounds.BENCH_KNOCK.get(), 0.5f, 1.0f);
+                }
+            }
+        }
+    }
+
+    /** The player's own stroke: the chisel bites, the core settles (only when it caught a pulse), the brush sweeps. */
+    private static void tapSound(Minecraft mc, Play p) {
+        switch (p.odds.act()) {
+            case TURN -> play(mc, p, ModSounds.BENCH_CUT.get(), 0.7f, 0.9f + mc.level.getRandom().nextFloat() * 0.2f);
+            case MARRY -> {
+                for (int b : p.beat.beats()) {
+                    if (Math.abs(b - tick) <= p.odds.window()) {
+                        play(mc, p, ModSounds.BENCH_TAKE.get(), 0.6f, 1.0f);
+                        return;
+                    }
+                }
+            }
+            case SEAL -> play(mc, p, ModSounds.BENCH_BRUSH.get(), 0.7f, 1.0f);
+            default -> { }
+        }
+    }
+
+    private static void play(Minecraft mc, Play p, net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
+        if (mc.level != null) {
+            mc.level.playLocalSound(p.pos, sound, net.minecraft.sounds.SoundSource.BLOCKS, volume, pitch, false);
         }
     }
 

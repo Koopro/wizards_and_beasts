@@ -102,6 +102,7 @@ public final class BenchMakingTests {
         WandmakersBenchBlockEntity.PendingAct pending = bench.pending();
         check(helper, pending != null, () -> "no act pending after it began");
         BenchCraft.Odds odds = pending.odds();
+        check(helper, bench.acting() == odds.act(), () -> "the rig does not play " + odds.act() + ": " + bench.acting());
         int[] taps = new int[0];
         boolean[] held = new boolean[0];
         if (perfect && odds.act().kind() == BenchCraft.Kind.TAPS) {
@@ -110,6 +111,7 @@ public final class BenchMakingTests {
             held = steadyHand(odds, pending.seed());
         }
         BenchMaking.resolve(bench, player, pending.seed(), taps, held, pending.startTick() + pending.duration(), roll);
+        check(helper, bench.acting() == null, () -> "the rig still plays " + bench.acting() + " after the act");
         return odds.act();
     }
 

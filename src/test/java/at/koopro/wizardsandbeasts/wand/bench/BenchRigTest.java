@@ -58,14 +58,21 @@ class BenchRigTest {
     }
 
     @Test
-    void bothClipsTheBlockEntityAsksForExist() throws IOException {
+    void everyClipTheBlockEntityAsksForExists() throws IOException {
         // WandmakersBenchBlockEntity.registerControllers names exactly these two.
         JsonObject clips = clips();
-        for (String clip : new String[]{"animation.wandmakers_bench.idle",
-                                        "animation.wandmakers_bench.working"}) {
+        // idle and working, one clip per act (BenchCraft.Act, named by the act: the block entity plays
+        // "animation.wandmakers_bench." + act name), and the triggered first sparks.
+        List<String> wanted = new java.util.ArrayList<>(List.of("animation.wandmakers_bench.idle",
+                "animation.wandmakers_bench.working", "animation.wandmakers_bench.sparks"));
+        for (at.koopro.wizardsandbeasts.wand.making.BenchCraft.Act act
+                : at.koopro.wizardsandbeasts.wand.making.BenchCraft.Act.values()) {
+            wanted.add("animation.wandmakers_bench." + act.name().toLowerCase(java.util.Locale.ROOT));
+        }
+        for (String clip : wanted) {
             assertTrue(clips.has(clip), "missing clip: " + clip);
         }
-        assertEquals(2, clips.size(), "clips nothing plays; either wire them or delete them");
+        assertEquals(wanted.size(), clips.size(), "clips nothing plays; either wire them or delete them");
     }
 
     @Test

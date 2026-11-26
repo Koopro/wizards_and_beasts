@@ -23,12 +23,13 @@ import at.koopro.wizardsandbeasts.wand.refine.WandRefinement;
 import at.koopro.wizardsandbeasts.wand.rules.WandRules;
 import at.koopro.wizardsandbeasts.wand.stat.WandFlexibility;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import at.koopro.wizardsandbeasts.registry.ModSounds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -143,7 +144,7 @@ public final class BenchMaking {
         bench.setPending(new WandmakersBenchBlockEntity.PendingAct(player.getUUID(), odds, seed, level.getGameTime(), duration));
         player.closeContainer();
         PacketDistributor.sendToPlayer(player, new BenchBeatStartPayload(bench.getBlockPos(), seed, odds));
-        level.playSound(null, bench.getBlockPos(), SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 0.6f, 1.1f);
+        level.playSound(null, bench.getBlockPos(), ModSounds.BENCH_KNOCK.get(), SoundSource.BLOCKS, 0.7f, 1.0f);
         return Status.READY;
     }
 
@@ -183,14 +184,14 @@ public final class BenchMaking {
         int percent = Math.round(score * 100f);
         if (struck && odds.act().risk() == BenchCraft.Risk.CRACK) {
             bench.crack();
-            level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0f, 0.8f);
+            level.playSound(null, pos, ModSounds.BENCH_CRACK.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
             level.sendParticles(ParticleTypes.CRIT, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 12, 0.2, 0.1, 0.2, 0.05);
             player.displayClientMessage(Component.translatable("wandcraft.bench.outcome.crack", percent), false);
             return;
         }
         if (struck && odds.act().risk() == BenchCraft.Risk.CORE_LOST) {
             bench.loseCore();
-            level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.7f, 1.2f);
+            level.playSound(null, pos, ModSounds.BENCH_CORE_LOST.get(), SoundSource.BLOCKS, 0.9f, 1.0f);
             level.sendParticles(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 10, 0.15, 0.1, 0.15, 0.01);
             player.displayClientMessage(Component.translatable("wandcraft.bench.outcome.core_lost", percent), false);
             return;
@@ -208,7 +209,8 @@ public final class BenchMaking {
             firstSparks(bench, player);
             return;
         }
-        level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.8f, 1.3f);
+        level.playSound(null, pos, odds.act() == Act.MARRY ? ModSounds.BENCH_TAKE.get() : ModSounds.BENCH_KNOCK.get(),
+                SoundSource.BLOCKS, 0.8f, 1.0f);
         player.displayClientMessage(Component.translatable("wandcraft.bench.outcome.done",
                 Component.translatable(odds.act().key()), percent), true);
     }
@@ -233,18 +235,53 @@ public final class BenchMaking {
         ItemStack wand = spec.get().createWand(flex, spec.get().rollLength(level.getRandom()), integrity);
         bench.finish(wand);
         BlockPos pos = bench.getBlockPos();
-        int sparks = 6 + Math.round(30 * mean);
-        level.sendParticles(integrity >= 1.0f ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.SMOKE,
-                pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, sparks, 0.25, 0.2, 0.25, 0.08);
-        level.sendParticles(at.koopro.wizardsandbeasts.particle.MagicMotes.magic(),
-                pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, sparks / 2, 0.2, 0.3, 0.2, 0.02);
-        level.playSound(null, pos, integrity >= 1.0f ? SoundEvents.AMETHYST_BLOCK_CHIME : SoundEvents.FIRE_EXTINGUISH,
-                SoundSource.BLOCKS, 1.0f, integrity >= 1.0f ? 1.2f : 0.9f);
+        bench.playSparks();
+        bench.startSparks(integrity >= 1.0f, mean);
+        level.playSound(null, pos, integrity >= 1.0f ? ModSounds.BENCH_SPARKS.get() : ModSounds.BENCH_FIZZLE.get(),
+                SoundSource.BLOCKS, 1.0f, integrity >= 1.0f ? 0.9f + 0.2f * mean : 1.0f);
         player.displayClientMessage(Component.translatable(integrity >= 1.0f
                 ? "wandcraft.bench.outcome.clean" : "wandcraft.bench.outcome.flawed",
                 Math.round(integrity * 100f)), false);
         // A wand finished at the bench is a Wandmaker's day of work.
         CareerWork.record(player, CareerWork.Kind.WANDCRAFT);
+    }
+
+    private static final DustParticleOptions RED = new DustParticleOptions(0xC8202A, 1.1f);
+    private static final DustParticleOptions GOLD = new DustParticleOptions(0xF0C040, 1.1f);
+    private static final DustParticleOptions ASH = new DustParticleOptions(0x6A6058, 1.0f);
+
+    /** Ticks the first sparks stream for. */
+    static final int SPARK_TICKS = 16;
+
+    /**
+     * One tick of a new wand's first spell. A clean one answers as Harry's did in Ollivanders (PS ch.5): "a stream of
+     * red and gold sparks shot from the end like a firework", so each tick lays a little more of a rising column, fuller
+     * the better the making, with a firework glitter at its head. A flawed one sputters a few dull sparks and smoke.
+     *
+     * @param step 0 to {@link #SPARK_TICKS} - 1
+     */
+    static void sparkTick(ServerLevel level, BlockPos pos, boolean clean, float mean, int step) {
+        double x = pos.getX() + 0.5;
+        double y = pos.getY() + 1.1;
+        double z = pos.getZ() + 0.5;
+        if (!clean) {
+            if (step % 4 == 0) {
+                level.sendParticles(ASH, x, y + 0.1, z, 2 + Math.round(3 * mean), 0.08, 0.05, 0.08, 0.0);
+                level.sendParticles(ParticleTypes.SMOKE, x, y, z, 3, 0.08, 0.05, 0.08, 0.01);
+            }
+            return;
+        }
+        // The column climbs with the ticks: a stream, not a burst. One packet per colour: the spread places the
+        // sparks up the column.
+        double head = y + 0.1 + step * (0.1 + 0.06 * mean);
+        double mid = (y + head) / 2;
+        double rise = (head - y) / 3;
+        int perColour = 1 + Math.round(2 * mean);
+        level.sendParticles(RED, x, mid, z, perColour, 0.05, rise, 0.05, 0);
+        level.sendParticles(GOLD, x, mid, z, perColour, 0.05, rise, 0.05, 0);
+        if (step % 2 == 0) {
+            level.sendParticles(ParticleTypes.FIREWORK, x, head, z, 1 + Math.round(2 * mean), 0.08, 0.04, 0.08, 0.05);
+        }
     }
 
     /** The wood a blank was carved from, or {@code null} for an unshaped blank or no blank. */

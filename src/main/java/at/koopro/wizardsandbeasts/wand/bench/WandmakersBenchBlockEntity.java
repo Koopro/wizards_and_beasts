@@ -84,6 +84,13 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
 
     private @Nullable PendingAct pending;
 
+    /**
+     * The act being played here ({@link BenchCraft.Act} ordinal), or -1: what the rig plays for everyone who can see the
+     * bench. Sent to clients; on the server it follows {@link #pending}, and a stale value (a reload mid-act) clears
+     * itself on the next tick.
+     */
+    private int acting = -1;
+
     private final AnimatableInstanceCache animatableCache = GeckoLibUtil.createInstanceCache(this);
 
     public WandmakersBenchBlockEntity(BlockPos pos, BlockState blockState) {
@@ -106,6 +113,16 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
      */
     public static void serverTick(Level level, BlockPos pos, BlockState state,
                                   WandmakersBenchBlockEntity bench) {
+        if (bench.sparkStep >= 0 && level instanceof net.minecraft.server.level.ServerLevel server) {
+            BenchMaking.sparkTick(server, pos, bench.sparkClean, bench.sparkMean, bench.sparkStep);
+            bench.sparkStep = ++bench.sparkStep >= BenchMaking.SPARK_TICKS ? -1 : bench.sparkStep;
+        }
+        // An act whose player never answered (left, logged out) is forgotten, and the rig stops playing it.
+        if (bench.pending != null && bench.pendingExpired(level.getGameTime())) {
+            bench.setPending(null);
+        } else if (bench.pending == null && bench.acting >= 0) {
+            bench.setPending(null);
+        }
         if (state.getValue(WandmakersBenchBlock.PART) == BenchPart.SOLO
                 && (!bench.growTried || level.getGameTime() % GROW_RETRY_INTERVAL == 0)) {
             bench.growTried = true;
@@ -157,12 +174,16 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // Half a second of blend: unlike the cauldron's liquid surfaces, these two clips pose the same
-        // bones, so easing between them reads as the wandmaker settling rather than as a snap.
-        controllers.add(new AnimationController<>("bench", 10, state -> state.setAndContinue(
-                working ? RawAnimation.begin().thenLoop("animation.wandmakers_bench.working")
-                        : RawAnimation.begin().thenLoop("animation.wandmakers_bench.idle"))));
+        // Half a second of blend: these clips pose the same bones, so easing between them reads as the wandmaker
+        // settling rather than as a snap. An act being played wins over the working and idle clips.
+        controllers.add(new AnimationController<WandmakersBenchBlockEntity>(CONTROLLER, 10, state -> {
+            BenchCraft.Act act = acting();
+            String clip = act != null ? act.name().toLowerCase(Locale.ROOT) : working ? "working" : "idle";
+            return state.setAndContinue(RawAnimation.begin().thenLoop("animation.wandmakers_bench." + clip));
+        }).triggerableAnim("sparks", RawAnimation.begin().thenPlay("animation.wandmakers_bench.sparks")));
     }
+
+    private static final String CONTROLLER = "bench";
 
     @Override
     public @NonNull AnimatableInstanceCache getAnimatableInstanceCache() {
@@ -285,6 +306,32 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
 
     void setPending(@Nullable PendingAct pending) {
         this.pending = pending;
+        int now = pending == null ? -1 : pending.odds().act().ordinal();
+        if (now != acting) {
+            acting = now;
+            changed();
+        }
+    }
+
+    /** The act the rig plays, or {@code null}. */
+    public BenchCraft.@Nullable Act acting() {
+        return acting < 0 || acting >= BenchCraft.Act.values().length ? null : BenchCraft.Act.values()[acting];
+    }
+
+    // The first sparks, streamed over a few ticks (BenchMaking#sparkTick). Not saved: a reload ends the show.
+    private int sparkStep = -1;
+    private boolean sparkClean;
+    private float sparkMean;
+
+    void startSparks(boolean clean, float mean) {
+        sparkStep = 0;
+        sparkClean = clean;
+        sparkMean = mean;
+    }
+
+    /** The finished wand's first sparks on the rig, for everyone watching (GeckoLib sends the trigger). */
+    void playSparks() {
+        triggerAnim(CONTROLLER, "sparks");
     }
 
     /** The mean score of the acts done so far, 0 to 1; 0 before any. */
@@ -381,6 +428,9 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         if (tools != 0) {
             output.store("tools", Codec.INT, tools);
         }
+        if (acting >= 0) {
+            output.store("acting", Codec.INT, acting);
+        }
         for (int i = 0; i < 3; i++) {
             // ItemStack.CODEC refuses an empty stack: storing one logged "Item must not be minecraft:air" on every
             // save and update packet. An absent slot reads back as empty, which is also how the client learns of it.
@@ -437,6 +487,7 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         working = hasWorkOnIt();
         // Read as a mask of known tools only: a bit a later build added and this one does not know is dropped.
         tools = input.read("tools", Codec.INT).orElse(0) & ALL_TOOLS;
+        acting = input.read("acting", Codec.INT).orElse(-1);
     }
 
     private ItemStack getSlotStack(int slot) {

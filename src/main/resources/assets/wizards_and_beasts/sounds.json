@@ -2169,5 +2169,175 @@
         "volume": 0.9
       }
     ]
+  },
+  "bench_knock": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_knock",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/knock_1",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:bench/knock_2",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:bench/knock_3",
+        "volume": 0.6
+      }
+    ]
+  },
+  "bench_cut": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_cut",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/cut_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:bench/cut_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:bench/cut_3",
+        "volume": 0.7
+      }
+    ]
+  },
+  "bench_bore": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_bore",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/bore_1",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:bench/bore_2",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:bench/bore_3",
+        "volume": 0.6
+      }
+    ]
+  },
+  "bench_pulse": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_pulse",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/pulse_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:bench/pulse_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:bench/pulse_3",
+        "volume": 0.7
+      }
+    ]
+  },
+  "bench_take": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_take",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/take_1",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:bench/take_2",
+        "volume": 0.7
+      },
+      {
+        "name": "wizards_and_beasts:bench/take_3",
+        "volume": 0.7
+      }
+    ]
+  },
+  "bench_brush": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_brush",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/brush_1",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:bench/brush_2",
+        "volume": 0.6
+      },
+      {
+        "name": "wizards_and_beasts:bench/brush_3",
+        "volume": 0.6
+      }
+    ]
+  },
+  "bench_crack": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_crack",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/crack_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:bench/crack_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:bench/crack_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "bench_core_lost": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_core_lost",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/core_lost_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:bench/core_lost_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:bench/core_lost_3",
+        "volume": 0.9
+      }
+    ]
+  },
+  "bench_sparks": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_sparks",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/sparks_1",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:bench/sparks_2",
+        "volume": 1.0
+      },
+      {
+        "name": "wizards_and_beasts:bench/sparks_3",
+        "volume": 1.0
+      }
+    ]
+  },
+  "bench_fizzle": {
+    "subtitle": "subtitles.wizards_and_beasts.bench_fizzle",
+    "sounds": [
+      {
+        "name": "wizards_and_beasts:bench/fizzle_1",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:bench/fizzle_2",
+        "volume": 0.9
+      },
+      {
+        "name": "wizards_and_beasts:bench/fizzle_3",
+        "volume": 0.9
+      }
+    ]
   }
 }
