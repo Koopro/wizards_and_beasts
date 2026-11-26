@@ -249,7 +249,7 @@ public class ModCreativeTabs {
                         output.accept(ModBlocks.WIZARDING_COPPER_CAULDRON.get());
                         output.accept(ModBlocks.PEWTER_CAULDRON.get());
                         output.accept(ModBlocks.FLOO_GRATE.get());
-                        output.accept(ModBlocks.FLOO_FIREPLACE.get());
+                        output.accept(ModBlocks.FLOO_POWDER_POT.get());
                         output.accept(ModBlocks.SPELL_TEACHER.get());
 
                         // Wood Sets

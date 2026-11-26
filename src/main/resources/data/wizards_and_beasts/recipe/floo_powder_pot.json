@@ -1,0 +1,20 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "FLOO_NETWORK"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:flower_pot",
+    "wizards_and_beasts:floo_powder",
+    "wizards_and_beasts:floo_powder",
+    "wizards_and_beasts:floo_powder"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:floo_powder_pot",
+    "count": 1
+  }
+}

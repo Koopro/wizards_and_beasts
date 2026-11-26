@@ -107,20 +107,6 @@ final class WizardingWorldBlockRegistry {
             ModBlocks.BLOCKS.registerBlock("pewter_cauldron",
                     props -> cauldron(props, CauldronTier.PEWTER, 0xFF9AB5C2),
                     RegistryUtils::metalCauldronProps);
-    /**
-     * Decorative grate block — no Floo Network travel logic.
-     * LORE: Intended as a visual prop (fireplace surround), not a travel node.
-     * @deprecated Superseded by {@link at.koopro.wizardsandbeasts.block.FlooFireplaceBlock}.
-     *             Will be removed in beta. Use {@code FLOO_FIREPLACE} for functional travel.
-     */
-    @Deprecated
-    static final DeferredBlock<AmbientParticleBlock> FLOO_GRATE =
-            ModBlocks.BLOCKS.registerBlock("floo_grate",
-                    props -> new AmbientParticleBlock(props,
-                            () -> new SpellTintParticleOptions(ModParticles.ARCANE_MOTE.get(), 0xFF4AC27A),
-                            AmbientParticleBlock.Emission.ABOVE, 12),
-                    () -> BlockBehaviour.Properties.of().strength(3.0f).sound(SoundType.COPPER).noOcclusion());
-
     static final DeferredBlock<SpellScriptoriumBlock> SPELL_TEACHER =
             ModBlocks.BLOCKS.registerBlock("spell_teacher", SpellScriptoriumBlock::new,
                     () -> BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.WOOD).noOcclusion());
@@ -142,7 +128,6 @@ final class WizardingWorldBlockRegistry {
     static final DeferredItem<BlockItem> BRASS_CAULDRON_ITEM = RegistryUtils.registerSimpleBlockItem("brass_cauldron", BRASS_CAULDRON);
     static final DeferredItem<BlockItem> WIZARDING_COPPER_CAULDRON_ITEM = RegistryUtils.registerSimpleBlockItem("wizarding_copper_cauldron", WIZARDING_COPPER_CAULDRON);
     static final DeferredItem<BlockItem> PEWTER_CAULDRON_ITEM = RegistryUtils.registerSimpleBlockItem("pewter_cauldron", PEWTER_CAULDRON);
-    static final DeferredItem<BlockItem> FLOO_GRATE_ITEM = RegistryUtils.registerSimpleBlockItem("floo_grate", FLOO_GRATE);
     static final DeferredItem<BlockItem> SPELL_TEACHER_ITEM = RegistryUtils.registerSimpleBlockItem("spell_teacher", SPELL_TEACHER);
     static final DeferredItem<BlockItem> WANDMAKERS_BENCH_ITEM = RegistryUtils.registerSimpleBlockItem("wandmakers_bench", WANDMAKERS_BENCH);
 

@@ -63,7 +63,7 @@ public class FlooNetworkScreen extends Screen {
     private static final int PANEL_W = 236;
     private static final int PANEL_H = 216;
     private static final int ENTRY_H = 16;
-    private static final int MAX_VISIBLE = 7;
+    private static final int MAX_VISIBLE = 6;
     /**
      * Content inset from the sheet's edge. The list's well is drawn {@code SPACE_S} outside this,
      * and the sheet's double ink rule sits 4 and 6px in, so 16 keeps the well clear of both rules.
@@ -86,7 +86,7 @@ public class FlooNetworkScreen extends Screen {
     // grate, soot ink, and an accent that is FlooCues.EMERALD to the byte. It is paper now, like
     // every screen, so text is soot ink and the green is kept for what it means -- the fire, the
     // row the fire has caught, the line the fire speaks. What survives as a literal is only that.
-    private static final GuiSkin SKIN = GuiSkin.HEARTH;
+    private static final GuiSkin SKIN = GuiSkin.FLOO;
 
     /** The network's green. Semantic: it is the Floo, not the decor. Furniture only, never text. */
     private static final int COL_EMERALD = at.koopro.wizardsandbeasts.floo.FlooCues.EMERALD;
@@ -100,7 +100,7 @@ public class FlooNetworkScreen extends Screen {
      */
     private static final int COL_CALL_DIM = 0x2A1E1A18;
     /** {@code SKIN.base()} under {@link #COL_CALL_DIM}: the face a head-in-fire call is read on. */
-    private static final int CALL_SHEET = 0xFFAA9F86;
+    private static final int CALL_SHEET = 0xFFA59C8A;
     /**
      * The same green as ink: the line spoken by the fire itself, and a row the cursor is over.
      * Pure emerald is 2 : 1 on the soot sheet, so it is taken down to text contrast with its hue kept
@@ -110,7 +110,29 @@ public class FlooNetworkScreen extends Screen {
 
     private static boolean lastSpeakMode = false;
 
-    private final List<FlooDestinationDto> destinations;
+    /** Every row the server sent, and the shelf of it on show ({@link #destinations}). */
+    private final List<FlooDestinationDto> all;
+    private List<FlooDestinationDto> destinations;
+
+    /** The address book's shelves: everything, the public addresses, your own hearths, places you have been. */
+    private enum Shelf {
+        ALL(0, "floo.wizards_and_beasts.gui.filter.all"),
+        PUBLIC(FlooDestinationDto.PUBLIC, "floo.wizards_and_beasts.gui.filter.public"),
+        MINE(FlooDestinationDto.MINE, "floo.wizards_and_beasts.gui.filter.mine"),
+        VISITED(FlooDestinationDto.VISITED, "floo.wizards_and_beasts.gui.filter.visited");
+
+        final int mark;
+        final String key;
+
+        Shelf(int mark, String key) {
+            this.mark = mark;
+            this.key = key;
+        }
+    }
+
+    private static Shelf lastShelf = Shelf.ALL;
+    private Shelf shelf = lastShelf;
+    private final java.util.EnumMap<Shelf, ThemedButton> shelfTabs = new java.util.EnumMap<>(Shelf.class);
     private final String originAddress;
     private final boolean headInFire;
 
@@ -137,7 +159,8 @@ public class FlooNetworkScreen extends Screen {
         super(Component.translatable(headInFire
                 ? "floo.wizards_and_beasts.gui.title.call"
                 : "floo.wizards_and_beasts.gui.title.network"));
-        this.destinations = destinations;
+        this.all = List.copyOf(destinations);
+        this.destinations = shelved(this.all, shelf);
         this.originAddress = originAddress;
         this.headInFire = headInFire;
         // A call is always spoken. Forced rather than defaulted, so no path through this screen can
@@ -162,6 +185,17 @@ public class FlooNetworkScreen extends Screen {
                     tabW, tabH, "floo.wizards_and_beasts.gui.tab.known", () -> setSpeakMode(false)));
             speakTab = addRenderableWidget(hearthButton(px + layout.s(EDGE) + tabW + gap, py + layout.s(34),
                     tabW, tabH, "floo.wizards_and_beasts.gui.tab.speak", () -> setSpeakMode(true)));
+        }
+
+        if (!headInFire) {
+            int gap = layout.s(3);
+            int shelfW = (panelW - LIST_PADDING * 2 - 3 * gap) / 4;
+            int x = px + LIST_PADDING;
+            for (Shelf each : Shelf.values()) {
+                shelfTabs.put(each, addRenderableWidget(hearthButton(x, py + layout.s(55), shelfW,
+                        Math.max(MIN_SKINNED, layout.s(14)), each.key, () -> setShelf(each))));
+                x += shelfW + gap;
+            }
         }
 
         // A well pressed into the sheet, written in soot ink: vanilla's field is a black box with
@@ -215,10 +249,32 @@ public class FlooNetworkScreen extends Screen {
         applyMode();
     }
 
+    private static List<FlooDestinationDto> shelved(List<FlooDestinationDto> rows, Shelf shelf) {
+        return shelf == Shelf.ALL ? rows : rows.stream().filter(d -> d.has(shelf.mark)).toList();
+    }
+
+    private void setShelf(Shelf next) {
+        if (shelf == next) {
+            return;
+        }
+        shelf = next;
+        lastShelf = next;
+        destinations = shelved(all, next);
+        selectedIndex = -1;
+        scrollOffset = 0;
+        playTick(1.2f);
+        applyMode();
+    }
+
     /** Show whichever half of the screen the current tab uses, and nothing of the other. */
     private void applyMode() {
         addressField.visible = speakMode;
         addressField.setEditable(speakMode);
+        // The shelf on show is the one you cannot press, as with the tabs; shelves only belong to the list.
+        shelfTabs.forEach((each, tab) -> {
+            tab.visible = !speakMode;
+            tab.active = each != shelf;
+        });
         if (listTab != null) {
             // The active tab is the one you cannot press. Cheaper than a custom widget and it reads
             // correctly: the pressed-looking, unclickable tab is the one you are on.
@@ -274,7 +330,7 @@ public class FlooNetworkScreen extends Screen {
                     px + panelW / 2, py + layout.s(21), SKIN.muted());
         }
 
-        int contentTop = py + layout.s(headInFire ? 36 : 54);
+        int contentTop = speakMode || headInFire ? py + layout.s(headInFire ? 36 : 54) : listTop();
 
         if (speakMode) {
             if (headInFire) {
@@ -323,31 +379,36 @@ public class FlooNetworkScreen extends Screen {
             graphics.fill(px + FRAME, py + FRAME, px + w - FRAME, py + h - FRAME, COL_CALL_DIM);
         }
 
-        // Two counter-phased sines, so opposite edges never pulse together and the frame never looks
-        // like it is breathing as one object.
-        float t = (Minecraft.getInstance().level == null ? 0f
-                : (Minecraft.getInstance().level.getGameTime() % 200L) / 200.0f) * Mth.TWO_PI;
-        float a = 0.62f + 0.38f * Mth.sin(t * 2.0f);
-        float b = 0.62f + 0.38f * Mth.sin(t * 2.0f + Mth.PI);
-
-        // The fire moved inside the sprite's border rather than replacing it. The panel is a
-        // nine-slice now and the flame is still four fills, because it animates: an animated
-        // nine-slice needs a sheet and an mcmeta for what is two sines, and a static frame would
-        // cost the one thing this screen has that no other screen does — the fire is supposed to be
-        // alive while you are standing in it.
-        int inset = FRAME - 1;
-        int thick = Math.max(1, layout.s(2));
-        int fx = px + inset;
-        int fy = py + inset;
-        int fw = w - 2 * inset;
-        int fh = h - 2 * inset;
-        graphics.fill(fx, fy, fx + fw, fy + thick, flame(a));
-        graphics.fill(fx, fy + fh - thick, fx + fw, fy + fh, flame(b));
-        graphics.fill(fx, fy, fx + thick, fy + fh, flame(b));
-        graphics.fill(fx + fw - thick, fy, fx + fw, fy + fh, flame(a));
+        drawFloorFire(graphics, px, py, w, h);
 
         McStylePanel.drawSkinDivider(graphics, SKIN, px + FRAME,
                 py + layout.s(30) - WizardsMetrics.DIVIDER_H / 2, w - 2 * FRAME);
+    }
+
+    /** The hearth's own green fire (tools/floo_hearth_art.py): 16 px frames stacked in a strip, one per tick. */
+    private static final net.minecraft.resources.Identifier[] FLOOR_FIRE = {
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                    at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/floo/floor_fire_0.png"),
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                    at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "textures/gui/floo/floor_fire_1.png")};
+    private static final int FIRE_FRAMES = 32;
+
+    /**
+     * The same emerald fire the traveller is standing in, burning along the hearth floor behind the buttons: a row of
+     * 16 px tiles of the animated sprite, each tile a frame apart so the row never flickers in step. Drawn tiles
+     * rather than drawn tongues: hand-drawn green blades along a bottom edge read as grass (11-26 look gate).
+     */
+    private void drawFloorFire(GuiGraphics graphics, int px, int py, int w, int h) {
+        long tick = System.currentTimeMillis() / 50L;
+        int tile = 16;
+        int floor = py + h - FRAME;
+        graphics.enableScissor(px + FRAME, floor - tile, px + w - FRAME, floor);
+        for (int x = px + FRAME, i = 0; x < px + w - FRAME; x += tile, i++) {
+            int frame = (int) Math.floorMod(tick + i * 7L, FIRE_FRAMES);
+            graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, FLOOR_FIRE[i & 1], x, floor - tile,
+                    0.0F, frame * (float) tile, tile, tile, tile, tile, tile, tile * FIRE_FRAMES);
+        }
+        graphics.disableScissor();
     }
 
     /**
@@ -377,8 +438,9 @@ public class FlooNetworkScreen extends Screen {
         // Rows stop short of the scrollbar. The old bar was two pixels drawn over the rows and got
         // away with it; the shared one is eight, and a row running under it would put an address
         // behind the thumb.
-        int rowW = destinations.size() > MAX_VISIBLE
-                ? listW - WizardsMetrics.SCROLLBAR_W : listW;
+        // Always clear of the scrollbar's track, which is drawn whether or not the list scrolls: a plate running
+        // under it lost the right-hand end of its shelf tag (11-26 capture).
+        int rowW = listW - WizardsMetrics.SCROLLBAR_W - 1;
         int visibleCount = Math.min(MAX_VISIBLE, destinations.size() - scrollOffset);
 
         McStylePanel.drawSkinInset(graphics, SKIN, listX - WizardsMetrics.SPACE_S,
@@ -394,12 +456,11 @@ public class FlooNetworkScreen extends Screen {
             boolean hovered = mouseX >= listX && mouseX < listX + rowW
                     && mouseY >= entryY && mouseY < entryY + ENTRY_H;
 
-            if (idx == selectedIndex) {
-                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, COL_SELECTED_WASH);
-                graphics.fill(listX, entryY, listX + 1, entryY + ENTRY_H, COL_EMERALD);
-            } else if (hovered && dto.isEnabled()) {
-                graphics.fill(listX, entryY, listX + rowW, entryY + ENTRY_H, COL_HOVER_WASH);
-            }
+            // Each address is a brass name plate in the firebox; the chosen one glows green round its rim.
+            McStylePanel.ControlState plate = !dto.isEnabled() ? McStylePanel.ControlState.DISABLED
+                    : idx == selectedIndex || hovered ? McStylePanel.ControlState.HOVER
+                    : McStylePanel.ControlState.NORMAL;
+            McStylePanel.drawSkinButton(graphics, SKIN, listX, entryY + 1, rowW, ENTRY_H - 2, plate);
 
             // The selected row keeps soot ink: its green is the wash under it, and green lettering
             // on a green wash is the one pairing that cannot be read.
@@ -408,8 +469,6 @@ public class FlooNetworkScreen extends Screen {
                 textColour = SKIN.muted();
             } else if (idx == selectedIndex) {
                 textColour = SKIN.ink();
-            } else if (hovered) {
-                textColour = COL_FIRE_INK;
             } else {
                 textColour = SKIN.ink();
             }
@@ -424,16 +483,28 @@ public class FlooNetworkScreen extends Screen {
             }
             // Ellipsised, not clipped: an address can now be 48 characters and the row cannot. A hard
             // scissor cut would leave a name that looks like a different, shorter name.
-            String shown = font.width(label) > rowW - 6
-                    ? font.plainSubstrByWidth(label, rowW - 12) + "..."
+            String shown = font.width(label) > rowW - 12
+                    ? font.plainSubstrByWidth(label, rowW - 18) + "..."
                     : label;
+
+            // A muted tag at the right of the plate says which shelf the address sits on.
+            Component tag = dto.has(FlooDestinationDto.MINE)
+                    ? Component.translatable("floo.wizards_and_beasts.gui.mark.mine")
+                    : dto.has(FlooDestinationDto.PUBLIC) ? Component.translatable("floo.wizards_and_beasts.gui.mark.public")
+                    : null;
+            if (tag != null) {
+                graphics.drawString(font, tag, listX + rowW - 6 - font.width(tag), entryY + 4, SKIN.muted(), false);
+                if (font.width(shown) > rowW - 18 - font.width(tag)) {
+                    shown = font.plainSubstrByWidth(label, rowW - 24 - font.width(tag)) + "...";
+                }
+            }
 
             String dimLabel = formatDimension(dto.dimensionName());
             if (!dimLabel.isEmpty()) {
-                graphics.drawString(font, shown, listX + 3, entryY + 2, textColour, false);
-                graphics.drawString(font, dimLabel, listX + 3, entryY + 9, SKIN.muted(), false);
+                graphics.drawString(font, shown, listX + 6, entryY + 2, textColour, false);
+                graphics.drawString(font, dimLabel, listX + 6, entryY + 9, SKIN.muted(), false);
             } else {
-                graphics.drawString(font, shown, listX + 3, entryY + 4, textColour, false);
+                graphics.drawString(font, shown, listX + 6, entryY + 4, textColour, false);
             }
         }
 
@@ -454,7 +525,7 @@ public class FlooNetworkScreen extends Screen {
     }
 
     private int listTop() {
-        return layout.panelY() + layout.s(headInFire ? 36 : 54);
+        return layout.panelY() + layout.s(headInFire ? 36 : 74);
     }
 
     // -- input -----------------------------------------------------------------------------------

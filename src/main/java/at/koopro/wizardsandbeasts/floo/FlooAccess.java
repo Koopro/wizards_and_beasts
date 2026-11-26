@@ -256,7 +256,10 @@ public final class FlooAccess {
         List<FlooDestinationDto> destinations = visibleTo(player, manager).stream()
                 .filter(e -> !FlooAddress.sameAddress(e.networkAddress(), hearthAddress))
                 .map(e -> new FlooDestinationDto(e.networkAddress(), e.dimension().toString(), e.isEnabled(),
-                        FlooTolls.owes(player, e) ? e.tollKnuts() : 0))
+                        FlooTolls.owes(player, e) ? e.tollKnuts() : 0,
+                        (e.isPublic() ? FlooDestinationDto.PUBLIC : 0)
+                                | (e.isOwnedBy(player.getUUID()) ? FlooDestinationDto.MINE : 0)
+                                | (hasVisited(player, e.networkAddress()) ? FlooDestinationDto.VISITED : 0)))
                 .toList();
         OpenFlooGuiS2CPayload.send(player, destinations, hearthAddress, headInFire);
     }

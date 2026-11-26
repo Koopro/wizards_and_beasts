@@ -4,10 +4,7 @@ import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.ability.PlayerAbilityHelper;
 import at.koopro.wizardsandbeasts.apparition.ApparitionService;
 import at.koopro.wizardsandbeasts.apparition.charge.ApparitionChargeManager;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock;
 import at.koopro.wizardsandbeasts.floo.FlooDeparture;
-import at.koopro.wizardsandbeasts.floo.FlooFlamePlacement;
 import at.koopro.wizardsandbeasts.floo.FlooNetworkManager;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import com.mojang.logging.LogUtils;
@@ -152,20 +149,33 @@ public final class TravelShowcaseCapture {
         FlooNetworkManager network = FlooNetworkManager.get(level);
         for (var entry : List.of(new Object[]{FLOO_FROM, "Showcase West"}, new Object[]{FLOO_TO, "Showcase East"})) {
             BlockPos pos = (BlockPos) entry[0];
-            BlockState grate = ModBlocks.FLOO_FIREPLACE.get().defaultBlockState()
-                    .setValue(FlooFireplaceBlock.FACING, Direction.SOUTH)
-                    .setValue(FlooFireplaceBlock.LIT, true);
-            level.setBlock(pos, grate, Block.UPDATE_ALL);
-            FlooFlamesBlock.light(level, pos, Direction.SOUTH);
+            at.koopro.wizardsandbeasts.floo.hearth.HearthStamp.stamp(level, pos, Direction.SOUTH,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "cottage"));
+            BlockState lit = level.getBlockState(pos)
+                    .setValue(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FUEL, true)
+                    .setValue(at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.FIRE,
+                            at.koopro.wizardsandbeasts.block.floo.HearthFire.WARM);
+            level.setBlock(pos, lit, Block.UPDATE_ALL);
             var result = network.register((String) entry[1], level.dimension().identifier(), pos, true,
                     Optional.of(p.getUUID()));
             LOGGER.info("Travel showcase: registered {} at {}: {}", entry[1], pos, result);
         }
-        // Floo powder is what a hop spends; without it the hop is refused at the last moment.
-        p.getInventory().add(new net.minecraft.world.item.ItemStack(
-                at.koopro.wizardsandbeasts.registry.MiscItemRegistry.FLOO_POWDER.get(), 16));
-        BlockPos stand = FlooFlamePlacement.flamePos(FLOO_FROM, Direction.SOUTH);
-        p.teleportTo(level, stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, Set.of(), 0.0F, 0.0F, true);
+        // Registered hearths, then the pinch: the departure hearth roars green for this hop.
+        for (BlockPos pos : List.of(FLOO_FROM, FLOO_TO)) {
+            if (level.getBlockEntity(pos) instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity be) {
+                be.setNetworkAddress(pos.equals(FLOO_FROM) ? "Showcase West" : "Showcase East");
+                be.setRegistered(true);
+                be.setEnabled(true);
+            }
+        }
+        if (level.getBlockEntity(FLOO_FROM) instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity from) {
+            from.throwPinch(level);
+        }
+        BlockPos stand = FLOO_FROM;
+        // The scene starts the departure itself rather than pressing Travel, so the list that stepping into the fire
+        // offers would never be closed and would hide the whole hop: hold the offer back while the player is staged.
+        at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock.suppressOfferFor(p.getUUID(), level.getGameTime() + 400L);
+        p.teleportTo(level, stand.getX() + 0.5, stand.getY() + 0.25, stand.getZ() + 0.5, Set.of(), 0.0F, 0.0F, true);
         Minecraft.getInstance().execute(() -> {
             lookYaw = 0.0F;
             lookPitch = 0.0F;

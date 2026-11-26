@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,fuel=false": {
+      "model": "wizards_and_beasts:block/floo/floo_grate"
+    },
+    "facing=north,fuel=true": {
+      "model": "wizards_and_beasts:block/floo/floo_grate_fuel"
+    },
+    "facing=east,fuel=false": {
+      "model": "wizards_and_beasts:block/floo/floo_grate",
+      "y": 90
+    },
+    "facing=east,fuel=true": {
+      "model": "wizards_and_beasts:block/floo/floo_grate_fuel",
+      "y": 90
+    },
+    "facing=south,fuel=false": {
+      "model": "wizards_and_beasts:block/floo/floo_grate",
+      "y": 180
+    },
+    "facing=south,fuel=true": {
+      "model": "wizards_and_beasts:block/floo/floo_grate_fuel",
+      "y": 180
+    },
+    "facing=west,fuel=false": {
+      "model": "wizards_and_beasts:block/floo/floo_grate",
+      "y": 270
+    },
+    "facing=west,fuel=true": {
+      "model": "wizards_and_beasts:block/floo/floo_grate_fuel",
+      "y": 270
+    }
+  }
+}

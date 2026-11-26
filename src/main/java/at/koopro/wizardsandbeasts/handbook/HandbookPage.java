@@ -16,7 +16,8 @@ public sealed interface HandbookPage permits
         HandbookPage.Text,
         HandbookPage.Recipe,
         HandbookPage.Image,
-        HandbookPage.CrossRef {
+        HandbookPage.CrossRef,
+        HandbookPage.Construction {
 
     Codec<HandbookPage> CODEC = HandbookPage.Type.CODEC.dispatch(HandbookPage::type, HandbookPage.Type::codec);
 
@@ -26,7 +27,8 @@ public sealed interface HandbookPage permits
         TEXT("text", Text.CODEC),
         RECIPE("recipe", Recipe.CODEC),
         IMAGE("image", Image.CODEC),
-        CROSS_REF("cross_ref", CrossRef.CODEC);
+        CROSS_REF("cross_ref", CrossRef.CODEC),
+        CONSTRUCTION("construction", Construction.CODEC);
 
         public static final Codec<Type> CODEC = StringRepresentable.fromValues(Type::values);
 
@@ -96,6 +98,25 @@ public sealed interface HandbookPage permits
         @Override
         public Type type() {
             return Type.CROSS_REF;
+        }
+    }
+
+    /**
+     * A build guide, step by step like Create's Ponder scenes: the right page shows the build in 3D, turnable, one layer
+     * at a time; the left page says what the current layer needs. {@code structure} names a Floo hearth style
+     * ({@code floo_hearth/<id>.json}), the same file the grate checks a build against, so the guide cannot drift from
+     * what the game accepts (Floo remake P6, 2026-11-26).
+     */
+    record Construction(Identifier structure, Optional<String> heading, Optional<String> body) implements HandbookPage {
+        public static final MapCodec<Construction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Identifier.CODEC.fieldOf("structure").forGetter(Construction::structure),
+                Codec.STRING.optionalFieldOf("heading").forGetter(Construction::heading),
+                Codec.STRING.optionalFieldOf("body").forGetter(Construction::body)
+        ).apply(instance, Construction::new));
+
+        @Override
+        public Type type() {
+            return Type.CONSTRUCTION;
         }
     }
 }

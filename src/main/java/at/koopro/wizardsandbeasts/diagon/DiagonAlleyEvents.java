@@ -86,6 +86,14 @@ public final class DiagonAlleyEvents {
             data.rememberPubDoor(door, facing);
         }
         FlooNetworkManager network = FlooNetworkManager.get(level);
+        // The grate carries its own side of the registration (it is what offers the list to someone standing in the
+        // fire), so it is marked as well as the network: a hearth only on the network could be arrived at, not left.
+        if (level.getBlockEntity(hearth) instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity grate
+                && !grate.isRegistered()) {
+            grate.setNetworkAddress(ADDRESS);
+            grate.setRegistered(true);
+            grate.setEnabled(true);
+        }
         if (network.findByPos(Level.OVERWORLD.identifier(), hearth) != null) {
             return;                                        // already on the network: the chunk has loaded before
         }

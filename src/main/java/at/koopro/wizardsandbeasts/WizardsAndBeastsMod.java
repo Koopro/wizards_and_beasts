@@ -222,6 +222,9 @@ public class WizardsAndBeastsMod {
                     Identifier.fromNamespaceAndPath(MODID, "handbook_chapter_reload_listener"),
                     new HandbookChapterManager());
             event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "floo_hearth_reload_listener"),
+                    new at.koopro.wizardsandbeasts.floo.hearth.HearthPatterns());
+            event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "animagus_form_reload_listener"),
                     new at.koopro.wizardsandbeasts.animagus.AnimagusFormLoader());
             event.addListener(

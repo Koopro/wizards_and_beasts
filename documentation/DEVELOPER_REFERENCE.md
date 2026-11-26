@@ -56,7 +56,7 @@ The project is a substantial alpha: production systems exist, but balancing, som
 | Vocations | 5 | `data/wizards_and_beasts/vocations` |
 | Custom mob effects | 24 | `effect.ModEffects` |
 | Custom attributes | 3 | `registry.ModAttributes` |
-| Block entities | 4 | Bench, pocket configurator, Floo fireplace, trunk |
+| Block entities | 4 | Bench, pocket configurator, Floo grate, trunk |
 | Menu types | 5 | Bench, Ollivander trial, configurator, Niffler pouch, Hermione’s bag |
 | Items / blocks | ~201 item models / ~203 blockstates | Useful **resource-derived lower bounds**, not registry totals; item and block registrations are distributed across helper registries and variants |
 | Network surface | 22 feature registrars; 100+ payload-related classes | `network.ModNetwork` fans out by feature; do not infer packet count from a single class |
@@ -151,7 +151,7 @@ wizardsandbeasts
 |---|---|---|
 | Items | `ModItems`; `WandItemRegistry`, `BroomItemRegistry`, `ConsumableItemRegistry`, `CurrencyItemRegistry`, `DarkArtefactItemRegistry`, `LoreItemRegistry`, `MiscItemRegistry`, `TrinketItemRegistry` | `ModItems.register(...)` is the common wrapper; grouped registrars prevent one giant item class. |
 | Blocks | `ModBlocks`, `WizardingWorldBlockRegistry`, location registries, `WoodSet`, `DeluminatorBlockRegistry` | Uses `DeferredRegister.Blocks`; wood-set helper registers matching block items. |
-| Block entities | `ModBlockEntities` | Four types: wandmakers bench, pocket configurator, Floo fireplace, trunks. |
+| Block entities | `ModBlockEntities` | Four types: wandmakers bench, pocket configurator, Floo grate, trunks. |
 | Entity types | `ModEntities`, `EntityHelper`, `ModCreatures` | Fixed special entities plus a 86-entry creature manifest. `EntityAttributeBindings` queues attributes before the registration event. |
 | Sounds / particles | `ModSounds`, `ModParticles` | Register via their own deferred registries; client providers are registered in `client.particle.ModParticleProviders`. |
 | Menus / creative tabs | `ModMenuTypes`, `ModCreativeTabs` | Menu constructors use `IMenuTypeExtension.create(...fromNetwork)`. Client screens are bound in `WizardsAndBeastsClient`. |
@@ -163,6 +163,7 @@ wizardsandbeasts
 | Villager content | `ModVillager` | POIs and professions. |
 | Pairing | `wand.making.WandmakingRules`, `WandmakingSpec`, `WoodMaking`, `CoreMaking` | Every wood pairs with every core by rule (difficulty, length, affinity and the core's marrying `pulse` from the `making` blocks of `wand_woods` / `wand_cores`); no recipe files since 2026-11-26. |
 | Making at the bench | `wand.making.BenchCraft` (pure), `wand.bench.BenchMaking`, `client.wand.BenchBeatClient` | A wand is made act by act: turn, bore, marry, seal, then first sparks. Each act is a timing beat the server seeds and the client plays (`BenchBeatStartPayload` / `BenchBeatResultPayload`); the server rebuilds the beat, scores the ticks the use key was pressed or held on, and rolls the act's risk (blank cracks, core does not take). Odds = Wandlore vocation, Wandmaker career, Wandlore nodes, the act's tool on the bench, wood/core hardness and affinity. The mean score sets the wand's integrity. The bench tier (enhancer blocks) is gone since 2026-11-26; refine asks for tools instead. |
+| Floo hearths | `floo.hearth.HearthPattern` / `HearthPatterns` (data `floo_hearth/*.json`), `block.floo.FlooGrateBlock` / `FlooGrateBlockEntity`, `floo.FlooHearths`, `client.floo.FlooGrateRenderer`, `client.handbook.ConstructionGuide` | A hearth is a player build around a grate: a style file lists its layers (G grate, . open, tag or block per symbol, an example palette). The grate rechecks its build once a second, holds the network side (address, registered, sealed) and the fire (none / warm / floo: one pinch = 30 s green for one traveller). The same files drive the handbook's `construction` pages (synced by `SyncHearthPatternsPayload`) and the templates (`tools/floo_hearths.py`, `HearthStamp`). Arrival = the hearthstone in front of the opening. |
 | Bench block and screens | `wand.bench.WandmakersBenchBlock` (BenchPart SOLO/MAIN/SIDE), `BenchTool`, `BenchRole`, `client.wand.gui.BenchChrome`, `WandmakersBenchScreen` / `WandRefineScreen` / `WandRestyleScreen` | Two blocks wide like a bed; a solo bench (old saves, templates) grows its side half when there is room. Five tools are laid on it and drawn by the rig. The three screens are the bench top seen from above (`tools/bench_screen.py`); leather tags switch make / mend / restyle (`SwitchBenchRolePayload`). The rig plays one clip per act from a synced `acting` state; sounds are `bench_*` (`tools/sound_kit.py`). |
 | Spells | `spell.core.Spells` | An in-memory, hybrid registry: Java static registrations, addon event registrations, and reloadable JSON registrations. It is not a vanilla `Registry`. |
 | Skills / vocations | `skill.SkillTrees`, `skill.SkillNodeLoader`, `skill.vocation.VocationLoader` | Runtime collections rebuilt from datapacks; skills are not a vanilla registry. |

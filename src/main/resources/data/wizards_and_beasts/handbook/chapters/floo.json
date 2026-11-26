@@ -5,6 +5,30 @@
   "sort_index": 45,
   "pages": [
     {
+      "type": "construction",
+      "structure": "wizards_and_beasts:cottage",
+      "heading": "handbook.wizards_and_beasts.floo.build.heading",
+      "body": "handbook.wizards_and_beasts.floo.build.body"
+    },
+    {
+      "type": "construction",
+      "structure": "wizards_and_beasts:castle",
+      "heading": "handbook.wizards_and_beasts.floo.build.castle.heading",
+      "body": "handbook.wizards_and_beasts.floo.build.castle.body"
+    },
+    {
+      "type": "construction",
+      "structure": "wizards_and_beasts:atrium",
+      "heading": "handbook.wizards_and_beasts.floo.build.atrium.heading",
+      "body": "handbook.wizards_and_beasts.floo.build.atrium.body"
+    },
+    {
+      "type": "construction",
+      "structure": "wizards_and_beasts:shop",
+      "heading": "handbook.wizards_and_beasts.floo.build.shop.heading",
+      "body": "handbook.wizards_and_beasts.floo.build.shop.body"
+    },
+    {
       "type": "text",
       "heading": "handbook.wizards_and_beasts.floo.page1.heading",
       "body": "handbook.wizards_and_beasts.floo.page1.body"

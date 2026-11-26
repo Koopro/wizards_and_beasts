@@ -1,7 +1,6 @@
 package at.koopro.wizardsandbeasts.floo;
 
 import at.koopro.wizardsandbeasts.Config;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
 import at.koopro.wizardsandbeasts.registry.ModSounds;
@@ -200,36 +199,21 @@ public final class FlooDeparture {
     }
 
     /**
-     * Whether the hearth being left is still a lit Floo hearth.
-     *
-     * <p>Reads the block, not the block entity's flag: a hearth that has been mined outright has no
-     * block entity to ask, and {@code getBlockEntity} on air answers null in a way that cannot be told
-     * apart from a chunk that unloaded.
+     * Whether the hearth being left still burns green. Reads the block, so a mined grate answers false.
      */
     private static boolean originStillBurning(ServerLevel level, BlockPos hearthPos) {
-        BlockState state = level.getBlockState(hearthPos);
-        return state.is(ModBlocks.FLOO_FIREPLACE.get())
-                && state.hasProperty(FlooFireplaceBlock.LIT)
-                && state.getValue(FlooFireplaceBlock.LIT);
+        return FlooHearths.isGreen(level, hearthPos);
     }
 
     /**
      * Whether the traveller is still standing in their own departure.
      *
-     * <p>Measured against the hearth and its flames rather than a radius around where the player
-     * started, so a traveller who shuffles between the flame block and the hearth's own opening —
-     * a normal thing to do while waiting — is not thrown out of their own journey for it.
+     * <p>Measured against the hearth's whole opening, so a traveller shuffling about inside the fire while waiting is
+     * not thrown out of their own journey for it.
      */
     private static boolean stillInTheFire(ServerPlayer player, BlockPos hearthPos) {
-        BlockPos feet = player.blockPosition();
-        if (feet.distSqr(hearthPos) <= 2.0) {
-            return true;
-        }
-        BlockState hearth = player.level().getBlockState(hearthPos);
-        if (!hearth.hasProperty(FlooFireplaceBlock.FACING)) {
-            return false;
-        }
-        return feet.equals(FlooFlamePlacement.flamePos(hearthPos, hearth.getValue(FlooFireplaceBlock.FACING)));
+        return FlooHearths.grate(player.level(), hearthPos) instanceof at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity grate
+                && FlooHearths.inOpening(grate, player.position());
     }
 
     /**

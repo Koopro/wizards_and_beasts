@@ -4,6 +4,29 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### The Floo Network, remade (2026-11-26)
+
+- **Changed:** a Floo hearth is built, not placed. Build a fireplace around a Floo grate, block by block: a stone breast,
+  a walk-in opening, a mantel, a chimney. Four styles from the films and books: cottage (the Burrow, the Leaky Cauldron),
+  castle (a Hogwarts common room), Atrium (the Ministry, gilded, taller) and shop (Borgin and Burkes, narrow and dark).
+  Each takes a range of blocks (any stone, any dark stone, tile or gilding). Right-click an unfinished grate and it marks
+  the next missing block and says what belongs there.
+- **Changed:** the ritual follows the books (CoS ch. 4): lay logs on the grate and light an ordinary fire, then throw a
+  pinch of Floo Powder into it (drop it in, or use it on the grate). The fire roars emerald for thirty seconds and one
+  traveller. Step into it and say where you are going; you come out on the hearthstone in front of the far hearth, which
+  flares green as you arrive. Ordinary fire burns like a campfire; the green fire is safe.
+- **Changed:** the pinch is the fare. Travel no longer takes Floo Powder from your inventory at the end; a refused trip
+  never costs a toll.
+- **Added:** the pot of Floo Powder, the Burrow's flowerpot for the mantel: take a pinch by hand, refill it with powder.
+- **Changed:** the Floo screen is the fireplace itself: a brick surround, hearthstone, the blackened firebox, brass name
+  plates, the green fire burning along its floor. The address book has shelves: all, public, your own, visited.
+- **Added:** build guides in the Ministry Handbook, step by step like Create's Ponder: the hearth in 3D, turnable, layer
+  by layer, with what each layer takes.
+- **Changed:** the Leaky Cauldron has a real cottage hearth, and travellers can now leave Diagon Alley by Floo as well as
+  arrive.
+- **Removed:** the one-block Floo fireplace and its separate green flames, and the three furniture fireplaces (Hogwarts,
+  Ministry, Knockturn); they are hearth styles now. Hearths registered with the old fireplace are not carried over.
+
 ### The wandmaker's bench, remade (2026-11-26)
 
 - **Changed:** a wand is made at the bench act by act: turn the blank, bore it, marry the core, seal it, and the first

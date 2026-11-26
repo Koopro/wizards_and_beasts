@@ -52,22 +52,17 @@ public class FurnitureBlock extends HorizontalDirectionalBlock implements Simple
      * @param seatHeight where a sitter sits, in blocks above the floor; below zero for no seat
      * @param wall       hung on a wall: faces out from the clicked wall and falls if the wall goes
      */
-    public record Spec(String shapeKey, float seatHeight, boolean wall, int width, int height) {
+    public record Spec(String shapeKey, float seatHeight, boolean wall) {
         public static Spec of(String shapeKey) {
-            return new Spec(shapeKey, -1f, false, 1, 1);
+            return new Spec(shapeKey, -1f, false);
         }
 
         public static Spec seat(String shapeKey, float seatHeight) {
-            return new Spec(shapeKey, seatHeight, false, 1, 1);
+            return new Spec(shapeKey, seatHeight, false);
         }
 
         public static Spec wall(String shapeKey) {
-            return new Spec(shapeKey, -1f, true, 1, 1);
-        }
-
-        /** A piece {@code width} blocks across and {@code height} high, built of one block per cell. */
-        public static Spec multi(String shapeKey, int width, int height) {
-            return new Spec(shapeKey, -1f, false, width, height);
+            return new Spec(shapeKey, -1f, true);
         }
     }
 

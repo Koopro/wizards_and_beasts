@@ -86,17 +86,6 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                         net.minecraft.world.level.block.state.properties.BedPart.HEAD)));
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.TALL.forEach(block -> add(block.get(),
                 createDoorTable(block.get())));
-        for (var block : at.koopro.wizardsandbeasts.registry.FurnitureBlocks.MULTIBLOCK) {
-            var piece = block.get();
-            add(piece, net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(piece,
-                    net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                            .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(piece))
-                            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(piece)
-                                    .setProperties(StatePropertiesPredicate.Builder.properties()
-                                            .hasProperty(at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock.COL,
-                                                    piece.spec().width() / 2)
-                                            .hasProperty(at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock.ROW, 0))))));
-        }
         for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
             add(f.door().get(), createDoorTable(f.door().get()));
             dropSelf(f.trapdoor().get());
@@ -165,7 +154,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                                                         at.koopro.wizardsandbeasts.wand.bench.BenchPart.SIDE))))))));
         dropSelf(ModBlocks.WARDING_STONE.get());
         dropSelf(ModBlocks.POCKET_CONFIGURATOR.get());
-        dropSelf(ModBlocks.FLOO_FIREPLACE.get());
+        dropSelf(ModBlocks.FLOO_POWDER_POT.get());
         dropSelf(ModBlocks.EXAMINATION_DESK.get());
         dropSelf(ModBlocks.BROOM_RACK.get());
         // Both tents were registered without a loot entry, which hard-failed the whole datagen run

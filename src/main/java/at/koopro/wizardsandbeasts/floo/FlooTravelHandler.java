@@ -1,8 +1,7 @@
 package at.koopro.wizardsandbeasts.floo;
 
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity;
-import at.koopro.wizardsandbeasts.block.floo.FlooFlamesBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity;
 import at.koopro.wizardsandbeasts.effect.ModEffects;
 import at.koopro.wizardsandbeasts.feedback.NoticeKind;
 import at.koopro.wizardsandbeasts.feedback.PlayerFeedback;
@@ -11,7 +10,6 @@ import at.koopro.wizardsandbeasts.registry.MiscItemRegistry;
 import at.koopro.wizardsandbeasts.module.Module;
 import at.koopro.wizardsandbeasts.module.ModuleManager;
 import at.koopro.wizardsandbeasts.network.floo.FlooArrivalEffectsS2CPayload;
-import at.koopro.wizardsandbeasts.network.floo.FlooBlockSyncS2CPayload;
 import at.koopro.wizardsandbeasts.network.floo.FlooTransitS2CPayload;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
 import at.koopro.wizardsandbeasts.registry.ModBlocks;
@@ -132,7 +130,7 @@ public final class FlooTravelHandler {
      *   <li><b>Renamed fireplace</b> — a re-registration retires the old address; see
      *       {@link FlooNetworkManager#register}. One block holds one address, so a renamed hearth
      *       stops answering to what it used to be called.</li>
-     *   <li><b>Broken fireplace</b> — {@code FlooFireplaceBlock.affectNeighborsAfterRemoval} purges
+     *   <li><b>Broken fireplace</b> — {@code FlooGrateBlock.affectNeighborsAfterRemoval} purges
      *       the entry by position, so the network never lists a hearth that is not there. A player
      *       who breaks their own destination loses it, which is the honest outcome.</li>
      *   <li><b>Unloaded destination chunk</b> — nothing is pre-loaded and no chunk ticket is held.
@@ -196,7 +194,7 @@ public final class FlooTravelHandler {
         // pressed Travel and nothing happened at all — no message, no sound, nothing to tell them
         // which of the three it was. This is the commonest way to fail to travel, so it is the one
         // that most needed a reason.
-        FlooFireplaceBlockEntity origin = findNearbyLitFireplace(player);
+        FlooGrateBlockEntity origin = FlooHearths.greenHearthAround(player);
         if (origin == null) {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.no_fireplace"));
             return;
@@ -241,7 +239,7 @@ public final class FlooTravelHandler {
             return;
         }
 
-        if (findSafeArrival(destLevel, dest.blockPos()) == null) {
+        if (FlooHearths.arrivalSpot(destLevel, dest.blockPos()) == null) {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.blocked"));
             return;
         }
@@ -250,12 +248,7 @@ public final class FlooTravelHandler {
             return;
         }
 
-        // Looked for, not taken. See the note above on why the fare is paid at the other end.
-        if (!hasPowder(player)) {
-            PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.no_powder"));
-            return;
-        }
-
+        // No powder is asked for here: the pinch thrown into the fire was the fare (Floo remake 2026-11-26).
         // Said before the fire roars, so nobody stands in a grate for two seconds to learn the price at the end.
         if (FlooAddress.sameAddress(actualAddress, intended) && FlooTolls.owes(player, dest)) {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.toll.notice",
@@ -306,13 +299,6 @@ public final class FlooTravelHandler {
      * that assumed the checks from before the window would teleport a player into a wall for the sake
      * of not repeating three cheap lookups.
      */
-    /** The green roar out of a hearth's recess, seen by everyone in the room. */
-    private static void roar(@NonNull ServerLevel level, @NonNull BlockPos hearth) {
-        if (level.getBlockEntity(hearth) instanceof FlooFireplaceBlockEntity fireplace) {
-            fireplace.play(FlooFireplaceBlockEntity.CLIP_ROAR);
-        }
-    }
-
     public static void commitTravel(@NonNull ServerPlayer player, @NonNull BlockPos originPos,
                                     @NonNull String actualAddress, @NonNull String intended) {
         ServerLevel originLevel = player.level();
@@ -340,7 +326,7 @@ public final class FlooTravelHandler {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.no_dimension"));
             return;
         }
-        BlockPos destPos = findSafeArrival(destLevel, dest.blockPos());
+        BlockPos destPos = FlooHearths.arrivalSpot(destLevel, dest.blockPos());
         if (destPos == null) {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.blocked"));
             return;
@@ -358,15 +344,8 @@ public final class FlooTravelHandler {
             FlooCues.sputter(originLevel, originPos);
             return;
         }
-        if (!consumeOnePowder(player)) {
-            FlooTolls.refund(player, toll);
-            PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.no_powder"));
-            FlooCues.sputter(originLevel, originPos);
-            return;
-        }
-
         String originAddress = originLevel.getBlockEntity(originPos)
-                instanceof FlooFireplaceBlockEntity originBe ? originBe.getNetworkAddress() : "(unknown)";
+                instanceof FlooGrateBlockEntity originBe ? originBe.getNetworkAddress() : "(unknown)";
 
         // The exit whoosh, heard by the room being left rather than by the traveller. They are about
         // to be somewhere else; the people watching them go are who this is for.
@@ -374,9 +353,10 @@ public final class FlooTravelHandler {
         originLevel.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
                 originPos.getX() + 0.5, originPos.getY() + 0.6, originPos.getZ() + 0.5,
                 20, 0.35, 0.5, 0.35, 0.06);
-        roar(originLevel, originPos);
-
-        resetOriginFireplace(originLevel, originPos);
+        // The pinch carries one traveller: the fire falls back to an ordinary one as they go.
+        if (originLevel.getBlockEntity(originPos) instanceof FlooGrateBlockEntity originGrate) {
+            originGrate.spendPinch(originLevel);
+        }
 
         // Anything riding the traveller is put down before they go. A passenger is not carried
         // through the Network - the grate takes one person - and leaving them attached across a
@@ -387,11 +367,12 @@ public final class FlooTravelHandler {
             player.ejectPassengers();
         }
 
+        // Out of the fire onto the hearthstone, facing the room.
         TeleportTransition transition = new TeleportTransition(
                 destLevel,
-                Vec3.atCenterOf(destPos),
+                Vec3.atBottomCenterOf(destPos),
                 Vec3.ZERO,
-                player.getYRot(),
+                FlooHearths.arrivalYaw(destLevel, dest.blockPos()),
                 player.getXRot(),
                 Set.of(),
                 entity -> {});
@@ -403,7 +384,6 @@ public final class FlooTravelHandler {
         applyTravelSickness(player, destLevel, destPos, wasMisfire);
 
         lightArrivalHearth(player, destLevel, dest.blockPos());
-        roar(destLevel, dest.blockPos());
 
         // A toast, not chat. Arriving somewhere is a discrete event worth a few seconds and worth
         // nothing afterwards, and a chat line for every hop buries whatever the player was reading
@@ -459,7 +439,10 @@ public final class FlooTravelHandler {
         // findSafeArrival, not blockPos().above(). The raw offset put the target inside whatever had
         // been built over the grate — an admin teleport that suffocates the player it was meant to
         // move — and this is the same two-clear-blocks search every ordinary hop already uses.
-        BlockPos destPos = findSafeArrival(destLevel, dest.blockPos());
+        BlockPos destPos = FlooHearths.arrivalSpot(destLevel, dest.blockPos());
+        if (destPos == null) {
+            destPos = findSafeArrival(destLevel, dest.blockPos());
+        }
         if (destPos == null) {
             PlayerFeedback.actionBar(player, Component.translatable("floo.wizards_and_beasts.fail.blocked"));
             return;
@@ -553,59 +536,6 @@ public final class FlooTravelHandler {
     }
 
     /**
-     * Whether the player could pay the fare, without taking it.
-     *
-     * <p>Split from {@link #consumeOnePowder} because the two questions are now asked at opposite
-     * ends of the departure window: the refusal that says "you have no Floo Powder" has to happen
-     * before the fire builds, and the deduction has to happen after it, or a cancelled hop would
-     * silently eat a pinch.
-     */
-    private static boolean hasPowder(@NonNull ServerPlayer player) {
-        if (player.getAbilities().instabuild) return true;
-        var inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            if (inv.getItem(i).is(MiscItemRegistry.FLOO_POWDER.get())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /** Consumes one Floo Powder from the player's inventory; true if paid (or creative). */
-    private static boolean consumeOnePowder(@NonNull ServerPlayer player) {
-        if (player.getAbilities().instabuild) return true;
-        var inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            var stack = inv.getItem(i);
-            if (stack.is(MiscItemRegistry.FLOO_POWDER.get())) {
-                stack.shrink(1);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Nullable
-    public static FlooFireplaceBlockEntity findNearbyLitFireplace(@NonNull ServerPlayer player) {
-        BlockPos center = player.blockPosition();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    BlockPos check = center.offset(dx, dy, dz);
-                    BlockState state = player.level().getBlockState(check);
-                    if (state.is(ModBlocks.FLOO_FIREPLACE.get()) && state.getValue(FlooFireplaceBlock.LIT)) {
-                        if (player.level().getBlockEntity(check) instanceof FlooFireplaceBlockEntity be
-                                && be.isRegistered() && be.isEnabled()) {
-                            return be;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Where the traveller actually ends up.
      *
      * <h2>Two ways to get it wrong, one table for the consequence</h2>
@@ -628,7 +558,7 @@ public final class FlooTravelHandler {
     @NonNull
     private static String rollMisfire(@NonNull ServerPlayer player,
                                        @NonNull FlooNetworkManager manager,
-                                       @NonNull FlooFireplaceBlockEntity origin,
+                                       @NonNull FlooGrateBlockEntity origin,
                                        @NonNull String heardAddress,
                                        boolean spoken, boolean mumbled) {
         boolean misfires;
@@ -683,69 +613,15 @@ public final class FlooTravelHandler {
     }
 
     /**
-     * What departing costs the hearth you left from.
-     *
-     * <p>A pinch of Floo Powder buys {@link FlooFlamesBlock#MAX_CHARGES} hops, so a departure spends
-     * one charge rather than putting the whole fire out — three people can leave one hearth on one
-     * pinch, which is what makes a lit hearth worth lighting in a shared base. The fire darkens the
-     * hearth itself when the last charge goes ({@link FlooFlamesBlock#extinguish}), so nothing here
-     * has to decide when {@code LIT} ends.
-     *
-     * <p>The unconditional darken survives as the fallback for a hearth that is lit with no flames in
-     * front of it — a world saved before flames existed, or a {@code /setblock}. Without it such a
-     * hearth would stay lit through every hop, since there is no fire to spend.
-     */
-    private static void resetOriginFireplace(@NonNull ServerLevel level, @NonNull BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
-        if (state.hasProperty(FlooFireplaceBlock.FACING)) {
-            Direction facing = state.getValue(FlooFireplaceBlock.FACING);
-            if (FlooFlamesBlock.isLitAt(level, pos, facing)) {
-                FlooFlamesBlock.consumeChargeAt(level, pos, facing);
-                return;
-            }
-        }
-        if (state.hasProperty(FlooFireplaceBlock.LIT)) {
-            level.setBlock(pos, state.setValue(FlooFireplaceBlock.LIT, false), 3);
-        }
-        // Looked up rather than passed in: the commit runs at the far end of a departure window, and
-        // a block entity captured before it could belong to a hearth that has since been mined.
-        if (level.getBlockEntity(pos) instanceof FlooFireplaceBlockEntity be) {
-            be.setLitTicksRemaining(0);
-        }
-        FlooBlockSyncS2CPayload.sendToNear(level, pos, false, 0);
-    }
-
-    /**
-     * The far end of the hop, seen from the far end.
-     *
-     * <p>A traveller comes <em>out</em> of green fire, so arriving lights the destination hearth and
-     * stands flames in its opening — the same block the departure was made from, so the arrival can be
-     * hopped onward from immediately without hunting for powder to light the hearth again. Powder is
-     * still spent per hop in {@link #consumeOnePowder}, so this gives away the fire, never the fare.
-     *
-     * <p>{@link FlooFlamesBlock#suppressOfferFor} is the reason it is safe: without it a traveller who
-     * took one step forward out of the grate would land in the flames they just arrived through and be
-     * handed the destination screen again before they had looked at the room.
-     *
-     * <p>If the opening is blocked the flames cannot stand, and the hearth falls back to the brief
-     * hundred-tick flare it always had — arrival still looks like arrival even where fire will not fit.
+     * The far end of the hop, seen from the far end: the destination hearth flares green whatever it was doing (a
+     * traveller comes out of green fire), then returns to its own fire. The offer of the destination list is held
+     * back for a moment so it does not open in the face of someone who has only just arrived.
      */
     private static void lightArrivalHearth(@NonNull ServerPlayer player, @NonNull ServerLevel destLevel,
                                            @NonNull BlockPos hearthPos) {
-        BlockState hearth = destLevel.getBlockState(hearthPos);
-        if (!hearth.is(ModBlocks.FLOO_FIREPLACE.get())
-                || !(destLevel.getBlockEntity(hearthPos) instanceof FlooFireplaceBlockEntity destBe)) {
-            return;
-        }
-        boolean flamesUp = FlooFlamesBlock.light(destLevel, hearthPos, hearth.getValue(FlooFireplaceBlock.FACING));
-        int litTicks = flamesUp ? FlooFireplaceBlockEntity.litTimeoutTicks() : 100;
-        if (!hearth.getValue(FlooFireplaceBlock.LIT)) {
-            destLevel.setBlock(hearthPos, hearth.setValue(FlooFireplaceBlock.LIT, true), 3);
-        }
-        destBe.setLitTicksRemaining(litTicks);
-        FlooBlockSyncS2CPayload.sendToNear(destLevel, hearthPos, true, litTicks);
-        if (flamesUp) {
-            FlooFlamesBlock.suppressOfferFor(player.getUUID(), destLevel.getGameTime());
+        if (destLevel.getBlockEntity(hearthPos) instanceof FlooGrateBlockEntity grate) {
+            grate.flareForArrival(destLevel);
+            FlooGrateBlock.suppressOfferFor(player.getUUID(), destLevel.getGameTime());
         }
     }
 

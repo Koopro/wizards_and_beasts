@@ -20,8 +20,6 @@ import at.koopro.wizardsandbeasts.block.furniture.TallStorageBlock;
 import at.koopro.wizardsandbeasts.block.furniture.TallFurnitureBlock;
 import at.koopro.wizardsandbeasts.block.furniture.GrandfatherClockBlock;
 import at.koopro.wizardsandbeasts.block.furniture.GlowingDecoBlock;
-import at.koopro.wizardsandbeasts.block.furniture.FireplaceBlock;
-import at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock;
 import net.minecraft.world.item.DyeColor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -349,30 +347,6 @@ public final class FurnitureBlocks {
             p -> new FurnitureBlock(p, Spec.of("gargoyle_statue")), () -> stone(MapColor.COLOR_GRAY));
     public static final DeferredBlock<TallFurnitureBlock> WIZARD_STATUE = tall("wizard_statue", "Wizard Statue",
             p -> new TallFurnitureBlock(p, Spec.of("wizard_statue")), () -> stone(MapColor.COLOR_GRAY));
-    /** Pieces bigger than a block: they drop from their bottom-middle cell only. */
-    public static final List<DeferredBlock<? extends MultiblockFurnitureBlock>> MULTIBLOCK = new ArrayList<>();
-
-    private static <T extends MultiblockFurnitureBlock> DeferredBlock<T> multi(String id, String name,
-            java.util.function.Function<BlockBehaviour.Properties, T> factory, Supplier<BlockBehaviour.Properties> properties) {
-        DeferredBlock<T> block = ModBlocks.BLOCKS.registerBlock(id, factory, properties);
-        ALL.add(block);
-        MULTIBLOCK.add(block);
-        ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
-        NAMES.put(id, name);
-        return block;
-    }
-
-    // Sized from the films (owner 11-18): the common room's "massive fire-place"; the Atrium's gilded fireplaces,
-    // each over 30 feet in the films (here 7 blocks, so one fits a hall); a mean Knockturn hearth.
-    public static final DeferredBlock<FireplaceBlock> HOGWARTS_FIREPLACE = multi("hogwarts_fireplace",
-            "Hogwarts Common Room Fireplace", p -> new FireplaceBlock(p, Spec.multi("hogwarts_fireplace", 4, 4),
-                    FireplaceBlock.Flame.WARM, 1, 2, 2), () -> stoneDeco(15));
-    public static final DeferredBlock<FireplaceBlock> MINISTRY_FIREPLACE = multi("ministry_fireplace",
-            "Ministry Atrium Fireplace", p -> new FireplaceBlock(p, Spec.multi("ministry_fireplace", 5, 7),
-                    FireplaceBlock.Flame.GREEN, 1, 3, 5), () -> stoneDeco(13));
-    public static final DeferredBlock<FireplaceBlock> KNOCKTURN_FIREPLACE = multi("knockturn_fireplace",
-            "Knockturn Fireplace", p -> new FireplaceBlock(p, Spec.multi("knockturn_fireplace", 3, 3),
-                    FireplaceBlock.Flame.SOUL, 1, 1, 2), () -> stoneDeco(10));
     public static final DeferredBlock<Block> GLOWING_RUNESTONE = block("glowing_runestone", "Glowing Runestone",
             Block::new, () -> stoneDeco(7));
 

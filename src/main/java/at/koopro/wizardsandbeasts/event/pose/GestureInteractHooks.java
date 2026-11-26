@@ -3,7 +3,7 @@ package at.koopro.wizardsandbeasts.event.pose;
 import at.koopro.wizardsandbeasts.WizardsAndBeastsMod;
 import at.koopro.wizardsandbeasts.artefact.cabinet.VanishingCabinetBlock;
 import at.koopro.wizardsandbeasts.block.ExaminationDeskBlock;
-import at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlock;
+import at.koopro.wizardsandbeasts.block.floo.FlooGrateBlock;
 import at.koopro.wizardsandbeasts.pose.PlayerGesture;
 import at.koopro.wizardsandbeasts.pose.PlayerGestures;
 import at.koopro.wizardsandbeasts.wand.bench.WandmakersBenchBlock;
@@ -46,6 +46,6 @@ public final class GestureInteractHooks {
         return block instanceof WandmakersBenchBlock
                 || block instanceof VanishingCabinetBlock
                 || block instanceof ExaminationDeskBlock
-                || block instanceof FlooFireplaceBlock;
+                || block instanceof FlooGrateBlock;
     }
 }

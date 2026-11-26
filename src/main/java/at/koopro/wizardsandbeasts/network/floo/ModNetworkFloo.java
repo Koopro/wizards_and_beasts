@@ -22,9 +22,10 @@ public final class ModNetworkFloo {
                 FlooArrivalEffectsS2CPayload.STREAM_CODEC,
                 ClientPayloadHandlers::handleFlooArrivalEffects);
         registrar.playToClient(
-                FlooBlockSyncS2CPayload.TYPE,
-                FlooBlockSyncS2CPayload.STREAM_CODEC,
-                ClientPayloadHandlers::handleFlooBlockSync);
+                SyncHearthPatternsPayload.TYPE,
+                SyncHearthPatternsPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(
+                        () -> at.koopro.wizardsandbeasts.floo.hearth.HearthPatterns.setClient(payload.patterns())));
         registrar.playToClient(
                 FlooTransitS2CPayload.TYPE,
                 FlooTransitS2CPayload.STREAM_CODEC,

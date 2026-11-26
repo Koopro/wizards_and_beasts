@@ -1,0 +1,45 @@
+{
+  "__comment": "Borgin and Burkes, Knockturn Alley (CoS ch.4: a stone fireplace in a dim shop; CANON.md): a narrow dark hearth, 2 wide x 3 high opening in a 4-wide breast of dark stone, a dark mantel, a low chimney. The grate stands in the left half of the opening as seen from the room. Layers bottom to top, rows back to front, read left to right from the room.",
+  "opening_width": 2,
+  "opening_height": 3,
+  "key": {
+    "D": "#wizards_and_beasts:hearth_dark",
+    "M": "#wizards_and_beasts:hearth_dark_mantel"
+  },
+  "layers": [
+    [
+      "    ",
+      " DD ",
+      "DDDD"
+    ],
+    [
+      "DDDD",
+      "DG.D",
+      "    "
+    ],
+    [
+      "DDDD",
+      "D..D",
+      "    "
+    ],
+    [
+      "DDDD",
+      "D..D",
+      "    "
+    ],
+    [
+      "DDDD",
+      "MMMM",
+      "    "
+    ],
+    [
+      " DD ",
+      " DD ",
+      "    "
+    ]
+  ],
+  "example": {
+    "D": "minecraft:polished_blackstone_bricks",
+    "M": "minecraft:stripped_dark_oak_log"
+  }
+}

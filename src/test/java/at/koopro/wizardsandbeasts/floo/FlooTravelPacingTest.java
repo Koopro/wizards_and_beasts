@@ -58,12 +58,12 @@ class FlooTravelPacingTest {
     }
 
     @Test
-    void theWindupFitsInsideAFreshlyLitHearth() {
-        // The departure window is measured against a hearth that has to still be burning at the end
-        // of it. A windup longer than the hearth's own life would make every hop cancel itself.
+    void theWindupFitsInsideAFreshPinch() {
+        // The departure window is measured against a fire that has to still be green at the end of it.
+        // A windup longer than a thrown pinch burns would make every hop cancel itself.
         assertTrue(FlooDeparture.windupTicks()
-                        < at.koopro.wizardsandbeasts.block.floo.FlooFireplaceBlockEntity.litTimeoutTicks(),
-                "a departure must be able to finish before the hearth goes cold");
+                        < at.koopro.wizardsandbeasts.block.floo.FlooGrateBlockEntity.PINCH_TICKS,
+                "a departure must be able to finish before the pinch burns out");
     }
 
     @Test
