@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * The green wash over the world while you are standing in a lit Floo hearth.
+ * What you see while you stand in a green Floo fire: the glow from below and the flames licking up the view.
  *
  * <h2>Why it draws nothing at all when you are not</h2>
  * <p>This is the only feedback that a wizard is <em>in</em> the fire rather than beside it, and that
@@ -38,11 +38,6 @@ public final class FlooHearthOverlay {
     /** How fast the wash comes up and goes down, in units per frame at 60fps. */
     private static final float FADE_STEP = 0.12f;
 
-    /** Deep hearth green for the full-screen wash: {@code FlooCues.EMERALD} at a third value. */
-    private static final int WASH_RGB = 0x0E5A22;
-
-    /** The Floo green itself, as bare RGB — a GUI fill packs its own alpha in the top byte. */
-    private static final int EDGE_RGB = at.koopro.wizardsandbeasts.floo.FlooCues.EMERALD & 0x00FFFFFF;
 
     private static float intensity = 0.0f;
 
@@ -68,20 +63,34 @@ public final class FlooHearthOverlay {
         int w = mc.getWindow().getGuiScaledWidth();
         int h = mc.getWindow().getGuiScaledHeight();
 
-        // A wash rather than a full-strength fill: the player has to keep being able to read the room
-        // they are about to leave, and the destination screen draws on top of this.
-        int washAlpha = (int) (intensity * 70);
-        graphics.fill(0, 0, w, h, (washAlpha << 24) | WASH_RGB);
+        // Standing in the fire (remade 2026-11-26: the four green bands read as a frame of boxes): the green glow
+        // rising from below, and the hearth's own flames licking up the bottom of the view, two rows out of step so
+        // the edge of the fire never sits still. The middle stays clear: the room you are leaving, and the list.
+        graphics.fillGradient(0, h / 3, w, h, argb(0.0f, 0x0F5A24), argb(intensity * 0.55f, 0x1A8A36));
+        graphics.fillGradient(0, 0, w, h / 5, argb(intensity * 0.25f, 0x0F5A24), argb(0.0f, 0x0F5A24));
+        long frame = System.currentTimeMillis() / 50L;
+        int big = Math.max(16, h / 5);
+        for (int row = 0; row < 2; row++) {
+            int size = row == 0 ? big : big * 2 / 3;
+            float alpha = intensity * (row == 0 ? 0.85f : 0.95f);
+            for (int x = -size / 2 + row * size / 3, i = 0; x < w; x += size * 3 / 4, i++) {
+                int f = (int) Math.floorMod(frame + i * 7L + row * 13L, FIRE_FRAMES);
+                // Each tongue a little lower or higher, so the top of the fire is ragged, not a straight line.
+                int lift = (int) (Math.sin(i * 1.7 + row) * size * 0.15);
+                graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, FIRE[(i + row) & 1],
+                        x, h - size + size / 6 - lift, 0.0f, f * 16.0f, size, size, 16, 16, 16, 16 * FIRE_FRAMES,
+                        argb(alpha, 0xFFFFFF));
+            }
+        }
+    }
 
-        // Vignette, built from four edge bands rather than a texture. The bands are what make it read
-        // as being inside something looking out, which a flat tint alone never does.
-        int band = Math.max(8, Math.min(w, h) / 8);
-        int edgeAlpha = (int) (intensity * 120);
-        int edge = (edgeAlpha << 24) | EDGE_RGB;
-        graphics.fill(0, 0, w, band, edge);
-        graphics.fill(0, h - band, w, h, edge);
-        graphics.fill(0, 0, band, h, edge);
-        graphics.fill(w - band, 0, w, h, edge);
+    private static final Identifier[] FIRE = {
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/floo/floor_fire_0.png"),
+            Identifier.fromNamespaceAndPath(WizardsAndBeastsMod.MODID, "textures/gui/floo/floor_fire_1.png")};
+    private static final int FIRE_FRAMES = 32;
+
+    private static int argb(float alpha, int rgb) {
+        return (Mth.clamp(Math.round(alpha * 255.0f), 0, 255) << 24) | (rgb & 0xFFFFFF);
     }
 
     private static boolean inFlooFire(Minecraft mc, LocalPlayer player) {
