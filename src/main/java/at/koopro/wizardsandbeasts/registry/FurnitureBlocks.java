@@ -20,7 +20,6 @@ import at.koopro.wizardsandbeasts.block.furniture.TallStorageBlock;
 import at.koopro.wizardsandbeasts.block.furniture.TallFurnitureBlock;
 import at.koopro.wizardsandbeasts.block.furniture.GrandfatherClockBlock;
 import at.koopro.wizardsandbeasts.block.furniture.GlowingDecoBlock;
-import at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock;
 import net.minecraft.world.item.DyeColor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -348,19 +347,6 @@ public final class FurnitureBlocks {
             p -> new FurnitureBlock(p, Spec.of("gargoyle_statue")), () -> stone(MapColor.COLOR_GRAY));
     public static final DeferredBlock<TallFurnitureBlock> WIZARD_STATUE = tall("wizard_statue", "Wizard Statue",
             p -> new TallFurnitureBlock(p, Spec.of("wizard_statue")), () -> stone(MapColor.COLOR_GRAY));
-    /** Pieces bigger than a block: they drop from their bottom-middle cell only. */
-    public static final List<DeferredBlock<? extends MultiblockFurnitureBlock>> MULTIBLOCK = new ArrayList<>();
-
-    private static <T extends MultiblockFurnitureBlock> DeferredBlock<T> multi(String id, String name,
-            java.util.function.Function<BlockBehaviour.Properties, T> factory, Supplier<BlockBehaviour.Properties> properties) {
-        DeferredBlock<T> block = ModBlocks.BLOCKS.registerBlock(id, factory, properties);
-        ALL.add(block);
-        MULTIBLOCK.add(block);
-        ITEMS.add(ModItems.ITEMS.registerSimpleBlockItem(id, block));
-        NAMES.put(id, name);
-        return block;
-    }
-
     public static final DeferredBlock<Block> GLOWING_RUNESTONE = block("glowing_runestone", "Glowing Runestone",
             Block::new, () -> stoneDeco(7));
 

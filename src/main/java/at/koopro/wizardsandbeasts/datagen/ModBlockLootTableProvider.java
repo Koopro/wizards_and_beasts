@@ -86,17 +86,6 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                         net.minecraft.world.level.block.state.properties.BedPart.HEAD)));
         at.koopro.wizardsandbeasts.registry.FurnitureBlocks.TALL.forEach(block -> add(block.get(),
                 createDoorTable(block.get())));
-        for (var block : at.koopro.wizardsandbeasts.registry.FurnitureBlocks.MULTIBLOCK) {
-            var piece = block.get();
-            add(piece, net.minecraft.world.level.storage.loot.LootTable.lootTable().withPool(applyExplosionCondition(piece,
-                    net.minecraft.world.level.storage.loot.LootPool.lootPool()
-                            .add(net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem(piece))
-                            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(piece)
-                                    .setProperties(StatePropertiesPredicate.Builder.properties()
-                                            .hasProperty(at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock.COL,
-                                                    piece.spec().width() / 2)
-                                            .hasProperty(at.koopro.wizardsandbeasts.block.furniture.MultiblockFurnitureBlock.ROW, 0))))));
-        }
         for (var f : at.koopro.wizardsandbeasts.registry.WoodFittings.WOODS) {
             add(f.door().get(), createDoorTable(f.door().get()));
             dropSelf(f.trapdoor().get());
