@@ -242,6 +242,10 @@ public class ModModelProvider extends ModelProvider {
         itemModels.generateFlatItem(CurrencyItemRegistry.DRAGOT.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
 
         itemModels.generateFlatItem(WandItemRegistry.WAND_BLANK.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        for (var tool : java.util.List.of(WandItemRegistry.CARVING_KNIFE, WandItemRegistry.LATHE_CHISEL,
+                WandItemRegistry.BORING_BRACE, WandItemRegistry.CORE_TONGS, WandItemRegistry.VARNISH_POT)) {
+            itemModels.generateFlatItem(tool.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        }
         iconInSlotModelInHand(itemModels, MiscItemRegistry.BESTIARY.get());
         itemModels.generateFlatItem(CurrencyItemRegistry.COUNTERFEIT_GALLEON.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(ConsumableItemRegistry.CONJURED_SPOILED_FOOD.get(), net.minecraft.client.data.models.model.ModelTemplates.FLAT_ITEM);

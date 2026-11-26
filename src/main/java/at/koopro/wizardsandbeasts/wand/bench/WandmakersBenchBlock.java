@@ -185,6 +185,9 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
                                           net.minecraft.world.InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.getItem() instanceof at.koopro.wizardsandbeasts.item.wand.BenchToolItem toolItem) {
+            return layTool(stack, toolItem.tool(), state, level, pos, player);
+        }
         if (!at.koopro.wizardsandbeasts.wand.refine.WandRefineMenu.isFinishedWand(stack)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
@@ -204,6 +207,28 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
         return InteractionResult.SUCCESS;
     }
 
+    /** A tool in hand is laid on the bench, unless that tool is already there. Creative keeps its copy. */
+    private static InteractionResult layTool(ItemStack stack, BenchTool tool, BlockState state, Level level,
+                                             BlockPos pos, Player player) {
+        WandmakersBenchBlockEntity bench = benchAt(level, state, pos);
+        if (bench == null) {
+            return InteractionResult.PASS;
+        }
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        Component name = stack.getHoverName();
+        if (!bench.placeTool(tool)) {
+            player.displayClientMessage(Component.translatable("block.wizards_and_beasts.wandmakers_bench.tool_already", name), true);
+            return InteractionResult.SUCCESS_SERVER;
+        }
+        stack.consume(1, player);
+        level.playSound(null, bench.getBlockPos(), net.minecraft.sounds.SoundEvents.WOOD_PLACE,
+                net.minecraft.sounds.SoundSource.BLOCKS, 0.7f, 1.2f);
+        player.displayClientMessage(Component.translatable("block.wizards_and_beasts.wandmakers_bench.tool_placed", name), true);
+        return InteractionResult.SUCCESS_SERVER;
+    }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!WandModuleHooks.isWandsEnabled()) {
@@ -212,6 +237,16 @@ public class WandmakersBenchBlock extends BaseEntityBlock implements EntityBlock
         WandmakersBenchBlockEntity bench = benchAt(level, state, pos);
         if (bench == null) {
             return InteractionResult.PASS;
+        }
+        // Sneaking with an empty hand takes the tools back; with none on the bench it opens the bench as ever.
+        if (player.isSecondaryUseActive() && bench.toolMask() != 0) {
+            if (!level.isClientSide()) {
+                for (ItemStack tool : bench.takeTools()) {
+                    at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, tool);
+                }
+                player.displayClientMessage(Component.translatable("block.wizards_and_beasts.wandmakers_bench.tools_taken"), true);
+            }
+            return InteractionResult.SUCCESS;
         }
         if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
             bench.recalcTierScore();

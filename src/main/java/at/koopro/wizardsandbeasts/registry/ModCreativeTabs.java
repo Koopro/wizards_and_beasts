@@ -72,6 +72,11 @@ public class ModCreativeTabs {
                         // Magical Tools
                         output.accept(WandItemRegistry.WAND.get());
                         output.accept(WandItemRegistry.WAND_BLANK.get());
+                        output.accept(WandItemRegistry.CARVING_KNIFE.get());
+                        output.accept(WandItemRegistry.LATHE_CHISEL.get());
+                        output.accept(WandItemRegistry.BORING_BRACE.get());
+                        output.accept(WandItemRegistry.CORE_TONGS.get());
+                        output.accept(WandItemRegistry.VARNISH_POT.get());
                         // Wandmaker's bench: the Wandmaker villager's workstation and the wandmaking station.
                         output.accept(ModBlocks.WANDMAKERS_BENCH_ITEM.get());
                         output.accept(BroomItemRegistry.BROOM_ITEM.get());

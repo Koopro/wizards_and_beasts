@@ -63,6 +63,11 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
      */
     private boolean working;
 
+    /** The tools on the bench, as {@link BenchTool#bit()}s. Saved, and sent to clients so the rig can draw them. */
+    private int tools;
+
+    private static final int ALL_TOOLS = (1 << BenchTool.values().length) - 1;
+
     private final AnimatableInstanceCache animatableCache = GeckoLibUtil.createInstanceCache(this);
 
     public WandmakersBenchBlockEntity(BlockPos pos, BlockState blockState) {
@@ -178,6 +183,76 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         this.detectedEnhancers = result.enhancers();
     }
 
+    // -- tools ------------------------------------------------------------------------------------
+
+    public boolean hasTool(BenchTool tool) {
+        return (tools & tool.bit()) != 0;
+    }
+
+    /** The tools on the bench as a bit mask, for the renderer. */
+    public int toolMask() {
+        return tools;
+    }
+
+    /** Lays a tool on the bench. False when that tool is already there. */
+    public boolean placeTool(BenchTool tool) {
+        if (hasTool(tool)) {
+            return false;
+        }
+        tools |= tool.bit();
+        toolsChanged();
+        return true;
+    }
+
+    /** Takes every tool off the bench and returns them as items, in {@link BenchTool} order. */
+    public List<ItemStack> takeTools() {
+        List<ItemStack> out = new ArrayList<>();
+        for (BenchTool tool : BenchTool.values()) {
+            if (hasTool(tool)) {
+                out.add(toolStack(tool));
+            }
+        }
+        if (tools != 0) {
+            tools = 0;
+            toolsChanged();
+        }
+        return out;
+    }
+
+    private static ItemStack toolStack(BenchTool tool) {
+        return new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
+                net.minecraft.resources.Identifier.fromNamespaceAndPath(at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, tool.itemId())));
+    }
+
+    private void toolsChanged() {
+        setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    /**
+     * The bench is coming down: what is on it falls to the floor. The blank, the core and the tools fall. The output
+     * slot is not dropped, because it is the preview of a wand not yet made, and dropping it would make a free wand.
+     */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        for (int slot = 0; slot < 2; slot++) {
+            ItemStack stack = getSlotStack(slot);
+            if (!stack.isEmpty()) {
+                net.minecraft.world.Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
+            }
+        }
+        for (BenchTool tool : BenchTool.values()) {
+            if (hasTool(tool)) {
+                net.minecraft.world.Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, toolStack(tool));
+            }
+        }
+    }
+
     public int getSelectedFlexibilityOrdinal() {
         return selectedFlexibilityOrdinal;
     }
@@ -204,6 +279,10 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.store("flexibility_ordinal", Codec.INT, selectedFlexibilityOrdinal);
+        // Absent when there are none, so a bench saved before tools existed and one with none read the same.
+        if (tools != 0) {
+            output.store("tools", Codec.INT, tools);
+        }
         for (int i = 0; i < 3; i++) {
             // ItemStack.CODEC refuses an empty stack: storing one logged "Item must not be minecraft:air" on every
             // save and update packet. An absent slot reads back as empty, which is also how the client learns of it.
@@ -225,6 +304,8 @@ public class WandmakersBenchBlockEntity extends BlockEntity implements GeoBlockE
         // as well would be a second copy of the same fact — and the copy is what goes stale. This way
         // a client cannot disagree with the server about whether the bench is busy.
         working = hasWorkOnIt();
+        // Read as a mask of known tools only: a bit a later build added and this one does not know is dropped.
+        tools = input.read("tools", Codec.INT).orElse(0) & ALL_TOOLS;
     }
 
     private ItemStack getSlotStack(int slot) {

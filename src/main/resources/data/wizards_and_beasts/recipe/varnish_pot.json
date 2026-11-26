@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "wizards_and_beasts:module_enabled",
+      "module": "WANDS"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:honeycomb",
+    "minecraft:bowl",
+    "minecraft:clay_ball"
+  ],
+  "result": {
+    "id": "wizards_and_beasts:varnish_pot",
+    "count": 1
+  }
+}
