@@ -101,9 +101,34 @@ public final class HandbookScreen extends Screen {
     private @Nullable int[] prevRect;
     private @Nullable int[] nextRect;
     private @Nullable int[] crossRefRect;
+    // The build guide on a construction page: its state, its layer arrows and the area that turns it.
+    private @Nullable ConstructionGuide guide;
+    private int guideChapter = -1;
+    private int guidePage = -1;
+    private boolean draggingGuide;
+    private @Nullable int[] layerPrevRect;
+    private @Nullable int[] layerNextRect;
+    private @Nullable int[] previewRect;
 
     public HandbookScreen() {
         super(Component.translatable("gui.wizards_and_beasts.handbook.title"));
+    }
+
+    /** Opened at a chapter, page and build-guide layer (screenshot captures). */
+    public static HandbookScreen openAt(Identifier chapter, int page, int layer) {
+        HandbookScreen screen = new HandbookScreen();
+        List<HandbookChapter> list = HandbookChapterManager.CLIENT_CHAPTERS;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).id().equals(chapter)) {
+                screen.chapterIndex = i;
+                screen.pageIndex = page;
+                screen.mode = Mode.CHAPTER;
+                if (list.get(i).pages().get(page) instanceof HandbookPage.Construction build) {
+                    screen.guideFor(build).move(layer);
+                }
+            }
+        }
+        return screen;
     }
 
     private List<HandbookChapter> chapters() {
@@ -142,6 +167,7 @@ public final class HandbookScreen extends Screen {
         this.renderMenuBackground(gg);
         catCells.clear();
         backRect = prevRect = nextRect = crossRefRect = null;
+        layerPrevRect = layerNextRect = previewRect = null;
         pageMaxScroll = 0;
 
         // Draw the book in design space; the pose shrinks it to fit small screens.
@@ -279,6 +305,8 @@ public final class HandbookScreen extends Screen {
             scrollableBody(gg, Component.literal("§o" + ref.entryId().getPath()), lx0, ly, lx1 - lx0, contentBottom, sbX, INK_GREY);
         } else if (page instanceof HandbookPage.Recipe || page instanceof HandbookPage.Image) {
             body(gg, Component.translatable("gui.wizards_and_beasts.handbook.see_facing"), lx0, ly, lx1 - lx0, INK_GREY);
+        } else if (page instanceof HandbookPage.Construction build) {
+            renderBuildSteps(gg, guideFor(build), build, lx0, ly, lx1 - lx0, contentBottom);
         }
 
         // ── Right page context ──
@@ -289,6 +317,8 @@ public final class HandbookScreen extends Screen {
             renderRecipe(gg, recipe, rx0, ry, rx1 - rx0);
         } else if (page instanceof HandbookPage.Image image) {
             renderImage(gg, image, rx0, ry, rx1 - rx0);
+        } else if (page instanceof HandbookPage.Construction build) {
+            renderBuildPreview(gg, guideFor(build), rx0, ry, rx1, y + H - FRAME - 34, mouseX, mouseY);
         } else if (page instanceof HandbookPage.CrossRef ref && "bestiary".equals(ref.targetType())) {
             crossRefRect = banner(gg, rx0, ry + 20, rx1 - rx0, mouseX, mouseY,
                     Component.translatable("gui.wizards_and_beasts.handbook.see_bestiary").copy().append(" →"));
@@ -311,6 +341,81 @@ public final class HandbookScreen extends Screen {
 
         Component indicator = Component.translatable("gui.wizards_and_beasts.handbook.page_indicator", pageIndex + 1, total);
         ink(gg, indicator, (rx0 + rx1) / 2 - font.width(indicator) / 2, navY, INK_GREY);
+    }
+
+    // ── Build guide (construction pages) ──────────────────────────────────────
+
+    /** The guide for this page, kept while the page stays open and started afresh when another one opens. */
+    private ConstructionGuide guideFor(HandbookPage.Construction build) {
+        if (guide == null || guideChapter != chapterIndex || guidePage != pageIndex
+                || !guide.structure().equals(build.structure())) {
+            guide = new ConstructionGuide(build.structure());
+            guideChapter = chapterIndex;
+            guidePage = pageIndex;
+        }
+        return guide;
+    }
+
+    /** Left page: the page's own words, then what the current layer takes, with an icon per material. */
+    private void renderBuildSteps(GuiGraphics gg, ConstructionGuide g, HandbookPage.Construction build,
+                                  int x0, int yy, int wrap, int bottom) {
+        if (build.heading().isPresent()) {
+            yy += heading(gg, Component.translatable(build.heading().get()), x0, yy, wrap);
+        }
+        if (build.body().isPresent()) {
+            yy = body(gg, Component.translatable(build.body().get()), x0, yy, wrap, INK, bottom - 60) + 4;
+        }
+        if (g.steps() == 0) {
+            body(gg, Component.translatable("gui.wizards_and_beasts.handbook.build.missing", g.structure().toString()),
+                    x0, yy, wrap, INK_GREY);
+            return;
+        }
+        yy += heading(gg, Component.translatable("gui.wizards_and_beasts.handbook.build.layer", g.step() + 1, g.steps()),
+                x0, yy, wrap);
+        for (ConstructionGuide.Material m : g.materials()) {
+            if (yy > bottom - 24) {
+                break;
+            }
+            if (!m.icon().isEmpty()) {
+                gg.renderItem(m.icon(), x0, yy - 4);
+            }
+            // Wrapped inside the page: a long material name must not run into the gutter (11-26 capture).
+            List<FormattedCharSequence> lines = font.split(
+                    Component.translatable("gui.wizards_and_beasts.handbook.build.count", m.count(), m.name()), wrap - 20);
+            for (FormattedCharSequence line : lines) {
+                ink(gg, line, x0 + 20, yy, INK);
+                yy += LINE_H;
+            }
+            yy += Math.max(0, 17 - lines.size() * LINE_H);
+        }
+        body(gg, Component.translatable("gui.wizards_and_beasts.handbook.build.hint"), x0, bottom - 10, wrap, INK_GREY);
+    }
+
+    /**
+     * Right page: the build in 3D on a turntable, up to the current layer (picture-in-picture, mapped from the book's
+     * design space to the screen because the book is drawn scaled), and the layer arrows under it.
+     */
+    private void renderBuildPreview(GuiGraphics gg, ConstructionGuide g, int x0, int y0, int x1, int y1,
+                                    int mouseX, int mouseY) {
+        previewRect = new int[]{x0, y0, x1, y1, 0};
+        float scale = layout.scale();
+        int px = layout.panelX(), py = layout.panelY();
+        int sx0 = Math.round(px + (x0 - px) * scale), sy0 = Math.round(py + (y0 - py) * scale);
+        int sx1 = Math.round(px + (x1 - px) * scale), sy1 = Math.round(py + (y1 - py) * scale);
+        float perBlock = Math.min(x1 - x0, y1 - y0) / (float) g.extent() * 1.2f * scale;
+        gg.pose().pushMatrix();
+        gg.pose().identity();
+        gg.submitPictureInPictureRenderState(new StructurePreviewRenderState(g.blocks(), g.drop(), g.yaw(), 22.0f,
+                perBlock, sx0, sy0, sx1, sy1, null));
+        gg.pose().popMatrix();
+
+        int ay = y1 + 4;
+        layerPrevRect = arrow(gg, x0, ay, "◀", g.hasPrev(), mouseX, mouseY);
+        layerNextRect = arrow(gg, x1 - font.width("▶") - 6, ay, "▶", g.hasNext(), mouseX, mouseY);
+        if (!g.hasPrev()) layerPrevRect = null;
+        if (!g.hasNext()) layerNextRect = null;
+        Component at = Component.translatable("gui.wizards_and_beasts.handbook.build.layer_short", g.step() + 1, g.steps());
+        ink(gg, at, (x0 + x1) / 2 - font.width(at) / 2, ay + 2, INK_GREY);
     }
 
     // ── Text drawing ─────────────────────────────────────────────────────────
@@ -573,6 +678,18 @@ public final class HandbookScreen extends Screen {
                     }
                 }
             } else {
+                if (guide != null && hit(layerPrevRect, mx, my)) {
+                    guide.move(-1);
+                    return true;
+                }
+                if (guide != null && hit(layerNextRect, mx, my)) {
+                    guide.move(1);
+                    return true;
+                }
+                if (guide != null && hit(previewRect, mx, my)) {
+                    draggingGuide = true;
+                    return true;
+                }
                 if (hit(backRect, mx, my)) {
                     mode = Mode.INDEX;
                     textScroll = 0;
@@ -601,7 +718,32 @@ public final class HandbookScreen extends Screen {
     }
 
     @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (draggingGuide && guide != null) {
+            guide.drag(dx / layout.scale() * 2.0);
+            return true;
+        }
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (draggingGuide && guide != null) {
+            draggingGuide = false;
+            guide.release();
+            return true;
+        }
+        return super.mouseReleased(event);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        // Over the build, the wheel steps through its layers rather than the pages.
+        if (mode == Mode.CHAPTER && guide != null && previewRect != null && scrollY != 0
+                && hit(previewRect, (int) Math.round(layout.unmapX(mouseX)), (int) Math.round(layout.unmapY(mouseY)))) {
+            guide.move(scrollY > 0 ? -1 : 1);
+            return true;
+        }
         if (mode == Mode.CHAPTER) {
             int delta = -(int) Math.signum(scrollY);
             // Scroll the body first; only flip pages once the body is at its scroll bound.

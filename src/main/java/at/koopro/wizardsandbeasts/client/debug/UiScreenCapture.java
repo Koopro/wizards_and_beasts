@@ -184,6 +184,10 @@ public final class UiScreenCapture {
                 Step.client("ability_wheel", () -> open(new AbilityWheelScreen())),
                 Step.client("bestiary", () -> open(new BestiaryScreen())),
                 Step.client("handbook", () -> open(new at.koopro.wizardsandbeasts.client.handbook.HandbookScreen())),
+                Step.client("handbook_floo_build_mid", () -> open(at.koopro.wizardsandbeasts.client.handbook.HandbookScreen.openAt(
+                        net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "floo"), 0, 2))),
+                Step.client("handbook_floo_build_full", () -> open(at.koopro.wizardsandbeasts.client.handbook.HandbookScreen.openAt(
+                        net.minecraft.resources.Identifier.fromNamespaceAndPath("wizards_and_beasts", "floo"), 0, 99))),
                 Step.client("owl_exam", () -> open(new OWLExamScreen())),
                 Step.client("education_tab", () -> open(CharacterSheetScreen.onEducationTab())),
                 Step.client("owl_sitting", UiScreenCapture::openSitting),

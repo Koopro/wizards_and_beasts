@@ -34,6 +34,8 @@ public final class HearthPatterns extends SimpleJsonResourceReloadListener<Heart
     public static final String DIRECTORY = "floo_hearth";
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<Identifier, HearthPattern> SERVER = new LinkedHashMap<>();
+    /** The client's copy, from {@code SyncHearthPatternsPayload}: what the handbook's build guide draws. */
+    private static volatile Map<Identifier, HearthPattern> client = Map.of();
 
     /** A build recognised as a style. */
     public record Match(Identifier style, HearthPattern pattern) {}
@@ -60,6 +62,14 @@ public final class HearthPatterns extends SimpleJsonResourceReloadListener<Heart
 
     public static Map<Identifier, HearthPattern> all() {
         return Map.copyOf(SERVER);
+    }
+
+    public static Map<Identifier, HearthPattern> client() {
+        return client;
+    }
+
+    public static void setClient(Map<Identifier, HearthPattern> patterns) {
+        client = Map.copyOf(patterns);
     }
 
     public static Optional<HearthPattern> get(Identifier style) {
