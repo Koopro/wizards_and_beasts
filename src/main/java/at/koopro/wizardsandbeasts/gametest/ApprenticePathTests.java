@@ -52,10 +52,11 @@ public final class ApprenticePathTests {
                 "path: choosing a heritage pays the Ministry Handbook and unlocks the bench, wand blank and handbook "
                         + "recipes; a second look pays nothing more",
                 ApprenticePathTests::arrivalPaysOnce);
-        tests.add("path_wand_puts_lumos_on_the_wheel",
-                "path: a wand that has chosen the player completes the wand step and puts Lumos on an empty wheel "
-                        + "slot, selected; casting then pays two Sickles",
-                ApprenticePathTests::wandPutsLumosOnTheWheel);
+        tests.add("path_wand_pays_the_book_list",
+                "path: a wand that has chosen the player completes the wand step and pays the first-year book money "
+                        + "into the vault (or the books, with no shop); the first spell read goes on an empty wheel, "
+                        + "selected; casting it pays two Sickles",
+                ApprenticePathTests::wandPaysTheBookList);
         tests.add("path_own_spell_pays_one_skill_point",
                 "path: knowing a spell beyond the starter charms pays exactly one skill point and a duelling dummy, "
                         + "however often the path looks",
@@ -121,12 +122,13 @@ public final class ApprenticePathTests {
         }
     }
 
-    private static void wandPutsLumosOnTheWheel(GameTestHelper helper) {
+    private static void wandPaysTheBookList(GameTestHelper helper) {
         ServerPlayer player = guided(helper, "PathWand");
         try {
             HeritageAPI.commit(player, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
-            SpellLearningService.teachStarter(player);
             PlayerSpellData spells = player.getData(ModAttachments.SPELL_DATA.get());
+            check(helper, spells.getKnownSpells().isEmpty(),
+                    () -> "a new wand hand knows spells before reading a book: " + spells.getKnownSpells());
             for (int slot = 0; slot < PlayerSpellData.LOADOUT_SIZE; slot++) {
                 spells.setLoadoutSpell(slot, null);
             }
@@ -134,9 +136,23 @@ public final class ApprenticePathTests {
             check(helper, !ApprenticePathService.record(player).has(PathStep.WAND),
                     () -> "the wand step was done with no wand in the pack");
 
+            long vaultBefore = player.getData(ModAttachments.VAULT_DATA.get()).getTotalInKnuts();
             WizardTestSupport.giveBondedWand(player);
             List<PathStep> paid = ApprenticePathService.evaluate(player);
             check(helper, paid.equals(List.of(PathStep.WAND)), () -> "a bonded wand paid " + paid + ", not the wand step");
+            if (at.koopro.wizardsandbeasts.module.ModuleManager.isEnabled(at.koopro.wizardsandbeasts.module.Module.GRINGOTTS)) {
+                long got = player.getData(ModAttachments.VAULT_DATA.get()).getTotalInKnuts() - vaultBefore;
+                check(helper, got == at.koopro.wizardsandbeasts.journey.PathReward.FIRST_YEAR_FUNDS_KNUTS,
+                        () -> "the wand step paid " + got + " Knuts of book money");
+            } else {
+                int books = player.getInventory().countItem(
+                        at.koopro.wizardsandbeasts.registry.CanonItemRegistry.STANDARD_BOOK_OF_SPELLS.get());
+                check(helper, books == 2, () -> "with no shop the wand step handed " + books + " books, not two");
+            }
+
+            // The first spell read out of a book goes on the empty wheel, selected.
+            var learned = SpellLearningService.commit(player, Spells.byId(LUMOS), SpellLearningService.Route.BOOK);
+            check(helper, learned.success(), () -> "Lumos could not be learned: " + learned.message());
             String lumos = Spells.byId(LUMOS).getId();
             check(helper, lumos.equals(spells.getActiveSpellId()),
                     () -> "Lumos is not the selected wheel spell; selected is " + spells.getActiveSpellId());
@@ -156,10 +172,10 @@ public final class ApprenticePathTests {
         ServerPlayer player = guided(helper, "PathOwnSpell");
         try {
             HeritageAPI.commit(player, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
-            SpellLearningService.teachStarter(player);
+            SpellLearningService.grantWithoutTrace(player, Spells.byId(LUMOS));
             ApprenticePathService.evaluate(player);
             check(helper, !ApprenticePathService.record(player).has(PathStep.OWN_SPELL),
-                    () -> "the starter charms counted as a spell of one's own");
+                    () -> "first light (Lumos and Nox) counted as a spell of one's own");
 
             int before = SkillSystemAPI.getSkillData(player).getSkillPoints();
             SpellLearningService.grantWithoutTrace(player, Spells.byId("wizards_and_beasts:stupefy"));
@@ -282,7 +298,7 @@ public final class ApprenticePathTests {
         ServerPlayer veteran = guided(helper, "PathVeteran");
         try {
             HeritageAPI.commit(veteran, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
-            SpellLearningService.teachStarter(veteran);
+            SpellLearningService.grantWithoutTrace(veteran, Spells.byId(LUMOS));
             WizardTestSupport.giveBondedWand(veteran);
             SpellLearningService.grantWithoutTrace(veteran, Spells.byId("wizards_and_beasts:stupefy"));
             veteran.getStats().setValue(veteran, Stats.CUSTOM.get(Stats.PLAY_TIME), 72_000);

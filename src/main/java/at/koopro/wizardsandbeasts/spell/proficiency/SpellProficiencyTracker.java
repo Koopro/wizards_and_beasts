@@ -35,6 +35,12 @@ public final class SpellProficiencyTracker {
         if (practice) {
             int practisedToday = data.recordPractice(spellId, today);
             data.incrementSuccessfulHits(spellId);
+            // A knack for the spell (skill-web spell_aptitude): every second practised hit counts twice, so
+            // practice goes half again as far -- towards the mastery tiers and the gates that read them.
+            if (at.koopro.wizardsandbeasts.skill.SkillSystemAPI.hasSpellAptitude(player, spellId)
+                    && practisedToday % 2 == 0) {
+                data.incrementSuccessfulHits(spellId);
+            }
             if (practisedToday == SpellPractice.DAILY_PRACTICE) {
                 // Told once, the moment it happens: otherwise a stalled tier reads as a bug.
                 PlayerFeedback.actionBar(player, Component.translatable(

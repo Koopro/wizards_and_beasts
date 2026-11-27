@@ -31,5 +31,10 @@
     "reducio",
     "obscuro"
   ],
-  "chance": 0.6
+  "chance": 0.6,
+  "books": [
+    "achievements_in_charming",
+    "standard_book_of_spells_grade_6",
+    "half_blood_princes_potion_book"
+  ]
 }

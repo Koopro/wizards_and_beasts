@@ -11,11 +11,11 @@
   },
   "effects": [
     {
-      "type": "learn_spell",
+      "type": "spell_aptitude",
       "spellId": "levicorpus"
     },
     {
-      "type": "learn_spell",
+      "type": "spell_aptitude",
       "spellId": "liberacorpus"
     }
   ],

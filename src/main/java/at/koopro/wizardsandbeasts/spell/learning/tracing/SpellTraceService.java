@@ -83,6 +83,27 @@ public final class SpellTraceService {
         return reopenFromBook(player, hand, spell);
     }
 
+    /** Marks {@code spellId} as just read (a textbook read through marks every chapter). */
+    public static void noteRead(ServerPlayer player, String spellId) {
+        READ_AT.computeIfAbsent(player.getUUID(), id -> new HashMap<>()).put(spellId, player.level().getGameTime());
+    }
+
+    /** Whether {@code spellId} was read within {@link #READ_FRESH_TICKS}: a trace may be opened from the book. */
+    public static boolean isReadFresh(ServerPlayer player, String spellId) {
+        Map<String, Long> reads = READ_AT.get(player);
+        Long readAt = reads == null ? null : reads.get(spellId);
+        long now = player.level().getGameTime();
+        return readAt != null && now >= readAt && now - readAt <= READ_FRESH_TICKS;
+    }
+
+    /**
+     * A chapter picked on the book screen: the trace for {@code spell} from the textbook in {@code hand}. The caller
+     * ({@code SpellBookService#studyChapter}) has checked the book teaches it and was read just now.
+     */
+    public static @Nullable TraceChallenge openChapter(ServerPlayer player, InteractionHand hand, Spell spell) {
+        return reopenFromBook(player, hand, spell);
+    }
+
     /** A trace from a book in hand, without the read: only for a read still fresh ({@link #request}). */
     private static @Nullable TraceChallenge reopenFromBook(ServerPlayer player, InteractionHand hand, Spell spell) {
         ItemStack stack = player.getItemInHand(hand);
@@ -93,39 +114,18 @@ public final class SpellTraceService {
     }
 
     /**
-     * Opens the lesson an allocated node owes for {@code spellId}.
-     *
-     * @return the challenge, or null when nothing is owed or a gate refused
-     */
-    public static @Nullable TraceChallenge openLesson(ServerPlayer player, String spellId) {
-        String node = SpellLessons.owingNode(player.getData(ModAttachments.SKILL_DATA.get()),
-                player.getData(ModAttachments.SPELL_DATA.get()), spellId);
-        Spell spell = Spells.byId(spellId);
-        if (node == null || spell == null) {
-            return null;
-        }
-        return open(player, spell, new TraceSource.Lesson(node));
-    }
-
-    /**
-     * A client asking to trace {@code spellId} — Try again, or a click on an owed node. The client names
-     * the spell only; the source is whatever the server can find for it right now.
+     * A client asking to trace {@code spellId} again (Try again). The client names the spell only; the source is
+     * whatever book in hand the server can find for it right now, read within {@link #READ_FRESH_TICKS}.
      */
     public static void request(ServerPlayer player, String spellId) {
         Spell spell = Spells.byId(spellId);
         if (spell == null) {
             return;
         }
-        if (openLesson(player, spell.getId()) != null) {
-            return;
-        }
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack stack = player.getItemInHand(hand);
-            if (stack.getItem() instanceof SpellSourceItem && spell.getId().equals(SpellSource.spellIdOf(stack))) {
-                Map<String, Long> reads = READ_AT.get(player);
-                Long readAt = reads == null ? null : reads.get(spell.getId());
-                long now = player.level().getGameTime();
-                if (readAt == null || now < readAt || now - readAt > READ_FRESH_TICKS) {
+            if (stack.getItem() instanceof SpellSourceItem && SpellSource.teaches(stack, spell.getId())) {
+                if (!isReadFresh(player, spell.getId())) {
                     PlayerFeedback.actionBar(player, Component.translatable("spell.wizards_and_beasts.trace.read_first"));
                     return;
                 }
@@ -138,9 +138,7 @@ public final class SpellTraceService {
 
     private static @Nullable TraceChallenge open(ServerPlayer player, Spell spell, TraceSource source) {
         SpellLearningService.LearnResult check = SpellLearningService.validateLearnAttempt(player, spell,
-                source instanceof TraceSource.Lesson
-                        ? SpellLearningService.Route.WEB_LESSON
-                        : SpellLearningService.Route.BOOK);
+                SpellLearningService.Route.BOOK);
         if (!check.success()) {
             PlayerFeedback.refuse(player, Component.translatable("spell.wizards_and_beasts.learning.refused"),
                     check.text());
@@ -159,8 +157,14 @@ public final class SpellTraceService {
             noteFailure(player, replaced, now);
         }
         TraceDifficulty difficulty = TraceDifficulty.forSpell(spell);
-        long seed = player.getRandom().nextLong();
-        TracePath path = TracePathGenerator.generate(seed, difficulty);
+        // A knack for the spell from the skill web (SpellAptitude) makes its gesture one step easier.
+        if (at.koopro.wizardsandbeasts.skill.SkillSystemAPI.hasSpellAptitude(player, spell.getId())) {
+            difficulty = difficulty.easier();
+        }
+        // One fixed wand movement per spell (owner 2026-11-27): the shape comes from the spell, not from the
+        // attempt, so a student who fails can learn the movement by heart and try it again.
+        long seed = TracePathGenerator.spellSeed(spell.getId());
+        TracePath path = TracePathGenerator.forSpell(spell.getId(), difficulty);
         TraceChallenge challenge = new TraceChallenge(player.getRandom().nextLong(), spell.getId(), difficulty,
                 seed, path, now, source);
         ACTIVE.put(player, challenge);
@@ -220,24 +224,14 @@ public final class SpellTraceService {
         ItemStack book = ItemStack.EMPTY;
         if (challenge.source() instanceof TraceSource.Book src) {
             book = player.getItemInHand(src.hand());
-            Spell written = SpellSource.spellOf(book);
-            if (book.getItem() != src.item() || written == null || !written.getId().equals(src.spellId())) {
-                send(player, challenge, TraceOutcome.SOURCE_GONE, -1, verdict.accuracy(), false, "");
-                return TraceOutcome.SOURCE_GONE;
-            }
-        } else if (challenge.source() instanceof TraceSource.Lesson src) {
-            String owing = SpellLessons.owingNode(player.getData(ModAttachments.SKILL_DATA.get()),
-                    player.getData(ModAttachments.SPELL_DATA.get()), challenge.spellId());
-            if (!src.nodeId().equals(owing)) {
+            if (book.getItem() != src.item() || !SpellSource.teaches(book, src.spellId())) {
                 send(player, challenge, TraceOutcome.SOURCE_GONE, -1, verdict.accuracy(), false, "");
                 return TraceOutcome.SOURCE_GONE;
             }
         }
         Spell spell = Spells.byId(challenge.spellId());
-        SpellLearningService.Route route = challenge.source() instanceof TraceSource.Lesson
-                ? SpellLearningService.Route.WEB_LESSON
-                : SpellLearningService.Route.BOOK;
-        SpellLearningService.LearnResult result = SpellLearningService.commit(player, spell, route);
+        SpellLearningService.LearnResult result = SpellLearningService.commit(player, spell,
+                SpellLearningService.Route.BOOK);
         if (!result.success()) {
             send(player, challenge, TraceOutcome.REFUSED, -1, verdict.accuracy(), true,
                     at.koopro.wizardsandbeasts.network.spell.SpellTraceResultS2CPayload.encodeDetail(result.text()));
@@ -254,6 +248,10 @@ public final class SpellTraceService {
                         SpellSource.writtenName(challenge.spellId())),
                 Component.translatable("spell.wizards_and_beasts.learning.learned.detail"));
         send(player, challenge, TraceOutcome.PASSED, -1, verdict.accuracy(), !challenge.source().spendsSource(), "");
+        // A textbook's page shows the chapter learned: the book screen behind the trace is sent its new state.
+        if (challenge.source() instanceof TraceSource.Book src && SpellSource.bookIdOf(book) != null) {
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.open(player, src.hand());
+        }
         return TraceOutcome.PASSED;
     }
 

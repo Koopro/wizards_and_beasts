@@ -26,6 +26,11 @@ public final class SpellTraceClient {
         mc.setScreen(new SpellTraceScreen(previous, pkt));
     }
 
+    /** The screen a trace now open will return to, or null when no trace is open (the textbook behind it, usually). */
+    public static @org.jspecify.annotations.Nullable Screen screenBehindTrace() {
+        return Minecraft.getInstance().screen instanceof SpellTraceScreen open ? open.previous() : null;
+    }
+
     public static void result(SpellTraceResultS2CPayload pkt) {
         if (Minecraft.getInstance().screen instanceof SpellTraceScreen screen
                 && screen.challengeId() == pkt.challengeId()) {

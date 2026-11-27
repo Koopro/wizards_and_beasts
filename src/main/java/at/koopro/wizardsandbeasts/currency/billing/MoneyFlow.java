@@ -33,6 +33,8 @@ public enum MoneyFlow {
     COURIER_PAY(Kind.SOURCE, true),
     /** The Auror Office's bounty for closing a case with the culprit taken alive ({@code ministry.trace.MinistryCasework}). */
     MINISTRY_BOUNTY(Kind.SOURCE, true),
+    /** The first-year book money the Apprentice's Path pays once, with the book list ({@code journey.PathReward}). */
+    SCHOOL_FUND(Kind.SOURCE, true),
 
     /** A wand after the first, from Ollivander's trial ({@code OllivanderPrice}). */
     WAND_PURCHASE(Kind.SINK, false),

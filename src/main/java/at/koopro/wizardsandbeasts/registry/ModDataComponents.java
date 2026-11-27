@@ -197,6 +197,18 @@ public class ModDataComponents {
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
                             .build());
 
+    /**
+     * Which textbook a {@code standard_book_of_spells} stack is: an id in {@code spell_books/}. A book of several
+     * spells (chapters), read whole and never spent; {@link #SPELL_SOURCE} stays the one-spell page form.
+     * Synchronised so the client can name the book (title and author are lang keys built from the id).
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> SPELL_BOOK =
+            DATA_COMPONENTS.register("spell_book", () ->
+                    DataComponentType.<String>builder()
+                            .persistent(com.mojang.serialization.Codec.STRING)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8)
+                            .build());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> BREW_ID =
             DATA_COMPONENTS.register("brew_id", () ->
                     DataComponentType.<String>builder()

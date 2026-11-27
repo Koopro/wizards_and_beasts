@@ -119,7 +119,7 @@ class ArchetypeDataTest {
         for (Archetype build : BUILDS) {
             Skill capstone = NODES.get(build.capstone());
             boolean mechanic = capstone.getEffects().stream().anyMatch(e ->
-                    e instanceof SkillEffect.UnlockAbility || e instanceof SkillEffect.LearnSpell
+                    e instanceof SkillEffect.UnlockAbility || e instanceof SkillEffect.SpellAptitude
                             || e instanceof SkillEffect.GrantAbility);
             boolean percentOnly = capstone.getEffects().stream().allMatch(e ->
                     e instanceof SkillEffect.GameplayBonus || e instanceof SkillEffect.CategoryDamageBonus

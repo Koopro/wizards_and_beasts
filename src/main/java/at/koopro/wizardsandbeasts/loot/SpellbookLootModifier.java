@@ -62,32 +62,51 @@ public class SpellbookLootModifier extends LootModifier {
 
     public static final MapCodec<SpellbookLootModifier> CODEC = RecordCodecBuilder.mapCodec(instance ->
             codecStart(instance).and(instance.group(
-                    Codec.STRING.listOf().fieldOf("spells").forGetter(m -> m.spells),
+                    Codec.STRING.listOf().optionalFieldOf("spells", List.of()).forGetter(m -> m.spells),
+                    Codec.STRING.listOf().optionalFieldOf("books", List.of()).forGetter(m -> m.books),
                     Codec.FLOAT.optionalFieldOf("chance", 1.0f).forGetter(m -> m.chance),
                     SOURCE_ITEM_CODEC.optionalFieldOf("item").forGetter(m -> m.item),
                     Codec.STRING.optionalFieldOf("place").forGetter(m -> m.place)
             )).apply(instance, SpellbookLootModifier::new));
 
     private final List<String> spells;
+    /**
+     * Whole textbooks ({@code spell_books/} ids) this place may hold beside, or instead of, single-spell sources.
+     * A roll picks one entry from spells and books together, so a pool of five spells and five books is an even
+     * draw. Added 2026-11-27 (spell acquisition remake).
+     */
+    private final List<String> books;
     private final float chance;
     private final Optional<Item> item;
     /** What kind of place this pool stands for ("village_library"), recorded in {@link SpellSites} when named. */
     private final Optional<String> place;
 
-    public SpellbookLootModifier(LootItemCondition[] conditions, List<String> spells, float chance,
+    public SpellbookLootModifier(LootItemCondition[] conditions, List<String> spells, List<String> books, float chance,
                                  Optional<Item> item, Optional<String> place) {
         super(conditions);
         this.spells = List.copyOf(spells);
+        this.books = List.copyOf(books);
         this.chance = chance;
         this.item = item;
         this.place = place;
-        place.ifPresent(p -> SpellSites.record(p, this.spells));
+        place.ifPresent(p -> SpellSites.record(p, this.spells, this.books));
     }
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         if (chance < 1.0f && context.getRandom().nextFloat() >= chance) {
             return generatedLoot;
+        }
+        int entries = spells.size() + books.size();
+        if (entries == 0) {
+            return generatedLoot;
+        }
+        if (!books.isEmpty() && context.getRandom().nextInt(entries) >= spells.size()) {
+            String book = books.get(context.getRandom().nextInt(books.size()));
+            if (at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.get(book) != null) {
+                generatedLoot.add(at.koopro.wizardsandbeasts.spell.learning.book.SpellBookStacks.of(book));
+                return generatedLoot;
+            }
         }
         Spell spell = rollSpell(context);
         if (spell == null) {

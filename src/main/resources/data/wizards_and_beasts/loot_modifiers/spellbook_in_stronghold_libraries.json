@@ -46,5 +46,14 @@
     "reducio",
     "expulso"
   ],
-  "chance": 0.7
+  "chance": 0.7,
+  "books": [
+    "standard_book_of_spells_grade_3",
+    "standard_book_of_spells_grade_4",
+    "standard_book_of_spells_grade_5",
+    "standard_book_of_spells_grade_6",
+    "standard_book_of_spells_grade_7",
+    "practical_defensive_magic",
+    "achievements_in_charming"
+  ]
 }

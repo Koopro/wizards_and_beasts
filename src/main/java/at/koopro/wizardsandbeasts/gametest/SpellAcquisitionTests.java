@@ -16,7 +16,8 @@ import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.check;
 import static at.koopro.wizardsandbeasts.gametest.WizardTestSupport.retire;
 
 /**
- * How spells are acquired (Phase 7): the starter charm every wand hand knows.
+ * How spells are acquired: from books only (remake, owner 2026-11-27). No starter charm; a textbook is read through
+ * and studied chapter by chapter; the skill web gives a knack for a spell, never the spell.
  */
 public final class SpellAcquisitionTests {
 
@@ -26,10 +27,14 @@ public final class SpellAcquisitionTests {
     private SpellAcquisitionTests() {}
 
     static void contribute(WizardTestSupport.Registrar tests) {
-        tests.add("spell_acquisition_starter_charm",
-                "spells: a wizard knows Lumos and Nox without a book, kept out of the web ledger so a respec cannot "
-                        + "take them; a goblin, who cannot use a wand, is taught nothing",
-                SpellAcquisitionTests::starterCharm);
+        tests.add("spell_acquisition_no_starter_charm",
+                "spells: a new witch or wizard knows no spell until they read one; Lumos is not given with the wand hand",
+                SpellAcquisitionTests::noStarterCharm);
+        tests.add("spell_acquisition_textbook_chapter_teaches",
+                "spells: The Dark Forces read through lists its chapters; studying Lumos opens its trace, a pass teaches "
+                        + "Lumos and Nox, puts Lumos on the empty wheel and keeps the book; a spell the book does not "
+                        + "hold cannot be studied from it",
+                SpellAcquisitionTests::textbookChapterTeaches);
         tests.add("spell_acquisition_books_to_copy_and_first_lessons",
                 "spells: blank spellbooks can be crafted and are sold at Ollivanders; First Lessons is earned by "
                         + "learning from a book, not by picking one up",
@@ -46,9 +51,10 @@ public final class SpellAcquisitionTests {
                 "spells: refusals are translatable sentences, not English strings; a goblin, who cannot use a wand, "
                         + "cannot learn a spell from a book",
                 SpellAcquisitionTests::refusalsAndWandless);
-        tests.add("spell_acquisition_respec_takes_the_companion",
-                "spells: Lumos learned in the web brings Nox into the web ledger, and a respec takes both back",
-                SpellAcquisitionTests::respecTakesTheCompanion);
+        tests.add("spell_acquisition_web_gives_aptitude_not_spells",
+                "spells: allocating a spell node teaches nothing and gives a knack for the spell; a respec forgets no "
+                        + "spell the old web once taught (grandfathered) and clears the old ledger",
+                SpellAcquisitionTests::webGivesAptitude);
     }
 
     private static void refusalsAndWandless(GameTestHelper helper) {
@@ -78,25 +84,72 @@ public final class SpellAcquisitionTests {
         }
     }
 
-    private static void respecTakesTheCompanion(GameTestHelper helper) {
-        ServerPlayer student = player(helper, "WebLumos");
+    private static void webGivesAptitude(GameTestHelper helper) {
+        ServerPlayer student = player(helper, "WebAptitude");
         try {
             var spells = student.getData(ModAttachments.SPELL_DATA.get());
             spells.forgetSpell(LUMOS);
             spells.forgetSpell(NOX);
             at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(student, "lumos_unlock");
-            var outcome = TraceTestSupport.pass(student);
-            check(helper, outcome == TraceOutcome.PASSED, () -> "setup: the Lumos lesson did not pass: " + outcome);
-            var ledger = student.getData(ModAttachments.SKILL_DATA.get()).getWebTaughtSpells();
-            check(helper, ledger.contains(LUMOS) && ledger.contains(NOX),
-                    () -> "the web ledger holds " + ledger + ", not Lumos and the Nox that came with it");
+            check(helper, !spells.knowsSpell(LUMOS), () -> "the Lumos node taught Lumos");
+            check(helper, SpellTraceService.active(student) == null, () -> "the Lumos node opened a lesson");
+            check(helper, at.koopro.wizardsandbeasts.skill.SkillSystemAPI.hasSpellAptitude(student, LUMOS),
+                    () -> "the Lumos node gave no knack for Lumos");
+
+            String stupefy = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wizards_and_beasts:stupefy").getId();
+            SpellLearningService.grantWithoutTrace(student, at.koopro.wizardsandbeasts.spell.core.Spells.byId(stupefy));
+            var skills = student.getData(ModAttachments.SKILL_DATA.get());
+            skills.recordWebTaughtSpell(stupefy); // as an old save's web ledger would hold it
             at.koopro.wizardsandbeasts.skill.SkillSystemAPI.getSkillData(student).setSkillLevel("lumos_unlock", 0);
-            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.revokeWebTaughtSpells(student);
-            check(helper, !spells.knowsSpell(LUMOS) && !spells.knowsSpell(NOX),
-                    () -> "a respec left Lumos or Nox behind");
+            int forgotten = at.koopro.wizardsandbeasts.skill.SkillSystemAPI.revokeWebTaughtSpells(student);
+            check(helper, forgotten == 0 && spells.knowsSpell(stupefy),
+                    () -> "a respec took back a spell the old web had taught");
+            check(helper, skills.getWebTaughtSpells().isEmpty(), () -> "the old web ledger was not cleared");
             helper.succeed();
         } finally {
             retire(helper, student);
+        }
+    }
+
+    private static void textbookChapterTeaches(GameTestHelper helper) {
+        ServerPlayer reader = player(helper, "TextbookReader");
+        try {
+            reader.getAbilities().instabuild = false;
+            HeritageAPI.commit(reader, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            PlayerSpellData spells = reader.getData(ModAttachments.SPELL_DATA.get());
+            spells.forgetSpell(LUMOS);
+            spells.forgetSpell(NOX);
+            for (int slot = 0; slot < PlayerSpellData.LOADOUT_SIZE; slot++) {
+                spells.setLoadoutSpell(slot, null);
+            }
+            var hand = net.minecraft.world.InteractionHand.MAIN_HAND;
+            var book = at.koopro.wizardsandbeasts.spell.learning.book.SpellBookStacks.of("the_dark_forces");
+            reader.setItemInHand(hand, book);
+            var chapters = at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.chapters(reader, book);
+            check(helper, chapters.size() == 3, () -> "The Dark Forces lists " + chapters.size() + " chapters, not three");
+
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.studyChapter(reader, hand, LUMOS);
+            check(helper, SpellTraceService.active(reader) == null, () -> "a chapter was studied without reading the book");
+
+            book.getItem().use(helper.getLevel(), reader, hand);
+            book.getItem().finishUsingItem(book, helper.getLevel(), reader);
+            check(helper, SpellTraceService.active(reader) == null, () -> "reading a textbook opened a trace by itself");
+            String stupefy = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wizards_and_beasts:stupefy").getId();
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.studyChapter(reader, hand, stupefy);
+            check(helper, SpellTraceService.active(reader) == null, () -> "a spell the book does not hold was studied from it");
+
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.studyChapter(reader, hand, LUMOS);
+            var outcome = TraceTestSupport.pass(reader);
+            check(helper, outcome == TraceOutcome.PASSED, () -> "the Lumos chapter's trace did not pass: " + outcome);
+            check(helper, spells.knowsSpell(LUMOS) && spells.knowsSpell(NOX), () -> "the chapter did not teach Lumos and Nox");
+            check(helper, LUMOS.equals(spells.getActiveSpellId()), () -> "Lumos is not on the empty wheel, selected");
+            check(helper, reader.getMainHandItem().getCount() == 1
+                            && at.koopro.wizardsandbeasts.spell.learning.SpellSource.bookIdOf(reader.getMainHandItem()) != null,
+                    () -> "the textbook was spent by a pass");
+            helper.succeed();
+        } finally {
+            SpellTraceService.cancel(reader);
+            retire(helper, reader);
         }
     }
 
@@ -131,27 +184,37 @@ public final class SpellAcquisitionTests {
     private static void cancelCostsTheWait(GameTestHelper helper) {
         ServerPlayer student = player(helper, "CancelledTrace");
         try {
-            String incendio = "wizards_and_beasts:incendio";
-            student.getData(ModAttachments.SPELL_DATA.get()).forgetSpell(incendio);
+            // Bombarda asks for a proficient Diffindo, which makes its gesture ADVANCED, with a retry wait.
+            String bombarda = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wizards_and_beasts:bombarda").getId();
+            String diffindo = at.koopro.wizardsandbeasts.spell.core.Spells.byId("wizards_and_beasts:diffindo").getId();
+            var data = student.getData(ModAttachments.SPELL_DATA.get());
+            data.forgetSpell(bombarda);
+            data.learnSpell(diffindo);
+            data.setSuccessfulHits(diffindo, 500);
             SpellTraceService.setSteadyHand(student, true);
             check(helper, SpellTraceService.steadyHand(student), () -> "the Steady hand setting was not kept");
 
-            at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(student, "incendio_unlock");
+            var hand = net.minecraft.world.InteractionHand.MAIN_HAND;
+            var book = at.koopro.wizardsandbeasts.spell.learning.book.SpellBookStacks.of("standard_book_of_spells_grade_3");
+            student.setItemInHand(hand, book);
+            book.getItem().finishUsingItem(book, helper.getLevel(), student);
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.studyChapter(student, hand, bombarda);
             var challenge = SpellTraceService.active(student);
             check(helper, challenge != null && challenge.difficulty().retryDelayTicks() > 0,
-                    () -> "setup: no advanced Incendio lesson opened: " + challenge);
+                    () -> "setup: no advanced Bombarda trace opened: " + challenge);
             SpellTraceService.setSteadyHand(student, false);
             check(helper, SpellTraceService.steadyHand(student), () -> "Steady hand changed in the middle of a trace");
 
             var outcome = SpellTraceService.submit(student, challenge.id(), false, new double[0]);
             check(helper, outcome == TraceOutcome.CANCELLED, () -> "expected CANCELLED, got " + outcome);
             long now = student.level().getGameTime();
-            check(helper, SpellTraceService.retryWait(student, incendio, now) > 0,
+            check(helper, SpellTraceService.retryWait(student, bombarda, now) > 0,
                     () -> "closing the trace cost nothing: a free reroll");
-            check(helper, student.getData(ModAttachments.TRACE_MEMORY.get()).waitFor(incendio, now) > 0,
+            check(helper, student.getData(ModAttachments.TRACE_MEMORY.get()).waitFor(bombarda, now) > 0,
                     () -> "the retry wait is not saved on the player, so a relog would clear it");
-            check(helper, SpellTraceService.openLesson(student, incendio) == null,
-                    () -> "the lesson re-opened inside its retry wait");
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.studyChapter(student, hand, bombarda);
+            check(helper, SpellTraceService.active(student) == null,
+                    () -> "the trace re-opened inside its retry wait");
             helper.succeed();
         } finally {
             SpellTraceService.cancel(student);
@@ -191,30 +254,18 @@ public final class SpellAcquisitionTests {
         }
     }
 
-    private static void starterCharm(GameTestHelper helper) {
-        ServerPlayer wizard = player(helper, "FirstLight");
-        ServerPlayer goblin = player(helper, "NoWandHand");
+    private static void noStarterCharm(GameTestHelper helper) {
+        ServerPlayer wizard = player(helper, "NoFirstLight");
         try {
-            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
-            HeritageAPI.commit(goblin, Heritage.GOBLIN, HeritageVariant.GOBLIN_COMMON);
-            wizard.getData(ModAttachments.SPELL_DATA.get()).forgetSpell(LUMOS);
-            wizard.getData(ModAttachments.SPELL_DATA.get()).forgetSpell(NOX);
-
-            var taught = SpellLearningService.teachStarter(wizard);
             PlayerSpellData spells = wizard.getData(ModAttachments.SPELL_DATA.get());
-            check(helper, spells.knowsSpell(LUMOS) && spells.knowsSpell(NOX),
-                    () -> "the wizard was not taught the starter charms: " + taught);
-            check(helper, !wizard.getData(ModAttachments.SKILL_DATA.get()).getWebTaughtSpells().contains(LUMOS),
-                    () -> "the starter charm went into the web ledger, where a respec would take it back");
-            check(helper, SpellLearningService.teachStarter(wizard).isEmpty(), () -> "the starter was taught twice");
-
-            check(helper, SpellLearningService.teachStarter(goblin).isEmpty()
-                            && !goblin.getData(ModAttachments.SPELL_DATA.get()).knowsSpell(LUMOS),
-                    () -> "a goblin, who cannot use a wand, was taught Lumos");
+            spells.forgetSpell(LUMOS);
+            spells.forgetSpell(NOX);
+            HeritageAPI.commit(wizard, Heritage.WIZARDKIND, HeritageVariant.HALF_BLOOD);
+            check(helper, !spells.knowsSpell(LUMOS) && !spells.knowsSpell(NOX),
+                    () -> "choosing a wand-holding heritage taught Lumos without a book");
             helper.succeed();
         } finally {
             retire(helper, wizard);
-            retire(helper, goblin);
         }
     }
 

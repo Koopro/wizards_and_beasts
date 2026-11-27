@@ -188,7 +188,7 @@ public final class ApprenticePathService {
 
     private static PathReward.Systems systems() {
         return new PathReward.Systems(ModuleManager.isEnabled(Module.HANDBOOK),
-                ModuleManager.isEnabled(Module.SKILL_TREES));
+                ModuleManager.isEnabled(Module.SKILL_TREES), ModuleManager.isEnabled(Module.GRINGOTTS));
     }
 
     /**
@@ -238,14 +238,17 @@ public final class ApprenticePathService {
         return false;
     }
 
-    /** The starter charms and their companions: known by every wand hand, so knowing them is not a find. */
+    /**
+     * The first light: Lumos and the Nox that comes with it, the first chapter of The Dark Forces. Knowing a spell
+     * beyond these is the step after ("a spell of your own"), as it was when Lumos was a starter charm.
+     */
+    static final String FIRST_LIGHT = "wizards_and_beasts:lumos";
+
     static Set<String> starterSet() {
         Set<String> out = new HashSet<>();
-        for (String id : SpellLearningService.STARTER_SPELLS) {
-            Spell spell = Spells.byId(id);
-            out.add(spell != null ? spell.getId() : id);
-            out.addAll(SpellLearningService.companionsOf(spell));
-        }
+        Spell spell = Spells.byId(FIRST_LIGHT);
+        out.add(spell != null ? spell.getId() : FIRST_LIGHT);
+        out.addAll(SpellLearningService.companionsOf(spell));
         return out;
     }
 
@@ -283,7 +286,13 @@ public final class ApprenticePathService {
         switch (part) {
             case HANDBOOK -> give(player, new ItemStack(MiscItemRegistry.MINISTRY_HANDBOOK.get()));
             case RECIPES -> unlockRecipes(player);
-            case STARTER_ON_WHEEL -> putStarterOnWheel(player);
+            case FIRST_YEAR_FUNDS -> at.koopro.wizardsandbeasts.currency.billing.GringottsBilling.credit(player,
+                    at.koopro.wizardsandbeasts.currency.billing.MoneyFlow.SCHOOL_FUND, PathReward.FIRST_YEAR_FUNDS_KNUTS);
+            case FIRST_YEAR_BOOKS -> {
+                for (String book : at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.FIRST_YEAR_LIST) {
+                    give(player, at.koopro.wizardsandbeasts.spell.learning.book.SpellBookStacks.of(book));
+                }
+            }
             case TWO_SICKLES -> give(player, new ItemStack(CurrencyItemRegistry.SICKLE.get(), 2));
             case SKILL_POINT -> {
                 SkillSystemAPI.awardPoints(player, 1);
@@ -314,39 +323,6 @@ public final class ApprenticePathService {
         }
         if (!keys.isEmpty()) {
             player.awardRecipesByKey(keys);
-        }
-    }
-
-    /**
-     * The starter charm on the first empty wheel slot, and selected if the selected slot is empty: with a wand in
-     * hand, the next step is then one release of the use key. A wheel the player has already filled is left alone.
-     */
-    static void putStarterOnWheel(ServerPlayer player) {
-        PlayerSpellData spells = player.getData(ModAttachments.SPELL_DATA.get());
-        for (String id : SpellLearningService.STARTER_SPELLS) {
-            Spell spell = Spells.byId(id);
-            if (spell == null || !spells.knowsSpell(spell.getId())) {
-                continue;
-            }
-            int empty = -1;
-            for (int slot = 0; slot < PlayerSpellData.LOADOUT_SIZE; slot++) {
-                String held = spells.getLoadoutSpell(slot);
-                if (spell.getId().equals(held)) {
-                    return;
-                }
-                if (held == null && empty < 0) {
-                    empty = slot;
-                }
-            }
-            if (empty < 0) {
-                return;
-            }
-            spells.setLoadoutSpell(empty, spell.getId());
-            if (spells.getLoadoutSpell(spells.getActiveSlot()) == null) {
-                spells.setActiveSlot(empty);
-            }
-            SpellDataSyncS2CPayload.syncToPlayer(player);
-            return;
         }
     }
 

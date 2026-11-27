@@ -213,7 +213,7 @@ public final class Skill {
     /** The spell this node teaches, or null. Also what an omitted {@link #getProvenance()} defers to. */
     public @Nullable String getTaughtSpellId() {
         for (SkillEffect effect : effects) {
-            if (effect instanceof SkillEffect.LearnSpell learn) {
+            if (effect instanceof SkillEffect.SpellAptitude learn) {
                 return learn.spellId();
             }
         }

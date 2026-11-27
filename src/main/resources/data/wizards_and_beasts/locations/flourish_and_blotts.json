@@ -1,0 +1,140 @@
+{
+  "_comment": "Flourish and Blotts, Diagon Alley: the bookseller (spell acquisition remake, owner 2026-11-27). The post in the shop (structure/diagon_alley/alley) keeps the bookseller role. Sells the spell textbooks (spell_books/); restricted books (the Prince's copy, Magick Moste Evile) are never on its shelves. Prices: first-year books 2 Sickles each, then by grade.",
+  "module": "gringotts",
+  "skin": "workbench",
+  "presence": {
+    "hosts": [
+      "wizards_and_beasts:settlement_npc"
+    ],
+    "host_role": "wizards_and_beasts:bookseller",
+    "host_reach": 6.0
+  },
+  "standing": {
+    "max_active": 2,
+    "board_size": 3,
+    "xp_rules": [
+      {
+        "when": {
+          "activity": "goods_traded",
+          "species": [
+            "wizards_and_beasts:bookseller"
+          ]
+        },
+        "xp": 6,
+        "daily_cap": 36
+      }
+    ],
+    "ranks": [
+      {
+        "id": "customer",
+        "xp": 0
+      },
+      {
+        "id": "regular",
+        "xp": 100
+      }
+    ],
+    "contracts": [
+      {
+        "id": "parchment",
+        "min_rank": "customer",
+        "duration_days": 4,
+        "cooldown_days": 2,
+        "weight": 10,
+        "objective": {
+          "type": "delivery",
+          "item": "wizards_and_beasts:parchment",
+          "count": 16
+        },
+        "reward": {
+          "knuts": 116,
+          "xp": 25
+        }
+      }
+    ]
+  },
+  "services": [],
+  "market": {
+    "half_life_days": 4.0,
+    "demand_bonus": 0.0,
+    "sells": [
+      {
+        "id": "standard_book_of_spells_grade_1",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_1",
+        "price_knuts": 58,
+        "depth": 16
+      },
+      {
+        "id": "the_dark_forces",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "the_dark_forces",
+        "price_knuts": 58,
+        "depth": 16
+      },
+      {
+        "id": "standard_book_of_spells_grade_2",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_2",
+        "price_knuts": 87,
+        "depth": 12
+      },
+      {
+        "id": "curses_and_counter_curses",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "curses_and_counter_curses",
+        "price_knuts": 87,
+        "depth": 12
+      },
+      {
+        "id": "standard_book_of_spells_grade_3",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_3",
+        "price_knuts": 116,
+        "depth": 10
+      },
+      {
+        "id": "standard_book_of_spells_grade_4",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_4",
+        "price_knuts": 116,
+        "depth": 10
+      },
+      {
+        "id": "standard_book_of_spells_grade_5",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_5",
+        "price_knuts": 145,
+        "depth": 8
+      },
+      {
+        "id": "standard_book_of_spells_grade_6",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_6",
+        "price_knuts": 203,
+        "depth": 8
+      },
+      {
+        "id": "standard_book_of_spells_grade_7",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "standard_book_of_spells_grade_7",
+        "price_knuts": 203,
+        "depth": 8
+      },
+      {
+        "id": "practical_defensive_magic",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "practical_defensive_magic",
+        "price_knuts": 145,
+        "depth": 6
+      },
+      {
+        "id": "achievements_in_charming",
+        "item": "wizards_and_beasts:standard_book_of_spells",
+        "spell_book": "achievements_in_charming",
+        "price_knuts": 174,
+        "depth": 8
+      }
+    ]
+  }
+}

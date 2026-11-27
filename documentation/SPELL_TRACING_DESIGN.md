@@ -3,6 +3,13 @@
 Status: **implemented on `feat/spell-tracing`** (2026-10-21). Source of the requirement: the 2026-10-21 master
 prompt §3.2 / §6 — *every newly learned spell passes a timed tracing challenge; no normal route bypasses it*.
 
+> **2026-11-27, spell acquisition remake:** books are the only learning route. A textbook (`spell_books/`) is
+> read through and opens a chapter screen; a chapter opens the trace. Skill-web nodes no longer teach (their
+> effect is `spell_aptitude`: one difficulty easier, faster practice, steadier casting), there is no starter
+> Lumos, and every spell traces one fixed path (`TracePathGenerator.spellSeed`, Leviosa = swish-and-flick).
+> The tables below describe the 2026-10-21 design; the web-node and Lumos rows are superseded.
+> Book catalogue and placement: `tasks/spell_books_catalogue_2026_11_27.md` (local) and `SpellBooks`.
+
 ## 1. What changes for the player
 
 Learning still starts where it always did:

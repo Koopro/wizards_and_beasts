@@ -2,7 +2,6 @@ package at.koopro.wizardsandbeasts.item.trinket;
 
 import at.koopro.wizardsandbeasts.ministry.law.MinistryFines;
 import at.koopro.wizardsandbeasts.registry.ModAttachments;
-import at.koopro.wizardsandbeasts.spell.learning.tracing.SpellLessons;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -21,7 +20,7 @@ import java.util.Optional;
  *   <li>{@link Forgotten#WHERE_YOU_FELL}: a death in the last five minutes, and the player has not been back
  *       within {@link #DEATH_RADIUS} blocks of it;</li>
  *   <li>{@link Forgotten#A_FINE}: a Ministry fine still outstanding;</li>
- *   <li>{@link Forgotten#LESSONS}: spells the player's training has paid for that they never learned.</li>
+ *   <li>{@link Forgotten#LESSONS}: no longer raised (the skill web stopped owing lessons, 2026-11-27); kept so an old stack still reads.</li>
  * </ul>
  * The first one found wins; the order is how urgent each is.
  */
@@ -41,10 +40,6 @@ public final class Remembrall {
         }
         if (MinistryFines.owed(player) > 0) {
             return Forgotten.A_FINE;
-        }
-        if (!SpellLessons.owed(player.getData(ModAttachments.SKILL_DATA.get()),
-                player.getData(ModAttachments.SPELL_DATA.get())).isEmpty()) {
-            return Forgotten.LESSONS;
         }
         return null;
     }

@@ -21,9 +21,8 @@
     "pitch": 1.5
   },
   "requirement": {
-    "type": "proficiency",
-    "prerequisiteId": "stupefy",
-    "minProficiency": "proficient"
+    "type": "knows",
+    "prerequisiteId": "lumos"
   },
   "vfx": {
     "trail": "arcane_mote",

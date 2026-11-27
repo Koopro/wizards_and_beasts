@@ -57,60 +57,13 @@ public final class SpellLearningService {
     private SpellLearningService() {
     }
 
-    /** Where a lesson came from. Decides the one side effect that differs between them. */
+    /**
+     * Where a lesson came from. Since 2026-11-27 there is one: a book (a textbook chapter, a page, notes). The skill
+     * web no longer teaches spells; its nodes give a knack for one instead ({@code SkillEffect.SpellAptitude}).
+     */
     public enum Route {
         /** A book, page or notes. Reading dark writing stains the reader ({@link SpellLawLearningGate}). */
-        BOOK,
-        /**
-         * A skill-web node. The node already charged its own {@code dark_study}, so no second stain;
-         * instead the spell goes in the web ledger, which is what lets a respec take it back.
-         */
-        WEB_LESSON
-    }
-
-    /**
-     * The charms every witch or wizard who can hold a wand knows before they find a single book: Lumos (and Nox with
-     * it). User decision (2026-10-23): the first spell was a lucky find -- six of the nine village books need another
-     * spell first -- and the cheapest web lesson cost all three starting points. Now the first light is free and the
-     * three points stay for the web.
-     */
-    public static final List<String> STARTER_SPELLS = List.of("wizards_and_beasts:lumos");
-
-    /**
-     * Teaches the {@link #STARTER_SPELLS} (and their companions) to a player whose heritage can use a wand and cast,
-     * if they do not know them yet. Not a lesson: nothing is traced, and nothing is written to the web ledger, so a
-     * respec never takes the starter charm away. Runs when a heritage is chosen and at every login (so saves from
-     * before this rule catch up).
-     *
-     * @return the spells newly taught, companions included
-     */
-    public static List<String> teachStarter(ServerPlayer player) {
-        PlayerHeritageData heritage = player.getData(ModAttachments.HERITAGE_DATA.get());
-        if (!heritage.canUseWand() || !heritage.canCast()) {
-            return List.of();
-        }
-        PlayerSpellData data = player.getData(ModAttachments.SPELL_DATA.get());
-        List<String> taught = new ArrayList<>();
-        for (String id : STARTER_SPELLS) {
-            Spell spell = Spells.byId(id);
-            if (spell == null || data.knowsSpell(spell.getId())) {
-                continue;
-            }
-            data.learnSpell(spell.getId());
-            taught.add(spell.getId());
-            for (String companionId : companionsOf(spell)) {
-                Spell companion = Spells.byId(companionId);
-                if (companion != null && !data.knowsSpell(companion.getId())) {
-                    data.learnSpell(companion.getId());
-                    taught.add(companion.getId());
-                }
-            }
-        }
-        if (!taught.isEmpty()) {
-            SpellDataSyncS2CPayload.syncToPlayer(player);
-            PlayerStatsSyncPayload.syncToPlayer(player);
-        }
-        return taught;
+        BOOK
     }
 
     /**
@@ -175,20 +128,30 @@ public final class SpellLearningService {
                 companionsTaught.add(companion.getId());
             }
         }
-        if (route == Route.BOOK) {
-            // Here rather than in validateLearnAttempt, which also answers the preview SpellSourceItem
-            // runs on the first right-click: a player who picks a book up, reads the refusal and puts it
-            // down again has not studied anything and must not be charged for it.
-            SpellLawLearningGate.stainForLearning(player, spell);
-            awardFirstLessons(player);
-        } else {
-            // The companions too: a respec that takes back Lumos takes back the Nox that came with it.
-            player.getData(ModAttachments.SKILL_DATA.get()).recordWebTaughtSpell(spell.getId());
-            companionsTaught.forEach(player.getData(ModAttachments.SKILL_DATA.get())::recordWebTaughtSpell);
-        }
+        // Here rather than in validateLearnAttempt, which also answers the preview SpellSourceItem
+        // runs on the first right-click: a player who picks a book up, reads the refusal and puts it
+        // down again has not studied anything and must not be charged for it.
+        SpellLawLearningGate.stainForLearning(player, spell);
+        awardFirstLessons(player);
+        putOnEmptyWheel(data, spell);
         SpellDataSyncS2CPayload.syncToPlayer(player);
         PlayerStatsSyncPayload.syncToPlayer(player); // KNOWLEDGE derives from spells learned
         return LearnResult.success(spell.getDisplayName());
+    }
+
+    /**
+     * A first spell goes straight on the wheel: when no slot holds a spell yet, {@code spell} takes the first slot
+     * and is selected, so a new student's next step is one release of the use key. Was the path's "Lumos on your
+     * wheel" reward while Lumos was a starter charm. A wheel with anything on it is left alone.
+     */
+    static void putOnEmptyWheel(PlayerSpellData data, Spell spell) {
+        for (int slot = 0; slot < PlayerSpellData.LOADOUT_SIZE; slot++) {
+            if (data.getLoadoutSpell(slot) != null) {
+                return;
+            }
+        }
+        data.setLoadoutSpell(0, spell.getId());
+        data.setActiveSlot(0);
     }
 
     /** "First Lessons": a spell read out of a book. Declared {@code minecraft:impossible}, awarded here only. */
@@ -234,18 +197,13 @@ public final class SpellLearningService {
         return out;
     }
 
-    /**
-     * Whether this player could learn this spell by {@code route} right now. A web lesson's node stands in
-     * for the spell's own progression gates ({@link SpellLearningEligibility#evaluate(ServerPlayer, Spell,
-     * PlayerSpellData, PlayerHeritageData, boolean)}).
-     */
+    /** Whether this player could learn this spell by {@code route} right now, without learning it. */
     public static LearnResult validateLearnAttempt(ServerPlayer player, @Nullable Spell spell, Route route) {
         if (spell == null) {
             return LearnResult.failure("Unknown spell.");
         }
         SpellLearningEligibility.Result eligibility = SpellLearningEligibility.evaluate(player, spell,
-                player.getData(ModAttachments.SPELL_DATA.get()), player.getData(ModAttachments.HERITAGE_DATA.get()),
-                route == Route.WEB_LESSON);
+                player.getData(ModAttachments.SPELL_DATA.get()), player.getData(ModAttachments.HERITAGE_DATA.get()));
         return eligibility.learnable() ? LearnResult.success("ok") : LearnResult.failure(eligibility.why());
     }
 

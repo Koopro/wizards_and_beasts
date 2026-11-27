@@ -360,7 +360,7 @@ public final class MarketTrade {
             return Result.UNKNOWN; // a datapack naming no real item: never charge for nothing
         }
         Item item = BuiltInRegistries.ITEM.getValue(good.item().get());
-        DealClass deal = MarketGoods.classify(good.item().get());
+        DealClass deal = MarketGoods.classifySold(good);
         refused = lawful(player, counter, deal);
         if (refused != null) {
             return refused;
@@ -420,7 +420,7 @@ public final class MarketTrade {
         while (left > 0) {
             // The item's default instance, so goods with default components (a broom's model) arrive whole.
             ItemStack stack = item.getDefaultInstance().copyWithCount(Math.min(left, perStack));
-            good.brew().ifPresent(brew -> stack.set(ModDataComponents.BREW_ID.get(), brew));
+            good.stamp(stack);
             left -= stack.getCount();
             at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(player, stack);
         }
@@ -451,7 +451,7 @@ public final class MarketTrade {
             case ITEM -> {
                 Item item = BuiltInRegistries.ITEM.getValue(good.item().orElseThrow());
                 ItemStack stack = new ItemStack(item);
-                good.brew().ifPresent(brew -> stack.set(ModDataComponents.BREW_ID.get(), brew));
+                good.stamp(stack);
                 yield stack.getHoverName();
             }
             case TREASURE -> Component.translatable("market.wizards_and_beasts.good.treasure."
@@ -520,7 +520,7 @@ public final class MarketTrade {
                     : onShelf > 0 ? Component.translatable("market.wizards_and_beasts.on_shelf", onShelf)
                     : left >= 0 ? Component.translatable("market.wizards_and_beasts.weekly_left", left, good.weeklyLimit())
                     : Component.empty();
-            DealClass deal = good.item().map(MarketGoods::classify).orElse(DealClass.LEGAL);
+            DealClass deal = MarketGoods.classifySold(good);
             int dragots = policy == DragotAcceptance.REFUSED ? 0
                     : DragotRates.dragotsToPay(policy.adjust(unit), Config.dragotGalleonRate);
             out.add(new MarketLine(good.id(), false, goodName(good, player), unit, left, unlocked && left != 0,
@@ -532,7 +532,7 @@ public final class MarketTrade {
     /** The class a board line shows for a good, before any particular stack is read. */
     static DealClass lineClass(MarketGood good, boolean outsideTheLaw) {
         return switch (good.kind()) {
-            case ITEM -> MarketGoods.classify(good.item().orElseThrow());
+            case ITEM -> MarketGoods.classifySold(good);
             case WAND -> MarketGood.STOLEN.equals(good.condition().orElse("")) ? DealClass.STOLEN : DealClass.LEGAL;
             case TREASURE -> outsideTheLaw ? DealClass.STOLEN : DealClass.LEGAL;
         };

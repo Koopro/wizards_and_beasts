@@ -51,5 +51,12 @@
     "rictusempra",
     "everte_statum"
   ],
-  "chance": 0.5
+  "chance": 0.5,
+  "books": [
+    "standard_book_of_spells_grade_6",
+    "standard_book_of_spells_grade_7",
+    "practical_defensive_magic",
+    "achievements_in_charming",
+    "half_blood_princes_potion_book"
+  ]
 }

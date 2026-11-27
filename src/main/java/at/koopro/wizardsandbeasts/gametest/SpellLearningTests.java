@@ -67,9 +67,10 @@ public final class SpellLearningTests {
         tests.add("spell_source_page_is_spent_only_on_success",
                 "torn page: destroyed by a passed trace, kept when a gate refuses it",
                 SpellLearningTests::pageIsSpentOnlyOnSuccess);
-        tests.add("skill_node_still_teaches_its_spell",
-                "skill web: a learn_spell keystone owes a traced lesson, and passing it grants and ledgers the spell",
-                SpellLearningTests::skillNodeStillTeaches);
+        tests.add("skill_node_gives_a_knack_not_the_spell",
+                "skill web: a spell node teaches nothing and opens no lesson; it gives a knack for its spell "
+                        + "(spell acquisition remake 2026-11-27: spells come from books)",
+                SpellLearningTests::skillNodeGivesAKnack);
         tests.add("spell_learn_command_still_works",
                 "command: /wandb magic spell learn teaches an admin a canonical id and refuses a non-admin",
                 SpellLearningTests::learnCommandStillWorks);
@@ -170,7 +171,7 @@ public final class SpellLearningTests {
      * way is never confiscated by one. Both halves are asserted, because a grant that skipped the
      * ledger would look correct here and quietly survive a respec forever.
      */
-    private static void skillNodeStillTeaches(GameTestHelper helper) {
+    private static void skillNodeGivesAKnack(GameTestHelper helper) {
         ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "Scholar");
         try {
             Spell spell = requireSpell(helper, SKILL_TAUGHT_SPELL);
@@ -181,16 +182,13 @@ public final class SpellLearningTests {
             at.koopro.wizardsandbeasts.skill.SkillSystemAPI.forceUnlock(player, SKILL_NODE);
 
             WizardTestSupport.check(helper, !data.knowsSpell(spell.getId()),
-                    () -> "allocating " + SKILL_NODE + " taught " + spell.getId() + " without a trace");
-            var outcome = TraceTestSupport.pass(player);
-            WizardTestSupport.check(helper, outcome == at.koopro.wizardsandbeasts.spell.learning.tracing.TraceOutcome.PASSED,
-                    () -> "allocating " + SKILL_NODE + " did not open a passable lesson: " + outcome);
-            WizardTestSupport.check(helper, data.knowsSpell(spell.getId()),
-                    () -> "passing the lesson did not teach " + spell.getId());
+                    () -> "allocating " + SKILL_NODE + " taught " + spell.getId());
             WizardTestSupport.check(helper,
-                    at.koopro.wizardsandbeasts.skill.SkillSystemAPI.getSkillData(player)
-                            .getWebTaughtSpells().contains(spell.getId()),
-                    () -> "the grant was not recorded in the web-taught ledger, so a respec could not revoke it");
+                    at.koopro.wizardsandbeasts.spell.learning.tracing.SpellTraceService.active(player) == null,
+                    () -> "allocating " + SKILL_NODE + " opened a lesson");
+            WizardTestSupport.check(helper,
+                    at.koopro.wizardsandbeasts.skill.SkillSystemAPI.hasSpellAptitude(player, spell.getId()),
+                    () -> "allocating " + SKILL_NODE + " gave no knack for " + spell.getId());
             helper.succeed();
         } finally {
             WizardTestSupport.retire(helper, player);

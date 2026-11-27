@@ -94,6 +94,19 @@ public final class SpellCommands {
                                         java.util.List.of(ctx.getSource().getPlayerOrException())))
                                 .then(sourceKind("book", false))
                                 .then(sourceKind("page", true))))
+                // Admin only: a whole textbook (spell_books/), read chapter by chapter.
+                .then(Commands.literal("textbook")
+                        .requires(WizardsAndBeastsCommandPermissions.ADMIN)
+                        .then(Commands.argument("book", StringArgumentType.word())
+                                .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                        at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.all().keySet().stream()
+                                                .map(net.minecraft.resources.Identifier::getPath), builder))
+                                .executes(ctx -> giveTextbook(ctx.getSource(), StringArgumentType.getString(ctx, "book"),
+                                        java.util.List.of(ctx.getSource().getPlayerOrException())))
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .executes(ctx -> giveTextbook(ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "book"),
+                                                EntityArgument.getPlayers(ctx, "targets"))))))
                 .then(Commands.literal("list")
                         .executes(ctx -> listSpells(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("info")
@@ -185,6 +198,21 @@ public final class SpellCommands {
             source.sendSuccess(() -> Component.literal("Note: " + suggestibleId(spell)
                     + " is not implemented yet, so reading it will be refused.").withStyle(ChatFormatting.YELLOW), false);
         }
+        return targets.size();
+    }
+
+    /** Hands each target the textbook {@code bookId}. Refuses an id with no {@code spell_books/} entry. */
+    private static int giveTextbook(CommandSourceStack source, String bookId, Collection<ServerPlayer> targets) {
+        if (at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.get(bookId) == null) {
+            source.sendFailure(Component.literal("Unknown spell book: " + bookId));
+            return 0;
+        }
+        for (ServerPlayer target : targets) {
+            at.koopro.wizardsandbeasts.util.InventoryHandover.giveOrDrop(target,
+                    at.koopro.wizardsandbeasts.spell.learning.book.SpellBookStacks.of(bookId));
+        }
+        source.sendSuccess(() -> Component.literal("Gave " + bookId + " to " + targets.size()
+                + " player(s). Hold right-click to read, then pick a chapter."), true);
         return targets.size();
     }
 

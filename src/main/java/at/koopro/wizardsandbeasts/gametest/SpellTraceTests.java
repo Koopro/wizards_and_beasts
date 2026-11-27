@@ -49,8 +49,6 @@ public final class SpellTraceTests {
                 SpellTraceTests::gatesRerun);
         tests.add("spell_trace_lumos_teaches_nox",
                 "tracing: one Lumos trace teaches its companion Nox", SpellTraceTests::companion);
-        tests.add("spell_trace_lesson_refunded_mid_trace_owes_nothing",
-                "tracing: a node refunded during its lesson cannot be passed into a spell", SpellTraceTests::lessonRefunded);
         tests.add("spell_learning_mastery_gate_reads_canonical_hits",
                 "learning: a bare masterySpellId (episkey -> reparo) counts the canonical hit ledger",
                 SpellTraceTests::masteryGateCanonical);
@@ -206,23 +204,6 @@ public final class SpellTraceTests {
             TraceOutcome outcome = TraceTestSupport.pass(player);
             WizardTestSupport.check(helper, outcome == TraceOutcome.PASSED, () -> "Lumos trace: " + outcome);
             WizardTestSupport.check(helper, spells(player).knowsSpell(nox.getId()), () -> "Lumos did not teach Nox");
-            helper.succeed();
-        } finally {
-            WizardTestSupport.retire(helper, player);
-        }
-    }
-
-    private static void lessonRefunded(GameTestHelper helper) {
-        ServerPlayer player = WizardTestSupport.placeMockPlayer(helper, "TraceRefund");
-        try {
-            Spell spell = Spells.byId(NODE_SPELL);
-            SkillSystemAPI.forceUnlock(player, NODE);
-            WizardTestSupport.check(helper, SpellTraceService.active(player) != null, () -> "allocation opened no lesson");
-            SkillSystemAPI.getSkillData(player).setSkillLevel(NODE, 0);
-
-            TraceOutcome outcome = TraceTestSupport.pass(player);
-            WizardTestSupport.check(helper, outcome == TraceOutcome.SOURCE_GONE, () -> "expected SOURCE_GONE, got " + outcome);
-            WizardTestSupport.check(helper, !spells(player).knowsSpell(spell.getId()), () -> "a refunded node's lesson taught");
             helper.succeed();
         } finally {
             WizardTestSupport.retire(helper, player);

@@ -83,7 +83,8 @@ public class SpellSourceItem extends Item {
             refuse(player, level, Component.translatable("item.wizards_and_beasts.spell_source.blank"));
             return InteractionResult.FAIL;
         }
-        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+        // A textbook is read whole whatever the reader knows: its page says which chapters are open to them.
+        if (SpellSource.bookIdOf(stack) == null && !level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
             Spell spell = SpellSource.spellOf(stack);
             SpellLearningService.LearnResult check = SpellLearningService.validateLearnAttempt(serverPlayer, spell);
             if (!check.success()) {
@@ -119,7 +120,9 @@ public class SpellSourceItem extends Item {
             return stack;
         }
         InteractionHand hand = player.getUsedItemHand();
-        if (SpellSource.spellOf(stack) != null) {
+        if (SpellSource.bookIdOf(stack) != null) {
+            at.koopro.wizardsandbeasts.spell.learning.book.SpellBookService.open(player, hand);
+        } else if (SpellSource.spellOf(stack) != null) {
             SpellTraceService.openFromBook(player, hand);
         }
         return stack;
@@ -140,6 +143,10 @@ public class SpellSourceItem extends Item {
      */
     @Override
     public Component getName(ItemStack stack) {
+        String bookId = SpellSource.bookIdOf(stack);
+        if (bookId != null) {
+            return bookTitle(bookId);
+        }
         String spellId = SpellSource.spellIdOf(stack);
         if (spellId == null) {
             return super.getName(stack);
@@ -156,10 +163,25 @@ public class SpellSourceItem extends Item {
                     .withStyle(ChatFormatting.DARK_GRAY));
             return;
         }
+        String bookId = SpellSource.bookIdOf(stack);
+        if (bookId != null) {
+            String path = at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.path(bookId);
+            tooltipAdder.accept(Component.translatableWithFallback("spell_book.wizards_and_beasts." + path + ".author", "")
+                    .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            tooltipAdder.accept(Component.translatable("item.wizards_and_beasts.spell_book.tooltip")
+                    .withStyle(ChatFormatting.GRAY));
+            return;
+        }
         tooltipAdder.accept(Component.translatable(spentOnRead
                         ? "item.wizards_and_beasts.spell_source.tooltip.spent"
                         : "item.wizards_and_beasts.spell_source.tooltip")
                 .withStyle(ChatFormatting.GRAY));
+    }
+
+    /** A textbook's title, from its id alone (lang key {@code spell_book.wizards_and_beasts.<path>.title}). */
+    public static Component bookTitle(String bookId) {
+        String path = at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.path(bookId);
+        return Component.translatableWithFallback("spell_book.wizards_and_beasts." + path + ".title", path);
     }
 
     /** Told on the action bar rather than refused silently, so a wasted click explains itself. */

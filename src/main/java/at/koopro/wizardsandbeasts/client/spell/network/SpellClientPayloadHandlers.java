@@ -132,6 +132,12 @@ public final class SpellClientPayloadHandlers {
         ctx.enqueueWork(() -> at.koopro.wizardsandbeasts.client.spell.trace.SpellTraceClient.open(pkt));
     }
 
+    /** Opens (or refreshes) the textbook screen. */
+    public static void handleSpellBookOpen(at.koopro.wizardsandbeasts.network.spell.SpellBookOpenS2CPayload pkt,
+                                           IPayloadContext ctx) {
+        ctx.enqueueWork(() -> at.koopro.wizardsandbeasts.client.spell.book.SpellBookScreen.show(pkt));
+    }
+
     /** Hands the server's verdict to an open tracing screen. */
     public static void handleSpellTraceResult(at.koopro.wizardsandbeasts.network.spell.SpellTraceResultS2CPayload pkt,
                                               IPayloadContext ctx) {

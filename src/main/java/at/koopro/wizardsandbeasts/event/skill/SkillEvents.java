@@ -102,20 +102,8 @@ public class SkillEvents {
         PlayerFeedback.toast(player, NoticeKind.UNLOCK,
                 Component.translatable(L + "heritage_award.title"),
                 Component.translatable(L + "heritage_award.body", 3));
-        // Lumos comes with a wand hand: the first spell is not a lucky find (SpellLearningService.STARTER_SPELLS).
-        if (!at.koopro.wizardsandbeasts.spell.learning.SpellLearningService.teachStarter(player).isEmpty()) {
-            PlayerFeedback.toast(player, NoticeKind.UNLOCK,
-                    Component.translatable("spell.wizards_and_beasts.starter.title"),
-                    Component.translatable("spell.wizards_and_beasts.starter.body"));
-        }
-    }
-
-    /** Saves from before the starter rule, and heritages changed since, catch up at login. */
-    @SubscribeEvent
-    public static void onLoginTeachStarter(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            at.koopro.wizardsandbeasts.spell.learning.SpellLearningService.teachStarter(player);
-        }
+        // No spell comes with the wand hand (owner 2026-11-27): the first spells are read out of the first-year
+        // books, which the Apprentice's Path hands over as a book list (journey/ApprenticePathService).
     }
 
     private static final String L = "skill.wizards_and_beasts.award.";

@@ -550,7 +550,7 @@ public final class SkillCommands {
 
     private static String describeEffect(SkillEffect effect) {
         return switch (effect) {
-            case SkillEffect.LearnSpell e -> "Spell study path: " + e.spellId();
+            case SkillEffect.SpellAptitude e -> "Spell study path: " + e.spellId();
             case SkillEffect.DarkStudy e ->
                     String.format("+%.0f dark corruption per level, on allocation", e.corruption());
             case SkillEffect.SpellDamageBonus e ->

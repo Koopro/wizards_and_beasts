@@ -59,10 +59,23 @@ class SpellbookLootPoolTest {
 
     private static List<String> poolOf(Path file) throws IOException {
         JsonObject json = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-        JsonArray spells = json.getAsJsonArray("spells");
         List<String> ids = new ArrayList<>();
-        for (JsonElement element : spells) {
-            ids.add(element.getAsString());
+        if (json.has("spells")) {
+            for (JsonElement element : json.getAsJsonArray("spells")) {
+                ids.add(element.getAsString());
+            }
+        }
+        return ids;
+    }
+
+    /** The whole textbooks a pool may hold (checked against the book files by {@code SpellBookCatalogueTest}). */
+    private static List<String> booksOf(Path file) throws IOException {
+        JsonObject json = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+        List<String> ids = new ArrayList<>();
+        if (json.has("books")) {
+            for (JsonElement element : json.getAsJsonArray("books")) {
+                ids.add(element.getAsString());
+            }
         }
         return ids;
     }
@@ -82,7 +95,8 @@ class SpellbookLootPoolTest {
 
         for (Path file : modifiers) {
             List<String> pool = poolOf(file);
-            assertFalse(pool.isEmpty(), file.getFileName() + " has an empty pool and can never drop a book");
+            assertFalse(pool.isEmpty() && booksOf(file).isEmpty(),
+                    file.getFileName() + " has an empty pool and can never drop a book");
             for (String id : pool) {
                 JsonObject definition = definitionOf(id);
                 if (definition == null) {
@@ -131,10 +145,10 @@ class SpellbookLootPoolTest {
     }
 
     /**
-     * The beginner's shelves (village libraries, torn pages in ruins) hold only what someone who knows nothing but the
-     * starter charms can read: no prerequisite, or a prerequisite that is a starter charm. Before 2026-10-23 six of
-     * the nine village books asked for a spell a new player could not have, and the Nox book could never be read at
-     * all. Lumos and Nox themselves are not on them: everyone who can hold a wand knows them.
+     * The beginner's shelves (village libraries, torn pages in ruins) hold only what a beginner can read: no
+     * prerequisite, or only Lumos (first chapter of The Dark Forces). Before 2026-10-23 six of the nine village books
+     * asked for a spell a new player could not have. Since 2026-11-27 nobody starts knowing Lumos, so it may be on
+     * these shelves itself.
      */
     @Test
     void beginnerShelvesHoldOnlyWhatABeginnerCanRead() throws IOException {
@@ -142,7 +156,6 @@ class SpellbookLootPoolTest {
         for (String shelf : List.of("spellbook_in_village_libraries", "spell_pages_in_ruins")) {
             for (String id : poolOf(MODIFIERS.resolve(shelf + ".json"))) {
                 String bare = id.replace("wizards_and_beasts:", "");
-                assertFalse(starters.contains(bare), shelf + ": '" + bare + "' is a starter charm everyone knows");
                 JsonObject definition = definitionOf(bare);
                 assertTrue(definition != null, shelf + ": '" + bare + "' has no JSON definition to check");
                 JsonObject requirement = definition.has("requirement") ? definition.getAsJsonObject("requirement")

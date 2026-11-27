@@ -124,6 +124,18 @@ public enum TraceDifficulty {
         return templates;
     }
 
+    /**
+     * One step easier, for a student with a knack for the spell (skill-web {@code spell_aptitude}). Dark magic does
+     * not get easier: a knack for a curse steadies it in the hand but not on the page.
+     */
+    public TraceDifficulty easier() {
+        return switch (this) {
+            case BASIC, INTERMEDIATE -> BASIC;
+            case ADVANCED, MASTERY -> this == MASTERY ? ADVANCED : INTERMEDIATE;
+            case DARK -> DARK;
+        };
+    }
+
     /** By ordinal, clamped: safe on a value read off the wire. */
     public static TraceDifficulty byOrdinal(int ordinal) {
         TraceDifficulty[] all = values();

@@ -126,6 +126,9 @@ public final class SkillSystemAPI {
         if (steadiness > 0f) {
             stack.addMisfireChance(-steadiness, "skill_web");
         }
+        if (spell != null && hasSpellAptitude(player, spell.getId())) {
+            stack.addMisfireChance(-SkillEffect.SpellAptitude.STEADINESS, "spell_aptitude");
+        }
         // The Dark Arts web buys control over dangerous magic and nothing else: this reaches a curse and no
         // other category, so studying the Dark Arts makes a curse behave, never makes it hit harder.
         if (spell != null && spell.getCategory() == at.koopro.wizardsandbeasts.spell.core.SpellCategory.DARK_ARTS) {
@@ -134,6 +137,11 @@ public final class SkillSystemAPI {
                 stack.addMisfireChance(-control, "dark_control");
             }
         }
+    }
+
+    /** Whether the player has a knack for {@code spellId} (registered id) from an allocated web node. */
+    public static boolean hasSpellAptitude(ServerPlayer player, String spellId) {
+        return getCache(player).hasAptitude(spellId);
     }
 
     // ── Validation ──
@@ -198,7 +206,7 @@ public final class SkillSystemAPI {
         // someone who cannot use a wand -- would take the points and owe a lesson that can never be passed. A spell
         // they already know is fine: the node is still the path on (the starter Lumos).
         for (SkillEffect effect : skill.getEffects()) {
-            if (effect instanceof SkillEffect.LearnSpell learn && !spellCanEverBeLearned(player, learn.spellId())) {
+            if (effect instanceof SkillEffect.SpellAptitude learn && !spellCanEverBeLearned(player, learn.spellId())) {
                 return new UnlockCheck(false, "spell_unlearnable");
             }
         }
@@ -407,21 +415,14 @@ public final class SkillSystemAPI {
      * <p>Most effects are derived: abilities recompute from allocated nodes through
      * {@link at.koopro.wizardsandbeasts.ability.grant.AbilityGrantService}, attributes are re-applied
      * wholesale by {@link SkillAttributeApplicator}, and the multiplier maps are rebuilt from the
-     * cache. Spell knowledge is the exception, because it lives in {@code PlayerSpellData} as one flat
-     * set shared with the books and has no source column to derive from. A node's spell is not written
-     * here: the node opens a traced lesson, and {@code SpellLearningService.commit} records the spell in
-     * the web ledger once it is passed — which is what {@link #revokeWebTaughtSpells} acts on.
+     * cache. A node never teaches a spell (books do, since 2026-11-27); its {@link SkillEffect.SpellAptitude} is
+     * read from the cache like every other derived effect.
      */
     private static void applyImmediateEffects(ServerPlayer player, Skill skill) {
         for (SkillEffect effect : skill.getEffects()) {
             if (effect instanceof SkillEffect.UnlockAbility) {
                 // Ability availability is derived from unlocked skill levels via SkillEffectCache.
                 // Keep this branch explicit so unlock effects remain discoverable in one place.
-            } else if (effect instanceof SkillEffect.LearnSpell learn) {
-                // The node owes a lesson; the spell is learned when its trace is passed. Opened now so
-                // the allocation and the lesson read as one act. If it is refused, closed or failed,
-                // the lesson stays owed (SpellLessons) and a click on the node opens it again.
-                at.koopro.wizardsandbeasts.spell.learning.tracing.SpellTraceService.openLesson(player, learn.spellId());
             } else if (effect instanceof SkillEffect.DarkStudy study) {
                 // The consequence half of the Dark Arts web. Accrued at allocation and never given back.
                 at.koopro.wizardsandbeasts.corruption.DarkCorruptionService.accrue(player, study.corruption());
@@ -431,41 +432,19 @@ public final class SkillSystemAPI {
     }
 
     /**
-     * Revokes every web-taught spell whose granting node is no longer allocated. Called from the
-     * respec path; safe to call at any time, since a still-allocated node simply re-asserts its spell.
+     * Was: revoked every web-taught spell whose node was no longer allocated. Since the web stopped teaching
+     * spells (2026-11-27) a respec forgets none; kept as the respec path's one call so the old ledger is cleared.
      *
-     * @return the number of spells forgotten
+     * @return always 0
      */
     public static int revokeWebTaughtSpells(ServerPlayer player) {
+        // Owner 2026-11-27: the web no longer teaches spells, and spells it once taught are kept (grandfathered).
+        // A respec forgets nothing; the old ledger is cleared so nothing later reads it as "taught by a node".
         PlayerSkillData data = getSkillData(player);
-        java.util.Set<String> stillGranted = new java.util.HashSet<>();
-        for (String nodeId : data.getUnlockedSkills().keySet()) {
-            Skill node = SkillTrees.byId(nodeId);
-            if (node == null) {
-                continue;
-            }
-            for (SkillEffect effect : node.getEffects()) {
-                if (effect instanceof SkillEffect.LearnSpell learn) {
-                    var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(learn.spellId());
-                    stillGranted.add(spell != null ? spell.getId() : learn.spellId());
-                }
-            }
-        }
-
-        var spellData = player.getData(ModAttachments.SPELL_DATA.get());
-        int forgotten = 0;
         for (String spellId : java.util.List.copyOf(data.getWebTaughtSpells())) {
-            if (stillGranted.contains(spellId)) {
-                continue;
-            }
-            spellData.forgetSpell(spellId);
             data.forgetWebTaughtSpell(spellId);
-            forgotten++;
         }
-        if (forgotten > 0) {
-            at.koopro.wizardsandbeasts.spell.learning.SpellLearningService.syncAfterGrant(player);
-        }
-        return forgotten;
+        return 0;
     }
 
     public static float getCategoryDamageMultiplier(ServerPlayer player, SpellCategory category) {

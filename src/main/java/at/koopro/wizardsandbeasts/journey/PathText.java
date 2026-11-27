@@ -26,7 +26,6 @@ public final class PathText {
         return switch (step) {
             case FIRST_LIGHT -> Component.translatable(step.hintKey(), key("spell_wheel"),
                     Component.keybind("key.use"));
-            case OWN_SPELL -> Component.translatable(step.hintKey(), key("skill_menu"));
             case PRACTICE -> Component.translatable(step.hintKey(), Proficiency.PROFICIENT.getCastsRequired(),
                     SpellPractice.DAILY_PRACTICE);
             case FIELD_STUDY -> Component.translatable(step.hintKey(), key("character_sheet"));
