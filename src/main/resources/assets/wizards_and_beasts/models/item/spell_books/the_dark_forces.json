@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wizards_and_beasts:item/spell_books/the_dark_forces"
+  }
+}

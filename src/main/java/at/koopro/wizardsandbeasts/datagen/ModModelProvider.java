@@ -318,9 +318,26 @@ public class ModModelProvider extends ModelProvider {
             return;
         }
         itemModels.itemModelOutput.accept(item, ItemModelGenerators.createFlatModelDispatch(
-                ItemModelUtils.plainModel(icon),
+                "standard_book_of_spells".equals(id) ? spellBookCovers(icon) : ItemModelUtils.plainModel(icon),
                 ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(item, "_held"),
                         new GeckolibItemSpecialRenderer.Unbaked())));
+    }
+
+    /**
+     * A spell textbook's cover in slots: one flat model per shipped book ({@code models/item/spell_books/<id>},
+     * hand-written in src/main, drawn by {@code tools/spell_book_icons.py}), chosen by the stack's {@code spell_book}
+     * component; a page with one spell, or a pack's own book, keeps the plain Standard Book of Spells icon.
+     */
+    private static net.minecraft.client.renderer.item.ItemModel.Unbaked spellBookCovers(Identifier fallback) {
+        java.util.List<net.minecraft.client.renderer.item.SelectItemModel.SwitchCase<String>> cases = new java.util.ArrayList<>();
+        for (String book : at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.SHIPPED) {
+            cases.add(ItemModelUtils.when(at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.canonical(book),
+                    ItemModelUtils.plainModel(Identifier.fromNamespaceAndPath(
+                            at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID, "item/spell_books/" + book))));
+        }
+        return ItemModelUtils.select(new net.minecraft.client.renderer.item.properties.select.ComponentContents<>(
+                at.koopro.wizardsandbeasts.registry.ModDataComponents.SPELL_BOOK.get()),
+                ItemModelUtils.plainModel(fallback), cases);
     }
 
     /**
