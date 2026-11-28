@@ -48,6 +48,19 @@ public interface AnimatedItem extends GeoItem {
     /** The clip {@link #clipFor} chose, carried from the renderer to the controller. */
     DataTicket<String> CLIP = DataTicket.create("wizards_and_beasts_item_clip", String.class);
 
+    /** The texture {@link #textureFor} chose, carried from the stack to the renderer. */
+    DataTicket<net.minecraft.resources.Identifier> TEXTURE =
+            DataTicket.create("wizards_and_beasts_item_texture", net.minecraft.resources.Identifier.class);
+
+    /**
+     * The in-hand model's texture for this stack, or {@code null} for the item's own
+     * ({@code textures/item/model/<id>.png}). For one item that wears different covers by component -- the spell
+     * textbooks. Read only the stack, as {@link #clipFor} does.
+     */
+    default net.minecraft.resources.@org.jspecify.annotations.Nullable Identifier textureFor(ItemStack stack) {
+        return null;
+    }
+
     /**
      * Which looping clip this stack should be playing. Called on the client each frame the item is
      * drawn; read only the stack, never the world, so every copy of the item shows its own state.

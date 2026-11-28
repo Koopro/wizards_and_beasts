@@ -196,5 +196,23 @@ public class SpellSourceItem extends Item {
         public Animated(Properties properties) {
             super(properties);
         }
+
+        /**
+         * A shipped textbook wears its own cover in hand ({@code textures/item/model/spell_books/<id>.png}, drawn by
+         * {@code tools/spell_book_icons.py} on the book's UV layout); a page or a pack's own book keeps the default.
+         */
+        @Override
+        public net.minecraft.resources.@Nullable Identifier textureFor(ItemStack stack) {
+            String book = SpellSource.bookIdOf(stack);
+            if (book == null) {
+                return null;
+            }
+            String path = at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.path(book);
+            return at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.SHIPPED.contains(path)
+                    ? net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                            at.koopro.wizardsandbeasts.WizardsAndBeastsMod.MODID,
+                            "textures/item/model/spell_books/" + path + ".png")
+                    : null;
+        }
     }
 }
