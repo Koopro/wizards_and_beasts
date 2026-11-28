@@ -136,8 +136,11 @@ class ApprenticePathTest {
 
     @Test
     void aSwitchedOffSystemIsNeitherPaidNorPromised() {
-        var all = new PathReward.Systems(true, true);
-        var none = new PathReward.Systems(false, false);
+        var all = new PathReward.Systems(true, true, true);
+        var none = new PathReward.Systems(false, false, false);
+        // The book list: money for Flourish and Blotts when there is a shop, the books themselves when there is not.
+        assertEquals(List.of(PathReward.FIRST_YEAR_FUNDS), PathReward.of(PathStep.WAND, all));
+        assertEquals(List.of(PathReward.FIRST_YEAR_BOOKS), PathReward.of(PathStep.WAND, none));
         assertEquals(List.of(PathReward.HANDBOOK, PathReward.RECIPES), PathReward.of(PathStep.ARRIVE, all));
         assertEquals(List.of(PathReward.RECIPES), PathReward.of(PathStep.ARRIVE, none));
         assertEquals(List.of(PathReward.SKILL_POINT, PathReward.DUELLING_DUMMY), PathReward.of(PathStep.OWN_SPELL, all));

@@ -72,7 +72,9 @@ class NpcRoleDataTest {
     void theFirstSettlementIsStaffedAndKnockturnHasItsFence() {
         assertEquals(Set.of("keeper", "wandmaker", "apothecary", "scholar", "teller", "borgin", "robemaker", "jokeshop",
                         // Hogsmeade's keepers (H3, 2026-11-25)
-                        "honeydukes", "three_broomsticks", "hogs_head", "zonkos", "scrivenshafts"),
+                        "honeydukes", "three_broomsticks", "hogs_head", "zonkos", "scrivenshafts",
+                        // Flourish and Blotts (spell acquisition remake, 2026-11-27)
+                        "bookseller"),
                 ALL.keySet());
     }
 

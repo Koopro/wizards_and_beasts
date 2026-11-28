@@ -1,0 +1,15 @@
+{
+  "type": "wizards_and_beasts:spellbook",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "wizards_and_beasts:chests/gaunt_shack"
+    }
+  ],
+  "place": "gaunt_shack",
+  "books": [
+    "magick_moste_evile"
+  ],
+  "chance": 0.5,
+  "_comment": "The Gaunts' hovel: a family of Dark wizards kept darker books than any shop will sell (spell acquisition remake 2026-11-27)."
+}

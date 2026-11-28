@@ -181,29 +181,12 @@ public final class SkillRespecService {
         return (int) RespecPricing.fullRespecFee(data.isFreeRespecAvailable(), Config.skillRespecCostKnuts, billingOn());
     }
 
-    /** Web-taught spells no node in {@code after} would still grant: what the player will forget. */
+    /**
+     * What a respec makes the player forget: nothing since 2026-11-27, when the web stopped teaching spells and the
+     * ones it had taught were kept. The quote still carries the list so the screen's wording needs no change.
+     */
     private static List<String> forgotten(PlayerSkillData data, Map<String, Integer> after) {
-        Set<String> stillGranted = new HashSet<>();
-        for (String nodeId : after.keySet()) {
-            Skill node = SkillTrees.byId(nodeId);
-            if (node == null) {
-                continue;
-            }
-            for (SkillEffect effect : node.getEffects()) {
-                if (effect instanceof SkillEffect.LearnSpell learn) {
-                    var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(learn.spellId());
-                    stillGranted.add(spell != null ? spell.getId() : learn.spellId());
-                }
-            }
-        }
-        List<String> out = new ArrayList<>();
-        for (String spellId : data.getWebTaughtSpells()) {
-            if (!stillGranted.contains(spellId)) {
-                out.add(spellId);
-            }
-        }
-        out.sort(null);
-        return out;
+        return List.of();
     }
 
     private static float darkStudy(Skill skill, int levels) {

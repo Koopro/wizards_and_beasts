@@ -37,6 +37,7 @@
   ],
   "place": "village_library",
   "spells": [
+    "lumos",
     "stupefy",
     "alohomora",
     "wingardium_leviosa",
@@ -49,5 +50,11 @@
     "engorgio"
   ],
   "chance": 0.35,
-  "_comment": "A beginner's shelf: every spell here can be read by someone who knows only Lumos and Nox (the charms every wand hand starts with, SpellLearningService.STARTER_SPELLS). SpellbookLootPoolTest pins that. Lumos and Nox themselves are not here: everybody knows them."
+  "_comment": "A beginner's shelf: a whole first- or second-year textbook, or a copy of one beginner's spell. Every loose spell here needs nothing, or only Lumos, which is itself here (SpellbookLootPoolTest). Spell acquisition remake 2026-11-27: no spell is known before a book is read.",
+  "books": [
+    "standard_book_of_spells_grade_1",
+    "the_dark_forces",
+    "standard_book_of_spells_grade_2",
+    "curses_and_counter_curses"
+  ]
 }

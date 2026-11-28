@@ -369,7 +369,7 @@ class SkillNodeJsonTest {
      * only find that out by spending four to six points. Naming is a promise here, so it is checked.
      */
     @Test
-    void everyUnlockNodeTeachesItsSpell() {
+    void everyUnlockNodeGivesAKnackForItsSpell() {
         List<String> problems = new ArrayList<>();
         for (Skill skill : BY_ID.values()) {
             if (!skill.getId().endsWith("_unlock")) continue;
@@ -377,10 +377,10 @@ class SkillNodeJsonTest {
             // A prefix match, not equality, because a node may be named for the incantation's first
             // word: `wingardium_unlock` teaches `wingardium_leviosa`.
             boolean teaches = skill.getEffects().stream()
-                    .anyMatch(e -> e instanceof SkillEffect.LearnSpell learn && learn.spellId().startsWith(named));
+                    .anyMatch(e -> e instanceof SkillEffect.SpellAptitude learn && learn.spellId().startsWith(named));
             if (!teaches) {
-                problems.add(skill.getId() + " does not teach '" + named
-                        + "' — rename the node or give it a learn_spell effect");
+                problems.add(skill.getId() + " gives no knack for '" + named
+                        + "' — rename the node or give it a spell_aptitude effect");
             }
         }
         assertTrue(problems.isEmpty(), String.join("\n", problems));
@@ -509,9 +509,9 @@ class SkillNodeJsonTest {
         List<String> problems = new ArrayList<>();
         for (Skill skill : BY_ID.values()) {
             for (SkillEffect effect : skill.getEffects()) {
-                if (effect instanceof SkillEffect.LearnSpell learn
+                if (effect instanceof SkillEffect.SpellAptitude learn
                         && !implemented.contains(learn.spellId())) {
-                    problems.add(skill.getId() + " teaches '" + learn.spellId()
+                    problems.add(skill.getId() + " gives a knack for '" + learn.spellId()
                             + "', which is not an implemented spell");
                 }
             }

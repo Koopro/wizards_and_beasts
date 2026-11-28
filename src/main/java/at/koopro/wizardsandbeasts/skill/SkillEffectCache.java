@@ -17,19 +17,23 @@ public final class SkillEffectCache {
     private final Map<SpellCategory, Float> categoryCooldownReductions;
     private final Set<String> unlockedAbilities;
     private final Map<GameplayStat, Float> gameplayBonuses;
+    /** Spells (registered ids) the student has a knack for ({@link SkillEffect.SpellAptitude}). */
+    private final Set<String> aptitudes;
 
     private SkillEffectCache(Map<String, Float> spellDamageBonuses,
                              Map<String, Float> spellCooldownReductions,
                              Map<SpellCategory, Float> categoryDamageBonuses,
                              Map<SpellCategory, Float> categoryCooldownReductions,
                              Set<String> unlockedAbilities,
-                             Map<GameplayStat, Float> gameplayBonuses) {
+                             Map<GameplayStat, Float> gameplayBonuses,
+                             Set<String> aptitudes) {
         this.spellDamageBonuses = spellDamageBonuses;
         this.spellCooldownReductions = spellCooldownReductions;
         this.categoryDamageBonuses = categoryDamageBonuses;
         this.categoryCooldownReductions = categoryCooldownReductions;
         this.unlockedAbilities = unlockedAbilities;
         this.gameplayBonuses = gameplayBonuses;
+        this.aptitudes = aptitudes;
     }
 
     /**
@@ -42,6 +46,7 @@ public final class SkillEffectCache {
         Map<SpellCategory, Float> catCd = new EnumMap<>(SpellCategory.class);
         Set<String> abilities = new HashSet<>();
         Map<GameplayStat, Float> gameplay = new EnumMap<>(GameplayStat.class);
+        Set<String> aptitudes = new HashSet<>();
 
         for (Map.Entry<String, Integer> entry : data.getUnlockedSkills().entrySet()) {
             Skill skill = SkillTrees.byId(entry.getKey());
@@ -62,10 +67,11 @@ public final class SkillEffectCache {
                             abilities.add(e.abilityId());
                     case SkillEffect.GameplayBonus e ->
                             gameplay.merge(e.stat(), e.perLevel() * level, Float::sum);
-                    // Pushed into PlayerSpellData at allocation by SkillSystemAPI.applyImmediateEffects
-                    // and revoked by revokeWebTaughtSpells, because spell knowledge is stored rather
-                    // than derived. Nothing for a read-side cache to aggregate.
-                    case SkillEffect.LearnSpell ignored -> {}
+                    // Keyed by the registered id, so a node naming a spell bare still matches at cast time.
+                    case SkillEffect.SpellAptitude e -> {
+                        var spell = at.koopro.wizardsandbeasts.spell.core.Spells.byId(e.spellId());
+                        aptitudes.add(spell != null ? spell.getId() : e.spellId());
+                    }
                     case SkillEffect.PassiveAttribute ignored -> {} // handled at unlock time
                     // Corruption is accrued once, at allocation, and then lives in its own attachment. A
                     // read-side cache must not re-add it every recompute, or logging in would darken you.
@@ -77,7 +83,7 @@ public final class SkillEffectCache {
             }
         }
 
-        return new SkillEffectCache(spellDmg, spellCd, catDmg, catCd, abilities, gameplay);
+        return new SkillEffectCache(spellDmg, spellCd, catDmg, catCd, abilities, gameplay, aptitudes);
     }
 
     /**
@@ -96,6 +102,11 @@ public final class SkillEffectCache {
     /** Per-spell cooldown reduction alone. Floored the same way as the combined form. */
     public float getSpellOnlyCooldownMultiplier(String spellId) {
         return Math.max(0.1f, 1.0f - spellCooldownReductions.getOrDefault(spellId, 0f));
+    }
+
+    /** Whether an allocated node gives a knack for {@code spellId} (registered id). */
+    public boolean hasAptitude(String spellId) {
+        return aptitudes.contains(spellId);
     }
 
     /**
@@ -118,5 +129,5 @@ public final class SkillEffectCache {
     public static final SkillEffectCache EMPTY = new SkillEffectCache(
             Collections.emptyMap(), Collections.emptyMap(),
             Collections.emptyMap(), Collections.emptyMap(),
-            Collections.emptySet(), Collections.emptyMap());
+            Collections.emptySet(), Collections.emptyMap(), Collections.emptySet());
 }

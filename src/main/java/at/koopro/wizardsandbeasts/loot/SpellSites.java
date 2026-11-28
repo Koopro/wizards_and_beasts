@@ -22,8 +22,21 @@ public final class SpellSites {
 
     private SpellSites() {}
 
+    /** Marks a pool entry that is a whole textbook ({@code spell_books/} id) rather than one spell. */
+    static final String BOOK = "book:";
+
     static void record(String place, List<String> spells) {
         POOLS.put(place, List.copyOf(spells));
+    }
+
+    /**
+     * A pool of loose spells and whole textbooks. A textbook's chapters are read when asked ({@link #placesOf}), not
+     * now: the book table may load after the loot modifiers.
+     */
+    static void record(String place, List<String> spells, List<String> books) {
+        List<String> all = new ArrayList<>(spells);
+        books.forEach(b -> all.add(BOOK + b));
+        POOLS.put(place, List.copyOf(all));
     }
 
     /**
@@ -34,12 +47,20 @@ public final class SpellSites {
         String wanted = path(spellId);
         List<String> out = new ArrayList<>();
         POOLS.forEach((place, spells) -> {
-            if (spells.stream().anyMatch(s -> path(s).equals(wanted))) {
+            if (spells.stream().anyMatch(s -> holds(s, wanted))) {
                 out.add(place);
             }
         });
         out.sort(null);
         return out;
+    }
+
+    private static boolean holds(String entry, String wantedPath) {
+        if (!entry.startsWith(BOOK)) {
+            return path(entry).equals(wantedPath);
+        }
+        var book = at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.get(entry.substring(BOOK.length()));
+        return book != null && book.chapters().stream().anyMatch(c -> path(c).equals(wantedPath));
     }
 
     private static String path(String id) {

@@ -78,7 +78,7 @@ public final class SkillEffectSummary {
                     : line("gameplay_bonus", percent(e.perLevel() * level), statName(e.stat()));
             case SkillEffect.UnlockAbility e ->
                     line("unlock_ability", abilityName(e.abilityId()));
-            case SkillEffect.LearnSpell e -> line("learn_spell", spellName(e.spellId()));
+            case SkillEffect.SpellAptitude e -> line("spell_aptitude", spellName(e.spellId()));
             case SkillEffect.DarkStudy e -> line("dark_study", String.format("%.0f", e.corruption() * level));
             // Same sentence as UnlockAbility, because it is the same benefit: SkillNodeAbilityGrantSource
             // feeds both into one grant list, and a player reading a tooltip has no way to care which
@@ -102,10 +102,9 @@ public final class SkillEffectSummary {
             case SPELL_DAMAGE_BONUS, SPELL_COOLDOWN_REDUCTION,
                  CATEGORY_DAMAGE_BONUS, CATEGORY_COOLDOWN_REDUCTION,
                  PASSIVE_ATTRIBUTE, UNLOCK_ABILITY, GAMEPLAY_BONUS,
-                 // Wired 2026-08-22: SkillSystemAPI.applyImmediateEffects teaches the spell at
-                 // allocation and revokeWebTaughtSpells takes it back on refund. Before that this
-                 // was the one shipped-but-inert type, and it read `false` correctly.
-                 LEARN_SPELL,
+                 // Wired 2026-11-27 (was learn_spell, which taught the spell): the aptitude is read by the
+                 // trace (one difficulty easier), the practice rate and the cast's misfire roll.
+                 SPELL_APTITUDE, LEARN_SPELL,
                  // Wired at the grant layer all along (SkillNodeAbilityGrantSource) and blocked here
                  // only because it had no tooltip line. It has one now, identical to UnlockAbility's,
                  // so a node may ship it.

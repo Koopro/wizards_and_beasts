@@ -114,6 +114,10 @@ public class ModCreativeTabs {
                         output.accept(MiscItemRegistry.PARCHMENT.get());
                         output.accept(MiscItemRegistry.INK_BOTTLE.get());
                         output.accept(MiscItemRegistry.TORN_SPELL_PAGE.get());
+                        // Spell textbooks (spell_books/): one stack per shipped book.
+                        for (String book : at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.SHIPPED) {
+                            output.accept(at.koopro.wizardsandbeasts.spell.learning.book.SpellBookStacks.of(book));
+                        }
                         output.accept(MiscItemRegistry.POTION_RECIPE_PAGE.get());
 
                         // Lore tomes — studyable for KNOWLEDGE / History of Magic OWL credit

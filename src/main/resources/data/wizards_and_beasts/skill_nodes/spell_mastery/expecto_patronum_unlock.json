@@ -11,7 +11,7 @@
   },
   "effects": [
     {
-      "type": "learn_spell",
+      "type": "spell_aptitude",
       "spellId": "expecto_patronum"
     }
   ],

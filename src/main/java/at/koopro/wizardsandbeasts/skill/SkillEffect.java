@@ -27,7 +27,13 @@ public sealed interface SkillEffect {
     Type type();
 
     enum Type implements StringRepresentable {
-        LEARN_SPELL("learn_spell", LearnSpell.CODEC),
+        SPELL_APTITUDE("spell_aptitude", SpellAptitude.CODEC),
+        /**
+         * The old name of {@link #SPELL_APTITUDE}, from when a node taught its spell outright (until 2026-11-27).
+         * Still read, so a pack that says {@code learn_spell} loads; it decodes to an aptitude and is written back
+         * as {@code spell_aptitude}.
+         */
+        LEARN_SPELL("learn_spell", SpellAptitude.CODEC),
         SPELL_DAMAGE_BONUS("spell_damage_bonus", SpellDamageBonus.CODEC),
         SPELL_COOLDOWN_REDUCTION("spell_cooldown_reduction", SpellCooldownReduction.CODEC),
         CATEGORY_DAMAGE_BONUS("category_damage_bonus", CategoryDamageBonus.CODEC),
@@ -59,7 +65,6 @@ public sealed interface SkillEffect {
         }
     }
 
-    /** Teaches the player a spell when unlocked. */
     /**
      * What studying the Dark Arts costs the student: {@code corruption} points of dark corruption, applied the
      * moment the node is allocated.
@@ -84,14 +89,23 @@ public sealed interface SkillEffect {
         }
     }
 
-    record LearnSpell(String spellId) implements SkillEffect {
-        public static final MapCodec<LearnSpell> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                Codec.STRING.fieldOf("spellId").forGetter(LearnSpell::spellId)
-        ).apply(instance, LearnSpell::new));
+    /**
+     * A knack for one spell (spell acquisition remake, owner 2026-11-27). The web no longer teaches spells -- a
+     * spell is learned from a book, as in canon -- so a node that used to teach one now makes the student good at
+     * it: its trace is one difficulty easier, every second practised hit counts twice (SpellProficiencyTracker), and it
+     * misfires less.
+     * Nothing here grants the spell.
+     */
+    record SpellAptitude(String spellId) implements SkillEffect {
+        public static final MapCodec<SpellAptitude> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Codec.STRING.fieldOf("spellId").forGetter(SpellAptitude::spellId)
+        ).apply(instance, SpellAptitude::new));
 
+        /** How much less often a spell the student has a knack for misfires (added negatively). */
+        public static final float STEADINESS = 0.05f;
         @Override
         public Type type() {
-            return Type.LEARN_SPELL;
+            return Type.SPELL_APTITUDE;
         }
     }
 

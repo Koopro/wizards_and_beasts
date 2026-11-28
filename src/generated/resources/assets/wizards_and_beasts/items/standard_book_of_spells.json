@@ -4,8 +4,106 @@
     "cases": [
       {
         "model": {
-          "type": "minecraft:model",
-          "model": "wizards_and_beasts:item/standard_book_of_spells"
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "wizards_and_beasts:spell_book",
+          "cases": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_1"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_1"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/the_dark_forces"
+              },
+              "when": "wizards_and_beasts:the_dark_forces"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_2"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_2"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/curses_and_counter_curses"
+              },
+              "when": "wizards_and_beasts:curses_and_counter_curses"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_3"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_3"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_4"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_4"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_5"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_5"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_6"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_6"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/standard_book_of_spells_grade_7"
+              },
+              "when": "wizards_and_beasts:standard_book_of_spells_grade_7"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/practical_defensive_magic"
+              },
+              "when": "wizards_and_beasts:practical_defensive_magic"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/achievements_in_charming"
+              },
+              "when": "wizards_and_beasts:achievements_in_charming"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/half_blood_princes_potion_book"
+              },
+              "when": "wizards_and_beasts:half_blood_princes_potion_book"
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "wizards_and_beasts:item/spell_books/magick_moste_evile"
+              },
+              "when": "wizards_and_beasts:magick_moste_evile"
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "wizards_and_beasts:item/standard_book_of_spells"
+          }
         },
         "when": [
           "gui",

@@ -197,6 +197,10 @@ public class WizardsAndBeastsMod {
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "brew_recipe_source_reload_listener"),
                     new at.koopro.wizardsandbeasts.brew.knowledge.RecipeSources.Loader());
+            // The spell textbooks and the chapters each one teaches (spell/learning/book/).
+            event.addListener(
+                    Identifier.fromNamespaceAndPath(MODID, "spell_book_reload_listener"),
+                    new at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.Loader());
             // House Cup cycle length (house/HouseCup).
             event.addListener(
                     Identifier.fromNamespaceAndPath(MODID, "house_cup_reload_listener"),

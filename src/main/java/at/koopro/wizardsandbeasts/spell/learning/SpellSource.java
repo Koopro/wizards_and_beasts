@@ -5,6 +5,9 @@ import at.koopro.wizardsandbeasts.spell.core.Spell;
 import at.koopro.wizardsandbeasts.spell.core.Spells;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks;
+
+import java.util.List;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -48,8 +51,49 @@ public final class SpellSource {
         return id == null ? null : Spells.byId(id);
     }
 
+    /** Blank: neither a textbook nor a page with a spell on it. */
     public static boolean isBlank(ItemStack stack) {
-        return spellIdOf(stack) == null;
+        return spellIdOf(stack) == null && bookIdOf(stack) == null;
+    }
+
+    /** The textbook this stack is ({@code spell_book} component, namespaced), or {@code null} for a page or a blank. */
+    public static @Nullable String bookIdOf(ItemStack stack) {
+        String id = stack.get(ModDataComponents.SPELL_BOOK.get());
+        return id == null || id.isBlank() ? null : id;
+    }
+
+    /**
+     * The spell ids this stack teaches, in reading order: a textbook's chapters, a page's one spell, or nothing.
+     * Server-side for a textbook (the chapter table is datapack data); a book whose entry a pack has dropped
+     * teaches nothing.
+     */
+    public static List<String> chaptersOf(ItemStack stack) {
+        String book = bookIdOf(stack);
+        if (book != null) {
+            SpellBooks.Book entry = SpellBooks.get(book);
+            return entry == null ? List.of() : entry.chapters();
+        }
+        String single = spellIdOf(stack);
+        return single == null ? List.of() : List.of(single);
+    }
+
+    /**
+     * Whether this stack teaches {@code spellId} (the registered id). Chapter ids are resolved through
+     * {@link Spells#byId}, so a book that names a spell bare still matches its canonical id.
+     */
+    public static boolean teaches(ItemStack stack, String spellId) {
+        for (String chapter : chaptersOf(stack)) {
+            Spell spell = Spells.byId(chapter);
+            if (spell != null ? spell.getId().equals(spellId) : chapter.equals(spellId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Makes {@code stack} the textbook {@code bookId}. */
+    public static void writeBook(ItemStack stack, String bookId) {
+        stack.set(ModDataComponents.SPELL_BOOK.get(), SpellBooks.canonical(bookId));
     }
 
     /**

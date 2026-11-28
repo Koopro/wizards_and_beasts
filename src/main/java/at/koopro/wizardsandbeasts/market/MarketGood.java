@@ -18,6 +18,7 @@ import java.util.Optional;
  * <pre>{@code
  * { "id": "unicorn_hair", "item": "wizards_and_beasts:unicorn_hair", "price_knuts": 87, "depth": 12 }
  * { "id": "felix", "item": "wizards_and_beasts:brew", "brew": "felix_felicis", "price_knuts": 1479, "depth": 3 }
+ * { "id": "grade_1", "item": "wizards_and_beasts:standard_book_of_spells", "spell_book": "standard_book_of_spells_grade_1", ... }
  * { "id": "artefacts", "kind": "treasure", "rate": 0.85, "depth": 6 }
  * { "id": "spare_wands", "kind": "wand", "condition": "unbonded", "price_knuts": 348, "depth": 6 }
  * }</pre>
@@ -33,10 +34,18 @@ import java.util.Optional;
  * @param weeklyLimit units one player may buy of it per in-game week; 0 for no limit (sold goods only)
  * @param condition   for wands: {@code unbonded} (never chose a master) or {@code stolen} (another wizard's);
  *                    for treasure: {@code clean} or {@code any}
+ * @param spellBook   for the spell-book item, the textbook ({@code spell_books/} id) it must be
  */
 @NullMarked
 public record MarketGood(String id, Kind kind, Optional<Identifier> item, Optional<String> brew, long priceKnuts,
-                         float rate, int depth, String minTier, int weeklyLimit, Optional<String> condition) {
+                         float rate, int depth, String minTier, int weeklyLimit, Optional<String> condition,
+                         Optional<String> spellBook) {
+
+    /** Writes this good's brew or spell book onto a stack of its item. */
+    public void stamp(net.minecraft.world.item.ItemStack stack) {
+        brew.ifPresent(b -> stack.set(at.koopro.wizardsandbeasts.registry.ModDataComponents.BREW_ID.get(), b));
+        spellBook.ifPresent(b -> at.koopro.wizardsandbeasts.spell.learning.SpellSource.writeBook(stack, b));
+    }
 
     /** What a good is. */
     public enum Kind implements StringRepresentable {
@@ -70,9 +79,10 @@ public record MarketGood(String id, Kind kind, Optional<Identifier> item, Option
             Codec.intRange(1, 4096).optionalFieldOf("depth", 16).forGetter(MarketGood::depth),
             Codec.STRING.optionalFieldOf("min_tier", "").forGetter(MarketGood::minTier),
             Codec.intRange(0, 4096).optionalFieldOf("weekly_limit", 0).forGetter(MarketGood::weeklyLimit),
-            Codec.STRING.optionalFieldOf("condition").forGetter(MarketGood::condition)
-    ).apply(i, (id, kind, item, brew, price, rate, depth, tier, limit, condition) ->
-            new MarketGood(id, kind, item, brew, price, rate, depth, tier, limit, condition)))
+            Codec.STRING.optionalFieldOf("condition").forGetter(MarketGood::condition),
+            Codec.STRING.optionalFieldOf("spell_book").forGetter(MarketGood::spellBook)
+    ).apply(i, (id, kind, item, brew, price, rate, depth, tier, limit, condition, spellBook) ->
+            new MarketGood(id, kind, item, brew, price, rate, depth, tier, limit, condition, spellBook)))
             .validate(MarketGood::checked);
 
     private static DataResult<MarketGood> checked(MarketGood good) {

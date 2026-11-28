@@ -152,5 +152,15 @@ public final class ModNetworkSpells {
                 SpellTraceRequestC2SPayload.TYPE,
                 SpellTraceRequestC2SPayload.STREAM_CODEC,
                 SpellTraceRequestC2SPayload::handle);
+
+        // Spell textbooks: a book read through, and the chapter picked to study.
+        registrar.playToClient(
+                SpellBookOpenS2CPayload.TYPE,
+                SpellBookOpenS2CPayload.STREAM_CODEC,
+                SpellClientPayloadHandlers::handleSpellBookOpen);
+        registrar.playToServer(
+                SpellBookChapterC2SPayload.TYPE,
+                SpellBookChapterC2SPayload.STREAM_CODEC,
+                SpellBookChapterC2SPayload::handle);
     }
 }

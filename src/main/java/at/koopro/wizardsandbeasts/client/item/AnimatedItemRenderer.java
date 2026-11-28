@@ -29,7 +29,18 @@ public class AnimatedItemRenderer<T extends Item & AnimatedItem> extends GeoItem
                               float partialTick) {
         if (renderData != null) {
             renderState.addGeckolibData(AnimatedItem.CLIP, animatable.clipFor(renderData.itemStack()));
+            Identifier texture = animatable.textureFor(renderData.itemStack());
+            if (texture != null) {
+                renderState.addGeckolibData(AnimatedItem.TEXTURE, texture);
+            }
         }
+    }
+
+    /** The stack's own texture when it named one ({@link AnimatedItem#textureFor}), else the item's. */
+    @Override
+    public Identifier getTextureLocation(GeoRenderState renderState) {
+        Identifier chosen = renderState.getGeckolibData(AnimatedItem.TEXTURE);
+        return chosen != null ? chosen : super.getTextureLocation(renderState);
     }
 
     private static <T extends Item & AnimatedItem> DefaultedItemGeoModel<T> model(Identifier id) {

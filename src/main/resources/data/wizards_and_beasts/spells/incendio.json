@@ -15,9 +15,8 @@
     "pitch": 1.0
   },
   "requirement": {
-    "type": "proficiency",
-    "prerequisiteId": "stupefy",
-    "minProficiency": "proficient"
+    "type": "knows",
+    "prerequisiteId": "lumos"
   },
   "vfx": {
     "trail": "fire_ember",

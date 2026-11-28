@@ -29,6 +29,48 @@ public final class TracePathGenerator {
     private TracePathGenerator() {
     }
 
+    /**
+     * Wand movements canon names, by spell path. Flitwick's "swish and flick" for the Levitation Charm (PS ch.10;
+     * Wizarding World fact file). Every other spell draws its shape from {@link #spellSeed}. A canon movement that
+     * does not fit a difficulty's fairness rules falls back to the seeded shape rather than an unfair path.
+     */
+    private static final java.util.Map<String, TraceTemplate> CANON_GESTURES = java.util.Map.of(
+            "wingardium_leviosa", TraceTemplate.SWISH);
+
+    /**
+     * The seed of a spell's own wand movement: the same every attempt, for every player, so the movement can be
+     * learned by heart (owner 2026-11-27). FNV-1a over the registered id.
+     */
+    public static long spellSeed(String spellId) {
+        long h = 0xcbf29ce484222325L;
+        for (int i = 0; i < spellId.length(); i++) {
+            h ^= spellId.charAt(i);
+            h *= 0x100000001b3L;
+        }
+        return h;
+    }
+
+    /** The canon movement for {@code spellId} (registered or bare id), or null. */
+    public static @org.jspecify.annotations.Nullable TraceTemplate canonGesture(String spellId) {
+        return CANON_GESTURES.get(spellId.substring(spellId.indexOf(':') + 1));
+    }
+
+    /** The path for a spell: its canon movement when one is named and fair, else its seeded shape. */
+    public static TracePath forSpell(String spellId, TraceDifficulty difficulty) {
+        long seed = spellSeed(spellId);
+        TraceTemplate canon = canonGesture(spellId);
+        if (canon != null) {
+            for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+                Random r = new Random(seed * 31L + attempt);
+                TracePath candidate = build(canon.raw(r), r.nextInt(4), r.nextBoolean(), r.nextBoolean(), difficulty);
+                if (TracePathValidator.isFair(candidate, difficulty)) {
+                    return candidate;
+                }
+            }
+        }
+        return generate(seed, difficulty);
+    }
+
     public static TracePath generate(long seed, TraceDifficulty difficulty) {
         for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             Random r = new Random(seed * 31L + attempt);

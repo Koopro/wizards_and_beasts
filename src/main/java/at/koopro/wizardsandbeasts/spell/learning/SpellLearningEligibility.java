@@ -27,19 +27,8 @@ public final class SpellLearningEligibility {
         return evaluate(player, spell, spellData, heritage);
     }
 
-    public static Result evaluate(@Nullable ServerPlayer player, Spell spell, PlayerSpellData spellData, @Nullable PlayerHeritageData heritage) {
-        return evaluate(player, spell, spellData, heritage, false);
-    }
-
-    /**
-     * @param nodeIsTheRequirement true for a skill-web lesson: the allocated node stands in for the spell's
-     *        own progression gates (prerequisite spell, required skill, profession, mastery), because the web's
-     *        layout is the progression the player paid points for and may not match the spell's authored
-     *        prerequisite. Every gate on whether the spell may exist for this player at all — module,
-     *        implementation, heritage, already known, Spell Law — still applies.
-     */
     public static Result evaluate(@Nullable ServerPlayer player, Spell spell, PlayerSpellData spellData,
-                                  @Nullable PlayerHeritageData heritage, boolean nodeIsTheRequirement) {
+                                  @Nullable PlayerHeritageData heritage) {
         if (spell == null) {
             return Result.deny("unknown", "Unknown spell.");
         }
@@ -75,9 +64,6 @@ public final class SpellLearningEligibility {
         net.minecraft.network.chat.Component lawRefusal = SpellLawLearningGate.refusal(player, spell);
         if (lawRefusal != null) {
             return Result.deny(lawRefusal);
-        }
-        if (nodeIsTheRequirement) {
-            return Result.allow();
         }
         if (!spell.getRequirement().isMet(player, spellData)) {
             return Result.deny(spell.getRequirement().describe());

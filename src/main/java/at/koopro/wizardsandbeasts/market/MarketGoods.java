@@ -64,6 +64,10 @@ public final class MarketGoods {
         if (good.brew().isPresent()) {
             return good.brew().get().equals(stack.get(ModDataComponents.BREW_ID.get()));
         }
+        if (good.spellBook().isPresent()) {
+            return at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.canonical(good.spellBook().get())
+                    .equals(at.koopro.wizardsandbeasts.spell.learning.SpellSource.bookIdOf(stack));
+        }
         return true;
     }
 
@@ -147,6 +151,21 @@ public final class MarketGoods {
             return DealClass.RESTRICTED;
         }
         return DealClass.LEGAL;
+    }
+
+    /**
+     * The class of a good a trader sells, before any stack exists: its item's class, made contraband when it is a
+     * restricted spell book (Magick Moste Evile, the Prince's copy) -- the item alone is an ordinary textbook.
+     */
+    public static DealClass classifySold(MarketGood good) {
+        DealClass deal = good.item().map(MarketGoods::classify).orElse(DealClass.LEGAL);
+        if (good.spellBook().isPresent()) {
+            var book = at.koopro.wizardsandbeasts.spell.learning.book.SpellBooks.get(good.spellBook().get());
+            if (book != null && book.restricted()) {
+                deal = deal.worse(DealClass.CONTRABAND);
+            }
+        }
+        return deal;
     }
 
     /** The class of a plain item by id, for goods a trader sells (no stack yet). */

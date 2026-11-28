@@ -21,8 +21,7 @@
     }
   ],
   "requirement": {
-    "type": "knows",
-    "prerequisiteId": "stupefy"
+    "type": "none"
   },
   "vfx": {
     "trail": "light_glow",

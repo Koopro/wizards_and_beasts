@@ -1,0 +1,26 @@
+{
+ "location": "wizards_and_beasts:flourish_and_blotts",
+ "names": [
+  "npc.wizards_and_beasts.bookseller.name.0"
+ ],
+ "greetings": [
+  {
+   "text": "npc.wizards_and_beasts.bookseller.greet.default"
+  },
+  {
+   "text": "npc.wizards_and_beasts.bookseller.greet.list"
+  }
+ ],
+ "topics": [
+  {
+   "id": "first_year",
+   "label": "npc.wizards_and_beasts.bookseller.topic.first_year",
+   "reply": "npc.wizards_and_beasts.bookseller.reply.first_year"
+  },
+  {
+   "id": "restricted",
+   "label": "npc.wizards_and_beasts.bookseller.topic.restricted",
+   "reply": "npc.wizards_and_beasts.bookseller.reply.restricted"
+  }
+ ]
+}

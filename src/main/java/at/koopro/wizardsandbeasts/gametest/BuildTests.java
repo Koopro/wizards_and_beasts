@@ -74,7 +74,8 @@ public final class BuildTests {
                 "builds: points are spent along adjacency, and a capstone needs its road, declares the build, and is one per wizard",
                 BuildTests::spendingAndCapstone);
         tests.add("builds_unlearn_and_respec",
-                "builds: unlearning respects the web's shape, takes back the web's spells, and the first full respec is free",
+                "builds: unlearning respects the web's shape, a spell node never teaches its spell, and the first full respec "
+                        + "is free",
                 BuildTests::unlearnAndRespec);
         tests.add("builds_persist_and_sync",
                 "builds: the allocation and the free-respec token survive a save and reach the client with the respec terms",
@@ -173,10 +174,7 @@ public final class BuildTests {
 
             check(helper, walk(player, List.of("wizard_core", "basic_casting", "expelliarmus_unlock")),
                     () -> "the short road could not be walked");
-            check(helper, !spells.knowsSpell(expelliarmus.getId()), () -> "the node taught its spell untraced");
-            var traced = TraceTestSupport.pass(player);
-            check(helper, spells.knowsSpell(expelliarmus.getId()),
-                    () -> "the node's lesson did not teach its spell once traced: " + traced);
+            check(helper, !spells.knowsSpell(expelliarmus.getId()), () -> "the node taught its spell");
 
             SkillRespecService.Quote bridge = SkillRespecService.quoteUnlearn(player, "basic_casting");
             check(helper, "would_strand".equals(bridge.reason()) && bridge.stranded().contains("expelliarmus_unlock"),
@@ -193,7 +191,6 @@ public final class BuildTests {
                             + leaf.quote().feeKnuts());
             check(helper, !SkillRespecService.billingOn() || leaf.quote().feeKnuts() > 0,
                     () -> "with billing on, unlearning was free");
-            check(helper, !spells.knowsSpell(expelliarmus.getId()), () -> "the web's spell outlived its node");
 
             check(helper, data.isFreeRespecAvailable(), () -> "a new character was owed no free respec");
             SkillRespecService.Outcome first = SkillRespecService.respec(player);

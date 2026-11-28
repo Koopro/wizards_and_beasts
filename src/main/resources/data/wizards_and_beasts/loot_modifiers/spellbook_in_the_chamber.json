@@ -1,0 +1,15 @@
+{
+  "type": "wizards_and_beasts:spellbook",
+  "conditions": [
+    {
+      "condition": "neoforge:loot_table_id",
+      "loot_table_id": "wizards_and_beasts:chests/scholars_shelf"
+    }
+  ],
+  "place": "chamber_of_secrets",
+  "books": [
+    "magick_moste_evile"
+  ],
+  "chance": 0.75,
+  "_comment": "Slytherin's Chamber: the Restricted Section's darkest book, where the Heir kept it (spell acquisition remake 2026-11-27)."
+}
