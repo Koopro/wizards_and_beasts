@@ -4957,7 +4957,7 @@
   "spell_book.wizards_and_beasts.magick_moste_evile.author": "Godelot",
   "item.wizards_and_beasts.spell_book.tooltip": "Hold to read; then choose a chapter to study.",
   "gui.wizards_and_beasts.spell_book.study": "Study this chapter",
-  "gui.wizards_and_beasts.spell_book.progress": "%s of %s chapters learned",
+  "gui.wizards_and_beasts.spell_book.progress": "%s / %s learned",
   "gui.wizards_and_beasts.spell_book.empty": "The pages are there, but nothing on them can be learned.",
   "gui.wizards_and_beasts.spell_book.known": "You know this spell. Practise it to master it.",
   "gui.wizards_and_beasts.spell_book.open": "Read the chapter, then trace its wand movement. A clean trace and the spell is yours.",

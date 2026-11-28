@@ -45,7 +45,8 @@ public final class SpellBookScreen extends Screen {
     static final int H = 190;
     private static final int PAGE_PAD = 8;
     private static final int ROW_H = 13;
-    private static final int LIST_TOP = 48;
+    /** Below a two-line title, the author and the progress line. */
+    private static final int LIST_TOP = 64;
     private static final UiSurface S = UiSurface.PAGE;
     /** The spellbook's own cover: the field journal's leather with a deep red ribbon. */
     private static final BookChrome.Style STYLE = BookChrome.FIELD_JOURNAL;
@@ -157,9 +158,10 @@ public final class SpellBookScreen extends Screen {
         int w = pageW() - 2 * PAGE_PAD - 4;
         int y = top + BookChrome.BORDER + 4;
         String path = SpellBooks.path(book.bookId());
-        UiText.drawFit(g, font, S, getTitle(), x, y, w, S.ink());
+        // Titles run long ("The Dark Forces: A Guide to Self-Protection"): two lines, then the author under them.
+        y = UiText.drawWrapped(g, font, S, UiText.Role.BODY, getTitle().copy().withColor(S.ink() & 0xFFFFFF), x, y, w, 2);
         UiText.drawFit(g, font, S, Component.translatableWithFallback(
-                "spell_book.wizards_and_beasts." + path + ".author", ""), x, y + 11, w, S.ink3());
+                "spell_book.wizards_and_beasts." + path + ".author", ""), x, y + 1, w, S.ink3());
         List<SpellBookOpenS2CPayload.Chapter> chapters = book.chapters();
         int known = 0;
         for (SpellBookOpenS2CPayload.Chapter c : chapters) {
@@ -167,9 +169,9 @@ public final class SpellBookScreen extends Screen {
                 known++;
             }
         }
-        UiText.drawFit(g, font, S, Component.translatable(KEY + "progress", known, chapters.size()), x, y + 24, w,
+        UiText.drawFit(g, font, S, Component.translatable(KEY + "progress", known, chapters.size()), x, y + 12, w,
                 S.ink3());
-        Ui.hairline(g, S, x, top + LIST_TOP - 5, w);
+        Ui.hairline(g, S, x, top + LIST_TOP - 4, w);
         if (chapters.isEmpty()) {
             UiText.drawWrapped(g, font, S, UiText.Role.BODY, Component.translatable(KEY + "empty"), x, top + LIST_TOP,
                     w, 3);
